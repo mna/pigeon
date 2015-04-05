@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PuerkitoBio/exp/peg/bootstrap"
+	"github.com/PuerkitoBio/pigeon/bootstrap"
 )
 
 var grammar = ` 

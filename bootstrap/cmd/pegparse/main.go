@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/PuerkitoBio/exp/peg/bootstrap"
+	"github.com/PuerkitoBio/pigeon/bootstrap"
 )
 
 func main() {

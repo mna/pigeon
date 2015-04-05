@@ -1,7 +1,6 @@
 - better docs, refactor code
 - better CLI doc, manpage
 - README, LICENSE, README in examples directories
-- move to pigeon repo (simply add remote?)
 ? implement "packrat" memoization
 ? type annotations for generated code functions
 ? toIfaceSlice as built-in helper function

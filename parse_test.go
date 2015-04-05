@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PuerkitoBio/exp/peg/ast"
+	"github.com/PuerkitoBio/pigeon/ast"
 )
 
 var invalidParseCases = map[string]string{

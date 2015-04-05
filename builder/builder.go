@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/PuerkitoBio/exp/peg/ast"
+	"github.com/PuerkitoBio/pigeon/ast"
 )
 
 // generated function templates
