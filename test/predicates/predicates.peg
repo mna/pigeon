@@ -1,0 +1,34 @@
+{
+package main
+
+func main() {
+    in := os.Stdin
+    if len(os.Args) > 1 {
+        f, err := os.Open(os.Args[1])
+        if err != nil {
+            log.Fatal(err)
+        }
+        defer f.Close()
+        in = f
+    }
+    got, err := Parse("", in)
+    fmt.Println(got, err)
+}
+}
+
+A ← a:'a' !{
+    fmt.Println(string(c.text))
+    return true, nil
+} 
+
+/ b:'b' !{
+    fmt.Println(string(c.text))
+    return true, nil
+}
+
+/ d:'d' &{
+    fmt.Println(string(c.text))
+    return true, nil
+}
+
+B ← out:( inner:( [^abd] innermost:. &{return true, nil} ) &{return true, nil} ) &{return true, nil}

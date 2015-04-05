@@ -1,0 +1,90 @@
+{
+// Command calculator is a small PEG-generated parser that computes
+// simple math using integers, additions, subtractions and multiplications.
+//
+// Example usage: $ calculator "3 + (2 - 5 * 12)"
+//
+// Inspired by pegjs arithmetic example:
+// https://github.com/pegjs/pegjs/blob/master/examples/arithmetics.pegjs
+//
+package main
+
+var ops = map[string]func(int, int) int {
+    "+": func(l, r int) int {
+        return l + r
+    },
+    "-": func(l, r int) int {
+        return l - r
+    },
+    "*": func(l, r int) int {
+        return l * r
+    },
+    "/": func(l, r int) int {
+        return l / r
+    },
+}
+
+func main() {
+    if len(os.Args) != 2 {
+        log.Fatal("Usage: calculator 'EXPR'")
+    }
+    got, err := Parse("", strings.NewReader(os.Args[1]))
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("=", got)
+}
+
+func toIfaceSlice(v interface{}) []interface{} {
+    if v == nil {
+        return nil
+    }
+    return v.([]interface{})
+}
+
+func eval(first, rest interface{}) int {
+    l := first.(int)
+    restSl := toIfaceSlice(rest)
+    for _, v := range restSl {
+        restExpr := toIfaceSlice(v)
+        r := restExpr[3].(int)
+        op := restExpr[1].(string)
+        l = ops[op](l, r)
+    }
+    return l
+}
+}
+
+Input <- expr:Expr EOF {
+    return expr, nil
+}
+
+Expr <- _ first:Term rest:( _ AddOp _ Term )* _ {
+    return eval(first, rest), nil
+}
+
+Term <- first:Factor rest:( _ MulOp _ Factor )* {
+    return eval(first, rest), nil
+}
+
+Factor <- '(' expr:Expr ')' {
+    return expr, nil
+} / integer:Integer {
+    return integer, nil
+}
+
+AddOp <- ( '+' / '-' ) {
+    return string(c.text), nil
+}
+
+MulOp <- ( '*' / '/' ) {
+    return string(c.text), nil
+}
+
+Integer <- '-'? [0-9]+ {
+    return strconv.Atoi(string(c.text))
+}
+
+_ "whitespace" <- [ \n\t\r]*
+
+EOF <- !.
