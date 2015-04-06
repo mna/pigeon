@@ -1,9 +1,6 @@
 package main
 
-import (
-	"strings"
-	"testing"
-)
+import "testing"
 
 // ABs must end in Bs, CDs must end in Ds
 var cases = map[string]string{
@@ -27,7 +24,7 @@ var cases = map[string]string{
 
 func TestAndNot(t *testing.T) {
 	for tc, exp := range cases {
-		_, err := Parse("", strings.NewReader(tc))
+		_, err := Parse("", []byte(tc))
 		var got string
 		if err != nil {
 			got = err.Error()

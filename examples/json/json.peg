@@ -19,7 +19,7 @@ func main() {
         nm = os.Args[1]
     }
 
-    got, err := Parse(nm, in)
+    got, err := ParseReader(nm, in)
     if err != nil {
         log.Fatal(err)
     }

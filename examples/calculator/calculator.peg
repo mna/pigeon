@@ -28,7 +28,7 @@ func main() {
     if len(os.Args) != 2 {
         log.Fatal("Usage: calculator 'EXPR'")
     }
-    got, err := Parse("", strings.NewReader(os.Args[1]))
+    got, err := ParseReader("", strings.NewReader(os.Args[1]))
     if err != nil {
         log.Fatal(err)
     }

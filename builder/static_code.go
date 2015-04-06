@@ -22,13 +22,24 @@ func ParseFile(filename string) (interface{}, error) {
 		return nil, err
 	}
 	defer f.Close()
-	return Parse(filename, f)
+	return ParseReader(filename, f)
 }
 
-// Parse parses the data from r, using filename as information in the
+// ParseReader parses the data from r using filename as information in the
 // error messages.
-func Parse(filename string, r io.Reader) (interface{}, error) {
-	return parse(filename, r, g)
+func ParseReader(filename string, r io.Reader) (interface{}, error) {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+
+	return Parse(filename, b)
+}
+
+// Parse parses the data from b using filename as information in the
+// error messages.
+func Parse(filename string, b []byte) (interface{}, error) {
+	return parse(filename, b, g)
 }
 
 type position struct {
@@ -180,12 +191,7 @@ func (p *ParserError) Error() string {
 	return p.prefix + ": " + p.Inner.Error()
 }
 
-func parse(filename string, r io.Reader, g *grammar) (interface{}, error) {
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-
+func parse(filename string, b []byte, g *grammar) (interface{}, error) {
 	p := &parser{
 		filename: filename, 
 		errs: new(errList), 

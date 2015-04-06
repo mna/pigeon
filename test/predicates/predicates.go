@@ -23,7 +23,7 @@ func main() {
 		defer f.Close()
 		in = f
 	}
-	got, err := Parse("", in)
+	got, err := ParseReader("", in)
 	fmt.Println(got, err)
 }
 
@@ -31,60 +31,60 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "A",
-			pos:  position{line: 19, col: 1, offset: 280},
+			pos:  position{line: 19, col: 1, offset: 286},
 			expr: &choiceExpr{
-				pos: position{line: 19, col: 5, offset: 286},
+				pos: position{line: 19, col: 5, offset: 292},
 				alternatives: []interface{}{
 					&seqExpr{
-						pos: position{line: 19, col: 5, offset: 286},
+						pos: position{line: 19, col: 5, offset: 292},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 19, col: 5, offset: 286},
+								pos:   position{line: 19, col: 5, offset: 292},
 								label: "a",
 								expr: &litMatcher{
-									pos:        position{line: 19, col: 7, offset: 288},
+									pos:        position{line: 19, col: 7, offset: 294},
 									val:        "a",
 									ignoreCase: false,
 								},
 							},
 							&notCodeExpr{
-								pos: position{line: 19, col: 11, offset: 292},
+								pos: position{line: 19, col: 11, offset: 298},
 								run: (*parser).callonA5,
 							},
 						},
 					},
 					&seqExpr{
-						pos: position{line: 24, col: 3, offset: 354},
+						pos: position{line: 24, col: 3, offset: 360},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 24, col: 3, offset: 354},
+								pos:   position{line: 24, col: 3, offset: 360},
 								label: "b",
 								expr: &litMatcher{
-									pos:        position{line: 24, col: 5, offset: 356},
+									pos:        position{line: 24, col: 5, offset: 362},
 									val:        "b",
 									ignoreCase: false,
 								},
 							},
 							&notCodeExpr{
-								pos: position{line: 24, col: 9, offset: 360},
+								pos: position{line: 24, col: 9, offset: 366},
 								run: (*parser).callonA9,
 							},
 						},
 					},
 					&seqExpr{
-						pos: position{line: 29, col: 3, offset: 421},
+						pos: position{line: 29, col: 3, offset: 427},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 29, col: 3, offset: 421},
+								pos:   position{line: 29, col: 3, offset: 427},
 								label: "d",
 								expr: &litMatcher{
-									pos:        position{line: 29, col: 5, offset: 423},
+									pos:        position{line: 29, col: 5, offset: 429},
 									val:        "d",
 									ignoreCase: false,
 								},
 							},
 							&andCodeExpr{
-								pos: position{line: 29, col: 9, offset: 427},
+								pos: position{line: 29, col: 9, offset: 433},
 								run: (*parser).callonA13,
 							},
 						},
@@ -94,52 +94,52 @@ var g = &grammar{
 		},
 		{
 			name: "B",
-			pos:  position{line: 34, col: 1, offset: 486},
+			pos:  position{line: 34, col: 1, offset: 492},
 			expr: &seqExpr{
-				pos: position{line: 34, col: 5, offset: 492},
+				pos: position{line: 34, col: 5, offset: 498},
 				exprs: []interface{}{
 					&labeledExpr{
-						pos:   position{line: 34, col: 5, offset: 492},
+						pos:   position{line: 34, col: 5, offset: 498},
 						label: "out",
 						expr: &seqExpr{
-							pos: position{line: 34, col: 11, offset: 498},
+							pos: position{line: 34, col: 11, offset: 504},
 							exprs: []interface{}{
 								&labeledExpr{
-									pos:   position{line: 34, col: 11, offset: 498},
+									pos:   position{line: 34, col: 11, offset: 504},
 									label: "inner",
 									expr: &seqExpr{
-										pos: position{line: 34, col: 19, offset: 506},
+										pos: position{line: 34, col: 19, offset: 512},
 										exprs: []interface{}{
 											&charClassMatcher{
-												pos:        position{line: 34, col: 19, offset: 506},
+												pos:        position{line: 34, col: 19, offset: 512},
 												val:        "[^abd]",
 												chars:      []rune{'a', 'b', 'd'},
 												ignoreCase: false,
 												inverted:   true,
 											},
 											&labeledExpr{
-												pos:   position{line: 34, col: 26, offset: 513},
+												pos:   position{line: 34, col: 26, offset: 519},
 												label: "innermost",
 												expr: &anyMatcher{
-													line: 34, col: 36, offset: 523,
+													line: 34, col: 36, offset: 529,
 												},
 											},
 											&andCodeExpr{
-												pos: position{line: 34, col: 38, offset: 525},
+												pos: position{line: 34, col: 38, offset: 531},
 												run: (*parser).callonB9,
 											},
 										},
 									},
 								},
 								&andCodeExpr{
-									pos: position{line: 34, col: 60, offset: 547},
+									pos: position{line: 34, col: 60, offset: 553},
 									run: (*parser).callonB10,
 								},
 							},
 						},
 					},
 					&andCodeExpr{
-						pos: position{line: 34, col: 82, offset: 569},
+						pos: position{line: 34, col: 82, offset: 575},
 						run: (*parser).callonB11,
 					},
 				},
@@ -232,13 +232,24 @@ func ParseFile(filename string) (interface{}, error) {
 		return nil, err
 	}
 	defer f.Close()
-	return Parse(filename, f)
+	return ParseReader(filename, f)
 }
 
-// Parse parses the data from r, using filename as information in the
+// ParseReader parses the data from r using filename as information in the
 // error messages.
-func Parse(filename string, r io.Reader) (interface{}, error) {
-	return parse(filename, r, g)
+func ParseReader(filename string, r io.Reader) (interface{}, error) {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+
+	return Parse(filename, b)
+}
+
+// Parse parses the data from b using filename as information in the
+// error messages.
+func Parse(filename string, b []byte) (interface{}, error) {
+	return parse(filename, b, g)
 }
 
 type position struct {
@@ -390,12 +401,7 @@ func (p *ParserError) Error() string {
 	return p.prefix + ": " + p.Inner.Error()
 }
 
-func parse(filename string, r io.Reader, g *grammar) (interface{}, error) {
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-
+func parse(filename string, b []byte, g *grammar) (interface{}, error) {
 	p := &parser{
 		filename: filename,
 		errs:     new(errList),

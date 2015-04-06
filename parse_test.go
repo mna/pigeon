@@ -1,7 +1,6 @@
 package main
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/PuerkitoBio/pigeon/ast"
@@ -161,7 +160,7 @@ file:1:26 (25): rule ShortUnicodeEscape: invalid Unicode escape`,
 
 func TestInvalidParseCases(t *testing.T) {
 	for tc, exp := range invalidParseCases {
-		_, err := Parse("file", strings.NewReader(tc))
+		_, err := Parse("file", []byte(tc))
 		if err == nil {
 			t.Errorf("%q: want error, got none", tc)
 			continue
@@ -388,7 +387,7 @@ var validParseCases = map[string]*ast.Grammar{
 
 func TestValidParseCases(t *testing.T) {
 	for tc, exp := range validParseCases {
-		got, err := Parse("", strings.NewReader(tc))
+		got, err := Parse("", []byte(tc))
 		if err != nil {
 			t.Errorf("%q: got error %v", tc, err)
 			continue

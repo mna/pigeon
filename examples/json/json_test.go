@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
@@ -57,14 +56,10 @@ func BenchmarkPigeonJSON(b *testing.B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	br := bytes.NewReader(d)
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		if _, err := Parse("", br); err != nil {
-			b.Fatal(err)
-		}
-		if _, err := br.Seek(0, 0); err != nil {
+		if _, err := Parse("", d); err != nil {
 			b.Fatal(err)
 		}
 	}

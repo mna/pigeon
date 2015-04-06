@@ -1,9 +1,6 @@
 package main
 
-import (
-	"strings"
-	"testing"
-)
+import "testing"
 
 var validCases = map[string]int{
 	"0":   0,
@@ -46,7 +43,7 @@ var validCases = map[string]int{
 
 func TestValidCases(t *testing.T) {
 	for tc, exp := range validCases {
-		got, err := Parse("", strings.NewReader(tc))
+		got, err := Parse("", []byte(tc))
 		if err != nil {
 			t.Errorf("%q: want no error, got %v", tc, err)
 			continue
@@ -85,7 +82,7 @@ var invalidCases = map[string]string{
 
 func TestInvalidCases(t *testing.T) {
 	for tc, exp := range invalidCases {
-		got, err := Parse("", strings.NewReader(tc))
+		got, err := Parse("", []byte(tc))
 		if err == nil {
 			t.Errorf("%q: want error, got none (%v)", tc, got)
 			continue

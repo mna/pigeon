@@ -40,7 +40,7 @@ func main() {
 	in := bufio.NewReader(inf)
 
 	debug = *dbgFlag
-	g, err := Parse(nm, in)
+	g, err := ParseReader(nm, in)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "parse error: ", err)
 		os.Exit(3)

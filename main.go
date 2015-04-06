@@ -37,7 +37,7 @@ func main() {
 
 	// parse input
 	debug = *dbgFlag
-	g, err := Parse(nm, rc)
+	g, err := ParseReader(nm, rc)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "parse error: ", err)
 		os.Exit(3)
