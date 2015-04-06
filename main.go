@@ -14,10 +14,10 @@ import (
 func main() {
 	// define command-line flags
 	var (
-		dbgFlag        = flag.Bool("debug", false, "set debug mode")
-		noBuildFlag    = flag.Bool("x", false, "do not build, only parse")
-		outputFlag     = flag.String("o", "", "output file, defaults to stdout")
-		curRecvrNmFlag = flag.String("receiver-name", "c", "receiver name for the `current` type's generated methods")
+		dbgFlag     = flag.Bool("debug", false, "set debug mode")
+		noBuildFlag = flag.Bool("x", false, "do not build, only parse")
+		outputFlag  = flag.String("o", "", "output file, defaults to stdout")
+		recvrNmFlag = flag.String("receiver-name", "c", "receiver name for the generated methods")
 	)
 	flag.Usage = usage
 	flag.Parse()
@@ -47,7 +47,7 @@ func main() {
 		out := output(*outputFlag)
 		defer out.Close()
 
-		curNmOpt := builder.CurrentReceiverName(*curRecvrNmFlag)
+		curNmOpt := builder.ReceiverName(*recvrNmFlag)
 		if err := builder.BuildParser(out, g.(*ast.Grammar), curNmOpt); err != nil {
 			fmt.Fprintln(os.Stderr, "build error: ", err)
 			os.Exit(5)

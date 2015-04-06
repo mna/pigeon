@@ -75,11 +75,11 @@ to separate tokens.
 
 Rules
 
-A PEG grammar is composed of a list of rules. A rule is an identifier followed
+A PEG grammar consists of a set of rules. A rule is an identifier followed
 by a rule definition operator and an expression. An optional display name -
 a string literal used in error messages instead of the rule identifier - can
 be specified after the rule identifier. E.g.:
-	RuleA = 'a'+ // RuleA is one or more lowercase 'a's
+	RuleA "friendly name" = 'a'+ // RuleA is one or more lowercase 'a's
 
 The rule definition operator can be any one of those:
 	=, <-, ← (U+2190), ⟵ (U+27F5)
@@ -121,7 +121,7 @@ E.g.:
 		return value, nil
 	}
 
-And (&) and not (!) expression
+And and not expressions
 
 An expression prefixed with the ampersand "&" is the "and" predicate
 expression: it is considered a match if the following expression is a match,
@@ -153,11 +153,46 @@ possible. E.g.
 
 Literal matcher
 
+A literal matcher tries to match the input against a single character or a
+string literal. The literal may be a single-quoted single character, a
+double-quoted string or a backtick-quoted raw string. The same rules as in Go
+apply regarding the allowed characters and escapes.
+
+The literal may be followed by a lowercase "i" (outside the ending quote)
+to indicate that the match is case-insensitive. E.g.:
+	LiteralMatch = "Awesome\n"i // matches "awesome" followed by a newline
+
 Character class matcher
+
+A character class matcher tries to match the input against a class of characters
+inside square brackets "[...]". Inside the brackets, characters represent
+themselves and the same escapes as in string literals are available, except
+that the single- and double-quote escape is not valid, instead the closing
+square bracket "]" must be escaped to be used.
+
+Character ranges can be specified using the "[a-z]" notation. Unicode
+classes can be specified using the "[\pL]" notation, where L is a
+single-letter Unicode class of characters, or using the "[\p{Class}]"
+notation where Class is a valid Unicode class (e.g. "Latin").
+
+As for string literals, a lowercase "i" may follow the matcher (outside
+the ending square bracket) to indicate that the match is case-insensitive.
+A "^" as first character inside the square brackets indicates that the match
+is inverted (it is a match if the input does not match the character class
+matcher). E.g.:
+	NotAZ = [^a-z]i
 
 Any matcher
 
+The any matcher is represented by the dot ".". It matches any character
+except the end of file, thus the "!." expression is used to indicate "match
+the end of file". E.g.:
+	AnyChar = . // match a single character
+	EOF = !.
+
 Code block
+
+TODO : Explain code blocks, initializer, return values, receiver name, etc.
 
 Using the generated parser
 

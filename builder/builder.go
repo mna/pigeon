@@ -39,21 +39,21 @@ var (
 
 type option func(*builder) option
 
-// CurrentReceiverName returns an option that specifies the receiver name to
+// ReceiverName returns an option that specifies the receiver name to
 // use for the current struct (which is the struct on which all code blocks
 // except the initializer are generated).
-func CurrentReceiverName(nm string) option {
+func ReceiverName(nm string) option {
 	return func(b *builder) option {
-		prev := b.curRecvName
-		b.curRecvName = nm
-		return CurrentReceiverName(prev)
+		prev := b.recvName
+		b.recvName = nm
+		return ReceiverName(prev)
 	}
 }
 
 // BuildParser builds the PEG parser using the provider grammar. The code is
 // written to the specified w.
 func BuildParser(w io.Writer, g *ast.Grammar, opts ...option) error {
-	b := &builder{w: w, curRecvName: "c"}
+	b := &builder{w: w, recvName: "c"}
 	b.setOptions(opts)
 	return b.buildParser(g)
 }
@@ -63,7 +63,7 @@ type builder struct {
 	err error
 
 	// options
-	curRecvName string
+	recvName string
 
 	ruleName  string
 	exprIndex int
@@ -528,7 +528,7 @@ func (b *builder) writeFunc(funcIx int, code *ast.CodeBlock, callTpl, funcTpl st
 	}
 
 	fnNm := b.funcName(funcIx)
-	b.writelnf(funcTpl, b.curRecvName, fnNm, args.String(), val)
+	b.writelnf(funcTpl, b.recvName, fnNm, args.String(), val)
 
 	args.Reset()
 	if ix >= 0 {
