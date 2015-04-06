@@ -248,6 +248,8 @@ in a predicate code block.
 
 Using the generated parser
 
+
+
 TODO: Start rule is the first rule. Example package to document the exported symbols.
 
 Error reporting

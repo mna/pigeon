@@ -139,8 +139,8 @@ func (e *errList) add(err error) {
 	*e = append(*e, err)
 }
 
-func (e *errList) err() error {
-	if len(*e) == 0 {
+func (e errList) err() error {
+	if len(e) == 0 {
 		return nil
 	}
 	e.dedupe()
@@ -159,16 +159,16 @@ func (e *errList) dedupe() {
 	*e = cleaned
 }
 
-func (e *errList) Error() string {
-	switch len(*e) {
+func (e errList) Error() string {
+	switch len(e) {
 	case 0:
 		return ""
 	case 1:
-		return (*e)[0].Error()
+		return e[0].Error()
 	default:
 		var buf bytes.Buffer
 
-		for i, err := range *e {
+		for i, err := range e {
 			if i > 0 {
 				buf.WriteRune('\n')
 			}

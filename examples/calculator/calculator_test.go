@@ -88,12 +88,12 @@ func TestInvalidCases(t *testing.T) {
 			t.Errorf("%q: want error, got none (%v)", tc, got)
 			continue
 		}
-		el, ok := err.(*errList)
+		el, ok := err.(errList)
 		if !ok {
 			t.Errorf("%q: want error type %T, got %T", tc, &errList{}, err)
 			continue
 		}
-		for _, e := range *el {
+		for _, e := range el {
 			if _, ok := e.(*ParserError); !ok {
 				t.Errorf("%q: want all individual errors to be %T, got %T (%[3]v)", tc, &ParserError{}, e)
 			}
