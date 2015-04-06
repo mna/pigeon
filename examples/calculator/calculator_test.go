@@ -94,8 +94,8 @@ func TestInvalidCases(t *testing.T) {
 			continue
 		}
 		for _, e := range el {
-			if _, ok := e.(*ParserError); !ok {
-				t.Errorf("%q: want all individual errors to be %T, got %T (%[3]v)", tc, &ParserError{}, e)
+			if _, ok := e.(*parserError); !ok {
+				t.Errorf("%q: want all individual errors to be %T, got %T (%[3]v)", tc, &parserError{}, e)
 			}
 		}
 		if exp != err.Error() {

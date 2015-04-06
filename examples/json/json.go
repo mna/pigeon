@@ -760,15 +760,15 @@ func (p *parser) callonNull1() (interface{}, error) {
 }
 
 var (
-	// ErrNoRule is returned when the grammar to parse has no rule.
-	ErrNoRule = errors.New("grammar has no rule")
+	// errNoRule is returned when the grammar to parse has no rule.
+	errNoRule = errors.New("grammar has no rule")
 
-	// ErrInvalidEncoding is returned when the source is not properly
+	// errInvalidEncoding is returned when the source is not properly
 	// utf8-encoded.
-	ErrInvalidEncoding = errors.New("invalid encoding")
+	errInvalidEncoding = errors.New("invalid encoding")
 
-	// ErrNoMatch is returned if no match could be found.
-	ErrNoMatch = errors.New("no match found")
+	// errNoMatch is returned if no match could be found.
+	errNoMatch = errors.New("no match found")
 )
 
 var debug = false
@@ -936,16 +936,16 @@ func (e errList) Error() string {
 	}
 }
 
-// ParserError wraps an error with a prefix indicating the rule in which
+// parserError wraps an error with a prefix indicating the rule in which
 // the error occurred. The original error is stored in the Inner field.
-type ParserError struct {
+type parserError struct {
 	Inner  error
 	pos    position
 	prefix string
 }
 
 // Error returns the error message.
-func (p *ParserError) Error() string {
+func (p *parserError) Error() string {
 	return p.prefix + ": " + p.Inner.Error()
 }
 
@@ -1053,7 +1053,7 @@ func (p *parser) addErrAt(err error, pos position) {
 			buf.WriteString("rule " + rule.name)
 		}
 	}
-	pe := &ParserError{Inner: err, prefix: buf.String()}
+	pe := &parserError{Inner: err, prefix: buf.String()}
 	p.errs.add(pe)
 }
 
@@ -1071,7 +1071,7 @@ func (p *parser) read() {
 
 	if rn == utf8.RuneError {
 		if n > 0 {
-			p.addErr(ErrInvalidEncoding)
+			p.addErr(errInvalidEncoding)
 		}
 	}
 }
@@ -1106,7 +1106,7 @@ func (p *parser) buildRulesTable(g *grammar) {
 
 func (p *parser) parse(g *grammar) (val interface{}, err error) {
 	if len(g.rules) == 0 {
-		p.addErr(ErrNoRule)
+		p.addErr(errNoRule)
 		return nil, p.errs.err()
 	}
 
@@ -1137,7 +1137,7 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 	if !ok {
 		if len(*p.errs) == 0 {
 			// make sure this doesn't go out silently
-			p.addErr(ErrNoMatch)
+			p.addErr(errNoMatch)
 		}
 		return nil, p.errs.err()
 	}
