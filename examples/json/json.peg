@@ -1,9 +1,9 @@
-// The JSON PEG grammar parses JSON as defined by [1].
+{
+// Command json parses JSON as defined by [1].
 //
 // BUGS: the escaped forward solidus (`\/`) is not currently handled.
 //
 // [1]: http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
-{
 package main
 
 func main() {

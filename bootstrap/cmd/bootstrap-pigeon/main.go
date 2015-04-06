@@ -1,5 +1,5 @@
-// Command bootstrap-pigeon generates a PEG parser from a PEG grammar. It
-// is used to bootstrap the pigeon command-line tool, as it is built using
+// Command bootstrap-pigeon generates a PEG parser from a PEG grammar
+// to bootstrap the pigeon command-line tool, as it is built using
 // a simplified bootstrapping grammar that understands just enough of the
 // pigeon grammar to parse it and build the tool.
 package main

@@ -1,6 +1,6 @@
 {
 // Command calculator is a small PEG-generated parser that computes
-// simple math using integers, additions, subtractions and multiplications.
+// simple math using integers.
 //
 // Example usage: $ calculator "3 + (2 - 5 * 12)"
 //

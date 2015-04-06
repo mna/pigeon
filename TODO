@@ -1,5 +1,5 @@
 - better docs, refactor code
 - better CLI doc, manpage
-? implement "packrat" memoization
+- implement "packrat" memoization
 ? type annotations for generated code functions
 ? toIfaceSlice as built-in helper function
