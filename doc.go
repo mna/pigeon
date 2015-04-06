@@ -192,7 +192,59 @@ the end of file". E.g.:
 
 Code block
 
-TODO : Explain code blocks, initializer, return values, receiver name, etc.
+Code blocks can be added to generate custom Go code. There are three kinds
+of code blocks: the initializer, the action and the predicate. All code blocks
+appear inside curly braces "{...}".
+
+The initializer must appear first in the grammar, before any rule. It is
+copied as-is (minus the wrapping curly braces) at the top of the generated
+parser. It may contain function declarations, types, variables, etc. just
+like any Go file. Every symbol declared here will be available to all other
+code blocks.  Although the initializer is optional in a valid grammar, it is
+usually required to generate a valid Go source code file (for the package
+clause). E.g.:
+	{
+		package main
+
+		func someHelper() {
+			// ...
+		}
+	}
+
+Action code blocks are code blocks declared after an expression in a rule.
+Those code blocks are turned into a method on the "*current" type in the
+generated source code. The method receives any labeled expression's value
+as argument (as interface{}) and must return two values, the first being
+the value of the expression (an interface{}), and the second an error.
+If a non-nil error is returned, it is added to the list of errors that the
+parser will return. E.g.:
+	RuleA = "A"+ {
+		// return the matched string, "c" is the default name for
+		// the *current receiver variable.
+		return string(c.text), nil
+	}
+
+Predicate code blocks are code blocks declared immediately after the and "&"
+or the not "!" operators. Like action code blocks, predicate code blocks
+are turned into a method on the "*current" type in the generated source code.
+The method receives any labeled expression's value as argument (as interface{})
+and must return two values, the first being a bool and the second an error.
+If a non-nil error is returned, it is added to the list of errors that the
+parser will return. E.g.:
+	RuleAB = [ab]i+ &{
+		return true, nil
+	}
+
+The current type is a struct that provides two useful fields that can be
+accessed in action and predicate code blocks: "pos" and "text".
+
+The "pos" field indicates the current position of the parser in the source
+input. It is itself a struct with three fields: "line", "col" and "offset".
+Line is a 1-based line number, col is a 1-based column number that counts
+runes from the start of the line, and offset is a 0-based byte offset.
+
+The "text" field is the slice of bytes of the current match. It is empty
+in a predicate code block.
 
 Using the generated parser
 
