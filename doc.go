@@ -113,7 +113,7 @@ Labeled expression
 
 A labeled expression consists of an identifier followed by a colon ":"
 and an expression. A labeled expression introduces a variable named with
-the label that can be referenced in the parent expression's code block.
+the label that can be referenced in the expression's code block.
 The variable will have the value of the expression that follows the colon.
 E.g.:
 	LabeledExpr = value:[a-z]+ {
@@ -127,7 +127,7 @@ An expression prefixed with the ampersand "&" is the "and" predicate
 expression: it is considered a match if the following expression is a match,
 but it does not consume any input.
 
-An expression prefixed with the exclamation point "!" is a predicate
+An expression prefixed with the exclamation point "!" is the "not" predicate
 expression: it is considered a match if the following expression is not
 a match, but it does not consume any input. E.g.:
 	AndExpr = "A" &"B" // matches "A" if followed by a "B" (does not consume "B")
@@ -310,8 +310,7 @@ filename, position and rule name in the error message, but an
 important part of good error reporting needs to be done by the grammar
 author.
 
-For example, many programming languages use double-quotes for string literals,
-and disallow newlines withing the string (escapes must be used instead).
+For example, many programming languages use double-quotes for string literals.
 Usually, if the opening quote is found, the closing quote is expected, and if
 none is found, there won't be any other rule that will match, there's no need
 to backtrack and try other choices, an error should be added to the list
