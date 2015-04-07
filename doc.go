@@ -1,5 +1,5 @@
 /*
-Command pigeon generates Go parsers from a PEG grammar.
+Command pigeon generates parsers in Go from a PEG grammar.
 
 From Wikipedia [0]:
 
