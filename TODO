@@ -1,4 +1,3 @@
-- better docs, refactor code
 - better CLI doc, manpage
 - implement "packrat" memoization
 ? type annotations for generated code functions
