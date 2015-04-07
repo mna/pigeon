@@ -2483,13 +2483,6 @@ func (p *parser) read() {
 	}
 }
 
-func (p *parser) save() savepoint {
-	if debug {
-		defer p.out(p.in("save"))
-	}
-	return p.pt
-}
-
 func (p *parser) restore(pt savepoint) {
 	if debug {
 		defer p.out(p.in("restore"))
@@ -2500,8 +2493,8 @@ func (p *parser) restore(pt savepoint) {
 	p.pt = pt
 }
 
-func (p *parser) slice(start, end position) []byte {
-	return p.data[start.offset:end.offset]
+func (p *parser) sliceFrom(start savepoint) []byte {
+	return p.data[start.position.offset:p.pt.position.offset]
 }
 
 func (p *parser) buildRulesTable(g *grammar) {
@@ -2556,14 +2549,14 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 		defer p.out(p.in("parseRule " + rule.name))
 	}
 
-	start := p.save()
+	start := p.pt
 	p.rstack = append(p.rstack, rule)
 	p.pushV()
 	val, ok := p.parseExpr(rule.expr)
 	p.popV()
 	p.rstack = p.rstack[:len(p.rstack)-1]
 	if ok && debug {
-		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.slice(start.position, p.pt.position)))
+		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
 	return val, ok
 }
@@ -2610,11 +2603,11 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 		defer p.out(p.in("parseActionExpr"))
 	}
 
-	start := p.save()
+	start := p.pt
 	val, ok := p.parseExpr(act.expr)
 	if ok {
 		p.cur.pos = start.position
-		p.cur.text = p.slice(start.position, p.pt.position)
+		p.cur.text = p.sliceFrom(start)
 		actVal, err := act.run(p)
 		if err != nil {
 			p.addErrAt(err, start.position)
@@ -2622,7 +2615,7 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 		val = actVal
 	}
 	if ok && debug {
-		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.slice(start.position, p.pt.position)))
+		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
 	return val, ok
 }
@@ -2644,7 +2637,7 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 		defer p.out(p.in("parseAndExpr"))
 	}
 
-	pt := p.save()
+	pt := p.pt
 	_, ok := p.parseExpr(and.expr)
 	p.restore(pt)
 	return nil, ok
@@ -2656,8 +2649,9 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 	}
 
 	if p.pt.rn != utf8.RuneError {
+		start := p.pt
 		p.read()
-		return string(p.pt.rn), true
+		return p.sliceFrom(start), true
 	}
 	return nil, false
 }
@@ -2668,6 +2662,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	}
 
 	cur := p.pt.rn
+	start := p.pt
 	if chr.ignoreCase {
 		cur = unicode.ToLower(cur)
 	}
@@ -2679,7 +2674,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 				return nil, false
 			}
 			p.read()
-			return string(cur), true
+			return p.sliceFrom(start), true
 		}
 	}
 
@@ -2690,7 +2685,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 				return nil, false
 			}
 			p.read()
-			return string(cur), true
+			return p.sliceFrom(start), true
 		}
 	}
 
@@ -2701,13 +2696,13 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 				return nil, false
 			}
 			p.read()
-			return string(cur), true
+			return p.sliceFrom(start), true
 		}
 	}
 
 	if chr.inverted {
 		p.read()
-		return string(cur), true
+		return p.sliceFrom(start), true
 	}
 	return nil, false
 }
@@ -2748,19 +2743,19 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 		defer p.out(p.in("parseLitMatcher"))
 	}
 
-	pt := p.save()
+	start := p.pt
 	for _, want := range lit.val {
 		cur := p.pt.rn
 		if lit.ignoreCase {
 			cur = unicode.ToLower(cur)
 		}
 		if cur != want {
-			p.restore(pt)
+			p.restore(start)
 			return nil, false
 		}
 		p.read()
 	}
-	return string(p.slice(pt.position, p.pt.position)), true
+	return p.sliceFrom(start), true
 }
 
 func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
@@ -2780,7 +2775,7 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 		defer p.out(p.in("parseNotExpr"))
 	}
 
-	pt := p.save()
+	pt := p.pt
 	_, ok := p.parseExpr(not.expr)
 	p.restore(pt)
 	return nil, !ok
@@ -2830,7 +2825,7 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 
 	var vals []interface{}
 
-	pt := p.save()
+	pt := p.pt
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {

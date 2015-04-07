@@ -19,7 +19,7 @@ func toString(v interface{}) string {
     ifSl := v.([]interface{})
     var res string
     for _, s := range ifSl {
-        res += s.(string)
+        res += string(s.([]byte))
     }
     return res
 }
