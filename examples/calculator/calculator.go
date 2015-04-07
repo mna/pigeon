@@ -1015,11 +1015,9 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 		defer p.out(p.in("parseLitMatcher"))
 	}
 
-	var buf bytes.Buffer
 	pt := p.save()
 	for _, want := range lit.val {
 		cur := p.pt.rn
-		buf.WriteRune(cur)
 		if lit.ignoreCase {
 			cur = unicode.ToLower(cur)
 		}
@@ -1029,7 +1027,7 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 		}
 		p.read()
 	}
-	return buf.String(), true
+	return string(p.slice(pt.position, p.pt.position)), true
 }
 
 func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
