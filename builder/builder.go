@@ -37,13 +37,15 @@ var (
 `
 )
 
-type option func(*builder) option
+// Option is a function that can set an option on the builder. It returns
+// the previous setting as an Option.
+type Option func(*builder) Option
 
 // ReceiverName returns an option that specifies the receiver name to
 // use for the current struct (which is the struct on which all code blocks
 // except the initializer are generated).
-func ReceiverName(nm string) option {
-	return func(b *builder) option {
+func ReceiverName(nm string) Option {
+	return func(b *builder) Option {
 		prev := b.recvName
 		b.recvName = nm
 		return ReceiverName(prev)
@@ -52,7 +54,7 @@ func ReceiverName(nm string) option {
 
 // BuildParser builds the PEG parser using the provider grammar. The code is
 // written to the specified w.
-func BuildParser(w io.Writer, g *ast.Grammar, opts ...option) error {
+func BuildParser(w io.Writer, g *ast.Grammar, opts ...Option) error {
 	b := &builder{w: w, recvName: "c"}
 	b.setOptions(opts)
 	return b.buildParser(g)
@@ -70,7 +72,7 @@ type builder struct {
 	argsStack [][]string
 }
 
-func (b *builder) setOptions(opts []option) {
+func (b *builder) setOptions(opts []Option) {
 	for _, opt := range opts {
 		opt(b)
 	}

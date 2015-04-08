@@ -15,6 +15,7 @@ import (
 func main() {
 	// define command-line flags
 	var (
+		//cacheFlag     = flag.Bool("cache", false, "cache parsing results")
 		dbgFlag       = flag.Bool("debug", false, "set debug mode")
 		shortHelpFlag = flag.Bool("h", false, "show help page")
 		longHelpFlag  = flag.Bool("help", false, "show help page")
