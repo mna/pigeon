@@ -3010,8 +3010,9 @@ type savepoint struct {
 }
 
 type resultTuple struct {
-	v interface{}
-	b bool
+	v   interface{}
+	b   bool
+	end savepoint
 }
 
 type parser struct {
@@ -3152,25 +3153,18 @@ func (p *parser) sliceFrom(start savepoint) []byte {
 }
 
 func (p *parser) getMemoized(node interface{}) (resultTuple, bool) {
-	// disable for now...
-	return resultTuple{}, false
-	/*
-		if len(p.memo) == 0 {
-			return resultTuple{}, false
-		}
-		m := p.memo[p.pt.offset]
-		if len(m) == 0 {
-			return resultTuple{}, false
-		}
-		res, ok := m[node]
-		if ok {
-			p.print(">>>>", "getMemoized at " + strconv.Itoa(p.pt.offset))
-		}
-		return res, ok
-	*/
+	if len(p.memo) == 0 {
+		return resultTuple{}, false
+	}
+	m := p.memo[p.pt.offset]
+	if len(m) == 0 {
+		return resultTuple{}, false
+	}
+	res, ok := m[node]
+	return res, ok
 }
 
-func (p *parser) setMemoized(pt savepoint, node, val interface{}, match bool) {
+func (p *parser) setMemoized(pt savepoint, node interface{}, tuple resultTuple) {
 	if p.memo == nil {
 		p.memo = make(map[int]map[interface{}]resultTuple)
 	}
@@ -3179,9 +3173,7 @@ func (p *parser) setMemoized(pt savepoint, node, val interface{}, match bool) {
 		m = make(map[interface{}]resultTuple)
 		p.memo[pt.offset] = m
 	}
-	m[node] = resultTuple{val, match}
-
-	p.print(">>>>", "setMemoized at "+strconv.Itoa(pt.offset))
+	m[node] = tuple
 }
 
 func (p *parser) buildRulesTable(g *grammar) {
@@ -3236,6 +3228,12 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 		defer p.out(p.in("parseRule " + rule.name))
 	}
 
+	res, ok := p.getMemoized(rule)
+	if ok {
+		p.restore(res.end)
+		return res.v, res.b
+	}
+
 	start := p.pt
 	p.rstack = append(p.rstack, rule)
 	p.pushV()
@@ -3245,13 +3243,15 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	if ok && debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
+
+	p.setMemoized(start, rule, resultTuple{val, ok, p.pt})
 	return val, ok
 }
 
 func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	res, ok := p.getMemoized(expr)
 	if ok {
-		p.print(">>>", "found in memo")
+		p.restore(res.end)
 		return res.v, res.b
 	}
 	pt := p.pt
@@ -3291,7 +3291,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	default:
 		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
-	p.setMemoized(pt, expr, val, ok)
+	p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
 	return val, ok
 }
 
