@@ -351,8 +351,6 @@ func (p *parser) sliceFrom(start savepoint) []byte {
 }
 
 func (p *parser) getMemoized(node interface{}) (resultTuple, bool) {
-	return resultTuple{}, false
-	/*
 	if len(p.memo) == 0 {
 		return resultTuple{}, false
 	}
@@ -362,12 +360,9 @@ func (p *parser) getMemoized(node interface{}) (resultTuple, bool) {
 	}
 	res, ok := m[node]
 	return res, ok
-	*/
 }
 
 func (p *parser) setMemoized(pt savepoint, node interface{}, tuple resultTuple) {
-	return
-	/*
 	if p.memo == nil {
 		p.memo = make(map[int]map[interface{}]resultTuple)
 	}
@@ -377,7 +372,6 @@ func (p *parser) setMemoized(pt savepoint, node interface{}, tuple resultTuple) 
 		p.memo[pt.offset] = m
 	}
 	m[node] = tuple
-	*/
 }
 
 func (p *parser) buildRulesTable(g *grammar) {
