@@ -15,7 +15,7 @@ import (
 func main() {
 	// define command-line flags
 	var (
-		//cacheFlag     = flag.Bool("cache", false, "cache parsing results")
+		cacheFlag     = flag.Bool("cache", false, "cache parsing results")
 		dbgFlag       = flag.Bool("debug", false, "set debug mode")
 		shortHelpFlag = flag.Bool("h", false, "show help page")
 		longHelpFlag  = flag.Bool("help", false, "show help page")
@@ -44,8 +44,7 @@ func main() {
 	defer rc.Close()
 
 	// parse input
-	debug = *dbgFlag
-	g, err := ParseReader(nm, rc)
+	g, err := ParseReader(nm, rc, Debug(*dbgFlag), Memoize(*cacheFlag))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "parse error(s):\n", err)
 		os.Exit(3)
@@ -82,6 +81,10 @@ generated parser to stdout. If GRAMMAR_FILE is specified, the
 grammar is read from this file instead. If the -o flag is set,
 the generated code is written to this file instead.
 
+	-cache
+		cache parser results to avoid exponential parsing time in
+		pathological cases. Can make the parsing slower for typical
+		cases and uses more memory.
 	-debug
 		output debugging information while parsing the grammar.
 	-h -help

@@ -27,6 +27,10 @@ by default.
 
 The following options can be specified:
 
+	-cache : cache parser results to avoid exponential parsing time in
+	pathological cases. Can make the parsing slower for typical
+	cases and uses more memory (default: false).
+
 	-debug : boolean, print debugging info to stdout (default: false).
 
 	-o=FILE : string, output file where the generated parser will be

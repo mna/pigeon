@@ -6,7 +6,6 @@ import (
 )
 
 func BenchmarkParsePigeonNoMemo(b *testing.B) {
-	memoize = false
 	d, err := ioutil.ReadFile("../../../grammar/pigeon.peg")
 	if err != nil {
 		b.Fatal(err)
@@ -14,14 +13,13 @@ func BenchmarkParsePigeonNoMemo(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		if _, err := Parse("", d); err != nil {
+		if _, err := Parse("", d, Memoize(false)); err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
 func BenchmarkParsePigeonMemo(b *testing.B) {
-	memoize = true
 	d, err := ioutil.ReadFile("../../../grammar/pigeon.peg")
 	if err != nil {
 		b.Fatal(err)
@@ -29,7 +27,7 @@ func BenchmarkParsePigeonMemo(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		if _, err := Parse("", d); err != nil {
+		if _, err := Parse("", d, Memoize(true)); err != nil {
 			b.Fatal(err)
 		}
 	}

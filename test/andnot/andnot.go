@@ -189,9 +189,23 @@ var (
 // the previous setting as an Option.
 type Option func(*parser) Option
 
-// TODO : temporary, both should be options to Parse*
-var debug = false
-var memoize = false
+// Debug creates an Option to set the debug flag to b.
+func Debug(b bool) Option {
+	return func(p *parser) Option {
+		old := p.debug
+		p.debug = b
+		return Debug(old)
+	}
+}
+
+// Memoize creates an Option to set the memoize flag to b.
+func Memoize(b bool) Option {
+	return func(p *parser) Option {
+		old := p.memoize
+		p.memoize = b
+		return Memoize(old)
+	}
+}
 
 // ParseFile parses the file identified by filename.
 func ParseFile(filename string, opts ...Option) (interface{}, error) {
@@ -415,7 +429,9 @@ type parser struct {
 	data []byte
 	errs *errList
 
+	debug bool
 	depth int
+
 	// rules table, maps the rule identifier to the rule node
 	rules map[string]*rule
 	// variables stack, map of label to value
@@ -425,8 +441,8 @@ type parser struct {
 
 	// memoization table for the packrat algorithm:
 	// map[offset in source] map[expression or rule] {value, match}
-	//
-	memo map[int]map[interface{}]resultTuple
+	memo    map[int]map[interface{}]resultTuple
+	memoize bool
 }
 
 // push a variable set on the vstack.
@@ -462,7 +478,7 @@ func (p *parser) popV() {
 }
 
 func (p *parser) print(prefix, s string) string {
-	if !debug {
+	if !p.debug {
 		return s
 	}
 
@@ -530,7 +546,7 @@ func (p *parser) read() {
 
 // restore parser position to the savepoint pt.
 func (p *parser) restore(pt savepoint) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("restore"))
 	}
 	if pt.offset == p.pt.offset {
@@ -588,7 +604,7 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 	// and return the panic as an error.
 	defer func() {
 		if e := recover(); e != nil {
-			if debug {
+			if p.debug {
 				defer p.out(p.in("panic handler"))
 			}
 			val = nil
@@ -616,11 +632,11 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 }
 
 func (p *parser) parseRule(rule *rule) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseRule " + rule.name))
 	}
 
-	if memoize {
+	if p.memoize {
 		res, ok := p.getMemoized(rule)
 		if ok {
 			p.restore(res.end)
@@ -634,11 +650,11 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	val, ok := p.parseExpr(rule.expr)
 	p.popV()
 	p.rstack = p.rstack[:len(p.rstack)-1]
-	if ok && debug {
+	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
 
-	if memoize {
+	if p.memoize {
 		p.setMemoized(start, rule, resultTuple{val, ok, p.pt})
 	}
 	return val, ok
@@ -648,7 +664,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	var pt savepoint
 	var ok bool
 
-	if memoize {
+	if p.memoize {
 		res, ok := p.getMemoized(expr)
 		if ok {
 			p.restore(res.end)
@@ -692,14 +708,14 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	default:
 		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
-	if memoize {
+	if p.memoize {
 		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
 	}
 	return val, ok
 }
 
 func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseActionExpr"))
 	}
 
@@ -714,14 +730,14 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 		}
 		val = actVal
 	}
-	if ok && debug {
+	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
 	return val, ok
 }
 
 func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseAndCodeExpr"))
 	}
 
@@ -733,7 +749,7 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseAndExpr"))
 	}
 
@@ -744,7 +760,7 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseAnyMatcher"))
 	}
 
@@ -757,7 +773,7 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 }
 
 func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseCharClassMatcher"))
 	}
 
@@ -808,7 +824,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 }
 
 func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseChoiceExpr"))
 	}
 
@@ -824,7 +840,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseLabeledExpr"))
 	}
 
@@ -839,7 +855,7 @@ func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseLitMatcher"))
 	}
 
@@ -859,7 +875,7 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 }
 
 func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseNotCodeExpr"))
 	}
 
@@ -871,7 +887,7 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseNotExpr"))
 	}
 
@@ -882,7 +898,7 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseOneOrMoreExpr"))
 	}
 
@@ -902,7 +918,7 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseRuleRefExpr " + ref.name))
 	}
 
@@ -919,7 +935,7 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseSeqExpr"))
 	}
 
@@ -938,7 +954,7 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseZeroOrMoreExpr"))
 	}
 
@@ -954,7 +970,7 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
-	if debug {
+	if p.debug {
 		defer p.out(p.in("parseZeroOrOneExpr"))
 	}
 

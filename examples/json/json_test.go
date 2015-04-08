@@ -52,7 +52,6 @@ func testJSONFiles(t *testing.T) []string {
 }
 
 func BenchmarkPigeonJSONNoMemo(b *testing.B) {
-	memoize = false
 	d, err := ioutil.ReadFile("testdata/github-octokit-repos.json")
 	if err != nil {
 		b.Fatal(err)
@@ -60,14 +59,13 @@ func BenchmarkPigeonJSONNoMemo(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		if _, err := Parse("", d); err != nil {
+		if _, err := Parse("", d, Memoize(false)); err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
 func BenchmarkPigeonJSONMemo(b *testing.B) {
-	memoize = true
 	d, err := ioutil.ReadFile("testdata/github-octokit-repos.json")
 	if err != nil {
 		b.Fatal(err)
@@ -75,7 +73,7 @@ func BenchmarkPigeonJSONMemo(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		if _, err := Parse("", d); err != nil {
+		if _, err := Parse("", d, Memoize(true)); err != nil {
 			b.Fatal(err)
 		}
 	}
