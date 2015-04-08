@@ -2815,7 +2815,9 @@ var (
 	errNoMatch = errors.New("no match found")
 )
 
+// TODO : temporary, both should be options to Parse*
 var debug = false
+var memoize = false
 
 // ParseFile parses the file identified by filename.
 func ParseFile(filename string) (interface{}, error) {
@@ -3228,10 +3230,12 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 		defer p.out(p.in("parseRule " + rule.name))
 	}
 
-	res, ok := p.getMemoized(rule)
-	if ok {
-		p.restore(res.end)
-		return res.v, res.b
+	if memoize {
+		res, ok := p.getMemoized(rule)
+		if ok {
+			p.restore(res.end)
+			return res.v, res.b
+		}
 	}
 
 	start := p.pt
@@ -3244,17 +3248,24 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
 
-	p.setMemoized(start, rule, resultTuple{val, ok, p.pt})
+	if memoize {
+		p.setMemoized(start, rule, resultTuple{val, ok, p.pt})
+	}
 	return val, ok
 }
 
 func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
-	res, ok := p.getMemoized(expr)
-	if ok {
-		p.restore(res.end)
-		return res.v, res.b
+	var pt savepoint
+	var ok bool
+
+	if memoize {
+		res, ok := p.getMemoized(expr)
+		if ok {
+			p.restore(res.end)
+			return res.v, res.b
+		}
+		pt = p.pt
 	}
-	pt := p.pt
 
 	var val interface{}
 	switch expr := expr.(type) {
@@ -3291,7 +3302,9 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	default:
 		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
-	p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
+	if memoize {
+		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
+	}
 	return val, ok
 }
 

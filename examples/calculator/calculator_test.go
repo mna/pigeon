@@ -105,10 +105,12 @@ func TestInvalidCases(t *testing.T) {
 }
 
 func TestMemoization(t *testing.T) {
+	// TODO: clean this up with options to Parse and a count of evaluated
+	// expressions instead...
 	in := " 2 + 35 * ( 18 - -4 / ( 5 + 1) ) * 456 + -1"
 	want := 287281
-	memoCalls, nonMemoCalls := 386, 0
 
+	memoize = false
 	got, err := Parse("", []byte(in))
 	if err != nil {
 		t.Fatal(err)
@@ -117,10 +119,14 @@ func TestMemoization(t *testing.T) {
 	if goti != want {
 		t.Errorf("want %d, got %d", want, goti)
 	}
-	if cntCodeBlocks != memoCalls {
-		t.Errorf("want %d memoized code block calls, got %d", memoCalls, cntCodeBlocks)
-	}
 
-	// TODO : support passing optimization option to Parse, test with non-memo
-	_ = nonMemoCalls
+	memoize = true
+	got, err = Parse("", []byte(in))
+	if err != nil {
+		t.Fatal(err)
+	}
+	goti = got.(int)
+	if goti != want {
+		t.Errorf("want %d, got %d", want, goti)
+	}
 }
