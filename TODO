@@ -1,2 +1,3 @@
 - implement "packrat" memoization
+- add more tests (e.g. one per parseExpr func to test all corner cases)
 ? type annotations for generated code functions

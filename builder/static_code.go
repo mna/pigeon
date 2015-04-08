@@ -207,6 +207,11 @@ type savepoint struct {
 	w  int
 }
 
+type resultTuple struct {
+	v interface{}
+	b bool
+}
+
 type parser struct {
 	filename string
 	pt       savepoint
@@ -216,11 +221,20 @@ type parser struct {
 	errs *errList
 
 	depth  int
+	// rules table, maps the rule identifier to the rule node
 	rules  map[string]*rule
+	// variables stack, map of label to value
 	vstack []map[string]interface{}
+	// rule stack, allows identification of the current rule in errors
 	rstack []*rule
+
+	// memoization table for the packrat algorithm:
+	// map[offset in source] map[expression or rule] {value, match}
+	//
+	memo map[int]map[interface{}]resultTuple
 }
 
+// push a variable set on the vstack.
 func (p *parser) pushV() {
 	if cap(p.vstack) == len(p.vstack) {
 		// create new empty slot in the stack
@@ -241,6 +255,7 @@ func (p *parser) pushV() {
 	p.vstack[len(p.vstack)-1] = m
 }
 
+// pop a variable set from the vstack.
 func (p *parser) popV() {
 	// if the map is not empty, clear it
 	m := p.vstack[len(p.vstack)-1]
@@ -318,6 +333,7 @@ func (p *parser) read() {
 	}
 }
 
+// restore parser position to the savepoint pt.
 func (p *parser) restore(pt savepoint) {
 	if debug {
 		defer p.out(p.in("restore"))
@@ -328,8 +344,42 @@ func (p *parser) restore(pt savepoint) {
 	p.pt = pt
 }
 
+// get the slice of bytes from the savepoint start to the current position.
 func (p *parser) sliceFrom(start savepoint) []byte {
 	return p.data[start.position.offset:p.pt.position.offset]
+}
+
+func (p *parser) getMemoized(node interface{}) (resultTuple, bool) {
+	// disable for now...
+	return resultTuple{}, false
+	/*
+	if len(p.memo) == 0 {
+		return resultTuple{}, false
+	}
+	m := p.memo[p.pt.offset]
+	if len(m) == 0 {
+		return resultTuple{}, false
+	}
+	res, ok := m[node]
+	if ok {
+		p.print(">>>>", "getMemoized at " + strconv.Itoa(p.pt.offset))
+	}
+	return res, ok
+	*/
+}
+
+func (p *parser) setMemoized(pt savepoint, node, val interface{}, match bool) {
+	if p.memo == nil {
+		p.memo = make(map[int]map[interface{}]resultTuple)
+	}
+	m := p.memo[pt.offset]
+	if m == nil {
+		m = make(map[interface{}]resultTuple)
+		p.memo[pt.offset] = m
+	}
+	m[node] = resultTuple{val, match}
+
+	p.print(">>>>", "setMemoized at " + strconv.Itoa(pt.offset))
 }
 
 func (p *parser) buildRulesTable(g *grammar) {
@@ -397,40 +447,50 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 }
 
 func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
+	res, ok := p.getMemoized(expr)
+	if ok {
+		p.print(">>>", "found in memo")
+		return res.v, res.b
+	}
+	pt := p.pt
+
+	var val interface{}
 	switch expr := expr.(type) {
 	case *actionExpr:
-		return p.parseActionExpr(expr)
+		val, ok = p.parseActionExpr(expr)
 	case *andCodeExpr:
-		return p.parseAndCodeExpr(expr)
+		val, ok = p.parseAndCodeExpr(expr)
 	case *andExpr:
-		return p.parseAndExpr(expr)
+		val, ok = p.parseAndExpr(expr)
 	case *anyMatcher:
-		return p.parseAnyMatcher(expr)
+		val, ok = p.parseAnyMatcher(expr)
 	case *charClassMatcher:
-		return p.parseCharClassMatcher(expr)
+		val, ok = p.parseCharClassMatcher(expr)
 	case *choiceExpr:
-		return p.parseChoiceExpr(expr)
+		val, ok = p.parseChoiceExpr(expr)
 	case *labeledExpr:
-		return p.parseLabeledExpr(expr)
+		val, ok = p.parseLabeledExpr(expr)
 	case *litMatcher:
-		return p.parseLitMatcher(expr)
+		val, ok = p.parseLitMatcher(expr)
 	case *notCodeExpr:
-		return p.parseNotCodeExpr(expr)
+		val, ok = p.parseNotCodeExpr(expr)
 	case *notExpr:
-		return p.parseNotExpr(expr)
+		val, ok = p.parseNotExpr(expr)
 	case *oneOrMoreExpr:
-		return p.parseOneOrMoreExpr(expr)
+		val, ok = p.parseOneOrMoreExpr(expr)
 	case *ruleRefExpr:
-		return p.parseRuleRefExpr(expr)
+		val, ok = p.parseRuleRefExpr(expr)
 	case *seqExpr:
-		return p.parseSeqExpr(expr)
+		val, ok = p.parseSeqExpr(expr)
 	case *zeroOrMoreExpr:
-		return p.parseZeroOrMoreExpr(expr)
+		val, ok = p.parseZeroOrMoreExpr(expr)
 	case *zeroOrOneExpr:
-		return p.parseZeroOrOneExpr(expr)
+		val, ok = p.parseZeroOrOneExpr(expr)
 	default:
 		panic(fmt.Sprintf("unknown expression type %%T", expr))
 	}
+	p.setMemoized(pt, expr, val, ok)
+	return val, ok
 }
 
 func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
