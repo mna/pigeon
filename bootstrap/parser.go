@@ -51,11 +51,11 @@ func (e *errList) Error() string {
 // an abstract syntax tree (AST).
 type Parser struct {
 	s   Scanner
-	tok token
+	tok Token
 
 	errs *errList
 	dbg  bool
-	pk   token
+	pk   Token
 }
 
 func (p *Parser) in(s string) string {
@@ -90,14 +90,14 @@ func (p *Parser) Parse(filename string, r io.Reader) (*ast.Grammar, error) {
 func (p *Parser) read() {
 	if p.pk.pos.Line != 0 {
 		p.tok = p.pk
-		p.pk = token{}
+		p.pk = Token{}
 		return
 	}
 	tok, _ := p.s.Scan()
 	p.tok = tok
 }
 
-func (p *Parser) peek() token {
+func (p *Parser) peek() Token {
 	if p.pk.pos.Line == 0 {
 		p.pk, _ = p.s.Scan()
 	}

@@ -41,8 +41,8 @@ func (s *Scanner) Init(filename string, r io.Reader, errh func(ast.Pos, error)) 
 
 // Scan returns the next token, along with a boolean indicating if EOF was
 // reached (false means no more tokens).
-func (s *Scanner) Scan() (token, bool) {
-	var tok token
+func (s *Scanner) Scan() (Token, bool) {
+	var tok Token
 
 	if !s.eof && s.cur == -1 {
 		// move to first rune
