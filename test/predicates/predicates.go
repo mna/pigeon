@@ -208,37 +208,42 @@ var (
 	errNoMatch = errors.New("no match found")
 )
 
+// Option is a function that can set an option on the parser. It returns
+// the previous setting as an Option.
+type Option func(*parser) Option
+
 // TODO : temporary, both should be options to Parse*
 var debug = false
 var memoize = false
 
 // ParseFile parses the file identified by filename.
-func ParseFile(filename string) (interface{}, error) {
+func ParseFile(filename string, opts ...Option) (interface{}, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	return ParseReader(filename, f)
+	return ParseReader(filename, f, opts...)
 }
 
 // ParseReader parses the data from r using filename as information in the
 // error messages.
-func ParseReader(filename string, r io.Reader) (interface{}, error) {
+func ParseReader(filename string, r io.Reader, opts ...Option) (interface{}, error) {
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
 
-	return Parse(filename, b)
+	return Parse(filename, b, opts...)
 }
 
 // Parse parses the data from b using filename as information in the
 // error messages.
-func Parse(filename string, b []byte) (interface{}, error) {
-	return parse(filename, b, g)
+func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
+	return parse(filename, b, g, opts...)
 }
 
+// position records a position in the text.
 type position struct {
 	line, col, offset int
 }
@@ -247,10 +252,20 @@ func (p position) String() string {
 	return fmt.Sprintf("%d:%d [%d]", p.line, p.col, p.offset)
 }
 
+// savepoint stores all state required to go back to this point in the
+// parser.
+type savepoint struct {
+	position
+	rn rune
+	w  int
+}
+
 type current struct {
 	pos  position // start position of the match
 	text []byte   // raw text of the match
 }
+
+// the AST types...
 
 type grammar struct {
 	pos   position
@@ -330,6 +345,7 @@ type charClassMatcher struct {
 
 type anyMatcher position
 
+// errList cumulates the errors found by the parser.
 type errList []error
 
 func (e *errList) add(err error) {
@@ -388,20 +404,24 @@ func (p *parserError) Error() string {
 	return p.prefix + ": " + p.Inner.Error()
 }
 
-func parse(filename string, b []byte, g *grammar) (interface{}, error) {
+// parse creates a parser and parses the provided input using the
+// grammar g.
+func parse(filename string, b []byte, g *grammar, opts ...Option) (interface{}, error) {
 	p := &parser{
 		filename: filename,
 		errs:     new(errList),
 		data:     b,
 		pt:       savepoint{position: position{line: 1}},
 	}
+	p.setOptions(opts)
 	return p.parse(g)
 }
 
-type savepoint struct {
-	position
-	rn rune
-	w  int
+// setOptions applies the options to the parser.
+func (p *parser) setOptions(opts []Option) {
+	for _, opt := range opts {
+		opt(p)
+	}
 }
 
 type resultTuple struct {
