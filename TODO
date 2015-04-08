@@ -1,3 +1,2 @@
 - implement "packrat" memoization
 ? type annotations for generated code functions
-? toIfaceSlice as built-in helper function
