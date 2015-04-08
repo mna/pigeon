@@ -383,6 +383,22 @@ var validParseCases = map[string]*ast.Grammar{
 			},
 		},
 	},
+	"a = `a\nb\nc`": &ast.Grammar{
+		Rules: []*ast.Rule{
+			{
+				Name: ast.NewIdentifier(ast.Pos{}, "a"),
+				Expr: ast.NewLitMatcher(ast.Pos{}, "a\nb\nc"),
+			},
+		},
+	},
+	"a = ``": &ast.Grammar{
+		Rules: []*ast.Rule{
+			{
+				Name: ast.NewIdentifier(ast.Pos{}, "a"),
+				Expr: ast.NewLitMatcher(ast.Pos{}, ""),
+			},
+		},
+	},
 }
 
 func TestValidParseCases(t *testing.T) {
