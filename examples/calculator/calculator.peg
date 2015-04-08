@@ -24,6 +24,9 @@ var ops = map[string]func(int, int) int {
     },
 }
 
+// for testing purpose
+var cntCodeBlocks int
+
 func main() {
     if len(os.Args) != 2 {
         log.Fatal("Usage: calculator 'EXPR'")
@@ -56,32 +59,40 @@ func eval(first, rest interface{}) int {
 }
 
 Input <- expr:Expr EOF {
+    cntCodeBlocks++
     return expr, nil
 }
 
 Expr <- _ first:Term rest:( _ AddOp _ Term )* _ {
+    cntCodeBlocks++
     return eval(first, rest), nil
 }
 
 Term <- first:Factor rest:( _ MulOp _ Factor )* {
+    cntCodeBlocks++
     return eval(first, rest), nil
 }
 
 Factor <- '(' expr:Expr ')' {
+    cntCodeBlocks++
     return expr, nil
 } / integer:Integer {
+    cntCodeBlocks++
     return integer, nil
 }
 
 AddOp <- ( '+' / '-' ) {
+    cntCodeBlocks++
     return string(c.text), nil
 }
 
 MulOp <- ( '*' / '/' ) {
+    cntCodeBlocks++
     return string(c.text), nil
 }
 
 Integer <- '-'? [0-9]+ {
+    cntCodeBlocks++
     return strconv.Atoi(string(c.text))
 }
 

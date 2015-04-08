@@ -1,3 +1,4 @@
 - implement "packrat" memoization
+- support optimization option flag, arg on Parse*
 - add more tests (e.g. one per parseExpr func to test all corner cases)
 ? type annotations for generated code functions
