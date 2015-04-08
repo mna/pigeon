@@ -8,11 +8,13 @@ From Wikipedia [0]:
 	strings in the language.
 
 Its features and syntax are inspired by the PEG.js project [1], while
-the implementation is loosely based on [2].
+the implementation is loosely based on [2]. Formal presentation of the
+PEG theory by Bryan Ford is also an important reference [3].
 
 	[0]: http://en.wikipedia.org/wiki/Parsing_expression_grammar
 	[1]: http://pegjs.org/
 	[2]: http://www.codeproject.com/Articles/29713/Parsing-Expression-Grammar-Support-for-C-Part
+	[3]: http://pdos.csail.mit.edu/~baford/packrat/popl04/peg-popl04.pdf
 
 Command-line usage
 
