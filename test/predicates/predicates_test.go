@@ -13,6 +13,7 @@ func TestPredicatesArgs(t *testing.T) {
 		"onB9":  {"innermost"},
 		"onB10": {"inner"},
 		"onB11": {"out"},
+		"onC1":  {"rest"},
 	}
 
 	typ := reflect.TypeOf(&current{})

@@ -130,6 +130,41 @@ var g = &grammar{
 				},
 			},
 		},
+		{
+			name: "C",
+			pos:  position{line: 22, col: 1, offset: 334},
+			expr: &actionExpr{
+				pos: position{line: 22, col: 5, offset: 340},
+				run: (*parser).callonC1,
+				expr: &seqExpr{
+					pos: position{line: 22, col: 5, offset: 340},
+					exprs: []interface{}{
+						&andExpr{
+							pos: position{line: 22, col: 5, offset: 340},
+							expr: &labeledExpr{
+								pos:   position{line: 22, col: 7, offset: 342},
+								label: "inand",
+								expr: &charClassMatcher{
+									pos:        position{line: 22, col: 13, offset: 348},
+									val:        "[efg]",
+									chars:      []rune{'e', 'f', 'g'},
+									ignoreCase: false,
+									inverted:   false,
+								},
+							},
+						},
+						&labeledExpr{
+							pos:   position{line: 22, col: 20, offset: 355},
+							label: "rest",
+							expr: &ruleRefExpr{
+								pos:  position{line: 22, col: 25, offset: 360},
+								name: "hij",
+							},
+						},
+					},
+				},
+			},
+		},
 	},
 }
 
@@ -194,6 +229,16 @@ func (p *parser) callonB11() (bool, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onB11(stack["out"])
+}
+
+func (c *current) onC1(rest interface{}) (interface{}, error) {
+	return nil, nil
+}
+
+func (p *parser) callonC1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onC1(stack["rest"])
 }
 
 var (
@@ -803,7 +848,9 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	p.pushV()
 	_, ok := p.parseExpr(and.expr)
+	p.popV()
 	p.restore(pt)
 	return nil, ok
 }
@@ -941,7 +988,9 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	p.pushV()
 	_, ok := p.parseExpr(not.expr)
+	p.popV()
 	p.restore(pt)
 	return nil, !ok
 }

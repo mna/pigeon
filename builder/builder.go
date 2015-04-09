@@ -461,7 +461,9 @@ func (b *builder) writeExprCode(expr ast.Expression) {
 		b.writeNotCodeExprCode(expr)
 
 	case *ast.AndExpr:
+		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
+		b.popArgsSet()
 	case *ast.ChoiceExpr:
 		for _, alt := range expr.Alternatives {
 			b.pushArgsSet()
@@ -469,7 +471,9 @@ func (b *builder) writeExprCode(expr ast.Expression) {
 			b.popArgsSet()
 		}
 	case *ast.NotExpr:
+		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
+		b.popArgsSet()
 	case *ast.OneOrMoreExpr:
 		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)

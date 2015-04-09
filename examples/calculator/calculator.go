@@ -1051,7 +1051,9 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	p.pushV()
 	_, ok := p.parseExpr(and.expr)
+	p.popV()
 	p.restore(pt)
 	return nil, ok
 }
@@ -1189,7 +1191,9 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	p.pushV()
 	_, ok := p.parseExpr(not.expr)
+	p.popV()
 	p.restore(pt)
 	return nil, !ok
 }
