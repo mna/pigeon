@@ -123,7 +123,8 @@ func TestMemoization(t *testing.T) {
 	in := " 2 + 35 * ( 18 - -4 / ( 5 + 1) ) * 456 + -1"
 	want := 287281
 
-	got, err := Parse("", []byte(in), Memoize(false))
+	p := newParser("", []byte(in), Memoize(false))
+	got, err := p.parse(g)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,13 +132,20 @@ func TestMemoization(t *testing.T) {
 	if goti != want {
 		t.Errorf("want %d, got %d", want, goti)
 	}
+	if p.exprCnt != 415 {
+		t.Errorf("with Memoize=false, want %d expressions evaluated, got %d", 415, p.exprCnt)
+	}
 
-	got, err = Parse("", []byte(in), Memoize(true))
+	p = newParser("", []byte(in), Memoize(true))
+	got, err = p.parse(g)
 	if err != nil {
 		t.Fatal(err)
 	}
 	goti = got.(int)
 	if goti != want {
 		t.Errorf("want %d, got %d", want, goti)
+	}
+	if p.exprCnt != 389 {
+		t.Errorf("with Memoize=true, want %d expressions evaluated, got %d", 389, p.exprCnt)
 	}
 }

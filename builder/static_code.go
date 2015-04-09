@@ -81,7 +81,7 @@ func ParseReader(filename string, r io.Reader, opts ...Option) (interface{}, err
 // Parse parses the data from b using filename as information in the
 // error messages.
 func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
-	return parse(filename, b, g, opts...)
+	return newParser(filename, b, opts...).parse(g)
 }
 
 // position records a position in the text.
@@ -245,9 +245,8 @@ func (p *parserError) Error() string {
 	return p.prefix + ": " + p.Inner.Error()
 }
 
-// parse creates a parser and parses the provided input using the
-// grammar g.
-func parse(filename string, b []byte, g *grammar, opts ...Option) (interface{}, error) {
+// newParser creates a parser with the specified input source and options.
+func newParser(filename string, b []byte, opts ...Option) *parser {
 	p := &parser{
 		filename: filename,
 		errs: new(errList),
@@ -256,7 +255,7 @@ func parse(filename string, b []byte, g *grammar, opts ...Option) (interface{}, 
 		recover: true,
 	}
 	p.setOptions(opts)
-	return p.parse(g)
+	return p
 }
 
 // setOptions applies the options to the parser.
@@ -296,6 +295,8 @@ type parser struct {
 	// rule stack, allows identification of the current rule in errors
 	rstack []*rule
 
+	// stats
+	exprCnt int
 }
 
 // push a variable set on the vstack.
@@ -528,6 +529,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 		pt = p.pt
 	}
 
+	p.exprCnt++
 	var val interface{}
 	switch expr := expr.(type) {
 	case *actionExpr:
