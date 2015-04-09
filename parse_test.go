@@ -158,11 +158,13 @@ file:1:23 (22): rule HexEscape: invalid hexadecimal escape
 file:1:26 (25): rule ShortUnicodeEscape: invalid Unicode escape`,
 
 	// syntactically valid escapes, but invalid values
-	// TODO: handle those cases
-	/*
-		`a = "\udfff"`:     "",
-		`a = "\U00110000"`: "",
-	*/
+	`a = "\udfff"`:     "file:1:7 (6): rule ShortUnicodeEscape: invalid Unicode escape",
+	`a = "\ud800"`:     "file:1:7 (6): rule ShortUnicodeEscape: invalid Unicode escape",
+	`a = "\ud801"`:     "file:1:7 (6): rule ShortUnicodeEscape: invalid Unicode escape",
+	`a = "\U00110000"`: "file:1:7 (6): rule LongUnicodeEscape: invalid Unicode escape",
+	`a = "\U0000DFFF"`: "file:1:7 (6): rule LongUnicodeEscape: invalid Unicode escape",
+	`a = "\U0000D800"`: "file:1:7 (6): rule LongUnicodeEscape: invalid Unicode escape",
+	`a = "\U0000D801"`: "file:1:7 (6): rule LongUnicodeEscape: invalid Unicode escape",
 }
 
 func TestInvalidParseCases(t *testing.T) {

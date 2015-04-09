@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/pigeon/ast"
@@ -171,4 +173,17 @@ func toIfaceSlice(v interface{}) []interface{} {
 		return nil
 	}
 	return v.([]interface{})
+}
+
+// validateUnicodeEscape checks that the provided escape sequence is a
+// valid Unicode escape sequence.
+func validateUnicodeEscape(escape, errMsg string) (interface{}, error) {
+	r, _, _, err := strconv.UnquoteChar("\\"+escape, '"')
+	if err != nil {
+		return nil, errors.New(errMsg)
+	}
+	if 0xD800 <= r && r <= 0xDFFF {
+		return nil, errors.New(errMsg)
+	}
+	return nil, nil
 }

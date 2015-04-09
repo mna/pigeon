@@ -219,11 +219,17 @@ HexEscape ← 'x' HexDigit HexDigit
     / 'x' ( SourceChar / EOL / EOF ) {
     return nil, errors.New("invalid hexadecimal escape")
 }
-LongUnicodeEscape ← 'U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit
+LongUnicodeEscape ← 
+    'U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit {
+        return validateUnicodeEscape(string(c.text), "invalid Unicode escape")
+    }
     / 'U' ( SourceChar / EOL / EOF ) {
     return nil, errors.New("invalid Unicode escape")
 }
-ShortUnicodeEscape ← 'u' HexDigit HexDigit HexDigit HexDigit
+ShortUnicodeEscape ← 
+    'u' HexDigit HexDigit HexDigit HexDigit {
+        return validateUnicodeEscape(string(c.text), "invalid Unicode escape")
+    }
     / 'u' ( SourceChar / EOL / EOF ) {
     return nil, errors.New("invalid Unicode escape")
 }
