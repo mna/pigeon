@@ -67,6 +67,9 @@ $(TEST_DIR)/andnot/andnot.go: $(TEST_DIR)/andnot/andnot.peg $(BINDIR)/pigeon
 $(TEST_DIR)/predicates/predicates.go: $(TEST_DIR)/predicates/predicates.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< | goimports > $@
 
+$(TEST_DIR)/issue_1/issue_1.go: $(TEST_DIR)/issue_1/issue_1.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< | goimports > $@
+
 clean:
 	rm $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC)
 	rm -rf $(BINDIR)

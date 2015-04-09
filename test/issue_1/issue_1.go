@@ -1,11 +1,3 @@
-// Command calculator is a small PEG-generated parser that computes
-// simple math using integers.
-//
-// Example usage: $ calculator "3 + (2 - 5 * 12)"
-//
-// Inspired by pegjs arithmetic example:
-// https://github.com/pegjs/pegjs/blob/master/examples/arithmetics.pegjs
-//
 package main
 
 import (
@@ -14,237 +6,59 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
-	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 )
 
-var ops = map[string]func(int, int) int{
-	"+": func(l, r int) int {
-		return l + r
-	},
-	"-": func(l, r int) int {
-		return l - r
-	},
-	"*": func(l, r int) int {
-		return l * r
-	},
-	"/": func(l, r int) int {
-		return l / r
-	},
-}
-
-// for testing purpose
-var cntCodeBlocks int
-
 func main() {
-	if len(os.Args) != 2 {
-		log.Fatal("Usage: calculator 'EXPR'")
-	}
-	got, err := ParseReader("", strings.NewReader(os.Args[1]))
+	ast, err := Parse("STDIN", []byte("foo"))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("error: %s\n", err)
+		return
 	}
-	fmt.Println("=", got)
-}
-
-func toIfaceSlice(v interface{}) []interface{} {
-	if v == nil {
-		return nil
-	}
-	return v.([]interface{})
-}
-
-func eval(first, rest interface{}) int {
-	l := first.(int)
-	restSl := toIfaceSlice(rest)
-	for _, v := range restSl {
-		restExpr := toIfaceSlice(v)
-		r := restExpr[3].(int)
-		op := restExpr[1].(string)
-		l = ops[op](l, r)
-	}
-	return l
+	fmt.Printf("%+v\n", ast)
 }
 
 var g = &grammar{
 	rules: []*rule{
 		{
-			name: "Input",
-			pos:  position{line: 61, col: 1, offset: 1247},
+			name: "TableRef",
+			pos:  position{line: 14, col: 1, offset: 174},
 			expr: &actionExpr{
-				pos: position{line: 61, col: 10, offset: 1256},
-				run: (*parser).callonInput1,
+				pos: position{line: 14, col: 13, offset: 186},
+				run: (*parser).callonTableRef1,
 				expr: &seqExpr{
-					pos: position{line: 61, col: 10, offset: 1256},
+					pos: position{line: 14, col: 13, offset: 186},
 					exprs: []interface{}{
 						&labeledExpr{
-							pos:   position{line: 61, col: 10, offset: 1256},
-							label: "expr",
-							expr: &ruleRefExpr{
-								pos:  position{line: 61, col: 15, offset: 1261},
-								name: "Expr",
-							},
-						},
-						&ruleRefExpr{
-							pos:  position{line: 61, col: 20, offset: 1266},
-							name: "EOF",
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Expr",
-			pos:  position{line: 66, col: 1, offset: 1316},
-			expr: &actionExpr{
-				pos: position{line: 66, col: 9, offset: 1324},
-				run: (*parser).callonExpr1,
-				expr: &seqExpr{
-					pos: position{line: 66, col: 9, offset: 1324},
-					exprs: []interface{}{
-						&ruleRefExpr{
-							pos:  position{line: 66, col: 9, offset: 1324},
-							name: "_",
-						},
-						&labeledExpr{
-							pos:   position{line: 66, col: 11, offset: 1326},
-							label: "first",
-							expr: &ruleRefExpr{
-								pos:  position{line: 66, col: 17, offset: 1332},
-								name: "Term",
-							},
-						},
-						&labeledExpr{
-							pos:   position{line: 66, col: 22, offset: 1337},
-							label: "rest",
-							expr: &zeroOrMoreExpr{
-								pos: position{line: 66, col: 27, offset: 1342},
+							pos:   position{line: 14, col: 13, offset: 186},
+							label: "database",
+							expr: &zeroOrOneExpr{
+								pos: position{line: 14, col: 22, offset: 195},
 								expr: &seqExpr{
-									pos: position{line: 66, col: 29, offset: 1344},
+									pos: position{line: 14, col: 23, offset: 196},
 									exprs: []interface{}{
 										&ruleRefExpr{
-											pos:  position{line: 66, col: 29, offset: 1344},
-											name: "_",
+											pos:  position{line: 14, col: 23, offset: 196},
+											name: "Id",
 										},
-										&ruleRefExpr{
-											pos:  position{line: 66, col: 31, offset: 1346},
-											name: "AddOp",
-										},
-										&ruleRefExpr{
-											pos:  position{line: 66, col: 37, offset: 1352},
-											name: "_",
-										},
-										&ruleRefExpr{
-											pos:  position{line: 66, col: 39, offset: 1354},
-											name: "Term",
+										&litMatcher{
+											pos:        position{line: 14, col: 26, offset: 199},
+											val:        ".",
+											ignoreCase: false,
 										},
 									},
 								},
-							},
-						},
-						&ruleRefExpr{
-							pos:  position{line: 66, col: 47, offset: 1362},
-							name: "_",
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Term",
-			pos:  position{line: 71, col: 1, offset: 1423},
-			expr: &actionExpr{
-				pos: position{line: 71, col: 9, offset: 1431},
-				run: (*parser).callonTerm1,
-				expr: &seqExpr{
-					pos: position{line: 71, col: 9, offset: 1431},
-					exprs: []interface{}{
-						&labeledExpr{
-							pos:   position{line: 71, col: 9, offset: 1431},
-							label: "first",
-							expr: &ruleRefExpr{
-								pos:  position{line: 71, col: 15, offset: 1437},
-								name: "Factor",
 							},
 						},
 						&labeledExpr{
-							pos:   position{line: 71, col: 22, offset: 1444},
-							label: "rest",
-							expr: &zeroOrMoreExpr{
-								pos: position{line: 71, col: 27, offset: 1449},
-								expr: &seqExpr{
-									pos: position{line: 71, col: 29, offset: 1451},
-									exprs: []interface{}{
-										&ruleRefExpr{
-											pos:  position{line: 71, col: 29, offset: 1451},
-											name: "_",
-										},
-										&ruleRefExpr{
-											pos:  position{line: 71, col: 31, offset: 1453},
-											name: "MulOp",
-										},
-										&ruleRefExpr{
-											pos:  position{line: 71, col: 37, offset: 1459},
-											name: "_",
-										},
-										&ruleRefExpr{
-											pos:  position{line: 71, col: 39, offset: 1461},
-											name: "Factor",
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Factor",
-			pos:  position{line: 76, col: 1, offset: 1530},
-			expr: &choiceExpr{
-				pos: position{line: 76, col: 11, offset: 1540},
-				alternatives: []interface{}{
-					&actionExpr{
-						pos: position{line: 76, col: 11, offset: 1540},
-						run: (*parser).callonFactor2,
-						expr: &seqExpr{
-							pos: position{line: 76, col: 11, offset: 1540},
-							exprs: []interface{}{
-								&litMatcher{
-									pos:        position{line: 76, col: 11, offset: 1540},
-									val:        "(",
-									ignoreCase: false,
-								},
-								&labeledExpr{
-									pos:   position{line: 76, col: 15, offset: 1544},
-									label: "expr",
-									expr: &ruleRefExpr{
-										pos:  position{line: 76, col: 20, offset: 1549},
-										name: "Expr",
-									},
-								},
-								&litMatcher{
-									pos:        position{line: 76, col: 25, offset: 1554},
-									val:        ")",
-									ignoreCase: false,
-								},
-							},
-						},
-					},
-					&actionExpr{
-						pos: position{line: 79, col: 5, offset: 1605},
-						run: (*parser).callonFactor8,
-						expr: &labeledExpr{
-							pos:   position{line: 79, col: 5, offset: 1605},
-							label: "integer",
+							pos:   position{line: 14, col: 32, offset: 205},
+							label: "table",
 							expr: &ruleRefExpr{
-								pos:  position{line: 79, col: 13, offset: 1613},
-								name: "Integer",
+								pos:  position{line: 14, col: 38, offset: 211},
+								name: "Id",
 							},
 						},
 					},
@@ -252,196 +66,44 @@ var g = &grammar{
 			},
 		},
 		{
-			name: "AddOp",
-			pos:  position{line: 84, col: 1, offset: 1670},
+			name: "Id",
+			pos:  position{line: 15, col: 1, offset: 271},
 			expr: &actionExpr{
-				pos: position{line: 84, col: 10, offset: 1679},
-				run: (*parser).callonAddOp1,
-				expr: &choiceExpr{
-					pos: position{line: 84, col: 12, offset: 1681},
-					alternatives: []interface{}{
-						&litMatcher{
-							pos:        position{line: 84, col: 12, offset: 1681},
-							val:        "+",
-							ignoreCase: false,
-						},
-						&litMatcher{
-							pos:        position{line: 84, col: 18, offset: 1687},
-							val:        "-",
-							ignoreCase: false,
-						},
+				pos: position{line: 15, col: 7, offset: 277},
+				run: (*parser).callonId1,
+				expr: &oneOrMoreExpr{
+					pos: position{line: 15, col: 7, offset: 277},
+					expr: &charClassMatcher{
+						pos:        position{line: 15, col: 7, offset: 277},
+						val:        "[a-z]",
+						ranges:     []rune{'a', 'z'},
+						ignoreCase: false,
+						inverted:   false,
 					},
-				},
-			},
-		},
-		{
-			name: "MulOp",
-			pos:  position{line: 89, col: 1, offset: 1749},
-			expr: &actionExpr{
-				pos: position{line: 89, col: 10, offset: 1758},
-				run: (*parser).callonMulOp1,
-				expr: &choiceExpr{
-					pos: position{line: 89, col: 12, offset: 1760},
-					alternatives: []interface{}{
-						&litMatcher{
-							pos:        position{line: 89, col: 12, offset: 1760},
-							val:        "*",
-							ignoreCase: false,
-						},
-						&litMatcher{
-							pos:        position{line: 89, col: 18, offset: 1766},
-							val:        "/",
-							ignoreCase: false,
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Integer",
-			pos:  position{line: 94, col: 1, offset: 1828},
-			expr: &actionExpr{
-				pos: position{line: 94, col: 12, offset: 1839},
-				run: (*parser).callonInteger1,
-				expr: &seqExpr{
-					pos: position{line: 94, col: 12, offset: 1839},
-					exprs: []interface{}{
-						&zeroOrOneExpr{
-							pos: position{line: 94, col: 12, offset: 1839},
-							expr: &litMatcher{
-								pos:        position{line: 94, col: 12, offset: 1839},
-								val:        "-",
-								ignoreCase: false,
-							},
-						},
-						&oneOrMoreExpr{
-							pos: position{line: 94, col: 17, offset: 1844},
-							expr: &charClassMatcher{
-								pos:        position{line: 94, col: 17, offset: 1844},
-								val:        "[0-9]",
-								ranges:     []rune{'0', '9'},
-								ignoreCase: false,
-								inverted:   false,
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			name:        "_",
-			displayName: "\"whitespace\"",
-			pos:         position{line: 99, col: 1, offset: 1916},
-			expr: &zeroOrMoreExpr{
-				pos: position{line: 99, col: 19, offset: 1934},
-				expr: &charClassMatcher{
-					pos:        position{line: 99, col: 19, offset: 1934},
-					val:        "[ \\n\\t\\r]",
-					chars:      []rune{' ', '\n', '\t', '\r'},
-					ignoreCase: false,
-					inverted:   false,
-				},
-			},
-		},
-		{
-			name: "EOF",
-			pos:  position{line: 101, col: 1, offset: 1946},
-			expr: &notExpr{
-				pos: position{line: 101, col: 8, offset: 1953},
-				expr: &anyMatcher{
-					line: 101, col: 9, offset: 1954,
 				},
 			},
 		},
 	},
 }
 
-func (c *current) onInput1(expr interface{}) (interface{}, error) {
-	cntCodeBlocks++
-	return expr, nil
+func (c *current) onTableRef1(database, table interface{}) (interface{}, error) {
+	return fmt.Sprintf("%v.%s", database, table), nil
 }
 
-func (p *parser) callonInput1() (interface{}, error) {
+func (p *parser) callonTableRef1() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onInput1(stack["expr"])
+	return p.cur.onTableRef1(stack["database"], stack["table"])
 }
 
-func (c *current) onExpr1(first, rest interface{}) (interface{}, error) {
-	cntCodeBlocks++
-	return eval(first, rest), nil
+func (c *current) onId1() (interface{}, error) {
+	return c.text, nil
 }
 
-func (p *parser) callonExpr1() (interface{}, error) {
+func (p *parser) callonId1() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onExpr1(stack["first"], stack["rest"])
-}
-
-func (c *current) onTerm1(first, rest interface{}) (interface{}, error) {
-	cntCodeBlocks++
-	return eval(first, rest), nil
-}
-
-func (p *parser) callonTerm1() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onTerm1(stack["first"], stack["rest"])
-}
-
-func (c *current) onFactor2(expr interface{}) (interface{}, error) {
-	cntCodeBlocks++
-	return expr, nil
-}
-
-func (p *parser) callonFactor2() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onFactor2(stack["expr"])
-}
-
-func (c *current) onFactor8(integer interface{}) (interface{}, error) {
-	cntCodeBlocks++
-	return integer, nil
-}
-
-func (p *parser) callonFactor8() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onFactor8(stack["integer"])
-}
-
-func (c *current) onAddOp1() (interface{}, error) {
-	cntCodeBlocks++
-	return string(c.text), nil
-}
-
-func (p *parser) callonAddOp1() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onAddOp1()
-}
-
-func (c *current) onMulOp1() (interface{}, error) {
-	cntCodeBlocks++
-	return string(c.text), nil
-}
-
-func (p *parser) callonMulOp1() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onMulOp1()
-}
-
-func (c *current) onInteger1() (interface{}, error) {
-	cntCodeBlocks++
-	return strconv.Atoi(string(c.text))
-}
-
-func (p *parser) callonInteger1() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onInteger1()
+	return p.cur.onId1()
 }
 
 var (

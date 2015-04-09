@@ -2898,7 +2898,9 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 	var vals []interface{}
 
 	for {
+		p.pushV()
 		val, ok := p.parseExpr(expr.expr)
+		p.popV()
 		if !ok {
 			if len(vals) == 0 {
 				// did not match once, no match
@@ -2954,7 +2956,9 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 	var vals []interface{}
 
 	for {
+		p.pushV()
 		val, ok := p.parseExpr(expr.expr)
+		p.popV()
 		if !ok {
 			return vals, true
 		}
@@ -2967,7 +2971,9 @@ func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
 		defer p.out(p.in("parseZeroOrOneExpr"))
 	}
 
+	p.pushV()
 	val, _ := p.parseExpr(expr.expr)
+	p.popV()
 	// whether it matched or not, consider it a match
 	return val, true
 }

@@ -1,0 +1,16 @@
+{
+package main
+
+func main() {
+  ast, err := Parse("STDIN", []byte("foo"))
+  if err != nil {
+    fmt.Printf("error: %s\n", err)
+    return
+  }
+  fmt.Printf("%+v\n", ast)
+}
+}
+
+TableRef <- database:(Id '.')? table:Id    { return fmt.Sprintf("%v.%s", database, table), nil }
+Id <- [a-z]+                               { return c.text, nil }
+

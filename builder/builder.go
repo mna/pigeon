@@ -471,15 +471,21 @@ func (b *builder) writeExprCode(expr ast.Expression) {
 	case *ast.NotExpr:
 		b.writeExprCode(expr.Expr)
 	case *ast.OneOrMoreExpr:
+		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
+		b.popArgsSet()
 	case *ast.SeqExpr:
 		for _, sub := range expr.Exprs {
 			b.writeExprCode(sub)
 		}
 	case *ast.ZeroOrMoreExpr:
+		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
+		b.popArgsSet()
 	case *ast.ZeroOrOneExpr:
+		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
+		b.popArgsSet()
 	}
 }
 
