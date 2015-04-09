@@ -156,6 +156,13 @@ file:1:5 (4): rule CharClassMatcher: character class not terminated`,
 	`a = "\a\b\c\t\n\r\xab\xz\ux"`: `file:1:11 (10): rule DoubleStringEscape: invalid escape character
 file:1:23 (22): rule HexEscape: invalid hexadecimal escape
 file:1:26 (25): rule ShortUnicodeEscape: invalid Unicode escape`,
+
+	// syntactically valid escapes, but invalid values
+	// TODO: handle those cases
+	/*
+		`a = "\udfff"`:     "",
+		`a = "\U00110000"`: "",
+	*/
 }
 
 func TestInvalidParseCases(t *testing.T) {

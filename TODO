@@ -1,2 +1,3 @@
+- handle syntactically valid escapes, but invalid values (see parse_test.go)
 - add more tests (e.g. one per parseExpr func to test all corner cases)
 ? type annotations for generated code functions
