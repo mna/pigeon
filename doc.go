@@ -33,6 +33,9 @@ The following options can be specified:
 
 	-debug : boolean, print debugging info to stdout (default: false).
 
+	-no-recover : do not recover from a panic. Useful to access the panic stack
+	when debugging, otherwise the panic is converted to an error.
+
 	-o=FILE : string, output file where the generated parser will be
 	written (default: stdout).
 

@@ -212,7 +212,10 @@ var (
 // the previous setting as an Option.
 type Option func(*parser) Option
 
-// Debug creates an Option to set the debug flag to b.
+// Debug creates an Option to set the debug flag to b. When set to true,
+// debugging information is printed to stdout while parsing.
+//
+// The default is false.
 func Debug(b bool) Option {
 	return func(p *parser) Option {
 		old := p.debug
@@ -221,12 +224,31 @@ func Debug(b bool) Option {
 	}
 }
 
-// Memoize creates an Option to set the memoize flag to b.
+// Memoize creates an Option to set the memoize flag to b. When set to true,
+// the parser will cache all results so each expression is evaluated only
+// once. This guarantees linear parsing time even for pathological cases,
+// at the expense of more memory and slower times for typical cases.
+//
+// The default is false.
 func Memoize(b bool) Option {
 	return func(p *parser) Option {
 		old := p.memoize
 		p.memoize = b
 		return Memoize(old)
+	}
+}
+
+// Recover creates an Option to set the recover flag to b. When set to
+// true, this causes the parser to recover from panics and convert it
+// to an error. Setting it to false can be useful while debugging to
+// access the full stack trace.
+//
+// The default is true.
+func Recover(b bool) Option {
+	return func(p *parser) Option {
+		old := p.recover
+		p.recover = b
+		return Recover(old)
 	}
 }
 
@@ -426,6 +448,7 @@ func parse(filename string, b []byte, g *grammar, opts ...Option) (interface{}, 
 		errs:     new(errList),
 		data:     b,
 		pt:       savepoint{position: position{line: 1}},
+		recover:  true,
 	}
 	p.setOptions(opts)
 	return p.parse(g)
@@ -452,8 +475,14 @@ type parser struct {
 	data []byte
 	errs *errList
 
-	debug bool
-	depth int
+	recover bool
+	debug   bool
+	depth   int
+
+	memoize bool
+	// memoization table for the packrat algorithm:
+	// map[offset in source] map[expression or rule] {value, match}
+	memo map[int]map[interface{}]resultTuple
 
 	// rules table, maps the rule identifier to the rule node
 	rules map[string]*rule
@@ -461,11 +490,6 @@ type parser struct {
 	vstack []map[string]interface{}
 	// rule stack, allows identification of the current rule in errors
 	rstack []*rule
-
-	// memoization table for the packrat algorithm:
-	// map[offset in source] map[expression or rule] {value, match}
-	memo    map[int]map[interface{}]resultTuple
-	memoize bool
 }
 
 // push a variable set on the vstack.
@@ -623,23 +647,25 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 	// TODO : not super critical but this could be generated
 	p.buildRulesTable(g)
 
-	// panic can be used in action code to stop parsing immediately
-	// and return the panic as an error.
-	defer func() {
-		if e := recover(); e != nil {
-			if p.debug {
-				defer p.out(p.in("panic handler"))
+	if p.recover {
+		// panic can be used in action code to stop parsing immediately
+		// and return the panic as an error.
+		defer func() {
+			if e := recover(); e != nil {
+				if p.debug {
+					defer p.out(p.in("panic handler"))
+				}
+				val = nil
+				switch e := e.(type) {
+				case error:
+					p.addErr(e)
+				default:
+					p.addErr(fmt.Errorf("%v", e))
+				}
+				err = p.errs.err()
 			}
-			val = nil
-			switch e := e.(type) {
-			case error:
-				p.addErr(e)
-			default:
-				p.addErr(fmt.Errorf("%v", e))
-			}
-			err = p.errs.err()
-		}
-	}()
+		}()
+	}
 
 	// start rule is rule [0]
 	p.read() // advance to first rune

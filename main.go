@@ -19,6 +19,7 @@ func main() {
 		dbgFlag       = flag.Bool("debug", false, "set debug mode")
 		shortHelpFlag = flag.Bool("h", false, "show help page")
 		longHelpFlag  = flag.Bool("help", false, "show help page")
+		noRecoverFlag = flag.Bool("no-recover", false, "do not recover from panic")
 		outputFlag    = flag.String("o", "", "output file, defaults to stdout")
 		recvrNmFlag   = flag.String("receiver-name", "c", "receiver name for the generated methods")
 		noBuildFlag   = flag.Bool("x", false, "do not build, only parse")
@@ -44,7 +45,7 @@ func main() {
 	defer rc.Close()
 
 	// parse input
-	g, err := ParseReader(nm, rc, Debug(*dbgFlag), Memoize(*cacheFlag))
+	g, err := ParseReader(nm, rc, Debug(*dbgFlag), Memoize(*cacheFlag), Recover(!*noRecoverFlag))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "parse error(s):\n", err)
 		os.Exit(3)
@@ -89,6 +90,9 @@ the generated code is written to this file instead.
 		output debugging information while parsing the grammar.
 	-h -help
 		display this help message.
+	-no-recover
+		do not recover from a panic. Useful to access the panic stack
+		when debugging, otherwise the panic is converted to an error.
 	-o OUTPUT_FILE
 		write the generated parser to OUTPUT_FILE. Defaults to stdout.
 	-receiver-name NAME
