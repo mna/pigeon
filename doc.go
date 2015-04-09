@@ -264,6 +264,7 @@ as a package with public functions to parse input text. The exported API is:
 	- ParseReader(string, io.Reader, ...Option) (interface{}, error)
 	- Debug(bool) Option
 	- Memoize(bool) Option
+	- Recover(bool) Option
 
 See the godoc page of the generated parser for the test/predicates grammar
 for an example documentation page of the exported API:
