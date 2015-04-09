@@ -104,8 +104,21 @@ func TestInvalidCases(t *testing.T) {
 	}
 }
 
+func TestPanicNoRecover(t *testing.T) {
+	defer func() {
+		if e := recover(); e != nil {
+			// all good
+			return
+		}
+		t.Fatal("want panic, got none")
+	}()
+
+	// should panic
+	Parse("", []byte("1 / 0"), Recover(false))
+}
+
 func TestMemoization(t *testing.T) {
-	// TODO: clean this up with options to Parse and a count of evaluated
+	// TODO: clean this up with a count of evaluated
 	// expressions instead...
 	in := " 2 + 35 * ( 18 - -4 / ( 5 + 1) ) * 456 + -1"
 	want := 287281
