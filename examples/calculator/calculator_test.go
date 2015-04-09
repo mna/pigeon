@@ -118,8 +118,6 @@ func TestPanicNoRecover(t *testing.T) {
 }
 
 func TestMemoization(t *testing.T) {
-	// TODO: clean this up with a count of evaluated
-	// expressions instead...
 	in := " 2 + 35 * ( 18 - -4 / ( 5 + 1) ) * 456 + -1"
 	want := 287281
 
