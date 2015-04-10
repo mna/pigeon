@@ -1,2 +1,3 @@
 - add more tests (e.g. one per parseExpr func to test all corner cases)
+? options like current receiver name read directly from the grammar file
 ? type annotations for generated code functions
