@@ -70,13 +70,20 @@ $(TEST_DIR)/predicates/predicates.go: $(TEST_DIR)/predicates/predicates.peg $(BI
 $(TEST_DIR)/issue_1/issue_1.go: $(TEST_DIR)/issue_1/issue_1.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< | goimports > $@
 
-clean:
-	rm $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC)
-	rm -rf $(BINDIR)
-
 lint:
 	golint ./...
 	go vet ./...
 
-.PHONY: all clean lint
+cmp:
+	@boot=$$(mktemp) && $(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR) | goimports > $$boot && \
+	official=$$(mktemp) && $(BINDIR)/pigeon $(PIGEON_GRAMMAR) | goimports > $$official && \
+	cmp $$boot $$official && \
+	unlink $$boot && \
+	unlink $$official
+
+clean:
+	rm $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC)
+	rm -rf $(BINDIR)
+
+.PHONY: all clean lint cmp
 
