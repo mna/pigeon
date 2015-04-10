@@ -42,7 +42,7 @@ var g = &grammar{
 									exprs: []interface{}{
 										&ruleRefExpr{
 											pos:  position{line: 14, col: 23, offset: 196},
-											name: "Id",
+											name: "ID",
 										},
 										&litMatcher{
 											pos:        position{line: 14, col: 26, offset: 199},
@@ -58,7 +58,7 @@ var g = &grammar{
 							label: "table",
 							expr: &ruleRefExpr{
 								pos:  position{line: 14, col: 38, offset: 211},
-								name: "Id",
+								name: "ID",
 							},
 						},
 					},
@@ -66,11 +66,11 @@ var g = &grammar{
 			},
 		},
 		{
-			name: "Id",
+			name: "ID",
 			pos:  position{line: 15, col: 1, offset: 271},
 			expr: &actionExpr{
 				pos: position{line: 15, col: 7, offset: 277},
-				run: (*parser).callonId1,
+				run: (*parser).callonID1,
 				expr: &oneOrMoreExpr{
 					pos: position{line: 15, col: 7, offset: 277},
 					expr: &charClassMatcher{
@@ -96,14 +96,14 @@ func (p *parser) callonTableRef1() (interface{}, error) {
 	return p.cur.onTableRef1(stack["database"], stack["table"])
 }
 
-func (c *current) onId1() (interface{}, error) {
+func (c *current) onID1() (interface{}, error) {
 	return c.text, nil
 }
 
-func (p *parser) callonId1() (interface{}, error) {
+func (p *parser) callonID1() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onId1()
+	return p.cur.onID1()
 }
 
 var (

@@ -20,7 +20,7 @@ func TestRunIssue1(t *testing.T) {
 func TestIssue1(t *testing.T) {
 	methods := map[string][]string{
 		"onTableRef1": {"database", "table"},
-		"onId1":       {},
+		"onID1":       {},
 	}
 
 	typ := reflect.TypeOf(&current{})

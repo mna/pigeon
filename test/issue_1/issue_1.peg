@@ -11,6 +11,6 @@ func main() {
 }
 }
 
-TableRef <- database:(Id '.')? table:Id    { return fmt.Sprintf("%v.%s", database, table), nil }
-Id <- [a-z]+                               { return c.text, nil }
+TableRef <- database:(ID '.')? table:ID    { return fmt.Sprintf("%v.%s", database, table), nil }
+ID <- [a-z]+                               { return c.text, nil }
 
