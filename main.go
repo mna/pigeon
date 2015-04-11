@@ -152,6 +152,7 @@ func output(filename string) io.WriteCloser {
 	return out
 }
 
+// create a ReadCloser that reads from r and closes c.
 func makeReadCloser(r io.Reader, c io.Closer) io.ReadCloser {
 	rc := struct {
 		io.Reader

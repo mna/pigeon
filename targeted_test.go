@@ -306,3 +306,61 @@ func TestParseZeroOrOneExpr(t *testing.T) {
 		}
 	}
 }
+
+func TestParseZeroOrMoreExpr(t *testing.T) {
+	cases := []struct {
+		in  string
+		lit string
+		out []string
+	}{
+		// ""* is a pathological case - the empty string always matches, so this
+		// is an infinite loop. Not fixing it, because semantically this seems
+		// correct.
+		// {"", "", []byte{}},
+
+		{"", "a", nil},
+		{"a", "a", []string{"a"}},
+		{"a", "b", nil},
+		{"abc", "ab", []string{"ab"}},
+		{"ab", "abc", nil},
+
+		{"aab", "a", []string{"a", "a"}},
+		{"bba", "a", nil},
+		{"bba", "b", []string{"b", "b"}},
+		{"bba", "bb", []string{"bb"}},
+		{"aaaaab", "aa", []string{"aa", "aa"}},
+		{"aaaaab", "a", []string{"a", "a", "a", "a", "a"}},
+	}
+
+	for _, tc := range cases {
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		want := make([]interface{}, len(tc.out))
+		for i, v := range tc.out {
+			want[i] = []byte(v)
+		}
+		if tc.out == nil {
+			want = nil
+		}
+		lbl := fmt.Sprintf("%q: %q", tc.lit, tc.in)
+
+		got, ok := p.parseZeroOrMoreExpr(&zeroOrMoreExpr{expr: &litMatcher{val: tc.lit}})
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%s: want %#v, got %#v", lbl, want, got)
+		}
+		// zero or more always matches
+		if !ok {
+			t.Errorf("%s: want match, got %t", lbl, ok)
+		}
+		wantOffset := 0
+		for _, s := range tc.out {
+			wantOffset += len(s)
+		}
+		if p.pt.offset != wantOffset {
+			t.Errorf("%s: want offset %d, got %d", lbl, wantOffset, p.pt.offset)
+		}
+	}
+}
