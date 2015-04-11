@@ -70,6 +70,9 @@ $(TEST_DIR)/predicates/predicates.go: $(TEST_DIR)/predicates/predicates.peg $(BI
 $(TEST_DIR)/issue_1/issue_1.go: $(TEST_DIR)/issue_1/issue_1.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< | goimports > $@
 
+$(TEST_DIR)/linear/linear.go: $(TEST_DIR)/linear/linear.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< | goimports > $@
+
 lint:
 	golint ./...
 	go vet ./...
