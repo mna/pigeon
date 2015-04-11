@@ -219,6 +219,13 @@ func TestParseCharClassMatcher(t *testing.T) {
 		{in: "←a", val: "[^\\pL]", iv: true, classes: []string{"L"}, out: []byte("←")},
 		{in: "←a", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: []byte("←")},
 		{in: "←a", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: []byte("←")},
+
+		{in: "b", val: "[\\p{Latin}]", classes: []string{"Latin"}, out: []byte("b")},
+		{in: "b", val: "[\\p{Latin}]i", ic: true, classes: []string{"Latin"}, out: []byte("b")},
+		{in: "B", val: "[\\p{Latin}]i", ic: true, classes: []string{"Latin"}, out: []byte("B")},
+		{in: "b", val: "[^\\p{Latin}]", iv: true, classes: []string{"Latin"}, out: nil},
+		{in: "b", val: "[^\\p{Latin}]i", ic: true, iv: true, classes: []string{"Latin"}, out: nil},
+		{in: "B", val: "[^\\p{Latin}]i", iv: true, ic: true, classes: []string{"Latin"}, out: nil},
 	}
 
 	for _, tc := range cases {
@@ -258,4 +265,8 @@ func TestParseCharClassMatcher(t *testing.T) {
 			t.Errorf("%s: want offset %d, got %d", lbl, len(tc.out), p.pt.offset)
 		}
 	}
+}
+
+func TestParseZeroOrOneExpr(t *testing.T) {
+
 }
