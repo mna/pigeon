@@ -268,5 +268,41 @@ func TestParseCharClassMatcher(t *testing.T) {
 }
 
 func TestParseZeroOrOneExpr(t *testing.T) {
+	cases := []struct {
+		in  string
+		lit string
+		out []byte
+	}{
+		{"", "", []byte{}},
+		{"", "a", nil},
+		{"a", "a", []byte("a")},
+		{"a", "b", nil},
+		{"abc", "ab", []byte("ab")},
+		{"ab", "abc", nil},
+	}
 
+	for _, tc := range cases {
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		var want interface{}
+		if tc.out != nil {
+			want = tc.out
+		}
+		lbl := fmt.Sprintf("%q: %q", tc.lit, tc.in)
+
+		got, ok := p.parseZeroOrOneExpr(&zeroOrOneExpr{expr: &litMatcher{val: tc.lit}})
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%q: want %v, got %v", lbl, tc.out, got)
+		}
+		// zero or one always matches
+		if !ok {
+			t.Errorf("%s: want match, got %t", lbl, ok)
+		}
+		if p.pt.offset != len(tc.out) {
+			t.Errorf("%s: want offset %d, got %d", lbl, len(tc.out), p.pt.offset)
+		}
+	}
 }
