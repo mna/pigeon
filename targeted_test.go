@@ -32,18 +32,17 @@ func TestParseNoRule(t *testing.T) {
 
 func TestParseAnyMatcher(t *testing.T) {
 	cases := []struct {
-		in    string
-		out   []byte
-		match bool
+		in  string
+		out []byte
 	}{
-		{"", nil, false},
-		{"a", []byte("a"), true},
-		{"\u2190", []byte("\u2190"), true},
-		{"ab", []byte("a"), true},
-		{"\u2190\U00001100", []byte("\u2190"), true},
-		{"\x0d", []byte("\x0d"), true},
-		{"\xfa", nil, false},
-		{"\nab", []byte("\n"), true},
+		{"", nil},
+		{"a", []byte("a")},
+		{"\u2190", []byte("\u2190")},
+		{"ab", []byte("a")},
+		{"\u2190\U00001100", []byte("\u2190")},
+		{"\x0d", []byte("\x0d")},
+		{"\xfa", nil},
+		{"\nab", []byte("\n")},
 	}
 
 	for _, tc := range cases {
@@ -53,15 +52,17 @@ func TestParseAnyMatcher(t *testing.T) {
 		p.read()
 
 		var want interface{}
+		var match bool
 		if tc.out != nil {
 			want = tc.out
+			match = true
 		}
 		got, ok := p.parseAnyMatcher(&anyMatcher{})
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("%q: want %v, got %v", tc.in, tc.out, got)
 		}
-		if ok != tc.match {
-			t.Errorf("%q: want match? %t, got %t", tc.in, tc.match, ok)
+		if ok != match {
+			t.Errorf("%q: want match? %t, got %t", tc.in, match, ok)
 		}
 		if p.pt.offset != len(tc.out) {
 			t.Errorf("%q: want offset %d, got %d", tc.in, len(tc.out), p.pt.offset)
@@ -71,33 +72,32 @@ func TestParseAnyMatcher(t *testing.T) {
 
 func TestParseLitMatcher(t *testing.T) {
 	cases := []struct {
-		in    string
-		lit   string
-		ic    bool
-		out   []byte
-		match bool
+		in  string
+		lit string
+		ic  bool
+		out []byte
 	}{
-		{"", "", false, []byte{}, true}, // empty literal always matches
-		{"", "", true, []byte{}, true},  // empty literal always matches
-		{"a", "", false, []byte{}, true},
-		{"a", "", true, []byte{}, true},
-		{"a", "a", false, []byte("a"), true},
-		{"a", "a", true, []byte("a"), true},
-		{"a", "A", false, nil, false},
-		{"a", "a", true, []byte("a"), true}, // ignored case literal is always generated lowercase
-		{"A", "a", true, []byte("A"), true},
-		{"b", "a", false, nil, false},
-		{"b", "a", true, nil, false},
-		{"abc", "ab", false, []byte("ab"), true},
-		{"abc", "ab", true, []byte("ab"), true},
-		{"ab", "abc", false, nil, false},
-		{"ab", "abc", true, nil, false},
-		{"\u2190a", "\u2190", false, []byte("\u2190"), true},
-		{"\u2190a", "\u2190", true, []byte("\u2190"), true},
-		{"\n", "\n", false, []byte("\n"), true},
-		{"\n", "\n", true, []byte("\n"), true},
-		{"\na", "\n", false, []byte("\n"), true},
-		{"\na", "\n", true, []byte("\n"), true},
+		{"", "", false, []byte{}}, // empty literal always matches
+		{"", "", true, []byte{}},  // empty literal always matches
+		{"a", "", false, []byte{}},
+		{"a", "", true, []byte{}},
+		{"a", "a", false, []byte("a")},
+		{"a", "a", true, []byte("a")},
+		{"a", "A", false, nil},
+		{"a", "a", true, []byte("a")}, // ignored case literal is always generated lowercase
+		{"A", "a", true, []byte("A")},
+		{"b", "a", false, nil},
+		{"b", "a", true, nil},
+		{"abc", "ab", false, []byte("ab")},
+		{"abc", "ab", true, []byte("ab")},
+		{"ab", "abc", false, nil},
+		{"ab", "abc", true, nil},
+		{"\u2190a", "\u2190", false, []byte("\u2190")},
+		{"\u2190a", "\u2190", true, []byte("\u2190")},
+		{"\n", "\n", false, []byte("\n")},
+		{"\n", "\n", true, []byte("\n")},
+		{"\na", "\n", false, []byte("\n")},
+		{"\na", "\n", true, []byte("\n")},
 	}
 
 	for _, tc := range cases {
@@ -107,7 +107,9 @@ func TestParseLitMatcher(t *testing.T) {
 		p.read()
 
 		var want interface{}
+		var match bool
 		if tc.out != nil {
+			match = true
 			want = tc.out
 		}
 		lbl := fmt.Sprintf("%q (%t): %q", tc.lit, tc.ic, tc.in)
@@ -116,8 +118,8 @@ func TestParseLitMatcher(t *testing.T) {
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("%s: want %v, got %v", lbl, tc.out, got)
 		}
-		if ok != tc.match {
-			t.Errorf("%s: want match? %t, got %t", lbl, tc.match, ok)
+		if ok != match {
+			t.Errorf("%s: want match? %t, got %t", lbl, match, ok)
 		}
 		if p.pt.offset != len(tc.out) {
 			t.Errorf("%s: want offset %d, got %d", lbl, len(tc.out), p.pt.offset)
@@ -158,6 +160,13 @@ func TestParseCharClassMatcher(t *testing.T) {
 		{in: "b", val: "[^a]i", iv: true, ic: true, chars: []rune{'a'}, out: []byte("b")},
 		{in: "B", val: "[^a]i", iv: true, ic: true, chars: []rune{'a'}, out: []byte("B")},
 
+		{in: "←", val: "[a]", chars: []rune{'a'}, out: nil},
+		{in: "←", val: "[a]i", ic: true, chars: []rune{'a'}, out: nil},
+		{in: "←", val: "[a]i", ic: true, chars: []rune{'a'}, out: nil},
+		{in: "←", val: "[^a]", chars: []rune{'a'}, iv: true, out: []byte("←")},
+		{in: "←", val: "[^a]i", iv: true, ic: true, chars: []rune{'a'}, out: []byte("←")},
+		{in: "←", val: "[^a]i", iv: true, ic: true, chars: []rune{'a'}, out: []byte("←")},
+
 		{in: "b", val: "[a-c]", ranges: []rune{'a', 'c'}, out: []byte("b")},
 		{in: "B", val: "[a-c]", ranges: []rune{'a', 'c'}, out: nil},
 		{in: "b", val: "[a-c]i", ic: true, ranges: []rune{'a', 'c'}, out: []byte("b")},
@@ -168,10 +177,48 @@ func TestParseCharClassMatcher(t *testing.T) {
 		{in: "B", val: "[^a-c]i", iv: true, ic: true, ranges: []rune{'a', 'c'}, out: nil},
 		{in: "z", val: "[^a-c]i", iv: true, ic: true, chars: []rune{'a', 'c'}, out: []byte("z")},
 
+		{in: "∝", val: "[a-c]", ranges: []rune{'a', 'c'}, out: nil},
+		{in: "∝", val: "[a-c]", ranges: []rune{'a', 'c'}, out: nil},
+		{in: "∝", val: "[a-c]i", ic: true, ranges: []rune{'a', 'c'}, out: nil},
+		{in: "∝", val: "[a-c]i", ic: true, ranges: []rune{'a', 'c'}, out: nil},
+		{in: "∝", val: "[^a-c]", ranges: []rune{'a', 'c'}, iv: true, out: []byte("∝")},
+		{in: "∝", val: "[^a-c]", ranges: []rune{'a', 'c'}, iv: true, out: []byte("∝")},
+		{in: "∝", val: "[^a-c]i", iv: true, ic: true, ranges: []rune{'a', 'c'}, out: []byte("∝")},
+		{in: "∝", val: "[^a-c]i", iv: true, ic: true, ranges: []rune{'a', 'c'}, out: []byte("∝")},
+		{in: "∝", val: "[^a-c]i", iv: true, ic: true, chars: []rune{'a', 'c'}, out: []byte("∝")},
+
 		{in: "b", val: "[c-a]", ranges: []rune{'c', 'a'}, out: nil},
 		{in: "B", val: "[c-a]i", ic: true, ranges: []rune{'c', 'a'}, out: nil},
 		{in: "B", val: "[^c-a]", iv: true, ranges: []rune{'c', 'a'}, out: []byte("B")},
 		{in: "B", val: "[^c-a]i", ic: true, iv: true, ranges: []rune{'c', 'a'}, out: []byte("B")},
+
+		{in: "b", val: "[\\pL]", classes: []string{"L"}, out: []byte("b")},
+		{in: "b", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: []byte("b")},
+		{in: "B", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: []byte("B")},
+		{in: "b", val: "[^\\pL]", iv: true, classes: []string{"L"}, out: nil},
+		{in: "b", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: nil},
+		{in: "B", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: nil},
+
+		{in: "1", val: "[\\pL]", classes: []string{"L"}, out: nil},
+		{in: "1", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: nil},
+		{in: "1", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: nil},
+		{in: "1", val: "[^\\pL]", iv: true, classes: []string{"L"}, out: []byte("1")},
+		{in: "1", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: []byte("1")},
+		{in: "1", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: []byte("1")},
+
+		{in: "ƛ", val: "[\\pL]", classes: []string{"L"}, out: []byte("ƛ")},
+		{in: "ƛ", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: []byte("ƛ")},
+		{in: "ƛ", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: []byte("ƛ")},
+		{in: "ƛ", val: "[^\\pL]", iv: true, classes: []string{"L"}, out: nil},
+		{in: "ƛ", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: nil},
+		{in: "ƛ", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: nil},
+
+		{in: "←a", val: "[\\pL]", classes: []string{"L"}, out: nil},
+		{in: "←a", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: nil},
+		{in: "←a", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: nil},
+		{in: "←a", val: "[^\\pL]", iv: true, classes: []string{"L"}, out: []byte("←")},
+		{in: "←a", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: []byte("←")},
+		{in: "←a", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: []byte("←")},
 	}
 
 	for _, tc := range cases {
