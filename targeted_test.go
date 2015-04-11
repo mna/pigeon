@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -63,6 +64,58 @@ func TestParseAnyMatcher(t *testing.T) {
 		}
 		if p.pt.offset != len(tc.out) {
 			t.Errorf("%q: want offset %d, got %d", tc.in, len(tc.out), p.pt.offset)
+		}
+	}
+}
+
+func TestParseLitMatcher(t *testing.T) {
+	cases := []struct {
+		in    string
+		lit   string
+		ic    bool
+		out   []byte
+		match bool
+	}{
+		{"", "", false, []byte{}, true}, // empty literal always matches
+		{"", "", true, []byte{}, true},  // empty literal always matches
+		{"a", "", false, []byte{}, true},
+		{"a", "", true, []byte{}, true},
+		{"a", "a", false, []byte("a"), true},
+		{"a", "a", true, []byte("a"), true},
+		{"a", "A", false, nil, false},
+		{"a", "a", true, []byte("a"), true}, // ignored case literal is always generated lowercase
+		{"A", "a", true, []byte("A"), true},
+		{"b", "a", false, nil, false},
+		{"b", "a", true, nil, false},
+		{"abc", "ab", false, []byte("ab"), true},
+		{"abc", "ab", true, []byte("ab"), true},
+		{"ab", "abc", false, nil, false},
+		{"ab", "abc", true, nil, false},
+		{"\u2190a", "\u2190", false, []byte("\u2190"), true},
+		{"\u2190a", "\u2190", true, []byte("\u2190"), true},
+	}
+
+	for _, tc := range cases {
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		var want interface{}
+		if tc.out != nil {
+			want = tc.out
+		}
+		lbl := fmt.Sprintf("%q (%t): %q", tc.lit, tc.ic, tc.in)
+
+		got, ok := p.parseLitMatcher(&litMatcher{val: tc.lit, ignoreCase: tc.ic})
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%s: want %v, got %v", lbl, tc.out, got)
+		}
+		if ok != tc.match {
+			t.Errorf("%s: want match? %t, got %t", lbl, tc.match, ok)
+		}
+		if p.pt.offset != len(tc.out) {
+			t.Errorf("%s: want offset %d, got %d", lbl, len(tc.out), p.pt.offset)
 		}
 	}
 }
