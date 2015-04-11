@@ -14,34 +14,39 @@ import (
 	"github.com/PuerkitoBio/pigeon/builder"
 )
 
+var exit = os.Exit
+
 func main() {
+	fs := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
 	// define command-line flags
 	var (
-		cacheFlag     = flag.Bool("cache", false, "cache parsing results")
-		dbgFlag       = flag.Bool("debug", false, "set debug mode")
-		shortHelpFlag = flag.Bool("h", false, "show help page")
-		longHelpFlag  = flag.Bool("help", false, "show help page")
-		noRecoverFlag = flag.Bool("no-recover", false, "do not recover from panic")
-		outputFlag    = flag.String("o", "", "output file, defaults to stdout")
-		recvrNmFlag   = flag.String("receiver-name", "c", "receiver name for the generated methods")
-		noBuildFlag   = flag.Bool("x", false, "do not build, only parse")
+		cacheFlag     = fs.Bool("cache", false, "cache parsing results")
+		dbgFlag       = fs.Bool("debug", false, "set debug mode")
+		shortHelpFlag = fs.Bool("h", false, "show help page")
+		longHelpFlag  = fs.Bool("help", false, "show help page")
+		noRecoverFlag = fs.Bool("no-recover", false, "do not recover from panic")
+		outputFlag    = fs.String("o", "", "output file, defaults to stdout")
+		recvrNmFlag   = fs.String("receiver-name", "c", "receiver name for the generated methods")
+		noBuildFlag   = fs.Bool("x", false, "do not build, only parse")
 	)
-	flag.Usage = usage
-	flag.Parse()
+
+	fs.Usage = usage
+	fs.Parse(os.Args[1:])
 
 	if *shortHelpFlag || *longHelpFlag {
-		flag.Usage()
-		os.Exit(0)
+		fs.Usage()
+		exit(0)
 	}
 
-	if flag.NArg() > 1 {
-		argError(1, "expected one argument, got %q", strings.Join(flag.Args(), " "))
+	if fs.NArg() > 1 {
+		argError(1, "expected one argument, got %q", strings.Join(fs.Args(), " "))
 	}
 
 	// get input source
 	infile := ""
-	if flag.NArg() == 1 {
-		infile = flag.Arg(0)
+	if fs.NArg() == 1 {
+		infile = fs.Arg(0)
 	}
 	nm, rc := input(infile)
 	defer rc.Close()
@@ -50,7 +55,7 @@ func main() {
 	g, err := ParseReader(nm, rc, Debug(*dbgFlag), Memoize(*cacheFlag), Recover(!*noRecoverFlag))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "parse error(s):\n", err)
-		os.Exit(3)
+		exit(3)
 	}
 
 	if !*noBuildFlag {
@@ -61,7 +66,7 @@ func main() {
 		curNmOpt := builder.ReceiverName(*recvrNmFlag)
 		if err := builder.BuildParser(out, g.(*ast.Grammar), curNmOpt); err != nil {
 			fmt.Fprintln(os.Stderr, "build error: ", err)
-			os.Exit(5)
+			exit(5)
 		}
 	}
 }
@@ -114,11 +119,11 @@ func usage() {
 
 // argError prints an error message to stderr, prints the command usage
 // and exits with the specified exit code.
-func argError(exit int, msg string, args ...interface{}) {
+func argError(exitCode int, msg string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, msg, args...)
 	fmt.Fprintln(os.Stderr)
-	flag.Usage()
-	os.Exit(exit)
+	usage()
+	exit(exitCode)
 }
 
 // input gets the name and reader to get input text from.
@@ -129,7 +134,7 @@ func input(filename string) (nm string, rc io.ReadCloser) {
 		f, err := os.Open(filename)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			os.Exit(2)
+			exit(2)
 		}
 		inf = f
 		nm = filename
@@ -145,7 +150,7 @@ func output(filename string) io.WriteCloser {
 		f, err := os.Create(filename)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			os.Exit(4)
+			exit(4)
 		}
 		out = f
 	}
