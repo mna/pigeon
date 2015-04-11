@@ -424,3 +424,58 @@ func TestParseOneOrMoreExpr(t *testing.T) {
 		}
 	}
 }
+
+func TestParseSeqExpr(t *testing.T) {
+	cases := []struct {
+		in   string
+		lits []string
+		out  []string
+	}{
+		{"", nil, []string{}}, // empty seq (impossible case via the parser) always matches
+		{"", []string{"a"}, nil},
+		{"a", []string{"a"}, []string{"a"}},
+		{"a", []string{"a", "b"}, nil},
+		{"abc", []string{"a", "b"}, []string{"a", "b"}},
+		{"abc", []string{"a", "b", "c"}, []string{"a", "b", "c"}},
+		{"ab", []string{"a", "b", "c"}, nil},
+	}
+
+	for _, tc := range cases {
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		var want interface{}
+		var match bool
+		if tc.out != nil {
+			var vals []interface{}
+			for _, v := range tc.out {
+				vals = append(vals, []byte(v))
+			}
+			want = vals
+			match = true
+		}
+		lbl := fmt.Sprintf("%v: %q", tc.lits, tc.in)
+
+		lits := make([]interface{}, len(tc.lits))
+		for i, l := range tc.lits {
+			lits[i] = &litMatcher{val: l}
+		}
+
+		got, ok := p.parseSeqExpr(&seqExpr{exprs: lits})
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%s: want %#v, got %#v", lbl, want, got)
+		}
+		if ok != match {
+			t.Errorf("%s: want match? %t, got %t", lbl, match, ok)
+		}
+		wantOffset := 0
+		for _, s := range tc.out {
+			wantOffset += len(s)
+		}
+		if p.pt.offset != wantOffset {
+			t.Errorf("%s: want offset %d, got %d", lbl, wantOffset, p.pt.offset)
+		}
+	}
+}
