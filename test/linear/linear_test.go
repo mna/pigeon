@@ -16,6 +16,8 @@ func TestLinearTime(t *testing.T) {
 		1 << 10,   // 1Kb
 		10 << 10,  // 10Kb
 		100 << 10, // 100Kb
+		// TODO : 1Mb overflows the stack
+		//1 << 20,
 	}
 	for _, sz := range sizes {
 		r := io.LimitReader(rand.Reader, sz)
