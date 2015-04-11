@@ -479,3 +479,6 @@ func TestParseSeqExpr(t *testing.T) {
 		}
 	}
 }
+
+func TestParseRuleRefExpr(t *testing.T) {
+}
