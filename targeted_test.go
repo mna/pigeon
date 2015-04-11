@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestParseNoRule(t *testing.T) {
 	g := &grammar{}
@@ -22,5 +25,44 @@ func TestParseNoRule(t *testing.T) {
 	}
 	if pe.Inner != errNoRule {
 		t.Fatalf("want error %v, got %v", errNoRule, el[0])
+	}
+}
+
+func TestParseAnyMatcher(t *testing.T) {
+	cases := []struct {
+		in    string
+		out   []byte
+		match bool
+	}{
+		{"", nil, false},
+		{"a", []byte("a"), true},
+		{"\u2190", []byte("\u2190"), true},
+		{"ab", []byte("a"), true},
+		{"\u2190\U00001100", []byte("\u2190"), true},
+		{"\x0d", []byte("\x0d"), true},
+		{"\xfa", nil, false},
+		{"\nab", []byte("\n"), true},
+	}
+
+	for _, tc := range cases {
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		var want interface{}
+		if tc.out != nil {
+			want = tc.out
+		}
+		got, ok := p.parseAnyMatcher(&anyMatcher{})
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%q: want %v, got %v", tc.in, tc.out, got)
+		}
+		if ok != tc.match {
+			t.Errorf("%q: want match? %t, got %t", tc.in, tc.match, ok)
+		}
+		if p.pt.offset != len(tc.out) {
+			t.Errorf("%q: want offset %d, got %d", tc.in, len(tc.out), p.pt.offset)
+		}
 	}
 }
