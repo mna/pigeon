@@ -168,8 +168,10 @@ file:1:26 (25): rule ShortUnicodeEscape: invalid Unicode escape`,
 }
 
 func TestInvalidParseCases(t *testing.T) {
+	memo := false
+again:
 	for tc, exp := range invalidParseCases {
-		_, err := Parse("file", []byte(tc))
+		_, err := Parse("file", []byte(tc), Memoize(memo))
 		if err == nil {
 			t.Errorf("%q: want error, got none", tc)
 			continue
@@ -177,6 +179,10 @@ func TestInvalidParseCases(t *testing.T) {
 		if err.Error() != exp {
 			t.Errorf("%q: want \n%s\n, got \n%s\n", tc, exp, err)
 		}
+	}
+	if !memo {
+		memo = true
+		goto again
 	}
 }
 
@@ -411,6 +417,8 @@ var validParseCases = map[string]*ast.Grammar{
 }
 
 func TestValidParseCases(t *testing.T) {
+	memo := false
+again:
 	for tc, exp := range validParseCases {
 		got, err := Parse("", []byte(tc))
 		if err != nil {
@@ -423,5 +431,9 @@ func TestValidParseCases(t *testing.T) {
 			continue
 		}
 		compareGrammars(t, tc, exp, gotg)
+	}
+	if !memo {
+		memo = true
+		goto again
 	}
 }
