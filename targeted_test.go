@@ -784,3 +784,70 @@ func TestParseChoiceExpr(t *testing.T) {
 		}
 	}
 }
+
+func TestParseActionExpr(t *testing.T) {
+	cases := []struct {
+		in  string
+		lit string
+		v   interface{}
+		err error
+	}{
+		{"", "", 1, nil}, // empty string always matches
+		{"", "", 1, io.EOF},
+		{"", "a", nil, nil},
+		{"a", "a", 1, nil},
+		{"a", "a", 1, io.EOF},
+		{"ab", "a", 1, nil},
+		{"ab", "a", 1, io.EOF},
+		{"ba", "a", nil, nil},
+	}
+
+	for _, tc := range cases {
+		called := false
+		fn := func(_ *parser) (interface{}, error) {
+			called = true
+			return tc.v, tc.err
+		}
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		lbl := fmt.Sprintf("%q: %q", tc.in, tc.lit)
+
+		match := tc.v != nil
+
+		got, ok := p.parseActionExpr(&actionExpr{run: fn, expr: &litMatcher{val: tc.lit}})
+		if ok != match {
+			t.Errorf("%s: want match? %t, got %t", lbl, match, ok)
+		}
+		if !reflect.DeepEqual(got, tc.v) {
+			t.Errorf("%s: want %#v, got %#v", lbl, tc.v, got)
+		}
+		if match != called {
+			t.Errorf("%s: want action code to be called? %t, got %t", lbl, match, called)
+		}
+
+		el := *p.errs
+		wantn := 0
+		if tc.err != nil {
+			wantn = 1
+		}
+		if len(el) != wantn {
+			t.Errorf("%s: want %d error, got %d", lbl, wantn, len(el))
+		} else if wantn == 1 {
+			ie := el[0].(*parserError).Inner
+			if ie != tc.err {
+				t.Errorf("%s: want error %v, got %v", lbl, tc.err, ie)
+			}
+		}
+
+		wantOffset := 0
+		if match {
+			wantOffset = len(tc.lit)
+		}
+		if p.pt.offset != wantOffset {
+			t.Errorf("%s: want offset %d, got %d", lbl, wantOffset, p.pt.offset)
+		}
+	}
+}
