@@ -498,3 +498,73 @@ func TestParseRuleRefExpr(t *testing.T) {
 		t.Fatal("want error, got none")
 	}
 }
+
+func TestParseNotExpr(t *testing.T) {
+	cases := []struct {
+		in    string
+		lit   string
+		match bool
+	}{
+		{"", "", false},
+		{"", "a", true},
+		{"a", "a", false},
+		{"b", "a", true},
+		{"ab", "a", false},
+		{"ab", "ab", false},
+		{"ab", "abc", true},
+		{"abc", "abc", false},
+		{"abc", "ab", false},
+		{"abc", "ac", true},
+	}
+	for _, tc := range cases {
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		lbl := fmt.Sprintf("%q: %q", tc.lit, tc.in)
+
+		_, ok := p.parseNotExpr(&notExpr{expr: &litMatcher{val: tc.lit}})
+		if ok != tc.match {
+			t.Errorf("%s: want match? %t, got %t", lbl, tc.match, ok)
+		}
+		if p.pt.offset != 0 {
+			t.Errorf("%s: want offset %d, got %d", lbl, 0, p.pt.offset)
+		}
+	}
+}
+
+func TestParseAndExpr(t *testing.T) {
+	cases := []struct {
+		in    string
+		lit   string
+		match bool
+	}{
+		{"", "", true},
+		{"", "a", false},
+		{"a", "a", true},
+		{"b", "a", false},
+		{"ab", "a", true},
+		{"ab", "ab", true},
+		{"ab", "abc", false},
+		{"abc", "abc", true},
+		{"abc", "ab", true},
+		{"abc", "ac", false},
+	}
+	for _, tc := range cases {
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		lbl := fmt.Sprintf("%q: %q", tc.lit, tc.in)
+
+		_, ok := p.parseAndExpr(&andExpr{expr: &litMatcher{val: tc.lit}})
+		if ok != tc.match {
+			t.Errorf("%s: want match? %t, got %t", lbl, tc.match, ok)
+		}
+		if p.pt.offset != 0 {
+			t.Errorf("%s: want offset %d, got %d", lbl, 0, p.pt.offset)
+		}
+	}
+}
