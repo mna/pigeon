@@ -7,8 +7,13 @@ import (
 )
 
 func TestMain(t *testing.T) {
+	stdout, stderr := os.Stdout, os.Stderr
+	os.Stdout, _ = os.Open(os.DevNull)
+	os.Stderr, _ = os.Open(os.DevNull)
 	defer func() {
 		exit = os.Exit
+		os.Stdout = stdout
+		os.Stderr = stderr
 	}()
 	exit = func(code int) {
 		panic(code)

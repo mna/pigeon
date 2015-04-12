@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"reflect"
 	"testing"
 	"unicode"
@@ -563,6 +564,110 @@ func TestParseAndExpr(t *testing.T) {
 		if ok != tc.match {
 			t.Errorf("%s: want match? %t, got %t", lbl, tc.match, ok)
 		}
+		if p.pt.offset != 0 {
+			t.Errorf("%s: want offset %d, got %d", lbl, 0, p.pt.offset)
+		}
+	}
+}
+
+func TestParseNotCodeExpr(t *testing.T) {
+	cases := []struct {
+		in  string
+		b   bool
+		err error
+	}{
+		{"", true, nil},
+		{"", true, io.EOF},
+		{"", false, nil},
+		{"", false, io.EOF},
+		{"a", true, nil},
+		{"a", true, io.EOF},
+		{"a", false, nil},
+		{"a", false, io.EOF},
+	}
+
+	for _, tc := range cases {
+		fn := func(_ *parser) (bool, error) {
+			return tc.b, tc.err
+		}
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		lbl := fmt.Sprintf("%q: %t-%t", tc.in, tc.b, tc.err == nil)
+
+		_, ok := p.parseNotCodeExpr(&notCodeExpr{run: fn})
+		if ok != !tc.b {
+			t.Errorf("%s: want match? %t, got %t", lbl, !tc.b, ok)
+		}
+
+		el := *p.errs
+		wantn := 0
+		if tc.err != nil {
+			wantn = 1
+		}
+		if len(el) != wantn {
+			t.Errorf("%s: want %d error, got %d", lbl, wantn, len(el))
+		} else if wantn == 1 {
+			ie := el[0].(*parserError).Inner
+			if ie != tc.err {
+				t.Errorf("%s: want error %v, got %v", lbl, tc.err, ie)
+			}
+		}
+
+		if p.pt.offset != 0 {
+			t.Errorf("%s: want offset %d, got %d", lbl, 0, p.pt.offset)
+		}
+	}
+}
+
+func TestParseAndCodeExpr(t *testing.T) {
+	cases := []struct {
+		in  string
+		b   bool
+		err error
+	}{
+		{"", true, nil},
+		{"", true, io.EOF},
+		{"", false, nil},
+		{"", false, io.EOF},
+		{"a", true, nil},
+		{"a", true, io.EOF},
+		{"a", false, nil},
+		{"a", false, io.EOF},
+	}
+
+	for _, tc := range cases {
+		fn := func(_ *parser) (bool, error) {
+			return tc.b, tc.err
+		}
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		lbl := fmt.Sprintf("%q: %t-%t", tc.in, tc.b, tc.err == nil)
+
+		_, ok := p.parseAndCodeExpr(&andCodeExpr{run: fn})
+		if ok != tc.b {
+			t.Errorf("%s: want match? %t, got %t", lbl, tc.b, ok)
+		}
+
+		el := *p.errs
+		wantn := 0
+		if tc.err != nil {
+			wantn = 1
+		}
+		if len(el) != wantn {
+			t.Errorf("%s: want %d error, got %d", lbl, wantn, len(el))
+		} else if wantn == 1 {
+			ie := el[0].(*parserError).Inner
+			if ie != tc.err {
+				t.Errorf("%s: want error %v, got %v", lbl, tc.err, ie)
+			}
+		}
+
 		if p.pt.offset != 0 {
 			t.Errorf("%s: want offset %d, got %d", lbl, 0, p.pt.offset)
 		}
