@@ -673,3 +673,58 @@ func TestParseAndCodeExpr(t *testing.T) {
 		}
 	}
 }
+
+func TestLabeledExpr(t *testing.T) {
+	cases := []struct {
+		in  string
+		lit string
+		out []byte
+	}{
+		{"", "", []byte{}},
+		{"", "a", nil},
+		{"a", "a", []byte("a")},
+		{"a", "ab", nil},
+		{"ab", "a", []byte("a")},
+		{"ab", "ab", []byte("ab")},
+		{"ab", "abc", nil},
+		{"abc", "ab", []byte("ab")},
+	}
+
+	for _, tc := range cases {
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+		p.pushV()
+
+		var want interface{}
+		var match bool
+		if tc.out != nil {
+			match = true
+			want = tc.out
+		}
+		lbl := fmt.Sprintf("%q: %q", tc.lit, tc.in)
+
+		got, ok := p.parseLabeledExpr(&labeledExpr{label: "l", expr: &litMatcher{val: tc.lit}})
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%s: want %v, got %v", lbl, tc.out, got)
+		}
+		if ok != match {
+			t.Errorf("%s: want match? %t, got %t", lbl, match, ok)
+		} else {
+			// must be 1 var set on the stack
+			if len(p.vstack) != 1 {
+				t.Errorf("%s: want %d var sets on the stack, got %d", lbl, 1, len(p.vstack))
+			} else {
+				vs := p.vstack[0]
+				if !reflect.DeepEqual(vs["l"], got) {
+					t.Errorf("%s: want %v on the stack for this label, got %v", lbl, got, vs["l"])
+				}
+			}
+		}
+
+		if p.pt.offset != len(tc.out) {
+			t.Errorf("%s: want offset %d, got %d", lbl, len(tc.out), p.pt.offset)
+		}
+	}
+}
