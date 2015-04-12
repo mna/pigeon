@@ -674,7 +674,7 @@ func TestParseAndCodeExpr(t *testing.T) {
 	}
 }
 
-func TestLabeledExpr(t *testing.T) {
+func TestParseLabeledExpr(t *testing.T) {
 	cases := []struct {
 		in  string
 		lit string
@@ -723,6 +723,62 @@ func TestLabeledExpr(t *testing.T) {
 			}
 		}
 
+		if p.pt.offset != len(tc.out) {
+			t.Errorf("%s: want offset %d, got %d", lbl, len(tc.out), p.pt.offset)
+		}
+	}
+}
+
+func TestParseChoiceExpr(t *testing.T) {
+	cases := []struct {
+		in   string
+		lits []string
+		out  []byte
+	}{
+		{"", nil, nil}, // empty choice (impossible case via the parser)
+
+		{"", []string{"a"}, nil},
+		{"a", []string{"a"}, []byte("a")},
+		{"a", []string{"b"}, nil},
+		{"ab", []string{"b"}, nil},
+		{"ba", []string{"b"}, []byte("b")},
+		{"a", []string{"a", "b"}, []byte("a")},
+		{"a", []string{"b", "a"}, []byte("a")},
+		{"ab", []string{"a", "b"}, []byte("a")},
+		{"ab", []string{"b", "a"}, []byte("a")},
+		{"cb", []string{"a", "b"}, nil},
+		{"cb", []string{"b", "a"}, nil},
+		{"abcd", []string{"abc", "ab", "a"}, []byte("abc")},
+		{"abcd", []string{"a", "ab", "abc"}, []byte("a")},
+		{"bcd", []string{"a", "ab", "abc"}, nil},
+	}
+
+	for _, tc := range cases {
+		p := newParser("", []byte(tc.in))
+
+		// advance to the first rune
+		p.read()
+
+		var want interface{}
+		var match bool
+		if tc.out != nil {
+			want = tc.out
+			match = true
+		}
+		lbl := fmt.Sprintf("%v: %q", tc.lits, tc.in)
+
+		lits := make([]interface{}, len(tc.lits))
+		for i, l := range tc.lits {
+			lits[i] = &litMatcher{val: l}
+		}
+
+		got, ok := p.parseChoiceExpr(&choiceExpr{alternatives: lits})
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%s: want %#v, got %#v", lbl, want, got)
+		}
+		if ok != match {
+			t.Errorf("%s: want match? %t, got %t", lbl, match, ok)
+		}
 		if p.pt.offset != len(tc.out) {
 			t.Errorf("%s: want offset %d, got %d", lbl, len(tc.out), p.pt.offset)
 		}
