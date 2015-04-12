@@ -481,4 +481,20 @@ func TestParseSeqExpr(t *testing.T) {
 }
 
 func TestParseRuleRefExpr(t *testing.T) {
+	p := newParser("", []byte(""))
+
+	func() {
+		defer func() {
+			if e := recover(); e != nil {
+				return
+			}
+			t.Fatal("want panic, got none")
+		}()
+		p.parseRuleRefExpr(&ruleRefExpr{})
+	}()
+
+	p.parseRuleRefExpr(&ruleRefExpr{name: "a"})
+	if p.errs.err() == nil {
+		t.Fatal("want error, got none")
+	}
 }
