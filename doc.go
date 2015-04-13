@@ -18,7 +18,7 @@ PEG theory by Bryan Ford is also an important reference [3].
 
 Command-line usage
 
-The pigeon tool must be called with a PEG grammar file as defined
+The pigeon tool must be called with PEG input as defined
 by the accepted PEG syntax below. The grammar may be provided by a
 file or read from stdin. The generated parser is written to stdout
 by default.
@@ -54,8 +54,9 @@ the output code:
 The goimports tool can be installed with:
 	go get golang.org/x/tools/cmd/goimports
 
-If the code blocks in the grammar are golint- and go vet-compliant, then
-the resulting generated code will also be golint- and go vet-compliant.
+If the code blocks in the grammar (see below, section "Code block") are golint-
+and go vet-compliant, then the resulting generated code will also be golint-
+and go vet-compliant.
 
 The generated code doesn't use any third-party dependency unless code blocks
 in the grammar require such a dependency.
