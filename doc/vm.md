@@ -15,6 +15,7 @@ type Matcher interface {
     Match(savepointReader) bool
 }
 
+// interface name and methods TBD.
 type savepointReader interface {
     current() savepoint
     advance() 
@@ -47,3 +48,15 @@ On scope exit, if the value for that scope is not nil or an empty map, then the 
 ### Memoization
 
 Memoization remains an option on the parser/VM. When an expression returns to its caller index, the values it produced will be stored, along with the starting parser position, the ending position and the index of the first instruction of this expression. Anytime a JUMP would occur to that expression for the same parser position, the VM would bypass the JUMP and instead put the memoized values on the stack directly, advance the parser at the saved ending position and resume execution at the caller's return instruction.
+
+### Error reporting
+
+One of the goals of this rewrite as a VM is to provide better error reporting, namely using the [farthest failure position][ffp] heuristic. The VM will track the FFP along with the instruction of the expression that failed the farthest so better error messages can be returned (the position, rule identifier or display name, and possibly the expected terminal or list of terminals).
+
+Panic recovery would work the same as now, with an option to disable it to get the stack trace.
+
+### Debugging
+
+The debug option would be supported as it is now, although the output will likely be quite different. Exact logging TBD.
+
+[ffp]: http://arxiv.org/abs/1405.6646
