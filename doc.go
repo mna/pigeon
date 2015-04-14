@@ -362,7 +362,8 @@ in future versions.
 
 The "stability" of the API attempts to make a similar guarantee as the
 Go 1 compatibility [4]. The following lists what part of the
-pigeon code falls under that guarantee:
+current pigeon code falls under that guarantee (features may be added in
+the future):
 
     - The pigeon command-line flags and arguments: those will not be removed
     and will maintain the same semantics.
@@ -371,6 +372,15 @@ pigeon code falls under that guarantee:
     documentation of this API on a generated parser.
 
     - The PEG syntax, as documented above.
+
+    - The code blocks (except the initializer) will always be generated as
+    methods on the *current type, and this type is guaranteed to have
+    the fields pos (type position) and text (type []byte). There are no
+    guarantees on other fields and methods of this type.
+
+    - The position type will always have the fields line, col and offset,
+    all defined as int. There are no guarantees on other fields and methods
+    of this type.
 
     - The type of the error value returned by the Parse* functions, when
     not nil, will always be errList defined as a []error. There are no
