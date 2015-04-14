@@ -30,17 +30,20 @@ Code blocks would still get generated as methods on the `*current` type, but the
 * `athunks` : list of action method thunks, signature `func() (interface{}, error)`
 * `bthunks` : list of predicate method thunks, signature `func() (bool, error)`
 
+CALL opcodes would have an index argument indicating which thunk to call (e.g. `CALLA 2` or `CALLB 0`).
+
 ### Rule name reference
 
 The `parser.rules` map of names to rule nodes would not be required, a rule reference would be simply a jump to the opcode instruction of the start of that rule.
 
-The `parser.rstack` slice of rules serves only to get the rule's identifier (or display name) in error messages. In the VM implementation, a simple mapping of instruction index to rule identifier (or display name) saves memory and achieves the same purpose.
+The `parser.rstack` slice of rules serves only to get the rule's identifier (or display name) in error messages. In the VM implementation, a simple mapping of instruction index to rule identifier (or display name) saves memory and achieves the same purpose. The exact way to do the mapping is TBD.
 
 ### Variable sets (scope of labels)
 
-The `parser.vstack` field holds the stack of variable sets - a mapping of label name to value that applies (is in scope) at a given position in the parser. In the VM implementation, a counter would keep track of the current scope depth, and the variable sets would be lazily created only when the first label in a scope is encountered. It would be stored in a `map[int]map[string]interface{}`, where the `int` is the scope depth.
+The `parser.vstack` field holds the stack of variable sets - a mapping of label name to value that applies ("is in scope") at a given position in the parser. In the VM implementation, a counter would keep track of the current scope depth, and the variable sets would be lazily created only when the first label in a scope is encountered. It would be stored in a `[]map[string]interface{}`, where the index is the scope depth.
 
-On scope exit, if the value for that scope is not nil or an empty map, then the key would be deleted to avoid corruption if the parser goes back to that scope level.
+On scope exit, if the value for that scope is not nil or an empty map, then the map would be deleted to avoid corruption if the parser goes back to that scope level.
 
 ### Memoization
 
+Memoization remains an option on the parser/VM. When an expression returns to its caller index, the values it produced will be stored, along with the starting parser position, the ending position and the index of the first instruction of this expression. Anytime a JUMP would occur to that expression for the same parser position, the VM would bypass the JUMP and instead put the memoized values on the stack directly, advance the parser at the saved ending position and resume execution at the caller's return instruction.
