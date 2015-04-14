@@ -349,19 +349,19 @@ needs to be thought out when designing the grammar.
 
 API stability
 
-Parsers generated with pigeon have user-provided code mixed with this
-package's code in the same final package, meaning that there is no package
-boundary in the resulting code that clearly defines what is exported and
-what is unexported. Unexported symbols that are meant to be implementation
-details in pigeon are available to user code - but that doesn't mean it
-is a good idea to take advantage of this.
+Generated parsers have user-provided code mixed with pigeon code
+in the same package, so there is no package
+boundary in the resulting code to prevent access to unexported symbols.
+What is meant to be implementation
+details in pigeon is also available to user code - which doesn't mean
+it should be used.
 
 For this reason, it is important to precisely define what is intended to be
-the exposed API of pigeon, the parts that will be supported and stable
+the supported API of pigeon, the parts that will be stable
 in future versions.
 
 The "stability" of the API attempts to make a similar guarantee as the
-Go 1 compatibility [4]. The rest of this section lists what part of the
+Go 1 compatibility [4]. The following lists what part of the
 pigeon code falls under that guarantee:
 
     - The pigeon command-line flags and arguments: those will not be removed
