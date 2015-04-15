@@ -18,7 +18,7 @@ type Matcher interface {
 // interface name and methods TBD.
 type savepointReader interface {
     current() savepoint
-    advance() 
+    advance()
 }
 ```
 
@@ -58,5 +58,54 @@ Panic recovery would work the same as now, with an option to disable it to get t
 ### Debugging
 
 The debug option would be supported as it is now, although the output will likely be quite different. Exact logging TBD.
+
+## Opcodes
+
+Each rule and expression execution (a rule is really a specific kind of expression, the RuleRefExpr, and the starting rule is a RuleRefExpr where the identifier is that of the first rule in the grammar) perform the following steps:
+
+* Pop the return instruction index from the stack, store it locally;
+* Push the current parser position to the stack;
+* Execute the match/expression;
+* Pop the current parser position from the stack;
+* Push the boolean match result;
+* Push the result value or nil;
+* Jump to the return instruction index.
+
+The VM defines the following registers (?):
+
+* pc : the program counter, increments on each instruction, `JUMP` sets it directly.
+* pt : the point, a position. `PUSH pt` pushes its value onto the stack, `POP pt` pops a value from the stack and assigns it to the register and `SET pt` sets the parser's current position to the value of the pt register.
+
+The following opcodes are required:
+
+* `JUMP i` where `i` is the instruction index. Runs the instruction at `i` as the next instruction.
+* `EXIT` pops the return value and the match boolean from the stack and terminates the VM execution, returning those two values.
+* `PUSH p` pushes the current parser position to the stack.
+
+
+## Examples
+
+Given the following grammar:
+
+```
+A <- 'a' / 'b' !'a' / B
+B <- 'c' .+ { code }
+```
+
+It would get translated to this:
+
+* Matchers: 'a', 'b', 'c', .
+* Thunks: athunks[0]: { code }
+
+And the following opcodes:
+
+0: PUSH 2 : push return index 2
+1: GOTO 5 : goto instruction 3
+2: POP v : pop top stack value into register v
+3: POP b : pop top stack value into register b
+4: EXIT : exit VM, return v and b
+5: [Rule A] POP r : pop top stack value into register r
+6:          PUSHPT : push current parser position
+7:          MATCH n : run matcher at index n ('a')
 
 [ffp]: http://arxiv.org/abs/1405.6646
