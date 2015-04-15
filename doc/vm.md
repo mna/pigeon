@@ -99,13 +99,14 @@ It would get translated to this:
 
 And the following opcodes:
 
-0: PUSH 2 : push return index 2
-1: GOTO 5 : goto instruction 3
-2: POP v : pop top stack value into register v
-3: POP b : pop top stack value into register b
-4: EXIT : exit VM, return v and b
-5: [Rule A] POP r : pop top stack value into register r
-6:          PUSHPT : push current parser position
-7:          MATCH n : run matcher at index n ('a')
+.: PUSHN 2 : push number, the return index 2
+.: GOTO 5 : goto instruction 3
+.: POP2 : pop v and b
+.: EXIT : exit VM, return v and b
+.: [Rule A] POP r : pop top stack value into register r
+.:          PUSHPT : push current parser position
+.:          MATCH n : run matcher at index n ('a'), push b, push v (?)
+.:          POP pt
+.:          RETURNIF b
 
 [ffp]: http://arxiv.org/abs/1405.6646
