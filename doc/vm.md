@@ -59,6 +59,10 @@ Panic recovery would work the same as now, with an option to disable it to get t
 
 The debug option would be supported as it is now, although the output will likely be quite different. Exact logging TBD.
 
+### API
+
+The API covered by the API stability guarantee in the doc will remain stable. Internal symbols not part of this API should use a prefix-naming-scheme to avoid clashes with user-defined code (e.g. π?). The accepted PEG syntax remains exactly the same, with the same semantics.
+
 ## Opcodes
 
 Each rule and expression execution (a rule is really a specific kind of expression, the RuleRefExpr, and the starting rule is a RuleRefExpr where the identifier is that of the first rule in the grammar) perform the following steps:
@@ -85,28 +89,50 @@ The following opcodes are required:
 
 ## Examples
 
-Given the following grammar:
+N means a number, M means a matcher index, I means an instruction index, V means a value generated from a match, B means a boolean (match or not), P means a position.
+
+VM has the following typed registers:
+
+* R int : a return index. POP R stores the value in this register, GOTO R jumps to the instruction at index R.
+
+### E1
+
+Grammar:
 
 ```
-A <- 'a' / 'b' !'a' / B
-B <- 'c' .+ { code }
+A <- 'a'
 ```
 
-It would get translated to this:
+* Matchers: 'a'
+* Thunks: none
 
-* Matchers: 'a', 'b', 'c', .
-* Thunks: athunks[0]: { code }
+Opcodes:
 
-And the following opcodes:
+0: PUSH N (2) : push the return index
+1: GOTO N (3) : goto instruction N
+2: EXIT : pop V and B, exit VM, return V and B
+3: [Rule A] POP R : save the return index, stack is now empty
+4:          MATCH M : run the matcher, if not a match, restore P, push B and V
+5:          GOTO R : return the the saved return index
 
-.: PUSHN 2 : push number, the return index 2
-.: GOTO 5 : goto instruction 3
-.: POP2 : pop v and b
-.: EXIT : exit VM, return v and b
-.: [Rule A] POP r : pop top stack value into register r
-.:          PUSHPT : push current parser position
-.:          MATCH n : run matcher at index n ('a'), push b, push v (?)
-.:          POP pt
-.:          RETURNIF b
+### E2
+
+Grammar:
+
+```
+A <- 'a' 'b'
+```
+
+* Matchers: 'a', 'b'
+* Thunks: none
+
+Opcodes:
+
+0: PUSH N (2) : push the return index
+1: GOTO N (3) : goto instruction N
+2: EXIT : pop V and B, exit VM, return V and B
+3: [Rule A] 
+4:          
+
 
 [ffp]: http://arxiv.org/abs/1405.6646
