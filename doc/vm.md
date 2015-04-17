@@ -89,11 +89,7 @@ The following opcodes are required:
 
 ## Examples
 
-N means a number, M means a matcher index, I means an instruction index, V means a value generated from a match, B means a boolean (match or not), P means a position.
-
-VM has the following typed registers:
-
-* R int : a return index. POP R stores the value in this register, GOTO R jumps to the instruction at index R.
+Value may be the sentinel value MatchFailed, indicating no match.
 
 ### E1
 
@@ -108,12 +104,16 @@ A <- 'a'
 
 Opcodes:
 
-0: PUSH N (2) : push the return index
-1: GOTO N (3) : goto instruction N
-2: EXIT : pop V and B, exit VM, return V and B
-3: [Rule A] POP R : save the return index, stack is now empty
-4:          MATCH M : run the matcher, if not a match, restore P, push B and V
-5:          GOTO R : return the the saved return index
+0: CALL N : push the next instruction index, goto instruction N |R|
+.: EXIT : pop V, exit VM, return V ||
+.: [Rule A, 'a'] PUSH P : save current parser position |R|P|
+.:               MATCH M : run the matcher, push V |R|P|V|
+.:               POP v : pop value into register v |R|P|
+.:               POP p : pop start position of this rule |R|
+.:               RESTORE : restore position to register p if register v is MatchFailed |R|
+.:               POP r : pop value into register r ||
+.:               PUSH v : push register v |V|
+.:               RETURN : return to the instruction index in register r |V|
 
 ### E2
 
@@ -128,11 +128,22 @@ A <- 'a' 'b'
 
 Opcodes:
 
-0: PUSH N (2) : push the return index
-1: GOTO N (3) : goto instruction N
-2: EXIT : pop V and B, exit VM, return V and B
-3: [Rule A] 
-4:          
+0: CALL N : push the next instruction index, goto instruction N |R|
+.: EXIT : pop V, exit VM, return V ||
 
+.: [Rule A, Seq] PUSH P : save current parser position |R|P|
+.:               PUSH Na Nb : push instruction indices for 'a' and 'b' |R|P|N|N|
+.:               POP N : pop call instruction into register n |R|P| [N|]
+.:               CALL N : call instruction at register n
+.:               
+
+.: [Rule A, 'a'] PUSH P : save current parser position |R|P|
+.:               MATCH M : run the matcher, push V |R|P|V|
+.:               POP v : pop value into register v |R|P|
+.:               POP p : pop start position of this rule |R|
+.:               RESTORE : restore position to register p if register v is MatchFailed |R|
+.:               POP r : pop value into register r ||
+.:               PUSH v : push register v |V|
+.:               RETURN : return to the instruction index in register r |V|
 
 [ffp]: http://arxiv.org/abs/1405.6646
