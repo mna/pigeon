@@ -89,7 +89,23 @@ The following opcodes are required:
 
 ## Examples
 
-Value may be the sentinel value MatchFailed, indicating no match.
+Value may be the sentinel value MatchFailed, indicating no match. VM has three distinct stacks:
+
+* Position stack (P) |...|
+* Instruction index stack (I) [...]
+* Value stack (V) {...}
+
+It also has three distinct lists:
+
+* Matchers (M)
+* Action thunks (A)
+* Predicate thunks (B)
+
+### Bootstrap sequence
+
+PUSHI N : push N on instruction index stack, N = 3 || [3] {}
+CALL : pop I, push next instruction index to I, jump to I || [2] {}
+EXIT : pop V, decompose and return v, b (if V is MatchFailed, return nil, false, otherwise return V, true).
 
 ### E1
 
@@ -99,21 +115,19 @@ Grammar:
 A <- 'a'
 ```
 
-* Matchers: 'a'
-* Thunks: none
+* M: 'a'
+* A, B: none
 
 Opcodes:
 
-0: CALL N : push the next instruction index, goto instruction N |R|
-.: EXIT : pop V, exit VM, return V ||
-.: [Rule A, 'a'] PUSH P : save current parser position |R|P|
-.:               MATCH M : run the matcher, push V |R|P|V|
-.:               POP v : pop value into register v |R|P|
-.:               POP p : pop start position of this rule |R|
-.:               RESTORE : restore position to register p if register v is MatchFailed |R|
-.:               POP r : pop value into register r ||
-.:               PUSH v : push register v |V|
-.:               RETURN : return to the instruction index in register r |V|
+0: PUSHI 3 || [3] {}
+1: CALL || [2] {}
+2: EXIT
+
+3: [Rule A, 'a'] PUSHP : save current parser position |p1| [2] {}
+.:               MATCH 0 : run the matcher at 0, push V |p1| [2] {v}
+.:               RESTORE : pop P, restore position if peek V is MatchFailed || [2] {v}
+.:               RETURN : pop I, return || [] {v}
 
 ### E2
 
@@ -123,27 +137,29 @@ Grammar:
 A <- 'a' 'b'
 ```
 
-* Matchers: 'a', 'b'
-* Thunks: none
+* M: 'a', 'b'
+* A, B: none
 
 Opcodes:
 
-0: CALL N : push the next instruction index, goto instruction N |R|
-.: EXIT : pop V, exit VM, return V ||
+0: PUSHI 3 || [3] {}
+1: CALL || [2] {}
+2: EXIT
 
-.: [Rule A, Seq] PUSH P : save current parser position |R|P|
-.:               PUSH Na Nb : push instruction indices for 'a' and 'b' |R|P|N|N|
-.:               POP N : pop call instruction into register n |R|P| [N|]
-.:               CALL N : call instruction at register n
+3: [Rule A, Seq] PUSHP : save current parser position |ps| [2] {}
+.:               PUSHI Ib : push index of 'b' |ps| [2|ib] {}
+.:               PUSHI Ia : push index of 'a' |ps| [2|ib|ia] {}
 .:               
 
-.: [Rule A, 'a'] PUSH P : save current parser position |R|P|
-.:               MATCH M : run the matcher, push V |R|P|V|
-.:               POP v : pop value into register v |R|P|
-.:               POP p : pop start position of this rule |R|
-.:               RESTORE : restore position to register p if register v is MatchFailed |R|
-.:               POP r : pop value into register r ||
-.:               PUSH v : push register v |V|
-.:               RETURN : return to the instruction index in register r |V|
+.: [Rule A, 'a'] PUSHP : save current parser position |ps|pa| [2] {}
+.:               MATCH 0 : run the matcher at 0, push V |p1| [2] {v}
+.:               RESTORE : pop P, restore position if peek V is MatchFailed || [2] {v}
+.:               RETURN : pop I, return || [] {v}
+
+.: [Rule A, 'b'] PUSHP : save current parser position |ps|pa| [2] {}
+.:               MATCH 1 : run the matcher at 1, push V |ps|pa| [2] {v}
+.:               RESTORE : pop P, restore position if peek V is MatchFailed || [2] {v}
+.:               RETURN : pop I, return || [] {v}
+
 
 [ffp]: http://arxiv.org/abs/1405.6646
