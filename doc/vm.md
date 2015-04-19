@@ -209,5 +209,107 @@ Opcodes:
 08:               JUMP 04
 09:               RETURN : P[] I[] V[vf]
 
+### E6 - Optional (`?`)
+
+Grammar:
+
+```
+A <- 'a'?
+```
+
+* M: 'a'
+* A, B: none
+
+Opcodes:
+
+(bootstrap)
+03: [Rule A, ZoO] PUSHI Ia : P[] I[2 Ia] V[]
+04:               CALL : P[] I[2 5] V[]
+05:               POPVJUMPIFF 07 : if top V value is FAIL, pop it and jump to N
+06:               RETURN : P[] I[] V[v]
+07:               PUSHV nil : P[] I[2] V[n]
+08:               RETURN : P[] I[] V[n]
+
+### E7 - Rule reference
+
+Grammar:
+
+```
+A <- B
+B <- 'a'
+```
+
+* M: 'a'
+* A, B: none
+
+Opcodes:
+
+(bootstrap)
+03: [Rule A, Ref] PUSHI Ib : P[] I[2 Ib] V[]
+04:               CALL : P[] I[2 5] V[]
+05:               RETURN : P[] I[2] V[v]
+
+### E8 - Predicates (and / not)
+
+Grammar:
+
+```
+A <- !'a'
+```
+
+* M: 'a'
+* A, B: none
+
+Opcodes:
+
+(bootstrap)
+03: [Rule A, Not] PUSHP : P[p] I[2] V[]
+04:               PUSHI Ia : P[p] I[2 Ia] V[]
+05:               CALL : P[p] I[2 6] V[]
+06:               TRUEIFF : pop V, push TRUE if v is FAIL, FALSE otherwise P[p] I[2] V[b]
+                  (FALSEIFF for and predicate)
+07:               RESTORE : P[] I[2] V[b]
+08:               RETURN : P[] I[2] V[b]
+
+### E9 - Boolean thunks (and / not)
+
+Grammar:
+
+```
+A <- !{return true, nil}
+```
+
+* M, A: none
+* B: f1 {return true, nil}
+
+Opcodes:
+
+(bootstrap)
+03: [Rule A, Not] CALLB 0 : call boolean thunk at index 0, push return value on V P[] I[2] V[]
+04:               TRUEIFF : pop V, push TRUE if v is FAIL, FALSE otherwise P[] I[2] V[b]
+                  (FALSEIFF for and predicate)
+05:               RETURN : P[] I[2] V[b]
+
+### E10 - Labeled and action
+
+Grammar:
+
+```
+A <- label:'a' { return nil, nil }
+```
+
+* M: 'a'
+* A: f1 { return nil, nil }
+* B: none
+
+Opcodes:
+
+(bootstrap)
+03: [Rule A, Act] PUSHP : P[p] I[2] V[]
+04:               PUSHI Il : P[p] I[2 Il] V[]
+05:               CALL : P[p] I[2 6] V[]
+06:               JUMPIFF N : P[p] I[2] V[v]
+07:               CALLA 0 : pop V and discard, call action thunk at index 0, push return value on V P[p] I[2] V[v]
+
 [ffp]: http://arxiv.org/abs/1405.6646
 
