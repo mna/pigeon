@@ -67,33 +67,16 @@ The API covered by the API stability guarantee in the doc will remain stable. In
 
 Each rule and expression execution (a rule is really a specific kind of expression, the RuleRefExpr, and the starting rule is a RuleRefExpr where the identifier is that of the first rule in the grammar) perform the following steps:
 
-* Pop the return instruction index from the stack, store it locally;
-* Push the current parser position to the stack;
-* Execute the match/expression;
-* Pop the current parser position from the stack;
-* Push the boolean match result;
-* Push the result value or nil;
-* Jump to the return instruction index.
-
-The VM defines the following registers (?):
-
-* pc : the program counter, increments on each instruction, `JUMP` sets it directly.
-* pt : the point, a position. `PUSH pt` pushes its value onto the stack, `POP pt` pops a value from the stack and assigns it to the register and `SET pt` sets the parser's current position to the value of the pt register.
-
-The following opcodes are required:
-
-* `JUMP i` where `i` is the instruction index. Runs the instruction at `i` as the next instruction.
-* `EXIT` pops the return value and the match boolean from the stack and terminates the VM execution, returning those two values.
-* `PUSH p` pushes the current parser position to the stack.
-
+TODO ...
 
 ## Examples
 
-Value may be the sentinel value MatchFailed, indicating no match. VM has three distinct stacks:
+Value may be the sentinel value MatchFailed, indicating no match. VM has four distinct stacks:
 
-* Position stack (P) |...|
-* Instruction index stack (I) [...]
-* Value stack (V) {...}
+* Position stack (P) P[...]
+* Instruction index stack (I) I[...]
+* Value stack (V) V[...]
+* Loop stack (L) L[...]
 
 It also has three distinct lists:
 
@@ -101,13 +84,17 @@ It also has three distinct lists:
 * Action thunks (A)
 * Predicate thunks (B)
 
+The following statements always hold;
+
+* A Matcher always consumes one `I` value and always produces one `V` value.
+
 ### Bootstrap sequence
 
-PUSHI N : push N on instruction index stack, N = 3 || [3] {}
-CALL : pop I, push next instruction index to I, jump to I || [2] {}
-EXIT : pop V, decompose and return v, b (if V is MatchFailed, return nil, false, otherwise return V, true).
+0: PUSHI N : push N on instruction index stack, N = 3 I[3]
+1: CALL : pop I, push next instruction index to I, jump to I I[2]
+2: EXIT : pop V, decompose and return v, b (if V is MatchFailed, return nil, false, otherwise return V, true).
 
-### E1
+### E1 - Matcher
 
 Grammar:
 
@@ -120,16 +107,13 @@ A <- 'a'
 
 Opcodes:
 
-0: PUSHI 3 || [3] {}
-1: CALL || [2] {}
-2: EXIT
+(bootstrap)
+3: [Rule A, 'a'] PUSHP : save current parser position P[pa] I[2]
+.:               MATCH 0 : run the matcher at 0, push V P[pa] I[2] V[va]
+.:               RESTOREIFF : pop P, restore position if peek V is MatchFailed P[] I[2] V[va]
+.:               RETURN : pop I, return P[] I[] V[va]
 
-3: [Rule A, 'a'] PUSHP : save current parser position |p1| [2] {}
-.:               MATCH 0 : run the matcher at 0, push V |p1| [2] {v}
-.:               RESTORE : pop P, restore position if peek V is MatchFailed || [2] {v}
-.:               RETURN : pop I, return || [] {v}
-
-### E2
+### E2 - Sequence
 
 Grammar:
 
@@ -142,24 +126,42 @@ A <- 'a' 'b'
 
 Opcodes:
 
-0: PUSHI 3 || [3] {}
-1: CALL || [2] {}
-2: EXIT
+(bootstrap)
+03: [Rule A, Seq] PUSHP : P[ps] I[2]
+04:               PUSHV FAIL : P[ps] I[2] V[f]
+05:               PUSHL : P[ps] I[2] V[f] L[[Ia Ib]]
+06:               TAKELORJUMP 11 : pop L, take one value off and push to I, push L. Jump to N if array is empty. P[ps] I[2 Ia] V[f] L[[Ib]]
+07:               CALL : P[ps] I[2 8] V[f] L[[Ib]]
+08:               CUMULORF : pop 2 values from V, cumulate in an array, push to V. If top V value is FAIL, pop 2 and push FAIL.
+09:               JUMPIFF 11 : jump to N if top V stack is FAIL
+10:               JUMP 06 : back to TAKE instruction
+11:               POPL : P[ps] I[2] V[v] L[]
+12:               RESTOREIFF : pop P, restore position if peek V is FAIL P[] I[2] V[v] L[]
+13:               RETURN : pop I, return P[] I[] V[v] L[]
 
-3: [Rule A, Seq] PUSHP : save current parser position |ps| [2] {}
-.:               PUSHI Ib : push index of 'b' |ps| [2|ib] {}
-.:               PUSHI Ia : push index of 'a' |ps| [2|ib|ia] {}
-.:               
+### E3 - Choice
 
-.: [Rule A, 'a'] PUSHP : save current parser position |ps|pa| [2] {}
-.:               MATCH 0 : run the matcher at 0, push V |p1| [2] {v}
-.:               RESTORE : pop P, restore position if peek V is MatchFailed || [2] {v}
-.:               RETURN : pop I, return || [] {v}
+Grammar:
 
-.: [Rule A, 'b'] PUSHP : save current parser position |ps|pa| [2] {}
-.:               MATCH 1 : run the matcher at 1, push V |ps|pa| [2] {v}
-.:               RESTORE : pop P, restore position if peek V is MatchFailed || [2] {v}
-.:               RETURN : pop I, return || [] {v}
+```
+A <- 'a' / 'b'
+```
 
+* M: 'a', 'b'
+* A, B: none
+
+Opcodes:
+
+(bootstrap)
+03: [Rule A, Choice] PUSHP : P[pc] I[2]
+04:                  PUSHL : P[pc] I[2] L[[Ia Ib]]
+05:                  TAKELORJUMP N : P[pc] I[2 Ia] L[[Ib]]
+06:                  CALL : P[pc] I[2 7] L[Ib]
+07:                  JUMPIFT 09 : jump to N if top V stack is not FAIL
+08:                  JUMP 05
+09:                  POPL : P[pc] I[2] V[v] L[]
+10:                  RESTOREIFF : P[] I[2] V[v] L[]
+11:                  RETURN : P[] I[] V[v] L[]
 
 [ffp]: http://arxiv.org/abs/1405.6646
+
