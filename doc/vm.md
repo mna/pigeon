@@ -63,6 +63,10 @@ The debug option would be supported as it is now, although the output will likel
 
 The API covered by the API stability guarantee in the doc will remain stable. Internal symbols not part of this API should use a prefix-naming-scheme to avoid clashes with user-defined code (e.g. π?). The accepted PEG syntax remains exactly the same, with the same semantics.
 
+### Code generation
+
+Use go's `text/template` package and data structures to generate the code, instead of a string with fmt verbs.
+
 ## Opcodes
 
 Each rule and expression execution (a rule is really a specific kind of expression, the RuleRefExpr, and the starting rule is a RuleRefExpr where the identifier is that of the first rule in the grammar) perform the following steps:
@@ -128,7 +132,7 @@ Opcodes:
 
 (bootstrap)
 03: [Rule A, Seq] PUSHP : P[ps] I[2]
-04:               PUSHV FAIL : P[ps] I[2] V[f]
+04:               PUSHV fail : P[ps] I[2] V[f]
 05:               PUSHL : P[ps] I[2] V[f] L[[Ia Ib]]
 06:               TAKELORJUMP 11 : pop L, take one value off and push to I, push L. Jump to N if array is empty. P[ps] I[2 Ia] V[f] L[[Ib]]
 07:               CALL : P[ps] I[2 8] V[f] L[[Ib]]
@@ -153,15 +157,57 @@ A <- 'a' / 'b'
 Opcodes:
 
 (bootstrap)
-03: [Rule A, Choice] PUSHP : P[pc] I[2]
-04:                  PUSHL : P[pc] I[2] L[[Ia Ib]]
-05:                  TAKELORJUMP N : P[pc] I[2 Ia] L[[Ib]]
-06:                  CALL : P[pc] I[2 7] L[Ib]
-07:                  JUMPIFT 09 : jump to N if top V stack is not FAIL
-08:                  JUMP 05
-09:                  POPL : P[pc] I[2] V[v] L[]
-10:                  RESTOREIFF : P[] I[2] V[v] L[]
-11:                  RETURN : P[] I[] V[v] L[]
+03: [Rule A, Choice] PUSHL : P[] I[2] L[[Ia Ib]]
+04:                  TAKELORJUMP 08 : P[] I[2 Ia] L[[Ib]]
+05:                  CALL : P[] I[2 7] L[[Ib]]
+06:                  JUMPIFT 08 : jump to N if top V stack is not FAIL
+07:                  JUMP 04
+08:                  POPL : P[] I[2] V[v] L[]
+09:                  RETURN : P[] I[] V[v] L[]
+
+### E4 - Repetition (`*`)
+
+Grammar:
+
+```
+A <- 'a'*
+```
+
+* M: 'a'
+* A, B: none
+
+Opcodes:
+
+(bootstrap)
+03: [Rule A, ZoM] PUSHV empty : P[] I[2] V[ve]
+04:               PUSHI Ia : P[] I[2 Ia] V[ve]
+05:               CALL : P[] I[2 6] V[ve]
+06:               POPVJUMPIFF 09 : if top V value is FAIL, pop it and jump to N
+07:               CUMULORF : P[] I[2] V[ve]
+08:               JUMP 04
+09:               RETURN : P[] I[] V[ve]
+
+### E5 - Repetition (`+`)
+
+Grammar:
+
+```
+A <- 'a'+
+```
+
+* M: 'a'
+* A, B: none
+
+Opcodes:
+
+(bootstrap)
+03: [Rule A, ZoM] PUSHV fail : P[] I[2] V[f]
+04:               PUSHI Ia : P[] I[2 Ia] V[f]
+05:               CALL : P[] I[2 6] V[f]
+06:               POPVJUMPIFF 09 : if top V value is FAIL, pop it and jump to N
+07:               CUMULORF : P[] I[2] V[vf]
+08:               JUMP 04
+09:               RETURN : P[] I[] V[vf]
 
 [ffp]: http://arxiv.org/abs/1405.6646
 
