@@ -4,6 +4,15 @@ The original recursive parser had issues with pathological input, where it could
 
 The transition to a Virtual Machine (VM) based implementation could be relatively simple. By representing the various expressions and matchers with relatively high-level opcodes, it should be possible to avoid excessive dispatch overhead while avoiding the problems inherent to the recursive implementation.
 
+The goals of this reimplementation, in no particular order, are:
+
+* Avoid stack overflows due to too many recursive calls.
+* More memory-efficient implementation.
+* Better performance.
+* Better error reporting with the "farthest failure position" technique.
+* Less code, though not at the expense of readability (should still be simple code).
+* Better isolation of implementation details vs exposed API, using a prefix to avoid clashes with user code for internal symbols.
+
 ## Overview
 
 ### Matchers
@@ -12,13 +21,13 @@ The parser generator would translate all literal matchers in the AST to a list o
 
 ```
 type Matcher interface {
-    Match(savepointReader) bool
+    Match(peekReader) bool
 }
 
-// interface name and methods TBD.
-type savepointReader interface {
-    current() savepoint
-    advance()
+// the parser would implement that interface
+type peekReader interface {
+    peek() savepoint // position and current rune
+    read()           // advance to next rune
 }
 ```
 
@@ -69,9 +78,31 @@ Use go's `text/template` package and data structures to generate the code, inste
 
 ## Opcodes
 
-Each rule and expression execution (a rule is really a specific kind of expression, the RuleRefExpr, and the starting rule is a RuleRefExpr where the identifier is that of the first rule in the grammar) perform the following steps:
-
-TODO ...
+* CALL : pop I (I1), push the next instruction index to the I stack, jump to I1. Starts a new variable stack (?).
+* CALLA N : pop V stack value and discard, pop P stack value and use to construct the current value, call action thunk at index N, push return value on the V strack.
+* CALLB N : call boolean thunk at index N, push FAIL on the V stack if the thunk returned FALSE, TRUE otherwise.
+* CUMULORF : pop 2 values from V (V and V-1), add V to the V-1 array (V-1 may be fail, replace with an array if that's the case), push to V. If V is FAIL, push FAIL instead of the cumulative array.
+* EXIT : pop V, exit VM and return value V and true if V is not FAIL, return nil and false otherwise.
+* FALSEIFF : pop top V stack value, push FALSE if V is FAIL, TRUE otherwise.
+* JUMP N : inconditional jump to integer N.
+* JUMPIFF N : jump to integer N if top V stack value is FAIL.
+* JUMPIFT N : jump to integer N if top V stack value is not FAIL.
+* MATCH N : save the start position, run the matcher at index N, if matcher returns true, push the slice of bytes from the start to the current parser position on stack V, otherwise push FAIL.
+* POPL : pop the top value from the L stack, discard.
+* POPP : pop the top value from the P stack, discard.
+* POPVJUMPIFF N : if top V stack value is FAIL, pop it and jump to integer N.
+* PUSHI N : push integer N on the I stack.
+* PUSHL n N... : push an array of n integers on the L stack.
+* PUSHP : push the current parser position on the P stack.
+* PUSHVE : push empty slice of interface{} on the V stack (typed nil).
+* PUSHVF : push value FAIL on the V stack.
+* PUSHVN : push value nil on the V stack.
+* RESTORE : pop P stack value, restore the parser's position.
+* RESTOREIFF : pop P, restore the parser's position if peek of top V stack value is FAIL, otherwise discard P.
+* RETURN : pop I, jump to this instruction.
+* STOREIFT N : pop top V stack value, if V is not FAIL store it in the current variable stack under label at index N, push V back on the V stack.
+* TAKELORJUMP N : pop L, take one value off of the array of integers and push that value on the I stack, push L back. If L is empty, don't push anything to I, jump to N.
+* TRUEIFF : pop top V stack value, push TRUE if V is FAIL, FALSE otherwise.
 
 ## Examples
 
@@ -87,9 +118,9 @@ It also has four distinct lists:
 * Matchers (M)
 * Action thunks (A)
 * Predicate thunks (B)
-* Labels (L)
+* Strings (S) : used for labels and to map instruction index to rule names.
 
-The following statements always hold;
+The following statement always holds:
 
 * A Matcher always consumes one `I` value and always produces one `V` value.
 
