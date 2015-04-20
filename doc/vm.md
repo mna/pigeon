@@ -82,11 +82,12 @@ Value may be the sentinel value MatchFailed, indicating no match. VM has four di
 * Value stack (V) V[...]
 * Loop stack (L) L[...]
 
-It also has three distinct lists:
+It also has four distinct lists:
 
 * Matchers (M)
 * Action thunks (A)
 * Predicate thunks (B)
+* Labels (L)
 
 The following statements always hold;
 
@@ -308,8 +309,16 @@ Opcodes:
 03: [Rule A, Act] PUSHP : P[p] I[2] V[]
 04:               PUSHI Il : P[p] I[2 Il] V[]
 05:               CALL : P[p] I[2 6] V[]
-06:               JUMPIFF N : P[p] I[2] V[v]
-07:               CALLA 0 : pop V and discard, call action thunk at index 0, push return value on V P[p] I[2] V[v]
+06:               JUMPIFF 09 : P[p] I[2] V[v]
+07:               CALLA 0 : pop V and discard, pop P, call action thunk at index 0, push return value on V P[] I[2] V[v]
+08:               RETURN : P[] I[2] V[v]
+09:               POPP : P[] I[2] V[f]
+10:               RETURN : P[] I[2] V[f]
+
+11: [Rule A, Lab] PUSHI Ia : P[p] I[2 6 Ia] V[]
+12:               CALL : P[p] I[2 6 13] V[]
+13:               STOREIFT lbl : store value in label on vstack if V is not FAIL. P[p] I[2 6] V[v]
+14:               RETURN : P[p] I[2 6] V[v]
 
 [ffp]: http://arxiv.org/abs/1405.6646
 
