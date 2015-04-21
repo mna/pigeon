@@ -22,12 +22,16 @@ type ϡvm struct {
 	errs *errList
 }
 
+// setOptions applies the options in sequence on the vm.
 func (v *ϡvm) setOptions(opts []Option) {
 	for _, opt := range opts {
 		opt(v)
 	}
 }
 
+// TODO : make run receive the list of instructions and the various lists,
+// so it is easy to generate parsers on-the-fly for tests, without saving
+// it to file.
 func (v *ϡvm) run() (interface{}, error) {
 	return nil, nil
 }
