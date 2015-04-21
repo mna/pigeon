@@ -70,7 +70,17 @@ The debug option would be supported as it is now, although the output will likel
 
 ### API
 
-The API covered by the API stability guarantee in the doc will remain stable. Internal symbols not part of this API should use a prefix-naming-scheme to avoid clashes with user-defined code (e.g. π?). The accepted PEG syntax remains exactly the same, with the same semantics.
+The API covered by the API stability guarantee in the doc will remain stable. Internal symbols not part of this API will use a prefix-naming-scheme to avoid clashes with user-defined code. The prefix will be U+03E1 `ϡ` ([see here][bird]). This is an interesting choice because:
+
+* it looks a little bit like a bird. If you squint.
+* my font correctly prints it (DejaVu Sans Mono)
+* it is a valid letter that can start a Go symbol
+* it is considered lowercase/not exported
+* it is highly unlikely to clash with user code
+* you have to make a conscious effort to use a symbol that starts with this prefix, so accidental use of internal symbols is also highly unlikely.
+* it doesn't have any controversial meaning (looks like it [hardly has any meaning that we know of][sampi]).
+
+The accepted PEG syntax remains exactly the same, with the same semantics.
 
 ### Code generation
 
@@ -352,4 +362,5 @@ Opcodes:
 14:               RETURN : P[p] I[2 6] V[v]
 
 [ffp]: http://arxiv.org/abs/1405.6646
-
+[bird]: http://unicode-table.com/en/03E1/
+[sampi]: http://simple.wikipedia.org/wiki/Sampi_%28letter%29
