@@ -22,11 +22,13 @@ type ϡvm struct {
 	errs *errList
 }
 
-// setOptions applies the options in sequence on the vm.
-func (v *ϡvm) setOptions(opts []Option) {
+// setOptions applies the options in sequence on the vm. It returns the
+// vm to allow for chaining calls.
+func (v *ϡvm) setOptions(opts []Option) *ϡvm {
 	for _, opt := range opts {
 		opt(v)
 	}
+	return v
 }
 
 // TODO : make run receive the list of instructions and the various lists,

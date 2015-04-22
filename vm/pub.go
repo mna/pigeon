@@ -74,7 +74,15 @@ func ParseReader(filename string, r io.Reader, opts ...Option) (interface{}, err
 // Parse parses the data from b using filename as information in the
 // error messages.
 func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
-	p := &ϡparser{}
-	v := &ϡvm{parser: p, errs: new(errList)}
-	return v.run()
+	p := &ϡparser{
+		data: b,
+		pt:   ϡsvpt{position: position{line: 1}},
+	}
+	v := &ϡvm{
+		filename: filename,
+		parser:   p,
+		errs:     new(errList),
+		recover:  true,
+	}
+	return v.setOptions(opts).run()
 }
