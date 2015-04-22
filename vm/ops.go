@@ -31,9 +31,10 @@ const (
 	ϡopTakeLOrJump
 	ϡopTrueIfF
 	ϡopDebug
-	ϡopMax
+	ϡopmax // must always be last
 )
 
+// ϡlookupOp translates an opcode to a string.
 var ϡlookupOp = []string{
 	ϡopExit: "exit", ϡopCall: "call", ϡopCallA: "callA",
 	ϡopCallB: "callB", ϡopCumulOrF: "cumulOrF", ϡopFalseIfF: "falseIfF",
@@ -44,6 +45,7 @@ var ϡlookupOp = []string{
 	ϡopTakeLOrJump: "takeLOrJump", ϡopTrueIfF: "trueIfF", ϡopDebug: "debug",
 }
 
+// String returns the string representation of the opcode.
 func (op ϡop) String() string {
 	if 0 <= op && int(op) < len(ϡlookupOp) {
 		return ϡlookupOp[op]
@@ -66,6 +68,7 @@ func (op ϡop) String() string {
 // indices per subsequent values (4 * 16 bits = 64 bits).
 type ϡinstr uint64
 
+// limits and masks.
 const (
 	ϡiBits = 64
 	ϡlBits = 16
@@ -113,7 +116,7 @@ func (i ϡinstr) decodeLs() (ix0, ix1, ix2, ix3 int) {
 func ϡencodeInstr(op ϡop, args []int) ([]ϡinstr, error) {
 	var is []ϡinstr
 
-	if op >= ϡopMax {
+	if op >= ϡopmax {
 		return nil, errors.New("invalid op value")
 	}
 	if len(args) > ϡnMask {

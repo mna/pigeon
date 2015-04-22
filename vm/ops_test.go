@@ -118,7 +118,7 @@ func TestEncodeInstrValid(t *testing.T) {
 			4<<48 | 5<<32 | 6<<16 | 7,
 			8<<48 | 9<<32 | 10<<16,
 		}},
-		{ϡopMax - 1, nil, []uint64{uint64(ϡopMax-1) << 58}},
+		{ϡopmax - 1, nil, []uint64{uint64(ϡopmax-1) << 58}},
 	}
 	for i, tc := range cases {
 		got, err := ϡencodeInstr(tc.op, tc.args)
@@ -152,8 +152,8 @@ func TestEncodeInstrLimits(t *testing.T) {
 		args []int
 		err  string
 	}{
-		{ϡopMax - 1, nil, ""},
-		{ϡopMax, nil, "invalid op value"},
+		{ϡopmax - 1, nil, ""},
+		{ϡopmax, nil, "invalid op value"},
 		{ϡopReturn, []int{1 << ϡlBits}, "argument value too big"},
 		{ϡopReturn, []int{1<<ϡlBits - 1}, ""},
 		{ϡopReturn, tooManyArgs, "too many arguments"},
