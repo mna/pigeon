@@ -20,6 +20,62 @@ func TestConsts(t *testing.T) {
 	}
 }
 
+func TestDecodeInstr(t *testing.T) {
+	cases := []struct {
+		ins  uint64
+		op   ϡop
+		args []int
+	}{
+		{0, ϡopExit, nil},
+		{1 << 58, ϡopCall, nil},
+		{2<<58 | 1<<48 | 10<<32, ϡopCallA, []int{10}},
+		{13<<58 | 2<<48 | 10<<32 | 12345<<16, ϡopPushL, []int{10, 12345}},
+		{13<<58 | 3<<48 | 1<<32 | 2<<16 | 3, ϡopPushL, []int{1, 2, 3}},
+	}
+
+	for i, tc := range cases {
+		op, n, ix0, ix1, ix2 := ϡinstr(tc.ins).decode()
+		if op != tc.op {
+			t.Errorf("%d: want op %s, got %s", i, tc.op, op)
+		}
+		if n != len(tc.args) {
+			t.Errorf("%d: want %d arguments, got %d", i, len(tc.args), n)
+			continue
+		}
+		for j, arg := range []int{ix0, ix1, ix2}[:n] {
+			if tc.args[j] != arg {
+				t.Errorf("%d: arg %d: want %d, got %d", i, j, tc.args[j], arg)
+			}
+		}
+	}
+}
+
+func TestDecodeLs(t *testing.T) {
+	cases := []struct {
+		ins  uint64
+		args []int
+	}{
+		{0, nil},
+		{1 << 48, []int{1}},
+		{1<<48 | 2<<32, []int{1, 2}},
+		{1<<48 | 2<<32 | 3<<16, []int{1, 2, 3}},
+		{1<<48 | 2<<32 | 3<<16 | 4, []int{1, 2, 3, 4}},
+	}
+
+	for i, tc := range cases {
+		ix0, ix1, ix2, ix3 := ϡinstr(tc.ins).decodeLs()
+		for j, arg := range []int{ix0, ix1, ix2, ix3} {
+			exp := 0
+			if j < len(tc.args) {
+				exp = tc.args[j]
+			}
+			if exp != arg {
+				t.Errorf("%d: arg %d: want %d, got %d", i, j, exp, arg)
+			}
+		}
+	}
+}
+
 func TestEncodeInstrValid(t *testing.T) {
 	cases := []struct {
 		op   ϡop
@@ -87,6 +143,33 @@ func TestEncodeInstrValid(t *testing.T) {
 	}
 }
 
-func TestEncodeInstrInvalid(t *testing.T) {
-	// TODO..
+func TestEncodeInstrLimits(t *testing.T) {
+	tooManyArgs := make([]int, ϡnMask+1)
+	maxArgs := make([]int, ϡnMask)
+
+	cases := []struct {
+		op   ϡop
+		args []int
+		err  string
+	}{
+		{ϡopMax - 1, nil, ""},
+		{ϡopMax, nil, "invalid op value"},
+		{ϡopReturn, []int{1 << ϡlBits}, "argument value too big"},
+		{ϡopReturn, []int{1<<ϡlBits - 1}, ""},
+		{ϡopReturn, tooManyArgs, "too many arguments"},
+		{ϡopReturn, maxArgs, ""},
+	}
+
+	for i, tc := range cases {
+		_, err := ϡencodeInstr(tc.op, tc.args)
+
+		if (err == nil) != (tc.err == "") {
+			t.Errorf("%d: want error? %t, got %v", i, tc.err == "", err)
+			continue
+		}
+
+		if err != nil && err.Error() != tc.err {
+			t.Errorf("%d: want %q, got %q", i, tc.err, err)
+		}
+	}
 }

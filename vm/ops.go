@@ -1,6 +1,9 @@
 package vm
 
-import "errors"
+import (
+	"errors"
+	"strconv"
+)
 
 // ϡop represents an opcode.
 type ϡop byte
@@ -29,6 +32,23 @@ const (
 	ϡopTrueIfF
 	ϡopMax
 )
+
+var ϡlookupOp = []string{
+	ϡopExit: "exit", ϡopCall: "call", ϡopCallA: "callA",
+	ϡopCallB: "callB", ϡopCumulOrF: "cumulOrF", ϡopFalseIfF: "falseIfF",
+	ϡopJump: "jump", ϡopJumpIfF: "jumpIfF", ϡopJumpIfT: "jumpIfT",
+	ϡopMatch: "match", ϡopPop: "pop", ϡopPopVJumpIfF: "popVJumpIfF",
+	ϡopPush: "push", ϡopPushL: "pushL", ϡopRestore: "restore",
+	ϡopRestoreIfF: "restoreIfF", ϡopReturn: "return", ϡopStoreIfT: "storeIfT",
+	ϡopTakeLOrJump: "takeLOrJump", ϡopTrueIfF: "trueIfF",
+}
+
+func (op ϡop) String() string {
+	if 0 <= op && int(op) < len(ϡlookupOp) {
+		return ϡlookupOp[op]
+	}
+	return "ϡop(" + strconv.Itoa(int(op)) + ")"
+}
 
 // ϡinstr encodes an opcode with its arguments as a 64-bits unsigned
 // integer. The bits are used as follows:
