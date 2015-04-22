@@ -73,7 +73,7 @@ func (p *ϡparser) restore(pt ϡsvpt) {
 }
 
 // sliceFrom gets the slice of bytes from the start savepoint to
-// the current position.
+// the current position, non inclusive.
 func (p *ϡparser) sliceFrom(start ϡsvpt) []byte {
 	return p.data[start.position.offset:p.pt.position.offset]
 }
