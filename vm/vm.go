@@ -1,7 +1,11 @@
 package vm
 
+// ϡsentinel is a type used to define sentinel values that shouldn't
+// be equal to something else.
+type ϡsentinel int
+
 // ϡmatchFailed is a sentinel value used to indicate a match failure.
-var ϡmatchFailed = struct{}{}
+const ϡmatchFailed ϡsentinel = iota
 
 type ϡmemoizedResult struct {
 	v  interface{}
