@@ -53,16 +53,16 @@ func (p *ϡparser) read() {
 	rn, n := utf8.DecodeRune(p.data[p.pt.offset:])
 	p.pt.rn = rn
 	p.pt.w = n
-	p.pt.col++
-	if rn == '\n' {
-		p.pt.line++
-		p.pt.col = 0
-	}
 
 	if rn == utf8.RuneError {
 		if n > 0 {
-			// TODO: panic(errInvalidEncoding)?
-			//p.addErr(errInvalidEncoding)
+			panic(errInvalidEncoding)
+		}
+	} else {
+		p.pt.col++
+		if rn == '\n' {
+			p.pt.line++
+			p.pt.col = 0
 		}
 	}
 }

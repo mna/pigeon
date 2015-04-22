@@ -30,6 +30,7 @@ const (
 	ϡopStoreIfT
 	ϡopTakeLOrJump
 	ϡopTrueIfF
+	ϡopDebug
 	ϡopMax
 )
 
@@ -40,7 +41,7 @@ var ϡlookupOp = []string{
 	ϡopMatch: "match", ϡopPop: "pop", ϡopPopVJumpIfF: "popVJumpIfF",
 	ϡopPush: "push", ϡopPushL: "pushL", ϡopRestore: "restore",
 	ϡopRestoreIfF: "restoreIfF", ϡopReturn: "return", ϡopStoreIfT: "storeIfT",
-	ϡopTakeLOrJump: "takeLOrJump", ϡopTrueIfF: "trueIfF",
+	ϡopTakeLOrJump: "takeLOrJump", ϡopTrueIfF: "trueIfF", ϡopDebug: "debug",
 }
 
 func (op ϡop) String() string {
