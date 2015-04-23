@@ -1,7 +1,7 @@
 # pigeon - a PEG parser generator for Go
 
 [![GoDoc](https://godoc.org/github.com/PuerkitoBio/pigeon?status.png)](https://godoc.org/github.com/PuerkitoBio/pigeon)
-[![build status](https://secure.travis-ci.org/PuerkitoBio/pigeon.png)](http://travis-ci.org/PuerkitoBio/pigeon)
+[![build status](https://secure.travis-ci.org/PuerkitoBio/pigeon.png?branch=master)](http://travis-ci.org/PuerkitoBio/pigeon)
 [![Software License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
 The pigeon command generates parsers based on a [parsing expression grammar (PEG)][0]. Its grammar and syntax is inspired by the [PEG.js project][1], while the implementation is loosely based on the [parsing expression grammar for C# 3.0][2] article. It parses Unicode text encoded in UTF-8.
