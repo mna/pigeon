@@ -58,21 +58,58 @@ func (v *ϡvm) setOptions(opts []Option) *ϡvm {
 	return v
 }
 
-// TODO : make run receive the list of instructions and the various lists,
-// so it is easy to generate parsers on-the-fly for tests, without saving
-// it to file.
+// run executes the provided program in this VM, and returns the result.
 func (v *ϡvm) run(pg *ϡprogram) (interface{}, error) {
 	v.pg = pg
+	// TODO : add a vm.init() or reset()?
 	ret := v.dispatch()
+
+	// if the match failed, translate that to a nil result and make
+	// sure it returns an error
 	if ret == ϡmatchFailed {
 		ret = nil
 		if len(*v.errs) == 0 {
-			v.addErr(errNoMatch)
+			//TODO : v.addErr(errNoMatch)
 		}
 	}
+
 	return ret, v.errs.ϡerr()
 }
 
+// dispatch is the proper execution method of the VM, it loops over
+// the instructions and executes each opcode.
 func (v *ϡvm) dispatch() interface{} {
-	return nil
+	for {
+		// fetch and decode the instruction
+		instr := v.pg.instrs[v.pc]
+		op, n, a0, a1, a2 := instr.decode()
+		_, _, _, _ = n, a0, a1, a2
+
+		// increment program counter
+		v.pc++
+
+		switch op {
+		case ϡopCall:
+		case ϡopCallA:
+		case ϡopCallB:
+		case ϡopCumulOrF:
+		case ϡopDebug:
+		case ϡopExit:
+		case ϡopFalseIfF:
+		case ϡopJump:
+		case ϡopJumpIfF:
+		case ϡopJumpIfT:
+		case ϡopMatch:
+		case ϡopPop:
+		case ϡopPopVJumpIfF:
+		case ϡopPush:
+		case ϡopPushL:
+		case ϡopRestore:
+		case ϡopRestoreIfF:
+		case ϡopReturn:
+		case ϡopStoreIfT:
+		case ϡopTakeLOrJump:
+		case ϡopTrueIfF:
+		}
+	}
 }
