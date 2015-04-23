@@ -1,11 +1,14 @@
 package vm
 
+// ϡpstack implements the Position stack. It stores savepoints.
 type ϡpstack []ϡsvpt
 
+// push adds a value on the stack.
 func (p *ϡpstack) push(pt ϡsvpt) {
 	*p = append(*p, pt)
 }
 
+// pop removes a value from the stack.
 func (p *ϡpstack) pop() ϡsvpt {
 	n := len(*p)
 	if n == 0 {
@@ -16,12 +19,15 @@ func (p *ϡpstack) pop() ϡsvpt {
 	return v
 }
 
+// ϡistack implements the Instruction index stack. It stores integers.
 type ϡistack []int
 
+// push adds a value on the stack.
 func (i *ϡistack) push(v int) {
 	*i = append(*i, v)
 }
 
+// pop removes a value from the stack.
 func (i *ϡistack) pop() int {
 	n := len(*i)
 	if n == 0 {
@@ -32,18 +38,22 @@ func (i *ϡistack) pop() int {
 	return v
 }
 
+// ϡvstack implements the Value stack. It stores empty interfaces.
 type ϡvstack []interface{}
 
+// push adds a value on the stack.
 func (v *ϡvstack) push(i interface{}) {
 	*v = append(*v, i)
 }
 
+// pop removes a value from the stack.
 func (v *ϡvstack) pop() interface{} {
 	i := v.peek()
 	*v = (*v)[:len(*v)-1]
 	return i
 }
 
+// peek returns the value at the top of the stack, leaving it there.
 func (v *ϡvstack) peek() interface{} {
 	n := len(*v)
 	if n == 0 {
@@ -53,12 +63,15 @@ func (v *ϡvstack) peek() interface{} {
 	return i
 }
 
+// ϡlstack implements the Loop stack. It stores slices of integers.
 type ϡlstack [][]int
 
+// push adds a value on the stack.
 func (l *ϡlstack) push(a []int) {
 	*l = append(*l, a)
 }
 
+// pop removes a value from the stack.
 func (l *ϡlstack) pop() []int {
 	n := len(*l)
 	if n == 0 {
@@ -69,6 +82,9 @@ func (l *ϡlstack) pop() []int {
 	return a
 }
 
+// take removes the integer at index 0 from the slice at the top of the
+// stack. It returns -1 if the slice is empty. The slice is left on the
+// stack.
 func (l *ϡlstack) take() int {
 	n := len(*l)
 	if n == 0 {
