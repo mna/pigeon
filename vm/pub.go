@@ -81,7 +81,6 @@ func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
 	v := &ϡvm{
 		filename: filename,
 		parser:   p,
-		errs:     new(errList),
 		recover:  true,
 	}
 	return v.setOptions(opts).run(ϡtheProgram)

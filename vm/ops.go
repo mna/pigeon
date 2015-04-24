@@ -23,7 +23,6 @@ const (
 	ϡopPop
 	ϡopPopVJumpIfF
 	ϡopPush
-	ϡopPushL
 	ϡopRestore
 	ϡopRestoreIfF
 	ϡopReturn
@@ -40,9 +39,9 @@ var ϡlookupOp = []string{
 	ϡopCallB: "callB", ϡopCumulOrF: "cumulOrF", ϡopFalseIfF: "falseIfF",
 	ϡopJump: "jump", ϡopJumpIfF: "jumpIfF", ϡopJumpIfT: "jumpIfT",
 	ϡopMatch: "match", ϡopPop: "pop", ϡopPopVJumpIfF: "popVJumpIfF",
-	ϡopPush: "push", ϡopPushL: "pushL", ϡopRestore: "restore",
-	ϡopRestoreIfF: "restoreIfF", ϡopReturn: "return", ϡopStoreIfT: "storeIfT",
-	ϡopTakeLOrJump: "takeLOrJump", ϡopTrueIfF: "trueIfF", ϡopDebug: "debug",
+	ϡopPush: "push", ϡopRestore: "restore", ϡopRestoreIfF: "restoreIfF",
+	ϡopReturn: "return", ϡopStoreIfT: "storeIfT", ϡopTakeLOrJump: "takeLOrJump",
+	ϡopTrueIfF: "trueIfF", ϡopDebug: "debug",
 }
 
 // String returns the string representation of the opcode.

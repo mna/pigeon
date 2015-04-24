@@ -1,11 +1,33 @@
 package vm
 
+import (
+	"bytes"
+	"fmt"
+)
+
 // ϡsentinel is a type used to define sentinel values that shouldn't
 // be equal to something else.
 type ϡsentinel int
 
-// ϡmatchFailed is a sentinel value used to indicate a match failure.
-const ϡmatchFailed ϡsentinel = iota
+const (
+	// ϡmatchFailed is a sentinel value used to indicate a match failure.
+	ϡmatchFailed ϡsentinel = iota
+)
+
+const (
+	// stack IDs, used in PUSH and POP's first argument
+	ϡpstackID = iota + 1
+	ϡlstackID
+	ϡvstackID
+	ϡistackID
+)
+
+// special values that may be pushed on the V stack.
+var ϡvSpecialValues = []interface{}{
+	nil,
+	ϡmatchFailed,
+	[]interface{}(nil),
+}
 
 type ϡmemoizedResult struct {
 	v  interface{}
@@ -27,6 +49,15 @@ type ϡprogram struct {
 	as []func(*ϡvm) (interface{}, error)
 	bs []func(*ϡvm) (bool, error)
 	ss []string
+
+	// instrToRule is the mapping of an instruction index to a rule
+	// identifier (or display name) in the ss list:
+	//
+	// ss[instrToRule[instrIndex]] == name of the rule
+	//
+	// Since instructions are limited to 65535, the size of this slice
+	// is bounded to a reasonable number.
+	instrToRule []int
 }
 
 type ϡvm struct {
@@ -38,19 +69,24 @@ type ϡvm struct {
 	debug   bool
 	memoize bool
 	recover bool
+	// TODO : no bounds checking option (for stacks)? benchmark to see if it's worth it.
 
-	// runtime state
-	pc int
-	pg *ϡprogram
+	// program data
+	pc    int
+	depth int
+	pg    *ϡprogram
 
 	// stacks
-	p ϡpstack
-	l ϡlstack
-	v ϡvstack
-	i ϡistack
+	p       ϡpstack
+	l       ϡlstack
+	v       ϡvstack
+	i       ϡistack
+	varSets []map[string]interface{}
+
+	// TODO: memoization...
 
 	// error list
-	errs *errList
+	errs errList
 }
 
 // setOptions applies the options in sequence on the vm. It returns the
@@ -60,6 +96,35 @@ func (v *ϡvm) setOptions(opts []Option) *ϡvm {
 		opt(v)
 	}
 	return v
+}
+
+func (v *ϡvm) addErr(err error) {
+	v.addErrAt(err, v.parser.pt.position)
+}
+
+func (v *ϡvm) addErrAt(err error, pos position) {
+	var buf bytes.Buffer
+	if v.filename != "" {
+		buf.WriteString(v.filename)
+	}
+	if buf.Len() > 0 {
+		buf.WriteString(":")
+	}
+	buf.WriteString(fmt.Sprintf("%s", pos))
+	// TODO : add rule ID or display name
+	// if len(p.rstack) > 0 {
+	// 	if buf.Len() > 0 {
+	// 		buf.WriteString(": ")
+	// 	}
+	// 	rule := p.rstack[len(p.rstack)-1]
+	// 	if rule.displayName != "" {
+	// 		buf.WriteString("rule " + rule.displayName)
+	// 	} else {
+	// 		buf.WriteString("rule " + rule.name)
+	// 	}
+	// }
+	pe := &parserError{Inner: err, ϡprefix: buf.String()}
+	v.errs.ϡadd(pe)
 }
 
 // run executes the provided program in this VM, and returns the result.
@@ -72,8 +137,8 @@ func (v *ϡvm) run(pg *ϡprogram) (interface{}, error) {
 	// sure it returns an error
 	if ret == ϡmatchFailed {
 		ret = nil
-		if len(*v.errs) == 0 {
-			//TODO : v.addErr(errNoMatch)
+		if len(v.errs) == 0 {
+			v.addErr(errNoMatch)
 		}
 	}
 
@@ -99,16 +164,41 @@ func (v *ϡvm) dispatch() interface{} {
 		case ϡopCumulOrF:
 		case ϡopDebug:
 		case ϡopExit:
+			return v.v.pop()
 		case ϡopFalseIfF:
 		case ϡopJump:
+			v.pc = a0
 		case ϡopJumpIfF:
 		case ϡopJumpIfT:
 		case ϡopMatch:
 		case ϡopPop:
+			switch a0 {
+			case ϡlstackID:
+				v.l.pop()
+			case ϡpstackID:
+				v.p.pop()
+			default:
+				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+			}
 		case ϡopPopVJumpIfF:
 		case ϡopPush:
-		case ϡopPushL:
+			switch a0 {
+			case ϡpstackID:
+				v.p.push(v.parser.pt)
+			case ϡistackID:
+				v.i.push(a1)
+			case ϡvstackID:
+				if a1 >= len(ϡvSpecialValues) {
+					panic(fmt.Sprintf("invalid %s V stack argument: %d", op, a1))
+				}
+				v.v.push(ϡvSpecialValues[a1])
+			case ϡlstackID:
+			default:
+				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+			}
 		case ϡopRestore:
+			pt := v.p.pop()
+			v.parser.pt = pt
 		case ϡopRestoreIfF:
 		case ϡopReturn:
 		case ϡopStoreIfT:
