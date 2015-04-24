@@ -40,3 +40,16 @@ func (s ϡstringMatcher) match(pr ϡpeekReader) bool {
 	}
 	return true
 }
+
+type ϡcharClassMatcher struct {
+	chars   []rune
+	ranges  []rune
+	classes []*unicode.RangeTable
+
+	ignoreCase bool
+	inverted   bool
+}
+
+func (c ϡcharClassMatcher) match(pr ϡpeekReader) bool {
+	return false
+}
