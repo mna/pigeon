@@ -42,8 +42,8 @@ func (s ϡstringMatcher) match(pr ϡpeekReader) bool {
 }
 
 type ϡcharClassMatcher struct {
-	chars   []rune
-	ranges  []rune
+	chars   []rune // runes must be lowercase if ignoreCase is true
+	ranges  []rune // runes lowercase? can give weird results if e.g. A-^
 	classes []*unicode.RangeTable
 
 	ignoreCase bool
@@ -51,5 +51,33 @@ type ϡcharClassMatcher struct {
 }
 
 func (c ϡcharClassMatcher) match(pr ϡpeekReader) bool {
-	return false
+	pt := pr.peek()
+	pr.read()
+
+	if c.ignoreCase {
+		pt.rn = unicode.ToLower(pt.rn)
+	}
+
+	// try to match in the list of available chars
+	for _, rn := range c.chars {
+		if pt.rn == rn {
+			return !c.inverted
+		}
+	}
+
+	// try to match in the list of ranges
+	for i := 0; i < len(c.ranges); i += 2 {
+		if pt.rn >= c.ranges[i] && pt.rn <= c.ranges[i+1] {
+			return !c.inverted
+		}
+	}
+
+	// try to match in the list of Unicode classes
+	for _, cl := range c.classes {
+		if unicode.Is(cl, pt.rn) {
+			return !c.inverted
+		}
+	}
+
+	return c.inverted
 }
