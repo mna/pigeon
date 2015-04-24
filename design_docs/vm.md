@@ -87,9 +87,9 @@ Use go's `text/template` package and data structures to generate the code, inste
 
 ## Opcodes
 
-* CALL : pop I (I1), push the next instruction index to the I stack, jump to I1. Starts a new variable stack (?).
-* CALLA N : pop V stack value and discard, pop P stack value and use to construct the current value, call action thunk at index N, push return value on the V strack.
-* CALLB N : call boolean thunk at index N, push FAIL on the V stack if the thunk returned FALSE, TRUE otherwise.
+✓ CALL : pop I (I1), push the next instruction index to the I stack, jump to I1. Starts a new variable stack (?).
+• CALLA N : pop V stack value and discard, pop P stack value and use to construct the current value, call action thunk at index N, push return value on the V strack.
+• CALLB N : call boolean thunk at index N, push FAIL on the V stack if the thunk returned FALSE, TRUE otherwise.
 ✓ CUMULORF : pop 2 values from V (V and V-1), add V to the V-1 array (V-1 may be fail, replace with an array if that's the case), push to V. If V is FAIL, push FAIL instead of the cumulative array.
 ✓ EXIT : pop V, exit VM and return value V and true if V is not FAIL, return nil and false otherwise.
 ✓ FALSEIFF : pop top V stack value, push FALSE if V is FAIL, TRUE otherwise.
@@ -109,7 +109,7 @@ Use go's `text/template` package and data structures to generate the code, inste
 ✓ RESTORE : pop P stack value, restore the parser's position.
 ✓ RESTOREIFF : pop P, restore the parser's position if peek of top V stack value is FAIL, otherwise discard P.
 ✓ RETURN : pop I, jump to this instruction.
-* STOREIFT N : pop top V stack value, if V is not FAIL store it in the current variable stack under label at index N, push V back on the V stack.
+• STOREIFT N : pop top V stack value, if V is not FAIL store it in the current variable stack under label at index N, push V back on the V stack.
 ✓ TAKELORJUMP N : pop L, take one value off of the array of integers and push that value on the I stack, push L back. If L is empty, don't push anything to I, jump to N.
 ✓ TRUEIFF : pop top V stack value, push TRUE if V is FAIL, FALSE otherwise.
 

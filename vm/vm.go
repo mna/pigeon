@@ -158,6 +158,10 @@ func (v *ϡvm) dispatch() interface{} {
 
 		switch op {
 		case ϡopCall:
+			ix := v.i.pop()
+			v.i.push(v.pc)
+			v.pc = ix
+			v.depth++
 		case ϡopCallA:
 		case ϡopCallB:
 		case ϡopCumulOrF:
