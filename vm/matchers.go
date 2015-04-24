@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"fmt"
 	"unicode"
 	"unicode/utf8"
 )
@@ -80,4 +81,19 @@ func (c ϡcharClassMatcher) match(pr ϡpeekReader) bool {
 	}
 
 	return c.inverted
+}
+
+func ϡrangeTable(class string) *unicode.RangeTable {
+	if rt, ok := unicode.Categories[class]; ok {
+		return rt
+	}
+	if rt, ok := unicode.Properties[class]; ok {
+		return rt
+	}
+	if rt, ok := unicode.Scripts[class]; ok {
+		return rt
+	}
+
+	// cannot happen
+	panic(fmt.Sprintf("invalid Unicode class: %s", class))
 }

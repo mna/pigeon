@@ -2,6 +2,7 @@ package vm
 
 import (
 	"testing"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -80,7 +81,127 @@ func TestStringMatcher(t *testing.T) {
 		got := m.match(&pr)
 
 		if got != tc.out {
-			t.Errorf("%q: want %t, got %t", tc.in, tc.out, got)
+			t.Errorf("%q with %q: want %t, got %t", tc.in, tc.val, tc.out, got)
+		}
+	}
+}
+
+func TestCharClassMatcher(t *testing.T) {
+	cases := []struct {
+		in      string
+		val     string
+		chars   []rune
+		ranges  []rune
+		classes []string
+		ic      bool
+		iv      bool
+		out     bool
+	}{
+		{in: "", val: "[]", out: false}, // empty char class means no char matches
+		{in: "", val: "[^]", iv: true, out: true},
+		{in: "", val: "[]i", ic: true, out: false},
+		{in: "", val: "[^]i", ic: true, iv: true, out: true},
+		{in: "a", val: "[]", out: false},
+		{in: "a", val: "[^]", iv: true, out: true},
+		{in: "a", val: "[]i", ic: true, out: false},
+		{in: "a", val: "[^]i", ic: true, iv: true, out: true},
+
+		{in: "a", val: "[a]", chars: []rune{'a'}, out: true},
+		{in: "a", val: "[a]i", ic: true, chars: []rune{'a'}, out: true},
+		{in: "A", val: "[a]i", ic: true, chars: []rune{'a'}, out: true},
+		{in: "a", val: "[^a]", chars: []rune{'a'}, iv: true, out: false},
+		{in: "A", val: "[^a]i", iv: true, ic: true, chars: []rune{'a'}, out: false},
+
+		{in: "b", val: "[a]", chars: []rune{'a'}, out: false},
+		{in: "b", val: "[a]i", ic: true, chars: []rune{'a'}, out: false},
+		{in: "B", val: "[a]i", ic: true, chars: []rune{'a'}, out: false},
+		{in: "b", val: "[^a]", chars: []rune{'a'}, iv: true, out: true},
+		{in: "b", val: "[^a]i", iv: true, ic: true, chars: []rune{'a'}, out: true},
+		{in: "B", val: "[^a]i", iv: true, ic: true, chars: []rune{'a'}, out: true},
+
+		{in: "←", val: "[a]", chars: []rune{'a'}, out: false},
+		{in: "←", val: "[a]i", ic: true, chars: []rune{'a'}, out: false},
+		{in: "←", val: "[a]i", ic: true, chars: []rune{'a'}, out: false},
+		{in: "←", val: "[^a]", chars: []rune{'a'}, iv: true, out: true},
+		{in: "←", val: "[^a]i", iv: true, ic: true, chars: []rune{'a'}, out: true},
+		{in: "←", val: "[^a]i", iv: true, ic: true, chars: []rune{'a'}, out: true},
+
+		{in: "b", val: "[a-c]", ranges: []rune{'a', 'c'}, out: true},
+		{in: "B", val: "[a-c]", ranges: []rune{'a', 'c'}, out: false},
+		{in: "b", val: "[a-c]i", ic: true, ranges: []rune{'a', 'c'}, out: true},
+		{in: "B", val: "[a-c]i", ic: true, ranges: []rune{'a', 'c'}, out: true},
+		{in: "b", val: "[^a-c]", ranges: []rune{'a', 'c'}, iv: true, out: false},
+		{in: "B", val: "[^a-c]", ranges: []rune{'a', 'c'}, iv: true, out: true},
+		{in: "b", val: "[^a-c]i", iv: true, ic: true, ranges: []rune{'a', 'c'}, out: false},
+		{in: "B", val: "[^a-c]i", iv: true, ic: true, ranges: []rune{'a', 'c'}, out: false},
+		{in: "z", val: "[^a-c]i", iv: true, ic: true, chars: []rune{'a', 'c'}, out: true},
+
+		{in: "∝", val: "[a-c]", ranges: []rune{'a', 'c'}, out: false},
+		{in: "∝", val: "[a-c]", ranges: []rune{'a', 'c'}, out: false},
+		{in: "∝", val: "[a-c]i", ic: true, ranges: []rune{'a', 'c'}, out: false},
+		{in: "∝", val: "[a-c]i", ic: true, ranges: []rune{'a', 'c'}, out: false},
+		{in: "∝", val: "[^a-c]", ranges: []rune{'a', 'c'}, iv: true, out: true},
+		{in: "∝", val: "[^a-c]", ranges: []rune{'a', 'c'}, iv: true, out: true},
+		{in: "∝", val: "[^a-c]i", iv: true, ic: true, ranges: []rune{'a', 'c'}, out: true},
+		{in: "∝", val: "[^a-c]i", iv: true, ic: true, ranges: []rune{'a', 'c'}, out: true},
+		{in: "∝", val: "[^a-c]i", iv: true, ic: true, chars: []rune{'a', 'c'}, out: true},
+
+		{in: "b", val: "[c-a]", ranges: []rune{'c', 'a'}, out: false},
+		{in: "B", val: "[c-a]i", ic: true, ranges: []rune{'c', 'a'}, out: false},
+		{in: "B", val: "[^c-a]", iv: true, ranges: []rune{'c', 'a'}, out: true},
+		{in: "B", val: "[^c-a]i", ic: true, iv: true, ranges: []rune{'c', 'a'}, out: true},
+
+		{in: "b", val: "[\\pL]", classes: []string{"L"}, out: true},
+		{in: "b", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: true},
+		{in: "B", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: true},
+		{in: "b", val: "[^\\pL]", iv: true, classes: []string{"L"}, out: false},
+		{in: "b", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: false},
+		{in: "B", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: false},
+
+		{in: "1", val: "[\\pL]", classes: []string{"L"}, out: false},
+		{in: "1", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: false},
+		{in: "1", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: false},
+		{in: "1", val: "[^\\pL]", iv: true, classes: []string{"L"}, out: true},
+		{in: "1", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: true},
+		{in: "1", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: true},
+
+		{in: "ƛ", val: "[\\pL]", classes: []string{"L"}, out: true},
+		{in: "ƛ", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: true},
+		{in: "ƛ", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: true},
+		{in: "ƛ", val: "[^\\pL]", iv: true, classes: []string{"L"}, out: false},
+		{in: "ƛ", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: false},
+		{in: "ƛ", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: false},
+
+		{in: "←a", val: "[\\pL]", classes: []string{"L"}, out: false},
+		{in: "←a", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: false},
+		{in: "←a", val: "[\\pL]i", ic: true, classes: []string{"L"}, out: false},
+		{in: "←a", val: "[^\\pL]", iv: true, classes: []string{"L"}, out: true},
+		{in: "←a", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: true},
+		{in: "←a", val: "[^\\pL]i", iv: true, ic: true, classes: []string{"L"}, out: true},
+
+		{in: "b", val: "[\\p{Latin}]", classes: []string{"Latin"}, out: true},
+		{in: "b", val: "[\\p{Latin}]i", ic: true, classes: []string{"Latin"}, out: true},
+		{in: "B", val: "[\\p{Latin}]i", ic: true, classes: []string{"Latin"}, out: true},
+		{in: "b", val: "[^\\p{Latin}]", iv: true, classes: []string{"Latin"}, out: false},
+		{in: "b", val: "[^\\p{Latin}]i", ic: true, iv: true, classes: []string{"Latin"}, out: false},
+		{in: "B", val: "[^\\p{Latin}]i", iv: true, ic: true, classes: []string{"Latin"}, out: false},
+	}
+
+	var m ϡcharClassMatcher
+	for _, tc := range cases {
+		pr := testPeekReader{rns: []rune(tc.in)}
+		m.chars = tc.chars
+		m.ranges = tc.ranges
+		m.classes = make([]*unicode.RangeTable, len(tc.classes))
+		for i, cl := range tc.classes {
+			m.classes[i] = ϡrangeTable(cl)
+		}
+		m.ignoreCase = tc.ic
+		m.inverted = tc.iv
+		got := m.match(&pr)
+
+		if got != tc.out {
+			t.Errorf("%q with %q: want %t, got %t", tc.in, tc.val, tc.out, got)
 		}
 	}
 }
