@@ -59,11 +59,11 @@ func (op ϡop) String() string {
 // n : 10 bits = for PUSHL, number of values in array (max=1023)
 // l : 16 bits = instruction index (max=65535)
 //
-// So a single PUSHL instruction can encode 3 indices. The 64-bit value
-// looks like this:
+// So a single PUSH instruction can encode 2 indices (first arg is the stack ID).
+// The 64-bit value looks like this:
 // oooooonn nnnnnnnn llllllll llllllll llllllll llllllll llllllll llllllll
 //
-// And if a PUSHL instruction has more than 3 indices, it can store 4 full
+// And if a PUSH (L) instruction has more than 2 indices, it can store 4 full
 // indices per subsequent values (4 * 16 bits = 64 bits).
 type ϡinstr uint64
 

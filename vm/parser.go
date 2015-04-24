@@ -47,6 +47,11 @@ type ϡparser struct {
 	cur  current
 }
 
+// peek returns the current savepoint information.
+func (p *ϡparser) peek() ϡsvpt {
+	return p.pt
+}
+
 // read advances the parser to the next rune.
 func (p *ϡparser) read() {
 	p.pt.offset += p.pt.w
@@ -65,11 +70,6 @@ func (p *ϡparser) read() {
 			p.pt.col = 0
 		}
 	}
-}
-
-// restore restores the parser position to the savepoint pt.
-func (p *ϡparser) restore(pt ϡsvpt) {
-	p.pt = pt
 }
 
 // sliceFrom gets the slice of bytes from the start savepoint to

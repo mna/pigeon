@@ -90,28 +90,28 @@ Use go's `text/template` package and data structures to generate the code, inste
 * CALL : pop I (I1), push the next instruction index to the I stack, jump to I1. Starts a new variable stack (?).
 * CALLA N : pop V stack value and discard, pop P stack value and use to construct the current value, call action thunk at index N, push return value on the V strack.
 * CALLB N : call boolean thunk at index N, push FAIL on the V stack if the thunk returned FALSE, TRUE otherwise.
-* CUMULORF : pop 2 values from V (V and V-1), add V to the V-1 array (V-1 may be fail, replace with an array if that's the case), push to V. If V is FAIL, push FAIL instead of the cumulative array.
+✓ CUMULORF : pop 2 values from V (V and V-1), add V to the V-1 array (V-1 may be fail, replace with an array if that's the case), push to V. If V is FAIL, push FAIL instead of the cumulative array.
 ✓ EXIT : pop V, exit VM and return value V and true if V is not FAIL, return nil and false otherwise.
-* FALSEIFF : pop top V stack value, push FALSE if V is FAIL, TRUE otherwise.
+✓ FALSEIFF : pop top V stack value, push FALSE if V is FAIL, TRUE otherwise.
 ✓ JUMP N : inconditional jump to integer N.
-* JUMPIFF N : jump to integer N if top V stack value is FAIL.
-* JUMPIFT N : jump to integer N if top V stack value is not FAIL.
-* MATCH N : save the start position, run the matcher at index N, if matcher returns true, push the slice of bytes from the start to the current parser position on stack V, otherwise push FAIL.
+✓ JUMPIFF N : jump to integer N if top V stack value is FAIL.
+✓ JUMPIFT N : jump to integer N if top V stack value is not FAIL.
+✓ MATCH N : save the start position, run the matcher at index N, if matcher returns true, push the slice of bytes from the start to the current parser position on stack V, otherwise push FAIL.
 ✓ POPL : pop the top value from the L stack, discard.
 ✓ POPP : pop the top value from the P stack, discard.
-* POPVJUMPIFF N : if top V stack value is FAIL, pop it and jump to integer N.
+✓ POPVJUMPIFF N : if top V stack value is FAIL, pop it and jump to integer N.
 ✓ PUSHI N : push integer N on the I stack.
-* PUSHL n N... : push an array of n integers on the L stack.
+✓ PUSHL n N... : push an array of n integers on the L stack.
 ✓ PUSHP : push the current parser position on the P stack.
 ✓ PUSHVE : push empty slice of interface{} on the V stack (typed nil).
 ✓ PUSHVF : push value FAIL on the V stack.
 ✓ PUSHVN : push value nil on the V stack.
 ✓ RESTORE : pop P stack value, restore the parser's position.
-* RESTOREIFF : pop P, restore the parser's position if peek of top V stack value is FAIL, otherwise discard P.
-* RETURN : pop I, jump to this instruction.
+✓ RESTOREIFF : pop P, restore the parser's position if peek of top V stack value is FAIL, otherwise discard P.
+✓ RETURN : pop I, jump to this instruction.
 * STOREIFT N : pop top V stack value, if V is not FAIL store it in the current variable stack under label at index N, push V back on the V stack.
-* TAKELORJUMP N : pop L, take one value off of the array of integers and push that value on the I stack, push L back. If L is empty, don't push anything to I, jump to N.
-* TRUEIFF : pop top V stack value, push TRUE if V is FAIL, FALSE otherwise.
+✓ TAKELORJUMP N : pop L, take one value off of the array of integers and push that value on the I stack, push L back. If L is empty, don't push anything to I, jump to N.
+✓ TRUEIFF : pop top V stack value, push TRUE if V is FAIL, FALSE otherwise.
 
 ## Examples
 
