@@ -414,6 +414,50 @@ var validParseCases = map[string]*ast.Grammar{
 			},
 		},
 	},
+	`a = [^a]`: &ast.Grammar{
+		Rules: []*ast.Rule{
+			{
+				Name: ast.NewIdentifier(ast.Pos{}, "a"),
+				Expr: &ast.CharClassMatcher{
+					Chars:    []rune{'a'},
+					Inverted: true,
+				},
+			},
+		},
+	},
+	`a = [\^a]`: &ast.Grammar{
+		Rules: []*ast.Rule{
+			{
+				Name: ast.NewIdentifier(ast.Pos{}, "a"),
+				Expr: &ast.CharClassMatcher{
+					Chars:    []rune{'^', 'a'},
+					Inverted: false,
+				},
+			},
+		},
+	},
+	`a = [^\^a]`: &ast.Grammar{
+		Rules: []*ast.Rule{
+			{
+				Name: ast.NewIdentifier(ast.Pos{}, "a"),
+				Expr: &ast.CharClassMatcher{
+					Chars:    []rune{'^', 'a'},
+					Inverted: true,
+				},
+			},
+		},
+	},
+	`a = [^^a]`: &ast.Grammar{
+		Rules: []*ast.Rule{
+			{
+				Name: ast.NewIdentifier(ast.Pos{}, "a"),
+				Expr: &ast.CharClassMatcher{
+					Chars:    []rune{'^', 'a'},
+					Inverted: true,
+				},
+			},
+		},
+	},
 }
 
 func TestValidParseCases(t *testing.T) {

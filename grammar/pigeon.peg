@@ -248,7 +248,7 @@ CharClassMatcher ← '[' ( ClassCharRange / ClassChar / "\\" UnicodeClassEscape 
 
 ClassCharRange ← ClassChar '-' ClassChar
 ClassChar ← !( "]" / "\\" / EOL ) SourceChar / "\\" CharClassEscape
-CharClassEscape ← ( ']' / CommonEscapeSequence )
+CharClassEscape ← ( ']' / '^' / CommonEscapeSequence )
     / !'p' ( SourceChar / EOL / EOF ) {
     return nil, errors.New("invalid escape character")
 }

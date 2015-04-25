@@ -215,7 +215,10 @@ A character class matcher tries to match the input against a class of characters
 inside square brackets "[...]". Inside the brackets, characters represent
 themselves and the same escapes as in string literals are available, except
 that the single- and double-quote escape is not valid, instead the closing
-square bracket "]" must be escaped to be used.
+square bracket "]" must be escaped to be used. The caret character "^" can be
+escaped too, and must be escaped if used in the first position in order to
+represent itself, otherwise it is interpreted as the inverted match character
+(see below).
 
 Character ranges can be specified using the "[a-z]" notation. Unicode
 classes can be specified using the "[\pL]" notation, where L is a
@@ -224,9 +227,9 @@ notation where Class is a valid Unicode class (e.g. "Latin").
 
 As for string literals, a lowercase "i" may follow the matcher (outside
 the ending square bracket) to indicate that the match is case-insensitive.
-A "^" as first character inside the square brackets indicates that the match
-is inverted (it is a match if the input does not match the character class
-matcher). E.g.:
+A caret "^" as first character inside the square brackets indicates that the
+match is inverted (it is a match if the input does not match the character
+class matcher). E.g.:
 	NotAZ = [^a-z]i
 
 Any matcher

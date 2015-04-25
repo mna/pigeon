@@ -208,7 +208,7 @@ CharClassMatcher ← '[' ( ClassCharRange / ClassChar / "\\" UnicodeClassEscape 
 }
 ClassCharRange ← ClassChar '-' ClassChar
 ClassChar ← !( "]" / "\\" / EOL ) SourceChar / "\\" CharClassEscape
-CharClassEscape ← ']' / CommonEscapeSequence
+CharClassEscape ← ']' / '^' / CommonEscapeSequence
 
 UnicodeClassEscape ← 'p' ( SingleCharUnicodeClass / '{' UnicodeClass '}' )
 SingleCharUnicodeClass ← [LMNCPZS]

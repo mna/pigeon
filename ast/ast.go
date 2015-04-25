@@ -431,6 +431,9 @@ outer:
 			case ']':
 				chars = append(chars, rn)
 				continue
+			case '^':
+				chars = append(chars, rn)
+				continue
 
 			case 'p':
 				rn, _, _ := r.ReadRune()

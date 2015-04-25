@@ -27,6 +27,7 @@ var charClasses = []string{
 	`[a-]`,
 	`[----]`,
 	`[\x00-\x05]`,
+	`[\^]`,
 }
 
 var expChars = []string{
@@ -50,12 +51,13 @@ var expChars = []string{
 	"a-",
 	"-",
 	"",
+	"^",
 }
 
 var expUnicodeClasses = [][]string{
 	9:  {"L"},
 	10: {"Greek", "N"},
-	19: nil,
+	20: nil,
 }
 
 var expRanges = []string{
@@ -65,6 +67,7 @@ var expRanges = []string{
 	16: "AZ",
 	18: "--",
 	19: "\x00\x05",
+	20: "",
 }
 
 func TestCharClassParse(t *testing.T) {
