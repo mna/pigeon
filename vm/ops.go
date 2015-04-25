@@ -15,11 +15,12 @@ const (
 	ϡopCallA
 	ϡopCallB
 	ϡopCumulOrF
-	ϡopFalseIfF
 	ϡopJump
 	ϡopJumpIfF
 	ϡopJumpIfT
 	ϡopMatch
+	ϡopNilIfF
+	ϡopNilIfT
 	ϡopPop
 	ϡopPopVJumpIfF
 	ϡopPush
@@ -28,7 +29,6 @@ const (
 	ϡopReturn
 	ϡopStoreIfT
 	ϡopTakeLOrJump
-	ϡopTrueIfF
 	ϡopDebug
 	ϡopmax // must always be last
 )
@@ -36,12 +36,13 @@ const (
 // ϡlookupOp translates an opcode to a string.
 var ϡlookupOp = []string{
 	ϡopExit: "exit", ϡopCall: "call", ϡopCallA: "callA",
-	ϡopCallB: "callB", ϡopCumulOrF: "cumulOrF", ϡopFalseIfF: "falseIfF",
+	ϡopCallB: "callB", ϡopCumulOrF: "cumulOrF",
 	ϡopJump: "jump", ϡopJumpIfF: "jumpIfF", ϡopJumpIfT: "jumpIfT",
-	ϡopMatch: "match", ϡopPop: "pop", ϡopPopVJumpIfF: "popVJumpIfF",
+	ϡopMatch: "match", ϡopNilIfF: "nilIfF", ϡopNilIfT: "nilIfT",
+	ϡopPop: "pop", ϡopPopVJumpIfF: "popVJumpIfF",
 	ϡopPush: "push", ϡopRestore: "restore", ϡopRestoreIfF: "restoreIfF",
 	ϡopReturn: "return", ϡopStoreIfT: "storeIfT", ϡopTakeLOrJump: "takeLOrJump",
-	ϡopTrueIfF: "trueIfF", ϡopDebug: "debug",
+	ϡopDebug: "debug",
 }
 
 // String returns the string representation of the opcode.

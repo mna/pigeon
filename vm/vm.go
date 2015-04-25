@@ -75,6 +75,7 @@ type ϡvm struct {
 	pc    int
 	depth int
 	pg    *ϡprogram
+	cur   current
 
 	// stacks
 	p       ϡpstack
@@ -162,8 +163,37 @@ func (v *ϡvm) dispatch() interface{} {
 			v.i.push(v.pc)
 			v.pc = ix
 			v.depth++
+
 		case ϡopCallA:
+			v.v.pop()
+			start := v.p.pop()
+			v.cur.pos = start.position
+			v.cur.text = v.parser.sliceFrom(start)
+			if a0 >= len(v.pg.as) {
+				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+			}
+			fn := v.pg.as[a0]
+			val, err := fn(v)
+			if err != nil {
+				v.addErrAt(err, start.position)
+			}
+			v.v.push(val)
+
 		case ϡopCallB:
+			if a0 >= len(v.pg.bs) {
+				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+			}
+			fn := v.pg.bs[a0]
+			val, err := fn(v)
+			if err != nil {
+				v.addErr(err)
+			}
+			if !val {
+				v.v.push(ϡmatchFailed)
+				break
+			}
+			v.v.push(nil)
+
 		case ϡopCumulOrF:
 			va, vb := v.v.pop(), v.v.pop()
 			if va == ϡmatchFailed {
@@ -179,22 +209,39 @@ func (v *ϡvm) dispatch() interface{} {
 			default:
 				panic(fmt.Sprintf("invalid %s value type on the V stack: %T", op, vb))
 			}
+
 		case ϡopDebug:
+
 		case ϡopExit:
 			return v.v.pop()
-		case ϡopFalseIfF:
-			top := v.v.pop()
-			v.v.push(top != ϡmatchFailed)
+
+		case ϡopNilIfF:
+			if top := v.v.pop(); top == ϡmatchFailed {
+				v.v.push(nil)
+				break
+			}
+			v.v.push(ϡmatchFailed)
+
+		case ϡopNilIfT:
+			if top := v.v.pop(); top != ϡmatchFailed {
+				v.v.push(nil)
+				break
+			}
+			v.v.push(ϡmatchFailed)
+
 		case ϡopJump:
 			v.pc = a0
+
 		case ϡopJumpIfF:
 			if top := v.v.peek(); top == ϡmatchFailed {
 				v.pc = a0
 			}
+
 		case ϡopJumpIfT:
 			if top := v.v.peek(); top != ϡmatchFailed {
 				v.pc = a0
 			}
+
 		case ϡopMatch:
 			start := v.parser.pt
 			if a0 >= len(v.pg.ms) {
@@ -207,6 +254,7 @@ func (v *ϡvm) dispatch() interface{} {
 			}
 			v.v.push(ϡmatchFailed)
 			v.parser.pt = start
+
 		case ϡopPop:
 			switch a0 {
 			case ϡlstackID:
@@ -216,11 +264,13 @@ func (v *ϡvm) dispatch() interface{} {
 			default:
 				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
 			}
+
 		case ϡopPopVJumpIfF:
 			if top := v.v.peek(); top == ϡmatchFailed {
 				v.v.pop()
 				v.pc = a0
 			}
+
 		case ϡopPush:
 			switch a0 {
 			case ϡpstackID:
@@ -251,23 +301,65 @@ func (v *ϡvm) dispatch() interface{} {
 			default:
 				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
 			}
+
 		case ϡopRestore:
 			pt := v.p.pop()
 			v.parser.pt = pt
+
 		case ϡopRestoreIfF:
 			pt := v.p.pop()
 			if top := v.v.peek(); top == ϡmatchFailed {
 				v.parser.pt = pt
 			}
+
 		case ϡopReturn:
 			ix := v.i.pop()
+			v.pc = ix
+
+			// clean-up the varSet, if required
+			if v.depth == len(v.varSets)-1 {
+				if m := v.varSets[v.depth]; len(m) > 0 {
+					v.varSets[v.depth] = nil
+				}
+			}
+
 			v.depth--
 			if v.depth < 0 {
 				panic("negative call depth")
 			}
-			v.pc = ix
-			// TODO : clean-up varSet
+
 		case ϡopStoreIfT:
+			if top := v.v.peek(); top != ϡmatchFailed {
+				// make sure the var set for this depth level is available
+				if v.depth >= len(v.varSets) {
+					// grow varSets to v.depth+1
+					if v.depth < cap(v.varSets) {
+						v.varSets = v.varSets[:v.depth+1]
+						v.varSets = v.varSets[:v.depth+1]
+					} else {
+						newSets := make([]map[string]interface{}, v.depth+1)
+						copy(newSets, v.varSets)
+						v.varSets = newSets
+					}
+				}
+
+				// create the var set map if required
+				m := v.varSets[v.depth]
+				if m == nil {
+					m = make(map[string]interface{})
+					v.varSets[v.depth] = m
+				}
+
+				// get the label name
+				if a0 >= len(v.pg.ss) {
+					panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+				}
+				lbl := v.pg.ss[a0]
+
+				// store the value
+				m[lbl] = top
+			}
+
 		case ϡopTakeLOrJump:
 			ix := v.l.take()
 			if ix < 0 {
@@ -275,9 +367,7 @@ func (v *ϡvm) dispatch() interface{} {
 				break
 			}
 			v.i.push(ix)
-		case ϡopTrueIfF:
-			top := v.v.pop()
-			v.v.push(top == ϡmatchFailed)
+
 		default:
 			panic(fmt.Sprintf("unknown opcode %s", op))
 		}

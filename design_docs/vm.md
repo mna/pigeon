@@ -88,15 +88,16 @@ Use go's `text/template` package and data structures to generate the code, inste
 ## Opcodes
 
 ✓ CALL : pop I (I1), push the next instruction index to the I stack, jump to I1. Starts a new variable stack (?).
-• CALLA N : pop V stack value and discard, pop P stack value and use to construct the current value, call action thunk at index N, push return value on the V strack.
-• CALLB N : call boolean thunk at index N, push FAIL on the V stack if the thunk returned FALSE, TRUE otherwise.
+✓ CALLA N : pop V stack value and discard, pop P stack value and use to construct the current value, call action thunk at index N, push return value on the V strack.
+✓ CALLB N : call boolean thunk at index N, push FAIL on the V stack if the thunk returned FALSE, TRUE otherwise.
 ✓ CUMULORF : pop 2 values from V (V and V-1), add V to the V-1 array (V-1 may be fail, replace with an array if that's the case), push to V. If V is FAIL, push FAIL instead of the cumulative array.
 ✓ EXIT : pop V, exit VM and return value V and true if V is not FAIL, return nil and false otherwise.
-✓ FALSEIFF : pop top V stack value, push FALSE if V is FAIL, TRUE otherwise.
 ✓ JUMP N : inconditional jump to integer N.
 ✓ JUMPIFF N : jump to integer N if top V stack value is FAIL.
 ✓ JUMPIFT N : jump to integer N if top V stack value is not FAIL.
 ✓ MATCH N : save the start position, run the matcher at index N, if matcher returns true, push the slice of bytes from the start to the current parser position on stack V, otherwise push FAIL.
+✓ NILIFF : pop top V stack value, push NIL if V is FAIL, FAIL otherwise.
+✓ NILIFT : pop top V stack value, push NIL if V is not FAIL, FAIL otherwise.
 ✓ POPL : pop the top value from the L stack, discard.
 ✓ POPP : pop the top value from the P stack, discard.
 ✓ POPVJUMPIFF N : if top V stack value is FAIL, pop it and jump to integer N.
@@ -109,9 +110,8 @@ Use go's `text/template` package and data structures to generate the code, inste
 ✓ RESTORE : pop P stack value, restore the parser's position.
 ✓ RESTOREIFF : pop P, restore the parser's position if peek of top V stack value is FAIL, otherwise discard P.
 ✓ RETURN : pop I, jump to this instruction.
-• STOREIFT N : pop top V stack value, if V is not FAIL store it in the current variable stack under label at index N, push V back on the V stack.
+✓ STOREIFT N : pop top V stack value, if V is not FAIL store it in the current variable stack under label at index N, push V back on the V stack.
 ✓ TAKELORJUMP N : pop L, take one value off of the array of integers and push that value on the I stack, push L back. If L is empty, don't push anything to I, jump to N.
-✓ TRUEIFF : pop top V stack value, push TRUE if V is FAIL, FALSE otherwise.
 
 ## Examples
 
@@ -307,8 +307,8 @@ Opcodes:
 03: [Rule A, Not] PUSHP : P[p] I[2] V[]
 04:               PUSHI Ia : P[p] I[2 Ia] V[]
 05:               CALL : P[p] I[2 6] V[]
-06:               TRUEIFF : pop V, push TRUE if v is FAIL, FALSE otherwise P[p] I[2] V[b]
-                  (FALSEIFF for and predicate)
+06:               NILIFF : pop V, push NIL if v is FAIL, FAIL otherwise P[p] I[2] V[b]
+                  (NILIFT for and predicate)
 07:               RESTORE : P[] I[2] V[b]
 08:               RETURN : P[] I[2] V[b]
 
@@ -327,8 +327,8 @@ Opcodes:
 
 (bootstrap)
 03: [Rule A, Not] CALLB 0 : call boolean thunk at index 0, push return value on V P[] I[2] V[]
-04:               TRUEIFF : pop V, push TRUE if v is FAIL, FALSE otherwise P[] I[2] V[b]
-                  (FALSEIFF for and predicate)
+04:               NILIFF : pop V, push NIL if v is FAIL, FAIL otherwise P[] I[2] V[b]
+                  (NILIFT for and predicate)
 05:               RETURN : P[] I[2] V[b]
 
 ### E10 - Labeled and action
