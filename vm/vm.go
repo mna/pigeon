@@ -223,6 +223,7 @@ func (v *ϡvm) dispatch() interface{} {
 			}
 
 		case ϡopDebug:
+			// TODO : print n instructions above and below, stacks, decode args
 
 		case ϡopExit:
 			return v.v.pop()
