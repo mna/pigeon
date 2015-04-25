@@ -192,6 +192,8 @@ func (v *ϡvm) dispatch() interface{} {
 			v.v.push(val)
 
 		case ϡopCallB:
+			v.cur.pos = v.parser.pt.position
+			v.cur.text = nil
 			if a0 >= len(v.pg.bs) {
 				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
 			}

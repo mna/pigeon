@@ -7,14 +7,15 @@ import (
 
 func TestTemplate(t *testing.T) {
 	data := genData{
-		Init: "this is init code",
+		Init:         "this is init code",
+		ReceiverName: "cc",
 		As: []struct {
-			ReceiverName string
-			RuleName     string
-			ExprIndex    int
-			Code         string
+			RuleName  string
+			ExprIndex int
+			Args      []string
+			Code      string
 		}{
-			{"c", "ruleA", 1, "this is code!"},
+			{"ruleA", 1, nil, "this is code!"},
 		},
 	}
 	if err := tpl.Execute(os.Stdout, data); err != nil {

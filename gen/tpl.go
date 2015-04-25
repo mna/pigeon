@@ -6,13 +6,21 @@ var tpl = template.New("gen")
 
 // TODO : better name...
 type genData struct {
-	Init string // init code block
+	Instrs       []uint64
+	Init         string // init code block
+	ReceiverName string
 
 	As []struct {
-		ReceiverName string
-		RuleName     string
-		ExprIndex    int
-		Code         string
+		RuleName  string
+		ExprIndex int
+		Args      []string
+		Code      string
+	}
+	Bs []struct {
+		RuleName  string
+		ExprIndex int
+		Args      []string
+		Code      string
 	}
 }
 
@@ -20,12 +28,14 @@ const codeTpl = `
 {{.Init}}
 
 {{range .As}}
-func ({{ .ReceiverName }} *current) on{{ .RuleName }}{{ .ExprIndex }}() (interface{}, error) {
+func ({{ $.ReceiverName }} *current) on{{ .RuleName }}{{ .ExprIndex }}() (interface{}, error) {
 {{ .Code }}	
 }
 
-func ({{ .ReceiverName }} *current) callOn{{ .RuleName }}{{ .ExprIndex }}() (interface{}, error) {
-{{ .Code }}	
+func (v *ϡvm) callOn{{ .RuleName }}{{ .ExprIndex }}() (interface{}, error) {
+{{range .Args}}
+
+{{end}}
 }
 {{end}}
 `
