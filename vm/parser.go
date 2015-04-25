@@ -18,7 +18,7 @@ type position struct {
 
 // String formats a position as a string.
 func (p position) String() string {
-	return fmt.Sprintf("%d:%d [%d]", p.line, p.col, p.offset)
+	return fmt.Sprintf("%d:%d (%d)", p.line, p.col, p.offset)
 }
 
 // current represents current matching data. It is the value on which

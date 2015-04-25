@@ -56,8 +56,22 @@ type ϡprogram struct {
 	// ss[instrToRule[instrIndex]] == name of the rule
 	//
 	// Since instructions are limited to 65535, the size of this slice
-	// is bounded to a reasonable number.
+	// is bounded.
 	instrToRule []int
+}
+
+// ruleNameAt returns the name of the rule that contains the instruction
+// index. It returns an empty string is the instruction is not part of a
+// rule (bootstrap instruction, invalid index).
+func (pg ϡprogram) ruleNameAt(instrIx int) string {
+	if instrIx < 0 || instrIx >= len(pg.instrToRule) {
+		return ""
+	}
+	ssIx := pg.instrToRule[instrIx]
+	if ssIx < 0 || ssIx >= len(pg.ss) {
+		return ""
+	}
+	return pg.ss[ssIx]
 }
 
 type ϡvm struct {
@@ -99,11 +113,15 @@ func (v *ϡvm) setOptions(opts []Option) *ϡvm {
 	return v
 }
 
+// addErr adds the error at the current parser position, without rule name
+// information.
 func (v *ϡvm) addErr(err error) {
-	v.addErrAt(err, v.parser.pt.position)
+	v.addErrAt(err, -1, v.parser.pt.position)
 }
 
-func (v *ϡvm) addErrAt(err error, pos position) {
+// addErrAt adds the error at the specified position, for the instruction
+// at instrIx.
+func (v *ϡvm) addErrAt(err error, instrIx int, pos position) {
 	var buf bytes.Buffer
 	if v.filename != "" {
 		buf.WriteString(v.filename)
@@ -112,18 +130,13 @@ func (v *ϡvm) addErrAt(err error, pos position) {
 		buf.WriteString(":")
 	}
 	buf.WriteString(fmt.Sprintf("%s", pos))
-	// TODO : add rule ID or display name
-	// if len(p.rstack) > 0 {
-	// 	if buf.Len() > 0 {
-	// 		buf.WriteString(": ")
-	// 	}
-	// 	rule := p.rstack[len(p.rstack)-1]
-	// 	if rule.displayName != "" {
-	// 		buf.WriteString("rule " + rule.displayName)
-	// 	} else {
-	// 		buf.WriteString("rule " + rule.name)
-	// 	}
-	// }
+
+	ruleNm := v.pg.ruleNameAt(instrIx)
+	if ruleNm != "" {
+		buf.WriteString(": ")
+		buf.WriteString("rule " + ruleNm)
+	}
+
 	pe := &parserError{Inner: err, ϡprefix: buf.String()}
 	v.errs.ϡadd(pe)
 }
@@ -131,7 +144,6 @@ func (v *ϡvm) addErrAt(err error, pos position) {
 // run executes the provided program in this VM, and returns the result.
 func (v *ϡvm) run(pg *ϡprogram) (interface{}, error) {
 	v.pg = pg
-	// TODO : add a vm.init() or reset()?
 	ret := v.dispatch()
 
 	// if the match failed, translate that to a nil result and make
@@ -175,7 +187,7 @@ func (v *ϡvm) dispatch() interface{} {
 			fn := v.pg.as[a0]
 			val, err := fn(v)
 			if err != nil {
-				v.addErrAt(err, start.position)
+				v.addErrAt(err, v.pc-1, start.position)
 			}
 			v.v.push(val)
 
@@ -186,7 +198,7 @@ func (v *ϡvm) dispatch() interface{} {
 			fn := v.pg.bs[a0]
 			val, err := fn(v)
 			if err != nil {
-				v.addErr(err)
+				v.addErrAt(err, v.pc-1, v.parser.pt.position)
 			}
 			if !val {
 				v.v.push(ϡmatchFailed)
