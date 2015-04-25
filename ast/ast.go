@@ -428,10 +428,7 @@ outer:
 		case '\\':
 			rn, _, _ := r.ReadRune()
 			switch rn {
-			case ']':
-				chars = append(chars, rn)
-				continue
-			case '^':
+			case ']', '^':
 				chars = append(chars, rn)
 				continue
 
