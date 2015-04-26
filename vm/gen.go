@@ -37,21 +37,35 @@ func (g *Generator) Generate(gr *ast.Grammar) error {
 	}
 
 	g.pg.Init = gr.Init.Val
-	// if err := g.bootstrap(gr); err != nil {
-	// 	return err
-	// }
-	// for _, r := range gr.Rules {
-	// 	g.rule(r)
-	// }
+	g.bootstrap()
+	for _, r := range gr.Rules {
+		g.rule(r)
+	}
 
 	return g.err
 }
 
 type program struct {
-	Instrs []uint64
+	Instrs []ϡinstr
 	Init   string
 }
 
-func (g *Generator) bootstrap() {
+func (g *Generator) rule(r *ast.Rule) {
 
+}
+
+// bootstrap adds the bootstrapping opcode sequence to the program's
+// instructions.
+func (g *Generator) bootstrap() {
+	g.encode(ϡopPush, ϡistackID, 3)
+	g.encode(ϡopCall)
+	g.encode(ϡopExit)
+}
+
+func (g *Generator) encode(op ϡop, args ...int) {
+	if g.err == nil {
+		instr, err := ϡencodeInstr(ϡopExit)
+		g.err = err
+		g.pg.Instrs = append(g.pg.Instrs, instr...)
+	}
 }

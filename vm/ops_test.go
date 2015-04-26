@@ -121,7 +121,7 @@ func TestEncodeInstrValid(t *testing.T) {
 		{ϡopmax - 1, nil, []uint64{uint64(ϡopmax-1) << 58}},
 	}
 	for i, tc := range cases {
-		got, err := ϡencodeInstr(tc.op, tc.args)
+		got, err := ϡencodeInstr(tc.op, tc.args...)
 
 		if err != nil {
 			t.Errorf("%d: got error %v", i, err)
@@ -161,7 +161,7 @@ func TestEncodeInstrLimits(t *testing.T) {
 	}
 
 	for i, tc := range cases {
-		_, err := ϡencodeInstr(tc.op, tc.args)
+		_, err := ϡencodeInstr(tc.op, tc.args...)
 
 		if (err == nil) != (tc.err == "") {
 			t.Errorf("%d: want error? %t, got %v", i, tc.err == "", err)

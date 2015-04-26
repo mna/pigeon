@@ -113,7 +113,7 @@ func (i ϡinstr) decodeLs() (ix0, ix1, ix2, ix3 int) {
 // ϡencodeInstr encodes the provided operation and its arguments into
 // a list of instruction values. It may return an error if any part
 // of the instruction overflows the allowed values.
-func ϡencodeInstr(op ϡop, args []int) ([]ϡinstr, error) {
+func ϡencodeInstr(op ϡop, args ...int) ([]ϡinstr, error) {
 	var is []ϡinstr
 
 	if op >= ϡopmax {
