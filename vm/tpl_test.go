@@ -1,4 +1,4 @@
-package gen
+package vm
 
 import (
 	"os"
