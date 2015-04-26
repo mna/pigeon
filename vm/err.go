@@ -6,10 +6,6 @@ import (
 )
 
 var (
-	// errNoRule is returned when the grammar to parse has no rule.
-	// TODO : probably returned by builder now?
-	errNoRule = errors.New("grammar has no rule")
-
 	// errInvalidEncoding is returned when the source is not properly
 	// utf8-encoded.
 	errInvalidEncoding = errors.New("invalid encoding")

@@ -1,9 +1,15 @@
 package gen
 
 import (
+	"errors"
 	"io"
 
 	"github.com/PuerkitoBio/pigeon/ast"
+)
+
+var (
+	// errNoRule is returned when the grammar to generate has no rule.
+	errNoRule = errors.New("grammar has no rule")
 )
 
 // Option is a function that can set an option on the code generator.
@@ -35,11 +41,25 @@ type generator struct {
 
 	// options
 	recvName string
+
+	pg program
 }
 
 // generate generates the PEG parser's code to g.w for the provider
 // grammar gr.
 func (g *generator) generate(gr *ast.Grammar) error {
+	if len(gr.Rules) == 0 {
+		return errNoRule
+	}
+
+	g.pg.Init = gr.Init.Val
+	// if err := g.bootstrap(gr); err != nil {
+	// 	return err
+	// }
+	// for _, r := range gr.Rules {
+	// 	g.rule(r)
+	// }
+
 	return g.err
 }
 
