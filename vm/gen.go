@@ -2,6 +2,7 @@ package vm
 
 import (
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/PuerkitoBio/pigeon/ast"
@@ -48,10 +49,89 @@ func (g *Generator) Generate(gr *ast.Grammar) error {
 type program struct {
 	Instrs []ϡinstr
 	Init   string
+	Ms     []ast.Expression
+	Ss     []string
+
+	ruleNmIx int
+	exprIx   int
+
+	mss map[string]int
+	mms map[string]int
+}
+
+func (pg *program) matcher(raw string, expr ast.Expression) int {
+	if pg.mms == nil {
+		pg.mms = make(map[string]int)
+	}
+	ix, ok := pg.mms[raw]
+	if !ok {
+		pg.Ms = append(pg.Ms, expr)
+		ix = len(pg.Ms) - 1
+		pg.mms[raw] = ix
+	}
+	return ix
+}
+
+func (pg *program) string(s string) int {
+	if pg.mss == nil {
+		pg.mss = make(map[string]int)
+	}
+	ix, ok := pg.mss[s]
+	if !ok {
+		pg.Ss = append(pg.Ss, s)
+		ix = len(pg.Ss) - 1
+		pg.mss[s] = ix
+	}
+	return ix
 }
 
 func (g *Generator) rule(r *ast.Rule) {
+	// store the rule's Identifier or Display name in the strings array
+	s := r.Name.Val
+	if r.DisplayName != nil {
+		s = r.DisplayName.Val
+	}
+	g.pg.ruleNmIx = g.pg.string(s)
+	g.pg.exprIx = 0
 
+	g.expr(r.Expr)
+}
+
+func (g *Generator) expr(expr ast.Expression) {
+	g.pg.exprIx++
+	switch expr := expr.(type) {
+	case *ast.ActionExpr:
+	case *ast.AndCodeExpr:
+	case *ast.AndExpr:
+	case *ast.AnyMatcher:
+		g.anyMatcher(expr)
+	case *ast.CharClassMatcher:
+	case *ast.ChoiceExpr:
+	case *ast.LabeledExpr:
+	case *ast.LitMatcher:
+	case *ast.NotCodeExpr:
+	case *ast.NotExpr:
+	case *ast.OneOrMoreExpr:
+	case *ast.RuleRefExpr:
+	case *ast.SeqExpr:
+	case *ast.ZeroOrMoreExpr:
+	case *ast.ZeroOrOneExpr:
+	default:
+		g.err = fmt.Errorf("unknown expression type %T", expr)
+	}
+}
+
+func (g *Generator) anyMatcher(e *ast.AnyMatcher) {
+	mIx := g.pg.matcher(e.Val, e)
+	g.matcher(mIx)
+}
+
+// matcher generates the instructions to call the matcher at index mIx.
+func (g *Generator) matcher(mIx int) {
+	g.encode(ϡopPush, ϡpstackID)
+	g.encode(ϡopMatch, mIx)
+	g.encode(ϡopRestoreIfF)
+	g.encode(ϡopReturn)
 }
 
 // bootstrap adds the bootstrapping opcode sequence to the program's
