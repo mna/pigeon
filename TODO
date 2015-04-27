@@ -1,3 +1,4 @@
 - refactor implementation as a VM to avoid stack overflow in pathological cases (and maybe better performance): in branch wip-vm
+- return an error if there is a duplicate rule name (may already be caught, but add a test)
 ? options like current receiver name read directly from the grammar file
 ? type annotations for generated code functions

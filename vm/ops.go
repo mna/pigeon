@@ -30,7 +30,16 @@ const (
 	ϡopStoreIfT
 	ϡopTakeLOrJump
 	ϡopDebug
-	ϡopmax // must always be last
+	ϡopmax // must always be after the last valid opcode
+
+	// ϡopPlaceholder is an (invalid) opcode used by the Generator
+	// to insert opcodes that need the index of the starting instruction
+	// of a rule that hasn't been generated yet.
+	//
+	// It must be placed after ϡopmax (because it is invalid in the
+	// final program) and it has one argument, the index in the strings
+	// array of the identifier of the rule.
+	ϡopPlaceholder
 )
 
 // ϡlookupOp translates an opcode to a string.

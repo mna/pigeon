@@ -50,28 +50,29 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 	}
 
 	g.pg.Init = gr.Init.Val
-	if g.bootstrap(); g.err == nil {
-		for _, r := range gr.Rules {
-			g.rule(r)
-			if g.err != nil {
-				break
-			}
+	for i, r := range gr.Rules {
+		if i == 0 {
+			g.bootstrap(r)
+		}
+		g.rule(r)
+		if g.err != nil {
+			break
 		}
 	}
 	return &g.pg, g.err
 }
 
 type program struct {
-	Instrs []ϡinstr
 	Init   string
-	Ms     []ast.Expression
-	Ss     []string
+	Instrs []ϡinstr
+
+	Ms  []ast.Expression
+	Ss  []string
+	mss map[string]int
+	mms map[string]int
 
 	ruleNmIx int
 	exprIx   int
-
-	mss map[string]int
-	mms map[string]int
 }
 
 func (pg *program) matcher(raw string, expr ast.Expression) int {
@@ -116,8 +117,11 @@ func (g *Generator) expr(expr ast.Expression) int {
 	g.pg.exprIx++
 	switch expr := expr.(type) {
 	case *ast.ActionExpr:
+		return g.action(expr)
 	case *ast.AndCodeExpr:
+		return g.andNotCode(expr.Code, true)
 	case *ast.AndExpr:
+		return g.andNot(expr.Expr, true)
 	case *ast.AnyMatcher:
 		return g.anyMatcher(expr)
 	case *ast.CharClassMatcher:
@@ -125,13 +129,17 @@ func (g *Generator) expr(expr ast.Expression) int {
 	case *ast.ChoiceExpr:
 		return g.choice(expr)
 	case *ast.LabeledExpr:
+		return g.labeled(expr)
 	case *ast.LitMatcher:
 		return g.litMatcher(expr)
 	case *ast.NotCodeExpr:
+		return g.andNotCode(expr.Code, false)
 	case *ast.NotExpr:
+		return g.andNot(expr.Expr, false)
 	case *ast.OneOrMoreExpr:
 		return g.oneOrMore(expr)
 	case *ast.RuleRefExpr:
+		return g.ruleRef(expr)
 	case *ast.SeqExpr:
 		return g.sequence(expr)
 	case *ast.ZeroOrMoreExpr:
@@ -168,6 +176,68 @@ func (g *Generator) litMatcher(e *ast.LitMatcher) int {
 	// will be used.
 	mIx := g.pg.matcher(raw, e)
 	return g.matcher(mIx)
+}
+
+func (g *Generator) andNotCode(code *ast.CodeBlock, and bool) int {
+	start := g.encode(ϡopCallB, 0) // TODO : B thunk index
+	if and {
+		g.encode(ϡopNilIfT)
+	} else {
+		g.encode(ϡopNilIfF)
+	}
+	g.encode(ϡopReturn)
+	return start
+}
+
+func (g *Generator) action(e *ast.ActionExpr) int {
+	ix := g.expr(e.Expr)
+
+	start := g.encode(ϡopPush, ϡpstackID)
+	g.encode(ϡopPush, ϡistackID, ix)
+	g.encode(ϡopCall)
+	g.encodeJumpDelta(ϡopJumpIfF, +3)
+	g.encode(ϡopCallA, 0) // TODO : A thunk index
+	g.encode(ϡopReturn)
+	g.encode(ϡopPop, ϡpstackID)
+	g.encode(ϡopReturn)
+	return start
+}
+
+func (g *Generator) labeled(e *ast.LabeledExpr) int {
+	ix := g.expr(e.Expr)
+	lbl := e.Label.Val
+	lblIx := g.pg.string(lbl)
+
+	start := g.encode(ϡopPush, ϡistackID, ix)
+	g.encode(ϡopCall)
+	g.encode(ϡopStoreIfT, lblIx)
+	g.encode(ϡopReturn)
+	return start
+}
+
+func (g *Generator) andNot(subExpr ast.Expression, and bool) int {
+	ix := g.expr(subExpr)
+	start := g.encode(ϡopPush, ϡpstackID)
+	g.encode(ϡopPush, ϡistackID, ix)
+	g.encode(ϡopCall)
+	if and {
+		g.encode(ϡopNilIfT)
+	} else {
+		g.encode(ϡopNilIfF)
+	}
+	g.encode(ϡopRestore)
+	g.encode(ϡopReturn)
+	return start
+}
+
+func (g *Generator) ruleRef(e *ast.RuleRefExpr) int {
+	nm := e.Name.Val
+	ix := g.pg.string(nm)
+
+	start := g.encode(ϡopPlaceholder, ix)
+	g.encode(ϡopCall)
+	g.encode(ϡopReturn)
+	return start
 }
 
 func (g *Generator) zeroOrOne(e *ast.ZeroOrOneExpr) int {
@@ -261,10 +331,11 @@ func (g *Generator) matcher(mIx int) int {
 
 // bootstrap adds the bootstrapping opcode sequence to the program's
 // instructions.
-func (g *Generator) bootstrap() {
-	// TODO : that's no good, entry point might not be instr 3 (e.g. if first
-	// rule is a sequence)
-	g.encode(ϡopPush, ϡistackID, 3)
+func (g *Generator) bootstrap(r *ast.Rule) {
+	nm := r.Name.Val
+	ix := g.pg.string(nm)
+
+	g.encode(ϡopPlaceholder, ix)
 	g.encode(ϡopCall)
 	g.encode(ϡopExit)
 }

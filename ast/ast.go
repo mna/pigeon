@@ -116,9 +116,10 @@ func (c *ChoiceExpr) String() string {
 // ActionExpr is an expression that has an associated block of code to
 // execute when the expression matches.
 type ActionExpr struct {
-	p      Pos
-	Expr   Expression
-	Code   *CodeBlock
+	p    Pos
+	Expr Expression
+	Code *CodeBlock
+	// TODO : will be able to remove those once vm generator is done
 	FuncIx int
 }
 
