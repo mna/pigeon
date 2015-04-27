@@ -112,7 +112,6 @@ func (g *Generator) rule(r *ast.Rule) int {
 	return g.expr(r.Expr)
 }
 
-// TODO : return index of start instruction
 func (g *Generator) expr(expr ast.Expression) int {
 	g.pg.exprIx++
 	switch expr := expr.(type) {
@@ -120,21 +119,25 @@ func (g *Generator) expr(expr ast.Expression) int {
 	case *ast.AndCodeExpr:
 	case *ast.AndExpr:
 	case *ast.AnyMatcher:
-		g.anyMatcher(expr)
+		return g.anyMatcher(expr)
 	case *ast.CharClassMatcher:
-		g.charClassMatcher(expr)
+		return g.charClassMatcher(expr)
 	case *ast.ChoiceExpr:
+		return g.choice(expr)
 	case *ast.LabeledExpr:
 	case *ast.LitMatcher:
-		g.litMatcher(expr)
+		return g.litMatcher(expr)
 	case *ast.NotCodeExpr:
 	case *ast.NotExpr:
 	case *ast.OneOrMoreExpr:
+		return g.oneOrMore(expr)
 	case *ast.RuleRefExpr:
 	case *ast.SeqExpr:
-		g.sequence()
+		return g.sequence(expr)
 	case *ast.ZeroOrMoreExpr:
+		return g.zeroOrMore(expr)
 	case *ast.ZeroOrOneExpr:
+		return g.zeroOrOne(expr)
 	default:
 		g.err = fmt.Errorf("unknown expression type %T", expr)
 	}
@@ -167,8 +170,84 @@ func (g *Generator) litMatcher(e *ast.LitMatcher) int {
 	return g.matcher(mIx)
 }
 
-func (g *Generator) sequence() int {
-	return 0
+func (g *Generator) zeroOrOne(e *ast.ZeroOrOneExpr) int {
+	ix := g.expr(e.Expr)
+
+	start := g.encode(ϡopPush, ϡistackID, ix)
+	g.encode(ϡopCall)
+	g.encodeJumpDelta(ϡopPopVJumpIfF, +2)
+	g.encode(ϡopReturn)
+	g.encode(ϡopPush, ϡvstackID, ϡvValNil)
+	g.encode(ϡopReturn)
+	return start
+}
+
+func (g *Generator) oneOrMore(e *ast.OneOrMoreExpr) int {
+	ix := g.expr(e.Expr)
+
+	start := g.encode(ϡopPush, ϡvstackID, ϡvValFailed)
+	g.encode(ϡopPush, ϡistackID, ix)
+	g.encode(ϡopCall)
+	g.encodeJumpDelta(ϡopPopVJumpIfF, +3)
+	g.encode(ϡopCumulOrF)
+	g.encodeJumpDelta(ϡopJump, -4)
+	g.encode(ϡopReturn)
+	return start
+}
+
+func (g *Generator) zeroOrMore(e *ast.ZeroOrMoreExpr) int {
+	ix := g.expr(e.Expr)
+
+	start := g.encode(ϡopPush, ϡvstackID, ϡvValEmpty)
+	g.encode(ϡopPush, ϡistackID, ix)
+	g.encode(ϡopCall)
+	g.encodeJumpDelta(ϡopPopVJumpIfF, +3)
+	g.encode(ϡopCumulOrF)
+	g.encodeJumpDelta(ϡopJump, -4)
+	g.encode(ϡopReturn)
+	return start
+}
+
+func (g *Generator) choice(e *ast.ChoiceExpr) int {
+	// first generate code for each of the choice's expressions
+	indices := make([]int, len(e.Alternatives)+1)
+	for i, se := range e.Alternatives {
+		indices[i+1] = g.expr(se)
+	}
+
+	// then generate the sequence's instructions
+	indices[0] = ϡlstackID
+	start := g.encode(ϡopPush, indices...)
+	g.encodeJumpDelta(ϡopTakeLOrJump, +4)
+	g.encode(ϡopCall)
+	g.encodeJumpDelta(ϡopJumpIfT, +2)
+	g.encodeJumpDelta(ϡopJump, -3)
+	g.encode(ϡopPop, ϡlstackID)
+	g.encode(ϡopReturn)
+	return start
+}
+
+func (g *Generator) sequence(e *ast.SeqExpr) int {
+	// first generate code for each of the sequence's expressions
+	indices := make([]int, len(e.Exprs)+1)
+	for i, se := range e.Exprs {
+		indices[i+1] = g.expr(se)
+	}
+
+	// then generate the sequence's instructions
+	start := g.encode(ϡopPush, ϡpstackID)
+	g.encode(ϡopPush, ϡvstackID, ϡvValFailed)
+	indices[0] = ϡlstackID
+	g.encode(ϡopPush, indices...)
+	g.encodeJumpDelta(ϡopTakeLOrJump, +5)
+	g.encode(ϡopCall)
+	g.encode(ϡopCumulOrF)
+	g.encodeJumpDelta(ϡopJumpIfF, +2)
+	g.encodeJumpDelta(ϡopJump, -4)
+	g.encode(ϡopPop, ϡlstackID)
+	g.encode(ϡopRestoreIfF)
+	g.encode(ϡopReturn)
+	return start
 }
 
 // matcher generates the instructions to call the matcher at index mIx.
@@ -188,6 +267,10 @@ func (g *Generator) bootstrap() {
 	g.encode(ϡopPush, ϡistackID, 3)
 	g.encode(ϡopCall)
 	g.encode(ϡopExit)
+}
+
+func (g *Generator) encodeJumpDelta(op ϡop, delta int) int {
+	return g.encode(op, delta+len(g.pg.Instrs))
 }
 
 func (g *Generator) encode(op ϡop, args ...int) int {

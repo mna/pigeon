@@ -24,6 +24,10 @@ const (
 	ϡlstackID
 	ϡvstackID
 	ϡistackID
+
+	ϡvValNil    = 0
+	ϡvValFailed = 1
+	ϡvValEmpty  = 2
 )
 
 // special values that may be pushed on the V stack.
