@@ -34,6 +34,25 @@ func TestGenerateProgram(t *testing.T) {
 				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
 				mustEncodeInstr(t, ϡopCall),
 				mustEncodeInstr(t, ϡopExit),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms:          []string{`"m"`},
+			Ss:          []string{"A"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 4)),
+		}, nil},
+
+		// matcher expression with an Init
+		{"{x}\nA = 'm'", &testProgram{
+			Init: "x",
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// 'm'
 				mustEncodeInstr(t, ϡopPush, ϡpstackID),
 				mustEncodeInstr(t, ϡopMatch, 0),
 				mustEncodeInstr(t, ϡopRestoreIfF),
@@ -218,6 +237,128 @@ func TestGenerateProgram(t *testing.T) {
 			Ss:          []string{"A", "B"},
 			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 3), rpt(1, 4)),
 		}, nil},
+
+		// and expression
+		{"A = &'m'", &testProgram{
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 7),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// and (7)
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopNilIfT),
+				mustEncodeInstr(t, ϡopRestore),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms:          []string{`"m"`},
+			Ss:          []string{"A"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 10)),
+		}, nil},
+
+		// not expression
+		{"A = !'m'", &testProgram{
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 7),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// not (7)
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopNilIfF),
+				mustEncodeInstr(t, ϡopRestore),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms:          []string{`"m"`},
+			Ss:          []string{"A"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 10)),
+		}, nil},
+
+		// not code expression
+		// TODO : bug in bootstrap parser, doesn't support code predicates
+		// {"A = 'a' !{ x }", &testProgram{
+		// 	Instrs: combineInstrs(
+		// 		mustEncodeInstr(t, ϡopPush, ϡistackID, 7),
+		// 		mustEncodeInstr(t, ϡopCall),
+		// 		mustEncodeInstr(t, ϡopExit),
+		// 		// not code (4)
+		// 		mustEncodeInstr(t, ϡopCallB, 0),
+		// 		mustEncodeInstr(t, ϡopNilIfF),
+		// 		mustEncodeInstr(t, ϡopReturn),
+		// 	),
+		// 	Ss: []string{"A"},
+		// 	Bs: []*thunkInfo{&thunkInfo{
+		// 		RuleNm: "A",
+		// 		Code:   "x",
+		// 		ExprIx: 1,
+		// 	}},
+		// 	InstrToRule: combineInts(rpt(-1, 3), rpt(0, 10)),
+		// }, nil},
+
+		// labeled expression
+		{"A = label:'m'", &testProgram{
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 7),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// label (7)
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopStoreIfT, 1),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms:          []string{`"m"`},
+			Ss:          []string{"A", "label"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 8)),
+		}, nil},
+
+		// action expression
+		{"A = 'm' {x}", &testProgram{
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 7),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// action (7)
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopJumpIfF, 13),
+				mustEncodeInstr(t, ϡopCallA, 0),
+				mustEncodeInstr(t, ϡopReturn),
+				mustEncodeInstr(t, ϡopPop, ϡpstackID),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms: []string{`"m"`},
+			Ss: []string{"A"},
+			As: []*thunkInfo{&thunkInfo{
+				RuleNm: "A",
+				ExprIx: 1,
+				Code:   "x",
+			}},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 12)),
+		}, nil},
 	}
 
 	for _, tc := range cases {
@@ -365,6 +506,32 @@ func compareThunkInfos(t *testing.T, label, thunkType string, want, got []*thunk
 		min = l
 	}
 	for i := 0; i < min; i++ {
-		// TODO ...
+		compareThunkInfo(t, label, thunkType, i, want[i], got[i])
+	}
+}
+
+func compareThunkInfo(t *testing.T, label, thunkType string, id int, want, got *thunkInfo) {
+	// compare parameters
+	if len(want.Parms) != len(got.Parms) {
+		t.Errorf("%q: %s %d: want %d params, got %d", label, thunkType, id, len(want.Parms), len(got.Parms))
+	}
+	min := len(want.Parms)
+	if l := len(got.Parms); l < min {
+		min = l
+	}
+	for i := 0; i < min; i++ {
+		if want.Parms[i] != got.Parms[i] {
+			t.Errorf("%q: %s %d: param %d: want %q, got %q", label, thunkType, id, i, want.Parms[i], got.Parms[i])
+		}
+	}
+
+	if want.RuleNm != got.RuleNm {
+		t.Errorf("%q: %s %d: want rule name %q, got %q", label, thunkType, id, want.RuleNm, got.RuleNm)
+	}
+	if want.ExprIx != got.ExprIx {
+		t.Errorf("%q: %s %d: want expression index %d, got %d", label, thunkType, id, want.ExprIx, got.ExprIx)
+	}
+	if want.Code != got.Code {
+		t.Errorf("%q: %s %d: want code %q, got %q", label, thunkType, id, want.Code, got.Code)
 	}
 }

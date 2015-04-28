@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 
 	"github.com/PuerkitoBio/pigeon/ast"
 )
@@ -50,7 +51,7 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 	}
 
 	if gr.Init != nil {
-		g.pg.Init = gr.Init.Val
+		g.pg.Init = unwrapCode(gr.Init.Val)
 	}
 	g.pg.ruleNmStartIx = make(map[int]int)
 	g.pg.ruleNmEntryIx = make(map[int]int)
@@ -238,7 +239,7 @@ func (g *Generator) andNotCode(code *ast.CodeBlock, and bool) int {
 		Parms:  g.pg.parmsSet[g.pg.exprIx],
 		RuleNm: g.pg.Ss[g.pg.ruleNmIx],
 		ExprIx: g.pg.exprIx,
-		Code:   code.Val,
+		Code:   unwrapCode(code.Val),
 	}
 	g.pg.Bs = append(g.pg.Bs, th)
 
@@ -259,7 +260,7 @@ func (g *Generator) action(e *ast.ActionExpr) int {
 		Parms:  g.pg.parmsSet[g.pg.exprIx],
 		RuleNm: g.pg.Ss[g.pg.ruleNmIx],
 		ExprIx: g.pg.exprIx,
-		Code:   e.Code.Val,
+		Code:   unwrapCode(e.Code.Val),
 	}
 	g.pg.As = append(g.pg.As, th)
 
@@ -457,4 +458,8 @@ func (g *Generator) encode(op ϡop, args ...int) int {
 		return start
 	}
 	return 0
+}
+
+func unwrapCode(val string) string {
+	return strings.TrimSpace(val)[1 : len(val)-1]
 }
