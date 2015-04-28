@@ -53,6 +53,7 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 		g.pg.Init = gr.Init.Val
 	}
 	g.pg.ruleNmStartIx = make(map[int]int)
+	g.pg.ruleNmEntryIx = make(map[int]int)
 	g.pg.ruleNmToDisNm = make(map[int]int)
 	for i, r := range gr.Rules {
 		if i == 0 {
@@ -112,8 +113,9 @@ type program struct {
 	ruleNmIx      int
 	exprIx        int
 	parmsSet      [][]string
-	ruleNmStartIx map[int]int
-	ruleNmToDisNm map[int]int
+	ruleNmStartIx map[int]int // rule name ix to first rule instr ix
+	ruleNmEntryIx map[int]int // rule name ix to entry point instr ix
+	ruleNmToDisNm map[int]int // rule name ix to rule display name ix
 }
 
 func (pg *program) matcher(raw string, expr ast.Expression) int {
@@ -142,8 +144,6 @@ func (pg *program) string(s string) int {
 	return ix
 }
 
-// TODO : need to return start ix (first instruction in this rule) and entry
-// point (where to jump to to run this rule).
 func (g *Generator) rule(r *ast.Rule) int {
 	// store the rule's Identifier and Display name in the strings array
 	g.pg.ruleNmIx = g.pg.string(r.Name.Val)
@@ -153,7 +153,9 @@ func (g *Generator) rule(r *ast.Rule) int {
 	}
 	g.pg.exprIx = 0
 
-	start := g.expr(r.Expr)
+	start := len(g.pg.Instrs)
+	entry := g.expr(r.Expr)
+	g.pg.ruleNmEntryIx[g.pg.ruleNmIx] = entry
 	g.pg.ruleNmStartIx[g.pg.ruleNmIx] = start
 	g.pg.ruleNmToDisNm[g.pg.ruleNmIx] = disNmIx
 	return start
@@ -190,13 +192,13 @@ func (g *Generator) expr(expr ast.Expression) int {
 	case *ast.NotExpr:
 		return g.andNot(expr.Expr, false)
 	case *ast.OneOrMoreExpr:
-		return g.oneOrMore(expr)
+		return g.repetition(expr.Expr, false)
 	case *ast.RuleRefExpr:
 		return g.ruleRef(expr)
 	case *ast.SeqExpr:
 		return g.sequence(expr)
 	case *ast.ZeroOrMoreExpr:
-		return g.zeroOrMore(expr)
+		return g.repetition(expr.Expr, true)
 	case *ast.ZeroOrOneExpr:
 		return g.zeroOrOne(expr)
 	default:
@@ -324,23 +326,14 @@ func (g *Generator) zeroOrOne(e *ast.ZeroOrOneExpr) int {
 	return start
 }
 
-func (g *Generator) oneOrMore(e *ast.OneOrMoreExpr) int {
-	ix := g.expr(e.Expr)
+func (g *Generator) repetition(subExpr ast.Expression, zeroOk bool) int {
+	ix := g.expr(subExpr)
 
-	start := g.encode(ϡopPush, ϡvstackID, ϡvValFailed)
-	g.encode(ϡopPush, ϡistackID, ix)
-	g.encode(ϡopCall)
-	g.encodeJumpDelta(ϡopPopVJumpIfF, +3)
-	g.encode(ϡopCumulOrF)
-	g.encodeJumpDelta(ϡopJump, -4)
-	g.encode(ϡopReturn)
-	return start
-}
-
-func (g *Generator) zeroOrMore(e *ast.ZeroOrMoreExpr) int {
-	ix := g.expr(e.Expr)
-
-	start := g.encode(ϡopPush, ϡvstackID, ϡvValEmpty)
+	vVal := ϡvValFailed
+	if zeroOk {
+		vVal = ϡvValEmpty
+	}
+	start := g.encode(ϡopPush, ϡvstackID, vVal)
 	g.encode(ϡopPush, ϡistackID, ix)
 	g.encode(ϡopCall)
 	g.encodeJumpDelta(ϡopPopVJumpIfF, +3)
@@ -423,7 +416,7 @@ func (g *Generator) fillPlaceholders() {
 		op, n, nmIx, _, _ = instr.decode()
 		n -= 3
 		if op == ϡopPlaceholder {
-			ix := g.pg.ruleNmStartIx[nmIx]
+			ix := g.pg.ruleNmEntryIx[nmIx]
 			newInstrs, _ := ϡencodeInstr(ϡopPush, ϡistackID, ix)
 			g.pg.Instrs[i] = newInstrs[0]
 		}

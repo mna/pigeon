@@ -27,6 +27,8 @@ func TestGenerateProgram(t *testing.T) {
 		err error
 	}{
 		{"", nil, errNoRule},
+
+		// matcher expression
 		{"A = 'm'", &testProgram{
 			Instrs: combineInstrs(
 				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
@@ -39,8 +41,10 @@ func TestGenerateProgram(t *testing.T) {
 			),
 			Ms:          []string{`"m"`},
 			Ss:          []string{"A"},
-			InstrToRule: []int{-1, -1, -1, 0, 0, 0, 0},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 4)),
 		}, nil},
+
+		// matcher with rule display name
 		{`A "Z" = 'm'`, &testProgram{
 			Instrs: combineInstrs(
 				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
@@ -53,8 +57,10 @@ func TestGenerateProgram(t *testing.T) {
 			),
 			Ms:          []string{`"m"`},
 			Ss:          []string{"A", "Z"},
-			InstrToRule: []int{-1, -1, -1, 1, 1, 1, 1},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(1, 4)),
 		}, nil},
+
+		// sequence expression
 		{`A  = 'm' 'n'`, &testProgram{
 			Instrs: combineInstrs(
 				mustEncodeInstr(t, ϡopPush, ϡistackID, 11),
@@ -85,7 +91,132 @@ func TestGenerateProgram(t *testing.T) {
 			),
 			Ms:          []string{`"m"`, `"n"`},
 			Ss:          []string{"A"},
-			InstrToRule: []int{-1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 19)),
+		}, nil},
+
+		// choice expression
+		{`A  = 'm' / 'n'`, &testProgram{
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 11),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// 'n'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 1),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// choice (11)
+				mustEncodeInstr(t, ϡopPush, ϡlstackID, 3, 7),
+				mustEncodeInstr(t, ϡopTakeLOrJump, 16),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopJumpIfT, 16),
+				mustEncodeInstr(t, ϡopJump, 12),
+				mustEncodeInstr(t, ϡopPop, ϡlstackID),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms:          []string{`"m"`, `"n"`},
+			Ss:          []string{"A"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 15)),
+		}, nil},
+
+		// zero or more expression
+		{`A  = 'm'*`, &testProgram{
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 7),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// zero or more (7)
+				mustEncodeInstr(t, ϡopPush, ϡvstackID, ϡvValEmpty),
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopPopVJumpIfF, 13),
+				mustEncodeInstr(t, ϡopCumulOrF),
+				mustEncodeInstr(t, ϡopJump, 8),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms:          []string{`"m"`},
+			Ss:          []string{"A"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 11)),
+		}, nil},
+
+		// one or more expression
+		{`A  = 'm'+`, &testProgram{
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 7),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// one or more (7)
+				mustEncodeInstr(t, ϡopPush, ϡvstackID, ϡvValFailed),
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopPopVJumpIfF, 13),
+				mustEncodeInstr(t, ϡopCumulOrF),
+				mustEncodeInstr(t, ϡopJump, 8),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms:          []string{`"m"`},
+			Ss:          []string{"A"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 11)),
+		}, nil},
+
+		// zero or one expression
+		{`A  = 'm'?`, &testProgram{
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 7),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// zero or one (7)
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopPopVJumpIfF, 11),
+				mustEncodeInstr(t, ϡopReturn),
+				mustEncodeInstr(t, ϡopPush, ϡvstackID, ϡvValNil),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms:          []string{`"m"`},
+			Ss:          []string{"A"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 10)),
+		}, nil},
+
+		// rule ref expression
+		{"A = B\nB = 'm'", &testProgram{
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// rule ref B
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 6),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopReturn),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms:          []string{`"m"`},
+			Ss:          []string{"A", "B"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 3), rpt(1, 4)),
 		}, nil},
 	}
 
@@ -109,6 +240,22 @@ func TestGenerateProgram(t *testing.T) {
 			comparePrograms(t, tc.in, tc.out, pg)
 		}
 	}
+}
+
+func combineInts(ints ...[]int) []int {
+	var ret []int
+	for _, ar := range ints {
+		ret = append(ret, ar...)
+	}
+	return ret
+}
+
+func rpt(n, x int) []int {
+	ret := make([]int, x)
+	for i := 0; i < x; i++ {
+		ret[i] = n
+	}
+	return ret
 }
 
 func combineInstrs(instrs ...[]ϡinstr) []ϡinstr {
