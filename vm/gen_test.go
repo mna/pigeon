@@ -27,7 +27,7 @@ func TestGenerateProgram(t *testing.T) {
 		err error
 	}{
 		{"", nil, errNoRule},
-		{"A = 'a'", &testProgram{
+		{"A = 'm'", &testProgram{
 			Instrs: combineInstrs(
 				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
 				mustEncodeInstr(t, ϡopCall),
@@ -37,11 +37,11 @@ func TestGenerateProgram(t *testing.T) {
 				mustEncodeInstr(t, ϡopRestoreIfF),
 				mustEncodeInstr(t, ϡopReturn),
 			),
-			Ms:          []string{`"a"`},
+			Ms:          []string{`"m"`},
 			Ss:          []string{"A"},
 			InstrToRule: []int{-1, -1, -1, 0, 0, 0, 0},
 		}, nil},
-		{`A "Z" = 'a'`, &testProgram{
+		{`A "Z" = 'm'`, &testProgram{
 			Instrs: combineInstrs(
 				mustEncodeInstr(t, ϡopPush, ϡistackID, 3),
 				mustEncodeInstr(t, ϡopCall),
@@ -51,9 +51,41 @@ func TestGenerateProgram(t *testing.T) {
 				mustEncodeInstr(t, ϡopRestoreIfF),
 				mustEncodeInstr(t, ϡopReturn),
 			),
-			Ms:          []string{`"a"`},
+			Ms:          []string{`"m"`},
 			Ss:          []string{"A", "Z"},
 			InstrToRule: []int{-1, -1, -1, 1, 1, 1, 1},
+		}, nil},
+		{`A  = 'm' 'n'`, &testProgram{
+			Instrs: combineInstrs(
+				mustEncodeInstr(t, ϡopPush, ϡistackID, 11),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopExit),
+				// 'm'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 0),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// 'n'
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopMatch, 1),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+				// seq (11)
+				mustEncodeInstr(t, ϡopPush, ϡpstackID),
+				mustEncodeInstr(t, ϡopPush, ϡvstackID, ϡvValFailed),
+				mustEncodeInstr(t, ϡopPush, ϡlstackID, 3, 7),
+				mustEncodeInstr(t, ϡopTakeLOrJump, 19),
+				mustEncodeInstr(t, ϡopCall),
+				mustEncodeInstr(t, ϡopCumulOrF),
+				mustEncodeInstr(t, ϡopJumpIfF, 19),
+				mustEncodeInstr(t, ϡopJump, 14),
+				mustEncodeInstr(t, ϡopPop, ϡlstackID),
+				mustEncodeInstr(t, ϡopRestoreIfF),
+				mustEncodeInstr(t, ϡopReturn),
+			),
+			Ms:          []string{`"m"`, `"n"`},
+			Ss:          []string{"A"},
+			InstrToRule: []int{-1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		}, nil},
 	}
 

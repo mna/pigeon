@@ -142,6 +142,8 @@ func (pg *program) string(s string) int {
 	return ix
 }
 
+// TODO : need to return start ix (first instruction in this rule) and entry
+// point (where to jump to to run this rule).
 func (g *Generator) rule(r *ast.Rule) int {
 	// store the rule's Identifier and Display name in the strings array
 	g.pg.ruleNmIx = g.pg.string(r.Name.Val)
