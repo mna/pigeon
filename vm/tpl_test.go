@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"os"
+	"io/ioutil"
 	"testing"
 )
 
@@ -18,7 +18,7 @@ func TestTemplate(t *testing.T) {
 			{"ruleA", 1, nil, "this is code!"},
 		},
 	}
-	if err := tpl.Execute(os.Stdout, data); err != nil {
+	if err := tpl.Execute(ioutil.Discard, data); err != nil {
 		t.Error(err)
 	}
 }
