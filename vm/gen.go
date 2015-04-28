@@ -62,17 +62,42 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 	return &g.pg, g.err
 }
 
+// this Generator-generated program will be used to write the
+// runtime ϡtheProgram variable, so it needs to have all the
+// information required to build this:
+//
+// type ϡprogram struct {
+// 	instrs []ϡinstr
+//
+// 	ms []ϡmatcher
+// 	as []func(*ϡvm) (interface{}, error)
+// 	bs []func(*ϡvm) (bool, error)
+// 	ss []string
+//
+// 	instrToRule []int
+// }
+
+type thunkInfo struct {
+	Parms  []string
+	RuleNm string
+	ExprIx int
+}
+
 type program struct {
 	Init   string
 	Instrs []ϡinstr
 
 	Ms  []ast.Expression
 	Ss  []string
+	As  []*thunkInfo
+	Bs  []*thunkInfo
 	mss map[string]int
 	mms map[string]int
 
-	ruleNmIx int
-	exprIx   int
+	ruleNmIx        int
+	ruleDisplayNmIx int
+	exprIx          int
+	parmsSet        [][]string
 }
 
 func (pg *program) matcher(raw string, expr ast.Expression) int {
@@ -102,12 +127,12 @@ func (pg *program) string(s string) int {
 }
 
 func (g *Generator) rule(r *ast.Rule) int {
-	// store the rule's Identifier or Display name in the strings array
-	s := r.Name.Val
+	// store the rule's Identifier and Display name in the strings array
+	g.pg.ruleNmIx = g.pg.string(r.Name.Val)
+	g.pg.ruleDisplayNmIx = g.pg.ruleNmIx
 	if r.DisplayName != nil {
-		s = r.DisplayName.Val
+		g.pg.ruleDisplayNmIx = g.pg.string(r.DisplayName.Val)
 	}
-	g.pg.ruleNmIx = g.pg.string(s)
 	g.pg.exprIx = 0
 
 	return g.expr(r.Expr)
@@ -115,6 +140,13 @@ func (g *Generator) rule(r *ast.Rule) int {
 
 func (g *Generator) expr(expr ast.Expression) int {
 	g.pg.exprIx++
+	if len(g.pg.parmsSet) < g.pg.exprIx {
+		g.pg.parmsSet = append(g.pg.parmsSet, nil)
+	}
+	defer func() {
+		g.pg.exprIx--
+	}()
+
 	switch expr := expr.(type) {
 	case *ast.ActionExpr:
 		return g.action(expr)
@@ -179,7 +211,14 @@ func (g *Generator) litMatcher(e *ast.LitMatcher) int {
 }
 
 func (g *Generator) andNotCode(code *ast.CodeBlock, and bool) int {
-	start := g.encode(ϡopCallB, 0) // TODO : B thunk index
+	th := &thunkInfo{
+		Parms:  g.pg.parmsSet[g.pg.exprIx],
+		RuleNm: g.pg.Ss[g.pg.ruleNmIx],
+		ExprIx: g.pg.exprIx,
+	}
+	g.pg.Bs = append(g.pg.Bs, th)
+
+	start := g.encode(ϡopCallB, len(g.pg.Bs)-1)
 	if and {
 		g.encode(ϡopNilIfT)
 	} else {
@@ -192,11 +231,18 @@ func (g *Generator) andNotCode(code *ast.CodeBlock, and bool) int {
 func (g *Generator) action(e *ast.ActionExpr) int {
 	ix := g.expr(e.Expr)
 
+	th := &thunkInfo{
+		Parms:  g.pg.parmsSet[g.pg.exprIx],
+		RuleNm: g.pg.Ss[g.pg.ruleNmIx],
+		ExprIx: g.pg.exprIx,
+	}
+	g.pg.As = append(g.pg.As, th)
+
 	start := g.encode(ϡopPush, ϡpstackID)
 	g.encode(ϡopPush, ϡistackID, ix)
 	g.encode(ϡopCall)
 	g.encodeJumpDelta(ϡopJumpIfF, +3)
-	g.encode(ϡopCallA, 0) // TODO : A thunk index
+	g.encode(ϡopCallA, len(g.pg.As)-1)
 	g.encode(ϡopReturn)
 	g.encode(ϡopPop, ϡpstackID)
 	g.encode(ϡopReturn)
@@ -207,6 +253,9 @@ func (g *Generator) labeled(e *ast.LabeledExpr) int {
 	ix := g.expr(e.Expr)
 	lbl := e.Label.Val
 	lblIx := g.pg.string(lbl)
+
+	setIx := g.pg.exprIx - 1
+	g.pg.parmsSet[setIx] = append(g.pg.parmsSet[setIx], lbl)
 
 	start := g.encode(ϡopPush, ϡistackID, ix)
 	g.encode(ϡopCall)
