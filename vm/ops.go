@@ -125,7 +125,7 @@ func (i ϡinstr) decodeLs() (ix0, ix1, ix2, ix3 int) {
 func ϡencodeInstr(op ϡop, args ...int) ([]ϡinstr, error) {
 	var is []ϡinstr
 
-	if op >= ϡopmax {
+	if op >= ϡopmax && op != ϡopPlaceholder {
 		return nil, errors.New("invalid op value")
 	}
 	if len(args) > ϡnMask {

@@ -49,8 +49,11 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 		return nil, errNoRule
 	}
 
-	g.pg.Init = gr.Init.Val
-	g.pg.ruleStartIx = make(map[int]int)
+	if gr.Init != nil {
+		g.pg.Init = gr.Init.Val
+	}
+	g.pg.ruleNmStartIx = make(map[int]int)
+	g.pg.ruleNmToDisNm = make(map[int]int)
 	for i, r := range gr.Rules {
 		if i == 0 {
 			g.bootstrap(r)
@@ -106,11 +109,11 @@ type program struct {
 	mss map[string]int
 	mms map[string]int
 
-	ruleNmIx        int
-	ruleDisplayNmIx int
-	exprIx          int
-	parmsSet        [][]string
-	ruleStartIx     map[int]int
+	ruleNmIx      int
+	exprIx        int
+	parmsSet      [][]string
+	ruleNmStartIx map[int]int
+	ruleNmToDisNm map[int]int
 }
 
 func (pg *program) matcher(raw string, expr ast.Expression) int {
@@ -142,14 +145,15 @@ func (pg *program) string(s string) int {
 func (g *Generator) rule(r *ast.Rule) int {
 	// store the rule's Identifier and Display name in the strings array
 	g.pg.ruleNmIx = g.pg.string(r.Name.Val)
-	g.pg.ruleDisplayNmIx = g.pg.ruleNmIx
+	disNmIx := g.pg.ruleNmIx
 	if r.DisplayName != nil {
-		g.pg.ruleDisplayNmIx = g.pg.string(r.DisplayName.Val)
+		disNmIx = g.pg.string(r.DisplayName.Val)
 	}
 	g.pg.exprIx = 0
 
 	start := g.expr(r.Expr)
-	g.pg.ruleStartIx[g.pg.ruleNmIx] = start
+	g.pg.ruleNmStartIx[g.pg.ruleNmIx] = start
+	g.pg.ruleNmToDisNm[g.pg.ruleNmIx] = disNmIx
 	return start
 }
 
@@ -417,7 +421,7 @@ func (g *Generator) fillPlaceholders() {
 		op, n, nmIx, _, _ = instr.decode()
 		n -= 3
 		if op == ϡopPlaceholder {
-			ix := g.pg.ruleStartIx[nmIx]
+			ix := g.pg.ruleNmStartIx[nmIx]
 			newInstrs, _ := ϡencodeInstr(ϡopPush, ϡistackID, ix)
 			g.pg.Instrs[i] = newInstrs[0]
 		}
@@ -428,11 +432,11 @@ func (g *Generator) instrToRule() {
 	g.pg.InstrToRule = make([]int, len(g.pg.Instrs))
 	// rule start index is necessarily > 0 because of the bootstrap sequence
 	startStartIx := 0
-	for ruleNmIx, startIx := range g.pg.ruleStartIx {
+	for ruleNmIx, startIx := range g.pg.ruleNmStartIx {
 		if startIx < startStartIx || startStartIx == 0 {
 			startStartIx = startIx
 		}
-		g.pg.InstrToRule[startIx] = ruleNmIx
+		g.pg.InstrToRule[startIx] = g.pg.ruleNmToDisNm[ruleNmIx]
 	}
 
 	// fill the blanks
@@ -451,7 +455,7 @@ func (g *Generator) encodeJumpDelta(op ϡop, delta int) int {
 
 func (g *Generator) encode(op ϡop, args ...int) int {
 	if g.err == nil {
-		instr, err := ϡencodeInstr(ϡopExit)
+		instr, err := ϡencodeInstr(op, args...)
 		g.err = err
 		start := len(g.pg.Instrs)
 		g.pg.Instrs = append(g.pg.Instrs, instr...)
