@@ -161,26 +161,35 @@ func TestGenerateProgram(t *testing.T) {
 			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 10)),
 		}, nil},
 
+		// and code expression
+		{"A = &{x}", &testProgram{
+			Instrs: combineInstrs(
+				encodeBootstrap(t, 3),
+				encodeCodePredicate(t, true, 0),
+			),
+			Ss: []string{"A"},
+			Bs: []*thunkInfo{&thunkInfo{
+				RuleNm: "A",
+				Code:   "x",
+				ExprIx: 1,
+			}},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 3)),
+		}, nil},
+
 		// not code expression
-		// TODO : bug in bootstrap parser, doesn't support code predicates
-		// {"A = 'a' !{ x }", &testProgram{
-		// 	Instrs: combineInstrs(
-		// 		mustEncodeInstr(t, ϡopPush, ϡistackID, 7),
-		// 		mustEncodeInstr(t, ϡopCall),
-		// 		mustEncodeInstr(t, ϡopExit),
-		// 		// not code (4)
-		// 		mustEncodeInstr(t, ϡopCallB, 0),
-		// 		mustEncodeInstr(t, ϡopNilIfF),
-		// 		mustEncodeInstr(t, ϡopReturn),
-		// 	),
-		// 	Ss: []string{"A"},
-		// 	Bs: []*thunkInfo{&thunkInfo{
-		// 		RuleNm: "A",
-		// 		Code:   "x",
-		// 		ExprIx: 1,
-		// 	}},
-		// 	InstrToRule: combineInts(rpt(-1, 3), rpt(0, 10)),
-		// }, nil},
+		{"A = !{x}", &testProgram{
+			Instrs: combineInstrs(
+				encodeBootstrap(t, 3),
+				encodeCodePredicate(t, false, 0),
+			),
+			Ss: []string{"A"},
+			Bs: []*thunkInfo{&thunkInfo{
+				RuleNm: "A",
+				Code:   "x",
+				ExprIx: 1,
+			}},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 3)),
+		}, nil},
 
 		// labeled expression
 		{"A = label:'m'", &testProgram{
@@ -476,6 +485,18 @@ func encodePredicate(t *testing.T, and bool, ix int) []ϡinstr {
 		mustEncodeInstr(t, ϡopCall),
 		mustEncodeInstr(t, op),
 		mustEncodeInstr(t, ϡopRestore),
+		mustEncodeInstr(t, ϡopReturn),
+	)
+}
+
+func encodeCodePredicate(t *testing.T, and bool, bIx int) []ϡinstr {
+	op := ϡopNilIfF
+	if and {
+		op = ϡopNilIfT
+	}
+	return combineInstrs(
+		mustEncodeInstr(t, ϡopCallB, bIx),
+		mustEncodeInstr(t, op),
 		mustEncodeInstr(t, ϡopReturn),
 	)
 }
