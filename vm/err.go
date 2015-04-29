@@ -10,8 +10,8 @@ var (
 	// utf8-encoded.
 	errInvalidEncoding = errors.New("invalid encoding")
 
-	// errNoMatch is returned if no match could be found.
-	// TODO : can this still be returned with ffp?
+	// errNoMatch is returned if no match could be found and no other
+	// error has been raised.
 	errNoMatch = errors.New("no match found")
 )
 
