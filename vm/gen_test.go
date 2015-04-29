@@ -2,6 +2,7 @@ package vm
 
 import (
 	"io/ioutil"
+	"math"
 	"strconv"
 	"strings"
 	"testing"
@@ -301,6 +302,33 @@ func TestGenerateProgram(t *testing.T) {
 			}},
 			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 47)),
 		}, nil},
+
+		// normalization of matchers
+		{"A = `m` 'm' `m`i", &testProgram{
+			Instrs: combineInstrs(
+				encodeBootstrap(t, 15),
+				encodeMatcher(t, 0), // 'm'
+				encodeMatcher(t, 0), // 'm'
+				encodeMatcher(t, 1), // 'm'i
+				encodeSequence(t, 15, 3, 7, 11),
+			),
+			Ms:          []string{`"m"`, `"m"i`},
+			Ss:          []string{"A"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 24)),
+		}, nil},
+
+		// test char class and any matchers
+		{"A = [a-z] .", &testProgram{
+			Instrs: combineInstrs(
+				encodeBootstrap(t, 11),
+				encodeMatcher(t, 0), // [a-z]
+				encodeMatcher(t, 1), // .
+				encodeSequence(t, 11, 3, 7),
+			),
+			Ms:          []string{`[a-z]`, `.`},
+			Ss:          []string{"A"},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 19)),
+		}, nil},
 	}
 
 	for _, tc := range cases {
@@ -375,15 +403,19 @@ func encodeMatcher(t *testing.T, mIx int) []ϡinstr {
 }
 
 func encodeSequence(t *testing.T, start int, ls ...int) []ϡinstr {
+	delta := 0
+	if len(ls) > 2 {
+		delta += int(math.Ceil(float64(len(ls)-2) / 4.0))
+	}
 	return combineInstrs(
 		mustEncodeInstr(t, ϡopPush, ϡpstackID),
 		mustEncodeInstr(t, ϡopPush, ϡvstackID, ϡvValFailed),
 		mustEncodeInstr(t, ϡopPush, append([]int{ϡlstackID}, ls...)...),
-		mustEncodeInstr(t, ϡopTakeLOrJump, start+8),
+		mustEncodeInstr(t, ϡopTakeLOrJump, start+8+delta),
 		mustEncodeInstr(t, ϡopCall),
 		mustEncodeInstr(t, ϡopCumulOrF),
-		mustEncodeInstr(t, ϡopJumpIfF, start+8),
-		mustEncodeInstr(t, ϡopJump, start+3),
+		mustEncodeInstr(t, ϡopJumpIfF, start+8+delta),
+		mustEncodeInstr(t, ϡopJump, start+3+delta),
 		mustEncodeInstr(t, ϡopPop, ϡlstackID),
 		mustEncodeInstr(t, ϡopRestoreIfF),
 		mustEncodeInstr(t, ϡopReturn),
