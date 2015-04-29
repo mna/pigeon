@@ -350,6 +350,8 @@ func (v *ϡvm) dispatch() interface{} {
 		case ϡopStoreIfT:
 			if top := v.v.peek(); top != ϡmatchFailed {
 				// make sure the var set for this depth level is available
+				// TODO : this is not correct, depth based var stack doesn't work,
+				// do similar to gen code.
 				if v.depth >= len(v.varSets) {
 					// grow varSets to v.depth+1
 					if v.depth < cap(v.varSets) {

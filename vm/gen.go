@@ -119,6 +119,23 @@ type program struct {
 	ruleNmToDisNm map[int]int // rule name ix to rule display name ix
 }
 
+func (pg *program) pushParmsSet() {
+	pg.parmsSet = append(pg.parmsSet, nil)
+}
+
+func (pg *program) popParmsSet() {
+	pg.parmsSet = pg.parmsSet[:len(pg.parmsSet)-1]
+}
+
+func (pg *program) peekParmsSet() []string {
+	return pg.parmsSet[len(pg.parmsSet)-1]
+}
+
+func (pg *program) pushParm(v string) {
+	ix := len(pg.parmsSet) - 1
+	pg.parmsSet[ix] = append(pg.parmsSet[ix], v)
+}
+
 func (pg *program) matcher(raw string, expr ast.Expression) int {
 	if pg.mms == nil {
 		pg.mms = make(map[string]int)
@@ -155,7 +172,11 @@ func (g *Generator) rule(r *ast.Rule) int {
 	g.pg.exprIx = 0
 
 	start := len(g.pg.Instrs)
+
+	g.pg.pushParmsSet()
 	entry := g.expr(r.Expr)
+	g.pg.popParmsSet()
+
 	g.pg.ruleNmEntryIx[g.pg.ruleNmIx] = entry
 	g.pg.ruleNmStartIx[g.pg.ruleNmIx] = start
 	g.pg.ruleNmToDisNm[g.pg.ruleNmIx] = disNmIx
@@ -164,12 +185,6 @@ func (g *Generator) rule(r *ast.Rule) int {
 
 func (g *Generator) expr(expr ast.Expression) int {
 	g.pg.exprIx++
-	if len(g.pg.parmsSet) < g.pg.exprIx {
-		g.pg.parmsSet = append(g.pg.parmsSet, nil)
-	}
-	defer func() {
-		g.pg.exprIx--
-	}()
 
 	switch expr := expr.(type) {
 	case *ast.ActionExpr:
@@ -236,7 +251,7 @@ func (g *Generator) litMatcher(e *ast.LitMatcher) int {
 
 func (g *Generator) andNotCode(code *ast.CodeBlock, and bool) int {
 	th := &thunkInfo{
-		Parms:  g.pg.parmsSet[g.pg.exprIx],
+		Parms:  g.pg.peekParmsSet(),
 		RuleNm: g.pg.Ss[g.pg.ruleNmIx],
 		ExprIx: g.pg.exprIx,
 		Code:   unwrapCode(code.Val),
@@ -254,12 +269,13 @@ func (g *Generator) andNotCode(code *ast.CodeBlock, and bool) int {
 }
 
 func (g *Generator) action(e *ast.ActionExpr) int {
+	actIx := g.pg.exprIx
 	ix := g.expr(e.Expr)
 
 	th := &thunkInfo{
-		Parms:  g.pg.parmsSet[g.pg.exprIx],
+		Parms:  g.pg.peekParmsSet(),
 		RuleNm: g.pg.Ss[g.pg.ruleNmIx],
-		ExprIx: g.pg.exprIx,
+		ExprIx: actIx,
 		Code:   unwrapCode(e.Code.Val),
 	}
 	g.pg.As = append(g.pg.As, th)
@@ -276,12 +292,13 @@ func (g *Generator) action(e *ast.ActionExpr) int {
 }
 
 func (g *Generator) labeled(e *ast.LabeledExpr) int {
-	ix := g.expr(e.Expr)
 	lbl := e.Label.Val
 	lblIx := g.pg.string(lbl)
+	g.pg.pushParm(lbl)
 
-	setIx := g.pg.exprIx - 1
-	g.pg.parmsSet[setIx] = append(g.pg.parmsSet[setIx], lbl)
+	g.pg.pushParmsSet()
+	ix := g.expr(e.Expr)
+	g.pg.popParmsSet()
 
 	start := g.encode(ϡopPush, ϡistackID, ix)
 	g.encode(ϡopCall)
@@ -291,7 +308,10 @@ func (g *Generator) labeled(e *ast.LabeledExpr) int {
 }
 
 func (g *Generator) andNot(subExpr ast.Expression, and bool) int {
+	g.pg.pushParmsSet()
 	ix := g.expr(subExpr)
+	g.pg.popParmsSet()
+
 	start := g.encode(ϡopPush, ϡpstackID)
 	g.encode(ϡopPush, ϡistackID, ix)
 	g.encode(ϡopCall)
@@ -316,7 +336,9 @@ func (g *Generator) ruleRef(e *ast.RuleRefExpr) int {
 }
 
 func (g *Generator) zeroOrOne(e *ast.ZeroOrOneExpr) int {
+	g.pg.pushParmsSet()
 	ix := g.expr(e.Expr)
+	g.pg.popParmsSet()
 
 	start := g.encode(ϡopPush, ϡistackID, ix)
 	g.encode(ϡopCall)
@@ -328,7 +350,9 @@ func (g *Generator) zeroOrOne(e *ast.ZeroOrOneExpr) int {
 }
 
 func (g *Generator) repetition(subExpr ast.Expression, zeroOk bool) int {
+	g.pg.pushParmsSet()
 	ix := g.expr(subExpr)
+	g.pg.popParmsSet()
 
 	vVal := ϡvValFailed
 	if zeroOk {
@@ -348,7 +372,9 @@ func (g *Generator) choice(e *ast.ChoiceExpr) int {
 	// first generate code for each of the choice's expressions
 	indices := make([]int, len(e.Alternatives)+1)
 	for i, se := range e.Alternatives {
+		g.pg.pushParmsSet()
 		indices[i+1] = g.expr(se)
+		g.pg.popParmsSet()
 	}
 
 	// then generate the sequence's instructions
