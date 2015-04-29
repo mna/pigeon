@@ -304,36 +304,62 @@ func (p *Parser) labeledExpr() ast.Expression {
 	return expr
 }
 
+var prefixMap = map[string]func(ast.Expression, ast.Pos) ast.Expression{
+	"!": func(e ast.Expression, pos ast.Pos) ast.Expression {
+		not := ast.NewNotExpr(pos)
+		not.Expr = e
+		return not
+	},
+	"&": func(e ast.Expression, pos ast.Pos) ast.Expression {
+		and := ast.NewAndExpr(pos)
+		and.Expr = e
+		return and
+	},
+	"!.": func(e ast.Expression, pos ast.Pos) ast.Expression {
+		not := ast.NewNotCodeExpr(pos)
+		not.Code = e.(*ast.CodeBlock)
+		return not
+	},
+	"&.": func(e ast.Expression, pos ast.Pos) ast.Expression {
+		and := ast.NewAndCodeExpr(pos)
+		and.Code = e.(*ast.CodeBlock)
+		return and
+	},
+}
+
 func (p *Parser) prefixedExpr() ast.Expression {
 	defer p.out(p.in("prefixedExpr"))
 
-	var pref ast.Expression
+	var prefix string
+	prefixPos := p.tok.pos
 	switch p.tok.id {
 	case ampersand:
-		pref = ast.NewAndExpr(p.tok.pos)
+		prefix = "&"
 		p.read()
 	case exclamation:
-		pref = ast.NewNotExpr(p.tok.pos)
+		prefix = "!"
 		p.read()
 	}
 
 	expr := p.suffixedExpr()
 	if expr == nil {
-		if pref != nil {
+		if prefix != "" {
+			// can have a code block, for a code predicate
+			if p.tok.id == code {
+				prefix += "."
+				code := ast.NewCodeBlock(p.tok.pos, p.tok.lit)
+				p.read()
+				return prefixMap[prefix](code, prefixPos)
+			}
 			p.errs.add(p.tok.pos, errors.New("prefix operator without expression"))
 		}
 		return nil
 	}
-	switch p := pref.(type) {
-	case *ast.AndExpr:
-		p.Expr = expr
-		return p
-	case *ast.NotExpr:
-		p.Expr = expr
-		return p
-	default:
-		return expr
+
+	if prefix != "" {
+		return prefixMap[prefix](expr, prefixPos)
 	}
+	return expr
 }
 
 func (p *Parser) suffixedExpr() ast.Expression {

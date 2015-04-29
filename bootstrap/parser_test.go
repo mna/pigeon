@@ -18,6 +18,8 @@ A = ident:B / C+ / D?;`,
 R "name" <- "abc"i
 R2 = 'd'i
 R3 = ( R2+ ![;] )`,
+	`A = !{code}`,
+	`A = &{code}`,
 }
 
 var parseExpRes = []string{
@@ -47,6 +49,12 @@ var parseExpRes = []string{
 5:8 (46): *ast.OneOrMoreExpr{Expr: 5:8 (46): *ast.RuleRefExpr{Name: 5:8 (46): *ast.Identifier{Val: "R2"}}},
 5:12 (50): *ast.NotExpr{Expr: 5:13 (51): *ast.CharClassMatcher{Val: "[;]", IgnoreCase: false, Inverted: false}},
 ]}},
+]}`,
+	`1:1 (0): *ast.Grammar{Init: <nil>, Rules: [
+1:1 (0): *ast.Rule{Name: 1:1 (0): *ast.Identifier{Val: "A"}, DisplayName: <nil>, Expr: 1:5 (4): *ast.NotCodeExpr{Code: 1:6 (5): *ast.CodeBlock{Val: "{code}"}}},
+]}`,
+	`1:1 (0): *ast.Grammar{Init: <nil>, Rules: [
+1:1 (0): *ast.Rule{Name: 1:1 (0): *ast.Identifier{Val: "A"}, DisplayName: <nil>, Expr: 1:5 (4): *ast.AndCodeExpr{Code: 1:6 (5): *ast.CodeBlock{Val: "{code}"}}},
 ]}`,
 }
 
