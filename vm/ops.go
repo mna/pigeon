@@ -5,6 +5,8 @@ import (
 	"strconv"
 )
 
+//+ϡ following code is part of the generated parser
+
 // ϡop represents an opcode.
 type ϡop byte
 

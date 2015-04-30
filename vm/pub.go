@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+//+ϡ following code is part of the generated parser
+
 // Option is a function that can set an option on the parser. It returns
 // the previous setting as an Option.
 type Option func(*ϡvm) Option

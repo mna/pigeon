@@ -9,6 +9,8 @@ import (
 // builder for the input PEG.
 var ϡtheProgram *ϡprogram
 
+//+ϡ following code is part of the generated parser
+
 // ϡsentinel is a type used to define sentinel values that shouldn't
 // be equal to something else.
 type ϡsentinel int
@@ -103,6 +105,7 @@ type ϡvm struct {
 	varSets []map[string]interface{}
 
 	// TODO: memoization...
+	// TODO: farthest failure position
 
 	// error list
 	errs errList

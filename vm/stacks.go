@@ -1,5 +1,7 @@
 package vm
 
+//+ϡ following code is part of the generated parser
+
 // ϡpstack implements the Position stack. It stores savepoints.
 type ϡpstack []ϡsvpt
 
