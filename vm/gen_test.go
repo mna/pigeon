@@ -312,6 +312,38 @@ func TestGenerateProgram(t *testing.T) {
 			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 47)),
 		}, nil},
 
+		// code predicates have access to params too
+		{"A = l1:'m' / l2:'n' &{x} l3:'o' {y}", &testProgram{
+			Instrs: combineInstrs(
+				encodeBootstrap(t, 50),
+				encodeMatcher(t, 0),               // 3: 'm'
+				encodeLabel(t, 1, 3),              // 7: l1
+				encodeMatcher(t, 1),               // 11: 'n'
+				encodeLabel(t, 2, 11),             // 15: l2
+				encodeCodePredicate(t, true, 0),   // 19
+				encodeMatcher(t, 2),               // 22: 'o'
+				encodeLabel(t, 3, 22),             // 26: l3
+				encodeSequence(t, 30, 15, 19, 26), // 30
+				encodeAction(t, 42, 0, 30),        // 42
+				encodeChoice(t, 50, 7, 42),
+			),
+			Ms: []string{`"m"`, `"n"`, `"o"`},
+			Ss: []string{"A", "l1", "l2", "l3"},
+			As: []*thunkInfo{&thunkInfo{
+				Parms:  []string{"l2", "l3"},
+				RuleNm: "A",
+				ExprIx: 4,
+				Code:   "y",
+			}},
+			Bs: []*thunkInfo{&thunkInfo{
+				Parms:  []string{"l2"},
+				RuleNm: "A",
+				ExprIx: 7,
+				Code:   "x",
+			}},
+			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 54)),
+		}, nil},
+
 		// normalization of matchers
 		{"A = `m` 'm' `m`i", &testProgram{
 			Instrs: combineInstrs(

@@ -32,7 +32,7 @@ type Generator struct {
 	pg program
 }
 
-// Generate generates the PEG parser's code to g.w for the provider
+// Generate generates the PEG parser's code to g.w for the provided
 // grammar gr.
 func (g *Generator) Generate(gr *ast.Grammar) error {
 	pg, err := g.toProgram(gr)
@@ -108,12 +108,12 @@ type program struct {
 
 	InstrToRule []int
 
-	mss map[string]int
-	mms map[string]int
+	mss map[string]int // reverse map of string to index in Ss
+	mms map[string]int // reverse map of matcher's raw value to index in Ms
 
 	ruleNmIx      int
 	exprIx        int
-	parmsSet      [][]string
+	parmsSet      [][]string  // stack of parms set for code blocks
 	ruleNmStartIx map[int]int // rule name ix to first rule instr ix
 	ruleNmEntryIx map[int]int // rule name ix to entry point instr ix
 	ruleNmToDisNm map[int]int // rule name ix to rule display name ix
