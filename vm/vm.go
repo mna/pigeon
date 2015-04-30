@@ -148,9 +148,37 @@ func (v *ϡvm) addErrAt(err error, instrIx int, pos position) {
 	v.errs.ϡadd(pe)
 }
 
+// injectDebug injects debugging opcodes into the list of instructions.
+func (v *ϡvm) injectDebug() {
+	var op ϡop
+	var n int
+
+	instrs, _ := ϡencodeInstr(ϡopDebug)
+	dbgInstr := instrs[0]
+
+	for i := 0; i < len(v.pg.instrs); i++ {
+		if n > 0 {
+			n -= 4
+			continue
+		}
+		op, n, _, _, _ = v.pg.instrs[i].decode()
+		n -= 3
+		switch op {
+		case ϡopCall, ϡopCallA, ϡopCallB:
+			v.pg.instrs = append(v.pg.instrs[:i], append([]ϡinstr{dbgInstr},
+				v.pg.instrs[i:]...)...)
+			i++
+		}
+	}
+}
+
 // run executes the provided program in this VM, and returns the result.
 func (v *ϡvm) run(pg *ϡprogram) (interface{}, error) {
 	v.pg = pg
+	if v.debug {
+		// inject debug opcodes before each CALL{A,B}
+		v.injectDebug()
+	}
 	ret := v.dispatch()
 
 	// if the match failed, translate that to a nil result and make
@@ -233,6 +261,7 @@ func (v *ϡvm) dispatch() interface{} {
 
 		case ϡopDebug:
 			// TODO : print n instructions above and below, stacks, decode args
+			fmt.Println("hello world")
 
 		case ϡopExit:
 			return v.v.pop()

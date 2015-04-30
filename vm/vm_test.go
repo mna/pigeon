@@ -10,6 +10,50 @@ import (
 	"github.com/PuerkitoBio/pigeon/bootstrap"
 )
 
+func TestInjectDebug(t *testing.T) {
+	cases := []struct {
+		in  []ϡinstr
+		out []ϡinstr
+	}{
+		{nil, nil},
+		{combineInstrs(mustEncodeInstr(t, ϡopJump)), combineInstrs(mustEncodeInstr(t, ϡopJump))},
+		{
+			combineInstrs(mustEncodeInstr(t, ϡopCall)),
+			combineInstrs(mustEncodeInstr(t, ϡopDebug), mustEncodeInstr(t, ϡopCall)),
+		},
+		{
+			combineInstrs(mustEncodeInstr(t, ϡopCall, 1, 2, 3, 4)),
+			combineInstrs(mustEncodeInstr(t, ϡopDebug),
+				mustEncodeInstr(t, ϡopCall, 1, 2, 3, 4)),
+		},
+		{
+			combineInstrs(mustEncodeInstr(t, ϡopPush, 1, 2, 3, 4),
+				mustEncodeInstr(t, ϡopCall)),
+			combineInstrs(mustEncodeInstr(t, ϡopPush, 1, 2, 3, 4),
+				mustEncodeInstr(t, ϡopDebug),
+				mustEncodeInstr(t, ϡopCall)),
+		},
+	}
+	v := ϡvm{debug: true}
+	for i, tc := range cases {
+		pg := &ϡprogram{instrs: tc.in}
+		v.pg = pg
+		v.injectDebug()
+
+		if len(tc.out) != len(pg.instrs) {
+			t.Errorf("%d: want %d instructions, got %d", i, len(tc.out), len(pg.instrs))
+			continue
+		}
+		for j, want := range tc.out {
+			if want != pg.instrs[j] {
+				wop, _, _, _, _ := want.decode()
+				gop, _, _, _, _ := pg.instrs[j].decode()
+				t.Errorf("%d: instr %d: want %s, got %s", i, j, wop, gop)
+			}
+		}
+	}
+}
+
 func TestRun(t *testing.T) {
 	t.Skip()
 	cases := []struct {
