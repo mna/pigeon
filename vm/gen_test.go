@@ -338,7 +338,7 @@ func TestGenerateProgram(t *testing.T) {
 			Bs: []*thunkInfo{&thunkInfo{
 				Parms:  []string{"l2"},
 				RuleNm: "A",
-				ExprIx: 7,
+				ExprIx: 8,
 				Code:   "x",
 			}},
 			InstrToRule: combineInts(rpt(-1, 3), rpt(0, 54)),
