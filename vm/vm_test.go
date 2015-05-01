@@ -20,6 +20,34 @@ func TestRun(t *testing.T) {
 	}{
 		{`A = 'a'`, "a", []byte("a"), nil},
 		{`A = 'a'`, "b", nil, errNoMatch},
+		{`A = "ab"`, "a", nil, errNoMatch},
+		{`A = "ab"`, "b", nil, errNoMatch},
+		{`A = "ab"`, "ab", []byte("ab"), nil},
+		{`A = "ab"`, "abb", []byte("ab"), nil},
+
+		{`A = 'a'*`, "", []interface{}(nil), nil},
+		{`A = 'a'*`, "a", []interface{}{[]byte("a")}, nil},
+		{`A = 'a'*`, "aa", []interface{}{[]byte("a"), []byte("a")}, nil},
+		{`A = 'a'*`, "aab", []interface{}{[]byte("a"), []byte("a")}, nil},
+		{`A = 'a'*`, "baa", []interface{}(nil), nil},
+
+		{`A = 'a'+`, "", nil, errNoMatch},
+		{`A = 'a'+`, "a", []interface{}{[]byte("a")}, nil},
+		{`A = 'a'+`, "aa", []interface{}{[]byte("a"), []byte("a")}, nil},
+		{`A = 'a'+`, "aab", []interface{}{[]byte("a"), []byte("a")}, nil},
+		{`A = 'a'+`, "baa", nil, errNoMatch},
+
+		{`A = 'a'?`, "", nil, nil},
+		{`A = 'a'?`, "a", []byte("a"), nil},
+		{`A = 'a'?`, "aa", []byte("a"), nil},
+		{`A = 'a'?`, "aab", []byte("a"), nil},
+		{`A = 'a'?`, "baa", nil, nil},
+
+		{`A = 'a' 'b'`, "", nil, errNoMatch},
+		{`A = 'a' 'b'`, "a", nil, errNoMatch},
+		//{`A = 'a' 'b'`, "ab", []interface{}{[]byte("a"), []byte("b")}, nil},
+		{`A = 'a' 'b'`, "aab", nil, errNoMatch},
+		{`A = 'a' 'b'`, "baa", nil, errNoMatch},
 	}
 	for i, tc := range cases {
 		gr, err := bootstrap.NewParser().Parse("", strings.NewReader(tc.grammar))
