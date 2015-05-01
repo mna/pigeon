@@ -1,7 +1,9 @@
 package vm
 
 import (
+	"bytes"
 	"fmt"
+	"strconv"
 	"unicode"
 	"unicode/utf8"
 )
@@ -31,6 +33,10 @@ func (a ϡanyMatcher) match(pr ϡpeekReader) bool {
 	return pt.rn != utf8.RuneError
 }
 
+func (a ϡanyMatcher) String() string {
+	return "."
+}
+
 // ϡstringMatcher is a matcher that matches a string.
 type ϡstringMatcher struct {
 	ignoreCase bool
@@ -52,6 +58,14 @@ func (s ϡstringMatcher) match(pr ϡpeekReader) bool {
 	return true
 }
 
+func (s ϡstringMatcher) String() string {
+	v := strconv.Quote(s.value)
+	if s.ignoreCase {
+		v += "i"
+	}
+	return v
+}
+
 // ϡcharClassMatcher is a matcher that matches classes of characters.
 type ϡcharClassMatcher struct {
 	chars   []rune // runes must be lowercase if ignoreCase is true
@@ -60,6 +74,30 @@ type ϡcharClassMatcher struct {
 
 	ignoreCase bool
 	inverted   bool
+}
+
+func (c ϡcharClassMatcher) String() string {
+	var buf bytes.Buffer
+
+	buf.WriteString("[")
+	if c.inverted {
+		buf.WriteString("^")
+	}
+	for _, c := range c.chars {
+		buf.WriteRune(c)
+	}
+	for i := 0; i < len(c.ranges); i += 2 {
+		buf.WriteString(fmt.Sprintf("%c-%c", c.ranges[i], c.ranges[i+1]))
+	}
+	// unicode classes can't be stringified
+	if l := len(c.classes); l > 0 {
+		buf.WriteString(fmt.Sprintf("\\p{%d classes}", l))
+	}
+	buf.WriteString("]")
+	if c.ignoreCase {
+		buf.WriteString("i")
+	}
+	return buf.String()
 }
 
 // match tries to match classes of characters in the peekReader.

@@ -31,7 +31,6 @@ const (
 	ϡopReturn
 	ϡopStoreIfT
 	ϡopTakeLOrJump
-	ϡopDebug
 	ϡopmax // must always be after the last valid opcode
 
 	// ϡopPlaceholder is an (invalid) opcode used by the Generator
@@ -53,7 +52,6 @@ var ϡlookupOp = []string{
 	ϡopPop: "pop", ϡopPopVJumpIfF: "popVJumpIfF",
 	ϡopPush: "push", ϡopRestore: "restore", ϡopRestoreIfF: "restoreIfF",
 	ϡopReturn: "return", ϡopStoreIfT: "storeIfT", ϡopTakeLOrJump: "takeLOrJump",
-	ϡopDebug: "debug",
 }
 
 // String returns the string representation of the opcode.

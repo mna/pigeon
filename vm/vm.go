@@ -27,6 +27,7 @@ const (
 	ϡvstackID
 	ϡistackID
 
+	// special V stack values
 	ϡvValNil    = 0
 	ϡvValFailed = 1
 	ϡvValEmpty  = 2
@@ -148,37 +149,58 @@ func (v *ϡvm) addErrAt(err error, instrIx int, pos position) {
 	v.errs.ϡadd(pe)
 }
 
-// injectDebug injects debugging opcodes into the list of instructions.
-func (v *ϡvm) injectDebug() {
-	var op ϡop
-	var n int
+func (v *ϡvm) dump() {
+	var buf bytes.Buffer
 
-	instrs, _ := ϡencodeInstr(ϡopDebug)
-	dbgInstr := instrs[0]
+	stackNm := []string{
+		ϡpstackID: "P",
+		ϡlstackID: "L",
+		ϡvstackID: "V",
+		ϡistackID: "I",
+	}
 
-	for i := 0; i < len(v.pg.instrs); i++ {
-		if n > 0 {
-			n -= 4
-			continue
+	if v.filename != "" {
+		buf.WriteString(v.filename + ":")
+	}
+	buf.WriteString(fmt.Sprintf("%s: %#U\n", v.parser.pt.position, v.parser.pt.rn))
+
+	// write the next 5 instructions
+	ix := v.pc
+	for i := 0; i < 5; i++ {
+		op, n, a0, a1, _ := v.pg.instrs[ix].decode()
+		rule := v.pg.ruleNameAt(ix)
+		if rule == "" {
+			rule = "<none>"
 		}
-		op, n, _, _, _ = v.pg.instrs[i].decode()
-		n -= 3
 		switch op {
-		case ϡopCall, ϡopCallA, ϡopCallB:
-			v.pg.instrs = append(v.pg.instrs[:i], append([]ϡinstr{dbgInstr},
-				v.pg.instrs[i:]...)...)
-			i++
+		case ϡopCall:
+			buf.WriteString(fmt.Sprintf("%d: [%s] %s\n", ix, rule, op))
+			ix = v.i.pop()
+			v.i.push(ix)
+			continue
+		case ϡopPush, ϡopPop:
+			buf.WriteString(fmt.Sprintf("%d: [%s] %s %s\n", ix, rule, op, stackNm[a0]))
+		case ϡopMatch:
+			buf.WriteString(fmt.Sprintf("%d: [%s] %s %d (%s)\n", ix, rule, op, a0, v.pg.ms[a0]))
+		default:
+			buf.WriteString(fmt.Sprintf("%d: [%s] %s %d %d\n", ix, rule, op, a0, a1))
+		}
+		ix++
+		n -= 3
+		for n > 0 {
+			ix++
+			n -= 4
+		}
+		if ix >= len(v.pg.instrs) {
+			break
 		}
 	}
+	fmt.Println(buf.String())
 }
 
 // run executes the provided program in this VM, and returns the result.
 func (v *ϡvm) run(pg *ϡprogram) (interface{}, error) {
 	v.pg = pg
-	if v.debug {
-		// inject debug opcodes before each CALL{A,B}
-		v.injectDebug()
-	}
 	ret := v.dispatch()
 
 	// if the match failed, translate that to a nil result and make
@@ -196,6 +218,8 @@ func (v *ϡvm) run(pg *ϡprogram) (interface{}, error) {
 // dispatch is the proper execution method of the VM, it loops over
 // the instructions and executes each opcode.
 func (v *ϡvm) dispatch() interface{} {
+	// move to first rune before starting the loop
+	v.parser.read()
 	for {
 		// fetch and decode the instruction
 		instr := v.pg.instrs[v.pc]
@@ -258,10 +282,6 @@ func (v *ϡvm) dispatch() interface{} {
 			default:
 				panic(fmt.Sprintf("invalid %s value type on the V stack: %T", op, vb))
 			}
-
-		case ϡopDebug:
-			// TODO : print n instructions above and below, stacks, decode args
-			fmt.Println("hello world")
 
 		case ϡopExit:
 			return v.v.pop()

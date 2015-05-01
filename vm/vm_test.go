@@ -2,6 +2,7 @@ package vm
 
 import (
 	"io/ioutil"
+	"reflect"
 	"strings"
 	"testing"
 	"unicode"
@@ -10,52 +11,7 @@ import (
 	"github.com/PuerkitoBio/pigeon/bootstrap"
 )
 
-func TestInjectDebug(t *testing.T) {
-	cases := []struct {
-		in  []ϡinstr
-		out []ϡinstr
-	}{
-		{nil, nil},
-		{combineInstrs(mustEncodeInstr(t, ϡopJump)), combineInstrs(mustEncodeInstr(t, ϡopJump))},
-		{
-			combineInstrs(mustEncodeInstr(t, ϡopCall)),
-			combineInstrs(mustEncodeInstr(t, ϡopDebug), mustEncodeInstr(t, ϡopCall)),
-		},
-		{
-			combineInstrs(mustEncodeInstr(t, ϡopCall, 1, 2, 3, 4)),
-			combineInstrs(mustEncodeInstr(t, ϡopDebug),
-				mustEncodeInstr(t, ϡopCall, 1, 2, 3, 4)),
-		},
-		{
-			combineInstrs(mustEncodeInstr(t, ϡopPush, 1, 2, 3, 4),
-				mustEncodeInstr(t, ϡopCall)),
-			combineInstrs(mustEncodeInstr(t, ϡopPush, 1, 2, 3, 4),
-				mustEncodeInstr(t, ϡopDebug),
-				mustEncodeInstr(t, ϡopCall)),
-		},
-	}
-	v := ϡvm{debug: true}
-	for i, tc := range cases {
-		pg := &ϡprogram{instrs: tc.in}
-		v.pg = pg
-		v.injectDebug()
-
-		if len(tc.out) != len(pg.instrs) {
-			t.Errorf("%d: want %d instructions, got %d", i, len(tc.out), len(pg.instrs))
-			continue
-		}
-		for j, want := range tc.out {
-			if want != pg.instrs[j] {
-				wop, _, _, _, _ := want.decode()
-				gop, _, _, _, _ := pg.instrs[j].decode()
-				t.Errorf("%d: instr %d: want %s, got %s", i, j, wop, gop)
-			}
-		}
-	}
-}
-
 func TestRun(t *testing.T) {
-	t.Skip()
 	cases := []struct {
 		grammar string
 		input   string
@@ -63,6 +19,7 @@ func TestRun(t *testing.T) {
 		err     error
 	}{
 		{`A = 'a'`, "a", []byte("a"), nil},
+		{`A = 'a'`, "b", nil, errNoMatch},
 	}
 	for i, tc := range cases {
 		gr, err := bootstrap.NewParser().Parse("", strings.NewReader(tc.grammar))
@@ -78,16 +35,19 @@ func TestRun(t *testing.T) {
 		}
 
 		ϡtheProgram = toϡprogram(t, pg, amockRetCode, bmockRetTrueIfT)
-		got, err := Parse("", []byte(tc.input))
+		got, err := Parse("", []byte(tc.input), Debug(true), Recover(false))
 		if (err != nil) != (tc.err != nil) {
 			t.Errorf("%d: want error? %t, got %v", i, tc.err != nil, err)
 			continue
-		} else if tc.err != err {
-			t.Errorf("%d: want error %v, got %v", i, tc.err, err)
-			continue
+		} else if tc.err != nil {
+			pe := err.(errList)[0].(*parserError)
+			if tc.err != pe.Inner {
+				t.Errorf("%d: want error %v, got %v", i, tc.err, err)
+				continue
+			}
 		}
 
-		if got != tc.want {
+		if !reflect.DeepEqual(tc.want, got) {
 			t.Errorf("%d: want %#v, got %#v", i, tc.want, got)
 		}
 	}
