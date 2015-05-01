@@ -72,6 +72,47 @@ func TestRun(t *testing.T) {
 		{`A = 'a' !'b'`, "ab", nil, errNoMatch},
 		{`A = 'a' !'b'`, "aab", []interface{}{[]byte("a"), nil}, nil},
 		{`A = 'a' !'b'`, "baa", nil, errNoMatch},
+
+		{`A = 'a' &{T}`, "", nil, errNoMatch},
+		{`A = 'a' &{T}`, "a", []interface{}{[]byte("a"), nil}, nil},
+		{`A = 'a' &{T}`, "ab", []interface{}{[]byte("a"), nil}, nil},
+		{`A = 'a' &{T}`, "aab", []interface{}{[]byte("a"), nil}, nil},
+		{`A = 'a' &{T}`, "baa", nil, errNoMatch},
+
+		{`A = 'a' &{F}`, "", nil, errNoMatch},
+		{`A = 'a' &{F}`, "a", nil, errNoMatch},
+		{`A = 'a' &{F}`, "ab", nil, errNoMatch},
+		{`A = 'a' &{F}`, "aab", nil, errNoMatch},
+		{`A = 'a' &{F}`, "baa", nil, errNoMatch},
+
+		{`A = 'a' !{T}`, "", nil, errNoMatch},
+		{`A = 'a' !{T}`, "a", nil, errNoMatch},
+		{`A = 'a' !{T}`, "ab", nil, errNoMatch},
+		{`A = 'a' !{T}`, "aab", nil, errNoMatch},
+		{`A = 'a' !{T}`, "baa", nil, errNoMatch},
+
+		{`A = 'a' !{F}`, "", nil, errNoMatch},
+		{`A = 'a' !{F}`, "a", []interface{}{[]byte("a"), nil}, nil},
+		{`A = 'a' !{F}`, "ab", []interface{}{[]byte("a"), nil}, nil},
+		{`A = 'a' !{F}`, "aab", []interface{}{[]byte("a"), nil}, nil},
+		{`A = 'a' !{F}`, "baa", nil, errNoMatch},
+
+		{`A = &{T}`, "", nil, nil},
+		{`A = &{F}`, "", nil, errNoMatch},
+		{`A = !{F}`, "", nil, nil},
+		{`A = !{T}`, "", nil, errNoMatch},
+
+		{`A = 'a' {x}`, "", nil, errNoMatch},
+		{`A = 'a' {x}`, "a", "x", nil},
+		{`A = 'a' {x}`, "aa", "x", nil},
+		{`A = 'a' {x}`, "aab", "x", nil},
+		{`A = 'a' {x}`, "baa", nil, errNoMatch},
+
+		{`A = l1:'a' l2:'b' {x}`, "", nil, errNoMatch},
+		{`A = l1:'a' l2:'b' {x}`, "a", nil, errNoMatch},
+		{`A = l1:'a' l2:'b' {x}`, "ab", "x", nil},
+		{`A = l1:'a' l2:'b' {x}`, "aab", nil, errNoMatch},
+		{`A = l1:'a' l2:'b' {x}`, "baa", nil, errNoMatch},
 	}
 	for i, tc := range cases {
 		gr, err := bootstrap.NewParser().Parse("", strings.NewReader(tc.grammar))
