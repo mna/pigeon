@@ -45,11 +45,14 @@ func TestRun(t *testing.T) {
 
 		{`A = 'a' 'b'`, "", nil, errNoMatch},
 		{`A = 'a' 'b'`, "a", nil, errNoMatch},
-		//{`A = 'a' 'b'`, "ab", []interface{}{[]byte("a"), []byte("b")}, nil},
+		{`A = 'a' 'b'`, "ab", []interface{}{[]byte("a"), []byte("b")}, nil},
 		{`A = 'a' 'b'`, "aab", nil, errNoMatch},
 		{`A = 'a' 'b'`, "baa", nil, errNoMatch},
 	}
 	for i, tc := range cases {
+		if i != 23 {
+			continue
+		}
 		gr, err := bootstrap.NewParser().Parse("", strings.NewReader(tc.grammar))
 		if err != nil {
 			t.Errorf("%d: parse error: %v", i, err)
