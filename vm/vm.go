@@ -163,10 +163,19 @@ func (v *ϡvm) dump() {
 		buf.WriteString(v.filename + ":")
 	}
 	buf.WriteString(fmt.Sprintf("%s: %#U\n", v.parser.pt.position, v.parser.pt.rn))
+	buf.WriteString("\n")
 
 	// write the next 5 instructions
-	ix := v.pc
+	ix := v.pc - 1
+	if ix > 0 {
+		ix--
+	}
+	stdFmt := ". [%d]: %s.%s"
 	for i := 0; i < 5; i++ {
+		stdFmt := stdFmt
+		if ix == v.pc-1 {
+			stdFmt = ">" + stdFmt[1:]
+		}
 		op, n, a0, a1, _ := v.pg.instrs[ix].decode()
 		rule := v.pg.ruleNameAt(ix)
 		if rule == "" {
@@ -174,16 +183,22 @@ func (v *ϡvm) dump() {
 		}
 		switch op {
 		case ϡopCall:
-			buf.WriteString(fmt.Sprintf("%d: [%s] %s\n", ix, rule, op))
-			ix = v.i.pop()
+			buf.WriteString(fmt.Sprintf(stdFmt+"\n", ix, rule, op))
+			ix = v.i.pop() // continue with instructions at this index
 			v.i.push(ix)
 			continue
+		case ϡopCumulOrF, ϡopReturn, ϡopExit, ϡopRestore, ϡopRestoreIfF, ϡopNilIfF, ϡopNilIfT:
+			buf.WriteString(fmt.Sprintf(stdFmt+"\n", ix, rule, op))
+		case ϡopCallA, ϡopCallB, ϡopJump, ϡopJumpIfT, ϡopJumpIfF, ϡopPopVJumpIfF, ϡopTakeLOrJump:
+			buf.WriteString(fmt.Sprintf(stdFmt+" %d\n", ix, rule, op, a0))
 		case ϡopPush, ϡopPop:
-			buf.WriteString(fmt.Sprintf("%d: [%s] %s %s\n", ix, rule, op, stackNm[a0]))
+			buf.WriteString(fmt.Sprintf(stdFmt+" %s\n", ix, rule, op, stackNm[a0]))
 		case ϡopMatch:
-			buf.WriteString(fmt.Sprintf("%d: [%s] %s %d (%s)\n", ix, rule, op, a0, v.pg.ms[a0]))
+			buf.WriteString(fmt.Sprintf(stdFmt+" %d (%s)\n", ix, rule, op, a0, v.pg.ms[a0]))
+		case ϡopStoreIfT:
+			buf.WriteString(fmt.Sprintf(stdFmt+" %d (%s)\n", ix, rule, op, a0, v.pg.ss[a0]))
 		default:
-			buf.WriteString(fmt.Sprintf("%d: [%s] %s %d %d\n", ix, rule, op, a0, a1))
+			buf.WriteString(fmt.Sprintf(stdFmt+" %d %d\n", ix, rule, op, a0, a1))
 		}
 		ix++
 		n -= 3
@@ -194,6 +209,41 @@ func (v *ϡvm) dump() {
 		if ix >= len(v.pg.instrs) {
 			break
 		}
+	}
+	buf.WriteString("\n")
+
+	// print the stacks
+	buf.WriteString("- P stack\n")
+	for i := 0; i < 3; i++ {
+		if len(v.p) <= i {
+			break
+		}
+		val := v.p[len(v.p)-i-1]
+		buf.WriteString(fmt.Sprintf(". %v\n", val))
+	}
+	buf.WriteString("- V stack\n")
+	for i := 0; i < 3; i++ {
+		if len(v.v) <= i {
+			break
+		}
+		val := v.v[len(v.v)-i-1]
+		buf.WriteString(fmt.Sprintf(". %v\n", val))
+	}
+	buf.WriteString("- I stack\n")
+	for i := 0; i < 3; i++ {
+		if len(v.i) <= i {
+			break
+		}
+		val := v.i[len(v.i)-i-1]
+		buf.WriteString(fmt.Sprintf(". %v\n", val))
+	}
+	buf.WriteString("- L stack\n")
+	for i := 0; i < 3; i++ {
+		if len(v.l) <= i {
+			break
+		}
+		val := v.l[len(v.l)-i-1]
+		buf.WriteString(fmt.Sprintf(". %v\n", val))
 	}
 	fmt.Println(buf.String())
 }
@@ -230,12 +280,18 @@ func (v *ϡvm) dispatch() interface{} {
 
 		switch op {
 		case ϡopCall:
+			if v.debug {
+				v.dump()
+			}
 			ix := v.i.pop()
 			v.i.push(v.pc)
 			v.pc = ix
 			v.depth++
 
 		case ϡopCallA:
+			if v.debug {
+				v.dump()
+			}
 			v.v.pop()
 			start := v.p.pop()
 			v.cur.pos = start.position
@@ -251,6 +307,9 @@ func (v *ϡvm) dispatch() interface{} {
 			v.v.push(val)
 
 		case ϡopCallB:
+			if v.debug {
+				v.dump()
+			}
 			v.cur.pos = v.parser.pt.position
 			v.cur.text = nil
 			if a0 >= len(v.pg.bs) {
