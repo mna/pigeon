@@ -48,11 +48,32 @@ func TestRun(t *testing.T) {
 		{`A = 'a' 'b'`, "ab", []interface{}{[]byte("a"), []byte("b")}, nil},
 		{`A = 'a' 'b'`, "aab", nil, errNoMatch},
 		{`A = 'a' 'b'`, "baa", nil, errNoMatch},
+
+		{`A = 'a' / 'b'`, "", nil, errNoMatch},
+		{`A = 'a' / 'b'`, "a", []byte("a"), nil},
+		{`A = 'a' / 'b'`, "ab", []byte("a"), nil},
+		{`A = 'a' / 'b'`, "aab", []byte("a"), nil},
+		{`A = 'a' / 'b'`, "baa", []byte("b"), nil},
+
+		{"A = B\nB= 'a'", "", nil, errNoMatch},
+		{"A = B\nB= 'a'", "a", []byte("a"), nil},
+		{"A = B\nB = 'a'", "ab", []byte("a"), nil},
+		{"A = B\nB = 'a'", "aab", []byte("a"), nil},
+		{"A = B\nB = 'a'", "baa", nil, errNoMatch},
+
+		{`A = 'a' &'b'`, "", nil, errNoMatch},
+		{`A = 'a' &'b'`, "a", nil, errNoMatch},
+		{`A = 'a' &'b'`, "ab", []interface{}{[]byte("a"), nil}, nil},
+		{`A = 'a' &'b'`, "aab", nil, errNoMatch},
+		{`A = 'a' &'b'`, "baa", nil, errNoMatch},
+
+		{`A = 'a' !'b'`, "", nil, errNoMatch},
+		{`A = 'a' !'b'`, "a", []interface{}{[]byte("a"), nil}, nil},
+		{`A = 'a' !'b'`, "ab", nil, errNoMatch},
+		{`A = 'a' !'b'`, "aab", []interface{}{[]byte("a"), nil}, nil},
+		{`A = 'a' !'b'`, "baa", nil, errNoMatch},
 	}
 	for i, tc := range cases {
-		if i != 23 {
-			continue
-		}
 		gr, err := bootstrap.NewParser().Parse("", strings.NewReader(tc.grammar))
 		if err != nil {
 			t.Errorf("%d: parse error: %v", i, err)
