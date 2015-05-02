@@ -79,21 +79,6 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 	return &g.pg, nil
 }
 
-// this Generator-generated program will be used to write the
-// runtime ϡtheProgram variable, so it needs to have all the
-// information required to build this:
-//
-// type ϡprogram struct {
-// 	instrs []ϡinstr
-//
-// 	ms []ϡmatcher
-// 	as []func(*ϡvm) (interface{}, error)
-// 	bs []func(*ϡvm) (bool, error)
-// 	ss []string
-//
-// 	instrToRule []int
-// }
-
 type thunkInfo struct {
 	Parms  []string
 	RuleNm string
