@@ -6,6 +6,7 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/pigeon/ast"
 )
@@ -51,6 +52,8 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 	}
 
 	g.pg.RecvrNm = g.RecvrName
+	g.pg.Now = time.Now()
+
 	if gr.Init != nil {
 		g.pg.Init = unwrapCode(gr.Init.Val)
 	}
@@ -99,6 +102,7 @@ type thunkInfo struct {
 }
 
 type program struct {
+	Now     time.Time
 	RecvrNm string
 	Init    string
 	Instrs  []ϡinstr
