@@ -28,6 +28,7 @@ const (
 	ϡlstackID
 	ϡvstackID
 	ϡistackID
+	ϡastackID
 
 	// special V stack values
 	ϡvValNil    = 0
@@ -41,6 +42,7 @@ var (
 		ϡlstackID: "L",
 		ϡvstackID: "V",
 		ϡistackID: "I",
+		ϡastackID: "A",
 	}
 )
 
@@ -78,6 +80,7 @@ type ϡprogram struct {
 	instrToRule []int
 }
 
+// String formats the program's instructions in a human-readable format.
 func (pg ϡprogram) String() string {
 	var buf bytes.Buffer
 	var n int
@@ -95,6 +98,8 @@ func (pg ϡprogram) String() string {
 	return buf.String()
 }
 
+// instrToString formats an instruction in a human-readable format, in the
+// context of the program.
 func (pg ϡprogram) instrToString(instr ϡinstr, ix int) string {
 	var buf bytes.Buffer
 
@@ -138,6 +143,7 @@ func (pg ϡprogram) ruleNameAt(instrIx int) string {
 	return pg.ss[ssIx]
 }
 
+// ϡvm holds the state to execute a compiled grammar.
 type ϡvm struct {
 	// input
 	filename string
@@ -150,17 +156,16 @@ type ϡvm struct {
 	// TODO : no bounds checking option (for stacks)? benchmark to see if it's worth it.
 
 	// program data
-	pc    int
-	depth int
-	pg    *ϡprogram
-	cur   current
+	pc  int
+	pg  *ϡprogram
+	cur current
 
 	// stacks
-	p       ϡpstack
-	l       ϡlstack
-	v       ϡvstack
-	i       ϡistack
-	varSets []map[string]interface{}
+	p ϡpstack
+	l ϡlstack
+	v ϡvstack
+	i ϡistack
+	a ϡastack
 
 	// TODO: memoization...
 	// TODO: farthest failure position
@@ -206,6 +211,7 @@ func (v *ϡvm) addErrAt(err error, instrIx int, pos position) {
 	v.errs.ϡadd(pe)
 }
 
+// dumpSnapshot writes a dump of the current VM state to w.
 func (v *ϡvm) dumpSnapshot(w io.Writer) {
 	var buf bytes.Buffer
 
@@ -349,7 +355,6 @@ func (v *ϡvm) dispatch() interface{} {
 			ix := v.i.pop()
 			v.i.push(v.pc)
 			v.pc = ix
-			v.depth++
 
 		case ϡopCallA:
 			if v.debug {
@@ -454,6 +459,8 @@ func (v *ϡvm) dispatch() interface{} {
 				v.l.pop()
 			case ϡpstackID:
 				v.p.pop()
+			case ϡastackID:
+				v.a.pop()
 			default:
 				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
 			}
@@ -475,6 +482,8 @@ func (v *ϡvm) dispatch() interface{} {
 					panic(fmt.Sprintf("invalid %s V stack argument: %d", op, a1))
 				}
 				v.v.push(ϡvSpecialValues[a1])
+			case ϡastackID:
+				v.a.push()
 			case ϡlstackID:
 				// n = L args to push + 1, for the lstackID
 				n--
@@ -511,42 +520,8 @@ func (v *ϡvm) dispatch() interface{} {
 			ix := v.i.pop()
 			v.pc = ix
 
-			// clean-up the varSet, if required
-			if v.depth == len(v.varSets)-1 {
-				if m := v.varSets[v.depth]; len(m) > 0 {
-					v.varSets[v.depth] = nil
-				}
-			}
-
-			v.depth--
-			if v.depth < 0 {
-				panic("negative call depth")
-			}
-
 		case ϡopStoreIfT:
 			if top := v.v.peek(); top != ϡmatchFailed {
-				// make sure the var set for this depth level is available
-				// TODO : this is not correct, depth based var stack doesn't work,
-				// do similar to gen code.
-				if v.depth >= len(v.varSets) {
-					// grow varSets to v.depth+1
-					if v.depth < cap(v.varSets) {
-						v.varSets = v.varSets[:v.depth+1]
-						v.varSets = v.varSets[:v.depth+1]
-					} else {
-						newSets := make([]map[string]interface{}, v.depth+1)
-						copy(newSets, v.varSets)
-						v.varSets = newSets
-					}
-				}
-
-				// create the var set map if required
-				m := v.varSets[v.depth]
-				if m == nil {
-					m = make(map[string]interface{})
-					v.varSets[v.depth] = m
-				}
-
 				// get the label name
 				if a0 >= len(v.pg.ss) {
 					panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
@@ -554,7 +529,8 @@ func (v *ϡvm) dispatch() interface{} {
 				lbl := v.pg.ss[a0]
 
 				// store the value
-				m[lbl] = top
+				as := v.a.peek()
+				as.add(lbl, top)
 			}
 
 		case ϡopTakeLOrJump:

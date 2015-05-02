@@ -128,7 +128,7 @@ func TestRun(t *testing.T) {
 		}
 
 		ϡtheProgram = toϡprogram(t, pg, amockRetCode, bmockRetTrueIfT)
-		got, err := Parse("", []byte(tc.input), Debug(true), Recover(false))
+		got, err := Parse("", []byte(tc.input), Debug(testing.Verbose()), Recover(false))
 		if (err != nil) != (tc.err != nil) {
 			t.Errorf("%d: want error? %t, got %v", i, tc.err != nil, err)
 			continue
