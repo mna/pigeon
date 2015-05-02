@@ -10,7 +10,10 @@ import (
 )
 
 func TestTemplate(t *testing.T) {
-	gr, err := bootstrap.NewParser().Parse("", strings.NewReader("{init}\nA = !{w} l1:'a' l2:'b' &{x} l3:'c' {y}"))
+	gr, err := bootstrap.NewParser().Parse("", strings.NewReader(`
+	{package abc}
+	A = !{return true, nil} l1:. l2:'B'i &{return false, nil} l3:[^A-CE\p{Latin}]i {return "ok", nil}
+	`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,7 +23,11 @@ func TestTemplate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := tpl.Execute(os.Stdout, pg); err != nil {
+	out := ioutil.Discard
+	if testing.Verbose() {
+		out = os.Stdout
+	}
+	if err := tpl.Execute(out, pg); err != nil {
 		t.Fatal(err)
 	}
 }
