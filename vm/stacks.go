@@ -1,7 +1,5 @@
 package vm
 
-import "fmt"
-
 //+pigeon following code is part of the generated parser
 
 // ϡpstack implements the Position stack. It stores savepoints.
@@ -104,42 +102,16 @@ func (l *ϡlstack) take() int {
 	return v
 }
 
-// ϡargsSet holds the ordered list of arguments (key and value) to pass
+// ϡargsSet holds the list of arguments (key and value) to pass
 // to the code blocks.
-type ϡargsSet struct {
-	keySet map[string]bool
-	keys   []string
-	vals   []interface{}
-}
-
-// len returns the number of arguments in the argsSet.
-func (as *ϡargsSet) len() int {
-	if as == nil {
-		return 0
-	}
-	return len(as.keys)
-}
-
-// add adds a new key-value pair in the argsSet.
-func (as *ϡargsSet) add(k string, v interface{}) {
-	if as.keySet == nil {
-		as.keySet = make(map[string]bool)
-	}
-	if as.keySet[k] {
-		panic(fmt.Sprintf("label %s already exists", k))
-	}
-
-	as.keySet[k] = true
-	as.keys = append(as.keys, k)
-	as.vals = append(as.vals, v)
-}
+type ϡargsSet map[string]interface{}
 
 // ϡastack is a stack of ϡargsSet.
-type ϡastack []*ϡargsSet
+type ϡastack []ϡargsSet
 
 // push adds an empty ϡargsSet on top of the stack.
 func (a *ϡastack) push() {
-	*a = append(*a, &ϡargsSet{})
+	*a = append(*a, ϡargsSet{})
 }
 
 // pop removes the top ϡargsSet from the stack.
@@ -152,7 +124,7 @@ func (a *ϡastack) pop() {
 }
 
 // peek returns the current top ϡargsSet.
-func (a *ϡastack) peek() *ϡargsSet {
+func (a *ϡastack) peek() ϡargsSet {
 	n := len(*a)
 	if n == 0 {
 		panic("astack is empty")

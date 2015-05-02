@@ -10,7 +10,7 @@ import (
 )
 
 func TestTemplate(t *testing.T) {
-	gr, err := bootstrap.NewParser().Parse("", strings.NewReader("A = 'a'"))
+	gr, err := bootstrap.NewParser().Parse("", strings.NewReader("{init}\nA = !{w} l1:'a' l2:'b' &{x} l3:'c' {y}"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -530,7 +530,7 @@ func (v *ϡvm) dispatch() interface{} {
 
 				// store the value
 				as := v.a.peek()
-				as.add(lbl, top)
+				as[lbl] = top
 			}
 
 		case ϡopTakeLOrJump:

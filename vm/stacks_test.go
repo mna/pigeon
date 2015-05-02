@@ -172,30 +172,17 @@ func TestAStack(t *testing.T) {
 	a.push()
 	a.push()
 	as := a.peek()
-	as.add("a", 1)
-	as.add("b", 2)
+	as["a"] = 1
+	as["b"] = 2
 
 	as = a.peek()
-	if as.len() != 2 {
-		t.Errorf("want args set length 2, got %d", as.len())
-	}
-
-	ok := false
-	func() {
-		defer func() {
-			if e := recover(); e != nil {
-				ok = true
-			}
-		}()
-		as.add("a", 3)
-	}()
-	if !ok {
-		t.Errorf("want panic, got none")
+	if len(as) != 2 {
+		t.Errorf("want args set length 2, got %d", len(as))
 	}
 
 	a.pop()
 	as = a.peek()
-	if as.len() != 0 {
-		t.Errorf("want args set length 0, got %d", as.len())
+	if len(as) != 0 {
+		t.Errorf("want args set length 0, got %d", len(as))
 	}
 }
