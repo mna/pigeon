@@ -17,14 +17,14 @@ var (
 
 // NewGenerator creates a Generator that writes to w.
 func NewGenerator(w io.Writer) *Generator {
-	g := &Generator{w: w, RecvName: "c"}
+	g := &Generator{w: w, RecvrName: "c"}
 	return g
 }
 
 // Generator generates the PEG parser for a provided grammar.
 type Generator struct {
 	// options
-	RecvName string
+	RecvrName string
 
 	w   io.Writer
 	err error
@@ -50,6 +50,7 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 		return nil, errNoRule
 	}
 
+	g.pg.RecvrNm = g.RecvrName
 	if gr.Init != nil {
 		g.pg.Init = unwrapCode(gr.Init.Val)
 	}
@@ -98,8 +99,9 @@ type thunkInfo struct {
 }
 
 type program struct {
-	Init   string
-	Instrs []ϡinstr
+	RecvrNm string
+	Init    string
+	Instrs  []ϡinstr
 
 	Ms []ast.Expression
 	As []*thunkInfo

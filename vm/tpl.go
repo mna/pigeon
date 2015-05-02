@@ -4,39 +4,52 @@ import "text/template"
 
 var tpl = template.New("gen")
 
-// TODO : better name...
-type genData struct {
-	Instrs       []uint64
-	Init         string // init code block
-	ReceiverName string
-
-	As []struct {
-		RuleName  string
-		ExprIndex int
-		Args      []string
-		Code      string
-	}
-	Bs []struct {
-		RuleName  string
-		ExprIndex int
-		Args      []string
-		Code      string
-	}
-}
+// type thunkInfo struct {
+// 	Parms  []string
+// 	RuleNm string
+// 	ExprIx int
+// 	Code   string
+// }
+//
+// type program struct {
+// 	Init   string
+// 	Instrs []ϡinstr
+//
+// 	Ms []ast.Expression
+// 	As []*thunkInfo
+// 	Bs []*thunkInfo
+// 	Ss []string
+//
+// 	InstrToRule []int
+//
+// 	mss map[string]int // reverse map of string to index in Ss
+// 	mms map[string]int // reverse map of matcher's raw value to index in Ms
+//
+// 	ruleNmIx      int
+// 	exprIx        int
+// 	parmsSet      [][]string  // stack of parms set for code blocks
+// 	ruleNmStartIx map[int]int // rule name ix to first rule instr ix
+// 	ruleNmEntryIx map[int]int // rule name ix to entry point instr ix
+// 	ruleNmToDisNm map[int]int // rule name ix to rule display name ix
+// }
 
 const codeTpl = `
 {{.Init}}
 
 {{range .As}}
-func ({{ $.ReceiverName }} *current) on{{ .RuleName }}{{ .ExprIndex }}() (interface{}, error) {
+func ({{$.RecvrNm}} *current) on{{.RuleNm}}{{.ExprIx}}() (interface{}, error) {
 {{ .Code }}	
 }
 
-func (v *ϡvm) callOn{{ .RuleName }}{{ .ExprIndex }}() (interface{}, error) {
-{{range .Args}}
+func (v *ϡvm) callOn{{.RuleNm}}{{.ExprIx}}() (interface{}, error) {
+{{range .Parms}}
 
 {{end}}
+	v.cur.on{{.RuleNm}}{{.ExprIx}}()
 }
+{{end}}
+
+{{range .Bs}}
 {{end}}
 `
 

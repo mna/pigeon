@@ -5,7 +5,7 @@ import (
 	"unicode/utf8"
 )
 
-//+ϡ following code is part of the generated parser
+//+pigeon following code is part of the generated parser
 
 // position records a position in the text. It is part of the supported
 // API.

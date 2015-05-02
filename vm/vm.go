@@ -11,7 +11,7 @@ import (
 // builder for the input PEG.
 var ϡtheProgram *ϡprogram
 
-//+ϡ following code is part of the generated parser
+//+pigeon following code is part of the generated parser
 
 // ϡsentinel is a type used to define sentinel values that shouldn't
 // be equal to something else.

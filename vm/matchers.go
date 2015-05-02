@@ -8,7 +8,7 @@ import (
 	"unicode/utf8"
 )
 
-//+ϡ following code is part of the generated parser
+//+pigeon following code is part of the generated parser
 
 // ϡpeekReader is the interface that defines the peek and read
 // methods.
