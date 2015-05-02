@@ -10,7 +10,7 @@ See the [godoc page][3] for detailed usage.
 
 ## Installation
 
-Provided you have Go correctly installed with the $GOPATH and $GOBIN environment variables set, run:
+Provided you have Go (1.1+) correctly installed with the $GOPATH and $GOBIN environment variables set, run:
 
 ```
 $ go get -u github.com/PuerkitoBio/pigeon
