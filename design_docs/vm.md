@@ -136,6 +136,7 @@ The following statement always holds:
 ### Bootstrap sequence
 
 0: PUSHI N : push N on instruction index stack, N = 3 I[3]
+.: PUSHA
 1: CALL : pop I, push next instruction index to I, jump to I I[2]
 2: EXIT : pop V, decompose and return v, b (if V is MatchFailed, return nil, false, otherwise return V, true).
 

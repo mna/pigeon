@@ -303,7 +303,9 @@ func (g *Generator) labeled(e *ast.LabeledExpr) int {
 	g.pg.popParmsSet()
 
 	start := g.encode(ϡopPush, ϡistackID, ix)
+	g.encode(ϡopPush, ϡastackID)
 	g.encode(ϡopCall)
+	g.encode(ϡopPop, ϡastackID)
 	g.encode(ϡopStoreIfT, lblIx)
 	g.encode(ϡopReturn)
 	return start
@@ -316,7 +318,9 @@ func (g *Generator) andNot(subExpr ast.Expression, and bool) int {
 
 	start := g.encode(ϡopPush, ϡpstackID)
 	g.encode(ϡopPush, ϡistackID, ix)
+	g.encode(ϡopPush, ϡastackID)
 	g.encode(ϡopCall)
+	g.encode(ϡopPop, ϡastackID)
 	if and {
 		g.encode(ϡopNilIfT)
 	} else {
@@ -332,7 +336,9 @@ func (g *Generator) ruleRef(e *ast.RuleRefExpr) int {
 	ix := g.pg.string(nm)
 
 	start := g.encode(ϡopPlaceholder, ix)
+	g.encode(ϡopPush, ϡastackID)
 	g.encode(ϡopCall)
+	g.encode(ϡopPop, ϡastackID)
 	g.encode(ϡopReturn)
 	return start
 }
@@ -343,7 +349,9 @@ func (g *Generator) zeroOrOne(e *ast.ZeroOrOneExpr) int {
 	g.pg.popParmsSet()
 
 	start := g.encode(ϡopPush, ϡistackID, ix)
+	g.encode(ϡopPush, ϡastackID)
 	g.encode(ϡopCall)
+	g.encode(ϡopPop, ϡastackID)
 	g.encodeJumpDelta(ϡopPopVJumpIfF, +2)
 	g.encode(ϡopReturn)
 	g.encode(ϡopPush, ϡvstackID, ϡvValNil)
@@ -362,10 +370,12 @@ func (g *Generator) repetition(subExpr ast.Expression, zeroOk bool) int {
 	}
 	start := g.encode(ϡopPush, ϡvstackID, vVal)
 	g.encode(ϡopPush, ϡistackID, ix)
+	g.encode(ϡopPush, ϡastackID)
 	g.encode(ϡopCall)
+	g.encode(ϡopPop, ϡastackID)
 	g.encodeJumpDelta(ϡopPopVJumpIfF, +3)
 	g.encode(ϡopCumulOrF)
-	g.encodeJumpDelta(ϡopJump, -4)
+	g.encodeJumpDelta(ϡopJump, -6)
 	g.encode(ϡopReturn)
 	return start
 }
@@ -382,10 +392,12 @@ func (g *Generator) choice(e *ast.ChoiceExpr) int {
 	// then generate the sequence's instructions
 	indices[0] = ϡlstackID
 	start := g.encode(ϡopPush, indices...)
-	g.encodeJumpDelta(ϡopTakeLOrJump, +4)
+	g.encodeJumpDelta(ϡopTakeLOrJump, +6)
+	g.encode(ϡopPush, ϡastackID)
 	g.encode(ϡopCall)
+	g.encode(ϡopPop, ϡastackID)
 	g.encodeJumpDelta(ϡopJumpIfT, +2)
-	g.encodeJumpDelta(ϡopJump, -3)
+	g.encodeJumpDelta(ϡopJump, -5)
 	g.encode(ϡopPop, ϡlstackID)
 	g.encode(ϡopReturn)
 	return start
@@ -430,6 +442,7 @@ func (g *Generator) bootstrap(r *ast.Rule) {
 	ix := g.pg.string(nm)
 
 	g.encode(ϡopPlaceholder, ix)
+	g.encode(ϡopPush, ϡastackID)
 	g.encode(ϡopCall)
 	g.encode(ϡopExit)
 }
