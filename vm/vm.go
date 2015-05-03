@@ -116,7 +116,16 @@ func (pg ϡprogram) instrToString(instr ϡinstr, ix int) string {
 	case ϡopCallA, ϡopCallB, ϡopJump, ϡopJumpIfT, ϡopJumpIfF, ϡopPopVJumpIfF, ϡopTakeLOrJump:
 		buf.WriteString(fmt.Sprintf(stdFmt+" %d", rule, op, a0))
 	case ϡopPush:
-		buf.WriteString(fmt.Sprintf(stdFmt+" %s %d %d (n=%d)", rule, op, ϡstackNm[a0], a1, a2, n))
+		buf.WriteString(fmt.Sprintf(stdFmt+" %s %d %d", rule, op, ϡstackNm[a0], a1, a2))
+		orin := n
+		n -= 3
+		for n > 0 {
+			ix++
+			a0, a1, a2, a3 := pg.instrs[ix].decodeLs()
+			n -= 4
+			buf.WriteString(fmt.Sprintf(" %d %d %d %d", a0, a1, a2, a3))
+		}
+		buf.WriteString(fmt.Sprintf(" (n=%d)", orin))
 	case ϡopPop:
 		buf.WriteString(fmt.Sprintf(stdFmt+" %s", rule, op, ϡstackNm[a0]))
 	case ϡopMatch:
