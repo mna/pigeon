@@ -29,13 +29,13 @@ by default.
 
 The following options can be specified:
 
-	-cache : cache parser results to avoid exponential parsing time in
+	--cache : cache parser results to avoid exponential parsing time in
 	pathological cases. Can make the parsing slower for typical
 	cases and uses more memory (default: false).
 
-	-debug : boolean, print debugging info to stdout (default: false).
+	--debug : boolean, print debugging info to stdout (default: false).
 
-	-no-recover : boolean, if set, do not recover from a panic. Useful
+	--no-recover : boolean, if set, do not recover from a panic. Useful
 	to access the panic stack when debugging, otherwise the panic
 	is converted to an error (default: false).
 
@@ -45,7 +45,7 @@ The following options can be specified:
 	-x : boolean, if set, do not build the parser, just parse the input grammar
 	(default: false).
 
-	-receiver-name=NAME : string, name of the receiver variable for the generated
+	--receiver-name=NAME : string, name of the receiver variable for the generated
 	code blocks. Non-initializer code blocks in the grammar end up as methods on the
 	*current type, and this option sets the name of the receiver (default: c).
 
@@ -214,7 +214,7 @@ Character class matcher
 A character class matcher tries to match the input against a class of characters
 inside square brackets "[...]". Inside the brackets, characters represent
 themselves and the same escapes as in string literals are available, except
-that the single- and double-quote escape is not valid, instead the closing
+that the single- and double-quote escapes are not valid, instead the closing
 square bracket "]" must be escaped to be used. The caret character "^" can be
 escaped too, and must be escaped if used in the first position in order to
 represent itself, otherwise it is interpreted as the inverted match character
@@ -231,6 +231,12 @@ A caret "^" as first character inside the square brackets indicates that the
 match is inverted (it is a match if the input does not match the character
 class matcher). E.g.:
 	NotAZ = [^a-z]i
+
+Be careful when using case insensitive matches with character ranges, as
+pigeon applies it by converting the range's starting and ending runes to
+lowercase. This can cause unexpected results when the range includes
+non-letter characters (e.g. [A-_]i would not match anything, as that would
+be translated to [a-_] and lowercase "a" is greater than the underscore).
 
 Any matcher
 

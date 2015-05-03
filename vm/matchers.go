@@ -69,7 +69,7 @@ func (s ϡstringMatcher) String() string {
 // ϡcharClassMatcher is a matcher that matches classes of characters.
 type ϡcharClassMatcher struct {
 	chars   []rune // runes must be lowercase if ignoreCase is true
-	ranges  []rune // TODO : document potential issues if ignore case is used with ranges
+	ranges  []rune // same for ranges
 	classes []*unicode.RangeTable
 
 	ignoreCase bool
