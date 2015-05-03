@@ -12,6 +12,9 @@ BUILDER_DIR = $(ROOT)/builder
 BUILDER_SRC = $(BUILDER_DIR)/*.go
 AST_DIR = $(ROOT)/ast
 AST_SRC = $(AST_DIR)/*.go
+CODE_DIR = $(ROOT)/vm
+CODE_FILE = $(CODE_DIR)/static_code.go
+CODE_SRC = $(filter-out $(CODE_FILE),$(CODE_DIR)/*.go)
 
 # bootstrap tools variables
 BOOTSTRAP_DIR = $(ROOT)/bootstrap
@@ -83,6 +86,14 @@ cmp:
 	cmp $$boot $$official && \
 	unlink $$boot && \
 	unlink $$official
+
+$(CODE_FILE): $(CODE_SRC)
+	files=$$(grep -n "//+pigeon" $(CODE_SRC) | cut -f1 -d:) && echo -e "package vm\n\nvar staticCode = \`" > $(CODE_FILE) && { \
+		  for var in $$files; do \
+		  tail -n +`grep -n "//+pigeon" $$var | cut -f1 -d:` $$var >> $(CODE_FILE); \
+		  done; \
+		  echo "\`" >> $(CODE_FILE); \
+		}
 
 clean:
 	rm $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC)
