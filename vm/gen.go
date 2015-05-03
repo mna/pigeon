@@ -41,9 +41,17 @@ func (g *Generator) Generate(gr *ast.Grammar) error {
 		return err
 	}
 
-	// TODO : return g.write(pg)
-	_ = pg
-	return nil
+	return g.write(pg)
+}
+
+func (g *Generator) write(pg *program) error {
+	// first write the template-generated code
+	if err := tpl.Execute(g.w, pg); err != nil {
+		return err
+	}
+	// then write the static code
+	_, err := fmt.Fprint(g.w, staticCode)
+	return err
 }
 
 func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
