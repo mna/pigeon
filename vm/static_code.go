@@ -1104,6 +1104,10 @@ func (v *ϡvm) dispatch() interface{} {
 			v.v.push(ϡmatchFailed)
 			v.parser.pt = start
 
+			if v.debug {
+				v.dumpSnapshot(os.Stderr)
+			}
+
 		case ϡopPop:
 			switch a0 {
 			case ϡlstackID:

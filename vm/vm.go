@@ -106,7 +106,7 @@ func (pg ϡprogram) instrToString(instr ϡinstr, ix int) string {
 	op, n, a0, a1, a2 := instr.decode()
 	rule := pg.ruleNameAt(ix)
 	if rule == "" {
-		rule = "<none>"
+		rule = "<bootstrap>"
 	}
 	stdFmt := "%s.%s"
 	switch op {
@@ -461,6 +461,10 @@ func (v *ϡvm) dispatch() interface{} {
 			}
 			v.v.push(ϡmatchFailed)
 			v.parser.pt = start
+
+			if v.debug {
+				v.dumpSnapshot(os.Stderr)
+			}
 
 		case ϡopPop:
 			switch a0 {

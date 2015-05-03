@@ -370,6 +370,31 @@ func TestGenerateProgram(t *testing.T) {
 			Ss:          []string{"A"},
 			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 19)),
 		}, nil},
+
+		// action with a sequence of 4 (the grammar's Grammar rule bug)
+		{"A = B C D E {x}\nB = 'b'\nC = 'c'\nD = 'd'\nE = 'e'", &testProgram{
+			Instrs: combineInstrs(
+				encodeBootstrap(t, 36),
+				encodeRuleRef(t, 44),                // 4
+				encodeRuleRef(t, 48),                // 9
+				encodeRuleRef(t, 52),                // 14
+				encodeRuleRef(t, 56),                // 19
+				encodeSequence(t, 24, 4, 9, 14, 19), // 24
+				encodeAction(t, 36, 0, 24),          // 36
+				encodeMatcher(t, 0),                 // 44
+				encodeMatcher(t, 1),                 // 48
+				encodeMatcher(t, 2),                 // 52
+				encodeMatcher(t, 3),                 // 56
+			),
+			Ms: []string{`"b"`, `"c"`, `"d"`, `"e"`},
+			Ss: []string{"A", "B", "C", "D", "E"},
+			As: []*thunkInfo{&thunkInfo{
+				RuleNm: "A",
+				ExprIx: 1,
+				Code:   "x",
+			}},
+			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 40), rpt(1, 4), rpt(2, 4), rpt(3, 4), rpt(4, 4)),
+		}, nil},
 	}
 
 	for _, tc := range cases {

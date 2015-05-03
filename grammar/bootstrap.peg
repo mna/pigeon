@@ -2,7 +2,7 @@
 package main
 }
 
-Grammar ← __ initializer:( Initializer __ )? rules:( Rule __ )+ {
+Grammar ← __ initializer:( Initializer __ )? rules:( Rule __ )+ EOF {
     pos := c.astPos()
 
     // create the grammar, assign its initializer
