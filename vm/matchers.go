@@ -8,7 +8,7 @@ import (
 	"unicode/utf8"
 )
 
-//+pigeon following code is part of the generated parser
+//+pigeon: matchers.go
 
 // ϡpeekReader is the interface that defines the peek and read
 // methods.

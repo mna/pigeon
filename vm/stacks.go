@@ -1,6 +1,6 @@
 package vm
 
-//+pigeon following code is part of the generated parser
+//+pigeon: stacks.go
 
 // ϡpstack implements the Position stack. It stores savepoints.
 type ϡpstack []ϡsvpt

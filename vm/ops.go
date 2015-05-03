@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-//+pigeon following code is part of the generated parser
+//+pigeon: ops.go
 
 // ϡop represents an opcode.
 type ϡop byte

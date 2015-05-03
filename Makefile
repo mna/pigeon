@@ -7,9 +7,9 @@ BINDIR = ./bin
 EXAMPLES_DIR = $(ROOT)/examples
 TEST_DIR = $(ROOT)/test
 
-# builder and ast packages
-BUILDER_DIR = $(ROOT)/builder
-BUILDER_SRC = $(BUILDER_DIR)/*.go
+# vm and ast packages
+VM_DIR = $(ROOT)/vm
+VM_SRC = $(VM_DIR)/*.go
 AST_DIR = $(ROOT)/ast
 AST_SRC = $(AST_DIR)/*.go
 CODE_DIR = $(ROOT)/vm
@@ -33,9 +33,9 @@ TEST_GENERATED_SRC = $(patsubst %.peg,%.go,$(shell echo ./{examples,test}/**/*.p
 
 all: $(BINDIR)/bootstrap-build $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go \
 	$(BINDIR)/bootstrap-pigeon $(ROOT)/pigeon.go $(BINDIR)/pigeon \
-	$(TEST_GENERATED_SRC)
+	$(CODE_FILE) $(TEST_GENERATED_SRC)
 
-$(BINDIR)/bootstrap-build: $(BOOTSTRAPBUILD_SRC) $(BOOTSTRAP_SRC) $(BUILDER_SRC) \
+$(BINDIR)/bootstrap-build: $(BOOTSTRAPBUILD_SRC) $(BOOTSTRAP_SRC) $(VM_SRC) \
 	$(AST_SRC)
 	go build -o $@ $(BOOTSTRAPBUILD_DIR)
 
@@ -52,6 +52,15 @@ $(ROOT)/pigeon.go: $(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR)
 
 $(BINDIR)/pigeon: $(ROOT_SRC) $(ROOT)/pigeon.go
 	go build -o $@ $(ROOT)
+
+$(CODE_FILE): $(CODE_SRC)
+	(rm $(CODE_FILE) || true) && files=$$(grep -n "//+pigeon" $(CODE_SRC) | cut -f1 -d:) && \
+		echo -e "package vm\n\nvar staticCode = \`" > $(CODE_FILE) && { \
+		  for var in $$files; do \
+		  tail -n +`grep -n "//+pigeon" $$var | cut -f1 -d:` $$var >> $(CODE_FILE); \
+		  done; \
+		  echo "\`" >> $(CODE_FILE); \
+		}
 
 $(BOOTSTRAP_GRAMMAR):
 $(PIGEON_GRAMMAR):
@@ -87,16 +96,9 @@ cmp:
 	unlink $$boot && \
 	unlink $$official
 
-$(CODE_FILE): $(CODE_SRC)
-	files=$$(grep -n "//+pigeon" $(CODE_SRC) | cut -f1 -d:) && echo -e "package vm\n\nvar staticCode = \`" > $(CODE_FILE) && { \
-		  for var in $$files; do \
-		  tail -n +`grep -n "//+pigeon" $$var | cut -f1 -d:` $$var >> $(CODE_FILE); \
-		  done; \
-		  echo "\`" >> $(CODE_FILE); \
-		}
-
 clean:
-	rm $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC)
+	rm $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go \
+		$(TEST_GENERATED_SRC) $(CODE_FILE)
 	rm -rf $(BINDIR)
 
 .PHONY: all clean lint cmp

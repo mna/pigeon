@@ -11,7 +11,7 @@ import (
 	"os"
 
 	"github.com/PuerkitoBio/pigeon/ast"
-	"github.com/PuerkitoBio/pigeon/builder"
+	"github.com/PuerkitoBio/pigeon/vm"
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 	}
 	in := bufio.NewReader(inf)
 
-	g, err := ParseReader(nm, in, Debug(*dbgFlag))
+	gr, err := ParseReader(nm, in, Debug(*dbgFlag))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "parse error: ", err)
 		os.Exit(3)
@@ -57,7 +57,8 @@ func main() {
 			outw = f
 		}
 
-		if err := builder.BuildParser(outw, g.(*ast.Grammar)); err != nil {
+		g := vm.NewGenerator(outw)
+		if err := g.Generate(gr.(*ast.Grammar)); err != nil {
 			fmt.Fprintln(os.Stderr, "build error: ", err)
 			os.Exit(5)
 		}

@@ -126,7 +126,7 @@ SuffixedExpr ← expr:PrimaryExpr __ op:SuffixedOp {
     default:
         return nil, errors.New("unknown operator: " + opStr)
     }
-} / PrimaryExpr 
+} / PrimaryExpr
 
 SuffixedOp ← ( '?' / '*' / '+' ) {
     return string(c.text), nil

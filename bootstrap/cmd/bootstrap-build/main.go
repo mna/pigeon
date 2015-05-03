@@ -10,7 +10,7 @@ import (
 	"os"
 
 	"github.com/PuerkitoBio/pigeon/bootstrap"
-	"github.com/PuerkitoBio/pigeon/builder"
+	"github.com/PuerkitoBio/pigeon/vm"
 )
 
 func main() {
@@ -41,12 +41,13 @@ func main() {
 	defer f.Close()
 
 	p := bootstrap.NewParser()
-	g, err := p.Parse(os.Args[1], f)
+	gr, err := p.Parse(os.Args[1], f)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := builder.BuildParser(outw, g); err != nil {
+	g := vm.NewGenerator(outw)
+	if err := g.Generate(gr); err != nil {
 		log.Fatal(err)
 	}
 }

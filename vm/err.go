@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-//+pigeon following code is part of the generated parser
+//+pigeon: err.go
 
 var (
 	// errInvalidEncoding is returned when the source is not properly

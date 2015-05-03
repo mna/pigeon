@@ -87,14 +87,14 @@ var funcMap = template.FuncMap{
 				if i > 0 {
 					buf.WriteString(", ")
 				}
-				buf.WriteString(fmt.Sprintf("%c", rn))
+				buf.WriteString(fmt.Sprintf("%q", rn))
 			}
 			buf.WriteString("},\nranges: []rune{")
 			for i, rn := range m.Ranges {
 				if i > 0 {
 					buf.WriteString(", ")
 				}
-				buf.WriteString(fmt.Sprintf("%c", rn))
+				buf.WriteString(fmt.Sprintf("%q", rn))
 			}
 			buf.WriteString("},\nclasses: []*unicode.RangeTable{")
 			for i, cl := range m.UnicodeClasses {
@@ -103,7 +103,7 @@ var funcMap = template.FuncMap{
 				}
 				buf.WriteString(fmt.Sprintf("ϡrangeTable(%q)", cl))
 			}
-			buf.WriteString("}\n}")
+			buf.WriteString("},\n}")
 			return buf.String()
 		default:
 			panic(fmt.Sprintf("unknown matcher type %T", m))

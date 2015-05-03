@@ -1,7 +1,7 @@
 package vm
 
 var staticCode = `
-//+pigeon following code is part of the generated parser
+//+pigeon: err.go
 
 var (
 	// errInvalidEncoding is returned when the source is not properly
@@ -72,7 +72,7 @@ type parserError struct {
 func (p *parserError) Error() string {
 	return p.ϡprefix + ": " + p.Inner.Error()
 }
-//+pigeon following code is part of the generated parser
+//+pigeon: matchers.go
 
 // ϡpeekReader is the interface that defines the peek and read
 // methods.
@@ -213,7 +213,7 @@ func ϡrangeTable(class string) *unicode.RangeTable {
 	// cannot happen
 	panic(fmt.Sprintf("invalid Unicode class: %s", class))
 }
-//+pigeon following code is part of the generated parser
+//+pigeon: ops.go
 
 // ϡop represents an opcode.
 type ϡop byte
@@ -366,7 +366,7 @@ func ϡencodeInstr(op ϡop, args ...int) ([]ϡinstr, error) {
 
 	return is, nil
 }
-//+pigeon following code is part of the generated parser
+//+pigeon: parser.go
 
 // position records a position in the text. It is part of the supported
 // API.
@@ -440,7 +440,7 @@ func (p *ϡparser) read() {
 func (p *ϡparser) sliceFrom(start ϡsvpt) []byte {
 	return p.data[start.position.offset:p.pt.position.offset]
 }
-//+pigeon following code is part of the generated parser
+//+pigeon: pub.go
 
 // Option is a function that can set an option on the parser. It returns
 // the previous setting as an Option.
@@ -521,7 +521,7 @@ func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
 	}
 	return v.setOptions(opts).run(ϡtheProgram)
 }
-//+pigeon following code is part of the generated parser
+//+pigeon: stacks.go
 
 // ϡpstack implements the Position stack. It stores savepoints.
 type ϡpstack []ϡsvpt
@@ -653,7 +653,7 @@ func (a *ϡastack) peek() ϡargsSet {
 	as := (*a)[n-1]
 	return as
 }
-//+pigeon following code is part of the generated parser
+//+pigeon: vm.go
 
 // ϡsentinel is a type used to define sentinel values that shouldn't
 // be equal to something else.
@@ -745,7 +745,7 @@ func (pg ϡprogram) String() string {
 func (pg ϡprogram) instrToString(instr ϡinstr, ix int) string {
 	var buf bytes.Buffer
 
-	op, _, a0, a1, a2 := instr.decode()
+	op, n, a0, a1, a2 := instr.decode()
 	rule := pg.ruleNameAt(ix)
 	if rule == "" {
 		rule = "<none>"
@@ -758,7 +758,7 @@ func (pg ϡprogram) instrToString(instr ϡinstr, ix int) string {
 	case ϡopCallA, ϡopCallB, ϡopJump, ϡopJumpIfT, ϡopJumpIfF, ϡopPopVJumpIfF, ϡopTakeLOrJump:
 		buf.WriteString(fmt.Sprintf(stdFmt+" %d", rule, op, a0))
 	case ϡopPush:
-		buf.WriteString(fmt.Sprintf(stdFmt+" %s %d %d", rule, op, ϡstackNm[a0], a1, a2))
+		buf.WriteString(fmt.Sprintf(stdFmt+" %s %d %d (n=%d)", rule, op, ϡstackNm[a0], a1, a2, n))
 	case ϡopPop:
 		buf.WriteString(fmt.Sprintf(stdFmt+" %s", rule, op, ϡstackNm[a0]))
 	case ϡopMatch:
@@ -1130,19 +1130,17 @@ func (v *ϡvm) dispatch() interface{} {
 				// n = L args to push + 1, for the lstackID
 				n--
 				ar := make([]int, n)
-				src := []int{0, 0, a2, a1}
-				for i := 0; i < n; i++ {
-					lsrc := len(src)
-					ar[i] = src[lsrc-1]
-					src = src[:lsrc-1]
-					if lsrc-1 == 0 && i < n-1 {
-						// need more
-						instr := v.pg.instrs[v.pc]
-						a0, a1, a2, a3 := instr.decodeLs()
-						src = append(src, a3, a2, a1, a0)
-						v.pc++
-					}
+				src := []int{a1, a2}
+				n -= 2
+				for n > 0 {
+					// need more
+					instr := v.pg.instrs[v.pc]
+					a0, a1, a2, a3 := instr.decodeLs()
+					src = append(src, a0, a1, a2, a3)
+					v.pc++
+					n -= 4
 				}
+				copy(ar, src)
 				v.l.push(ar)
 			default:
 				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))

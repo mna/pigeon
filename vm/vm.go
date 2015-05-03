@@ -11,7 +11,7 @@ import (
 // builder for the input PEG.
 var ϡtheProgram *ϡprogram
 
-//+pigeon following code is part of the generated parser
+//+pigeon: vm.go
 
 // ϡsentinel is a type used to define sentinel values that shouldn't
 // be equal to something else.
@@ -103,7 +103,7 @@ func (pg ϡprogram) String() string {
 func (pg ϡprogram) instrToString(instr ϡinstr, ix int) string {
 	var buf bytes.Buffer
 
-	op, _, a0, a1, a2 := instr.decode()
+	op, n, a0, a1, a2 := instr.decode()
 	rule := pg.ruleNameAt(ix)
 	if rule == "" {
 		rule = "<none>"
@@ -116,7 +116,7 @@ func (pg ϡprogram) instrToString(instr ϡinstr, ix int) string {
 	case ϡopCallA, ϡopCallB, ϡopJump, ϡopJumpIfT, ϡopJumpIfF, ϡopPopVJumpIfF, ϡopTakeLOrJump:
 		buf.WriteString(fmt.Sprintf(stdFmt+" %d", rule, op, a0))
 	case ϡopPush:
-		buf.WriteString(fmt.Sprintf(stdFmt+" %s %d %d", rule, op, ϡstackNm[a0], a1, a2))
+		buf.WriteString(fmt.Sprintf(stdFmt+" %s %d %d (n=%d)", rule, op, ϡstackNm[a0], a1, a2, n))
 	case ϡopPop:
 		buf.WriteString(fmt.Sprintf(stdFmt+" %s", rule, op, ϡstackNm[a0]))
 	case ϡopMatch:
@@ -488,19 +488,17 @@ func (v *ϡvm) dispatch() interface{} {
 				// n = L args to push + 1, for the lstackID
 				n--
 				ar := make([]int, n)
-				src := []int{0, 0, a2, a1}
-				for i := 0; i < n; i++ {
-					lsrc := len(src)
-					ar[i] = src[lsrc-1]
-					src = src[:lsrc-1]
-					if lsrc-1 == 0 && i < n-1 {
-						// need more
-						instr := v.pg.instrs[v.pc]
-						a0, a1, a2, a3 := instr.decodeLs()
-						src = append(src, a3, a2, a1, a0)
-						v.pc++
-					}
+				src := []int{a1, a2}
+				n -= 2
+				for n > 0 {
+					// need more
+					instr := v.pg.instrs[v.pc]
+					a0, a1, a2, a3 := instr.decodeLs()
+					src = append(src, a0, a1, a2, a3)
+					v.pc++
+					n -= 4
 				}
+				copy(ar, src)
 				v.l.push(ar)
 			default:
 				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))

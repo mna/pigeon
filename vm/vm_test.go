@@ -113,6 +113,12 @@ func TestRun(t *testing.T) {
 		{`A = l1:'a' l2:'b' {x}`, "ab", "x", nil},
 		{`A = l1:'a' l2:'b' {x}`, "aab", nil, errNoMatch},
 		{`A = l1:'a' l2:'b' {x}`, "baa", nil, errNoMatch},
+
+		{`A = 'a' 'b' 'c' 'd'`, "", nil, errNoMatch},
+		{`A = 'a' 'b' 'c' 'd'`, "a", nil, errNoMatch},
+		{`A = 'a' 'b' 'c' 'd'`, "abcd", []interface{}{[]byte("a"), []byte("b"), []byte("c"), []byte("d")}, nil},
+		{`A = 'a' 'b' 'c' 'd'`, "aab", nil, errNoMatch},
+		{`A = 'a' 'b' 'c' 'd'`, "baa", nil, errNoMatch},
 	}
 	for i, tc := range cases {
 		gr, err := bootstrap.NewParser().Parse("", strings.NewReader(tc.grammar))
