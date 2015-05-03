@@ -389,12 +389,14 @@ func (g *Generator) choice(e *ast.ChoiceExpr) int {
 	// then generate the sequence's instructions
 	indices[0] = ϡlstackID
 	start := g.encode(ϡopPush, indices...)
-	g.encodeJumpDelta(ϡopTakeLOrJump, +6)
+	g.encodeJumpDelta(ϡopTakeLOrJump, +7)
 	g.encode(ϡopPush, ϡastackID)
 	g.encode(ϡopCall)
 	g.encode(ϡopPop, ϡastackID)
-	g.encodeJumpDelta(ϡopJumpIfT, +2)
-	g.encodeJumpDelta(ϡopJump, -5)
+	g.encodeJumpDelta(ϡopJumpIfT, +4)
+	g.encode(ϡopPop, ϡvstackID)
+	g.encodeJumpDelta(ϡopJump, -6)
+	g.encode(ϡopPush, ϡvstackID, ϡvValFailed)
 	g.encode(ϡopPop, ϡlstackID)
 	g.encode(ϡopReturn)
 	return start

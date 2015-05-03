@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/pigeon/ast"
-	"github.com/PuerkitoBio/pigeon/builder"
+	"github.com/PuerkitoBio/pigeon/vm"
 )
 
 var exit = os.Exit
@@ -42,6 +42,9 @@ func main() {
 	if fs.NArg() > 1 {
 		argError(1, "expected one argument, got %q", strings.Join(fs.Args(), " "))
 	}
+	if *recvrNmFlag == "" {
+		*recvrNmFlag = "c"
+	}
 
 	// get input source
 	infile := ""
@@ -52,7 +55,7 @@ func main() {
 	defer rc.Close()
 
 	// parse input
-	g, err := ParseReader(nm, rc, Debug(*dbgFlag), Memoize(*cacheFlag), Recover(!*noRecoverFlag))
+	gr, err := ParseReader(nm, rc, Debug(*dbgFlag), Memoize(*cacheFlag), Recover(!*noRecoverFlag))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "parse error(s):\n", err)
 		exit(3)
@@ -63,8 +66,9 @@ func main() {
 		out := output(*outputFlag)
 		defer out.Close()
 
-		curNmOpt := builder.ReceiverName(*recvrNmFlag)
-		if err := builder.BuildParser(out, g.(*ast.Grammar), curNmOpt); err != nil {
+		g := vm.NewGenerator(out)
+		g.RecvrName = *recvrNmFlag
+		if err := g.Generate(gr.(*ast.Grammar)); err != nil {
 			fmt.Fprintln(os.Stderr, "build error: ", err)
 			exit(5)
 		}
@@ -89,20 +93,20 @@ generated parser to stdout. If GRAMMAR_FILE is specified, the
 grammar is read from this file instead. If the -o flag is set,
 the generated code is written to this file instead.
 
-	-cache
+	--cache
 		cache parser results to avoid exponential parsing time in
 		pathological cases. Can make the parsing slower for typical
 		cases and uses more memory.
-	-debug
+	--debug
 		output debugging information while parsing the grammar.
-	-h -help
+	-h --help
 		display this help message.
-	-no-recover
+	--no-recover
 		do not recover from a panic. Useful to access the panic stack
 		when debugging, otherwise the panic is converted to an error.
 	-o OUTPUT_FILE
 		write the generated parser to OUTPUT_FILE. Defaults to stdout.
-	-receiver-name NAME
+	--receiver-name NAME
 		use NAME as for the receiver name of the generated methods
 		for the grammar's code blocks. Defaults to "c".
 	-x

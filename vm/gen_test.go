@@ -86,7 +86,7 @@ func TestGenerateProgram(t *testing.T) {
 			),
 			Ms:          []string{`"m"`, `"n"`},
 			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 17)),
+			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 19)),
 		}, nil},
 
 		// zero or more expression
@@ -280,7 +280,7 @@ func TestGenerateProgram(t *testing.T) {
 				ExprIx: 4,
 				Code:   "x",
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 37)),
+			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 39)),
 		}, nil},
 
 		// scope of params
@@ -341,7 +341,7 @@ func TestGenerateProgram(t *testing.T) {
 				ExprIx: 8,
 				Code:   "x",
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 62)),
+			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 64)),
 		}, nil},
 
 		// normalization of matchers
@@ -492,12 +492,14 @@ func encodeSequence(t *testing.T, start int, ls ...int) []ϡinstr {
 func encodeChoice(t *testing.T, start int, ls ...int) []ϡinstr {
 	return combineInstrs(
 		mustEncodeInstr(t, ϡopPush, append([]int{ϡlstackID}, ls...)...),
-		mustEncodeInstr(t, ϡopTakeLOrJump, start+7),
+		mustEncodeInstr(t, ϡopTakeLOrJump, start+8),
 		mustEncodeInstr(t, ϡopPush, ϡastackID),
 		mustEncodeInstr(t, ϡopCall),
 		mustEncodeInstr(t, ϡopPop, ϡastackID),
-		mustEncodeInstr(t, ϡopJumpIfT, start+7),
+		mustEncodeInstr(t, ϡopJumpIfT, start+9),
+		mustEncodeInstr(t, ϡopPop, ϡvstackID),
 		mustEncodeInstr(t, ϡopJump, start+1),
+		mustEncodeInstr(t, ϡopPush, ϡvstackID, ϡvValFailed),
 		mustEncodeInstr(t, ϡopPop, ϡlstackID),
 		mustEncodeInstr(t, ϡopReturn),
 	)

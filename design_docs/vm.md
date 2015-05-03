@@ -200,12 +200,14 @@ Opcodes:
 
 (bootstrap)
 03: [Rule A, Choice] PUSHL : P[] I[2] L[[Ia Ib]]
-04:                  TAKELORJUMP 08 : P[] I[2 Ia] L[[Ib]]
+04:                  TAKELORJUMP 09 : P[] I[2 Ia] L[[Ib]]
 05:                  CALL : P[] I[2 7] L[[Ib]]
-06:                  JUMPIFT 08 : jump to N if top V stack is not FAIL
-07:                  JUMP 04
-08:                  POPL : P[] I[2] V[v] L[]
-09:                  RETURN : P[] I[] V[v] L[]
+06:                  JUMPIFT 10 : jump to N if top V stack is not FAIL
+07:                  POPV (remove the FAIL)
+08:                  JUMP 04
+09:                  PUSHV FAIL (return fail)
+10:                  POPL : P[] I[2] V[v] L[]
+11:                  RETURN : P[] I[] V[v] L[]
 
 ### E4 - Repetition (`*`)
 

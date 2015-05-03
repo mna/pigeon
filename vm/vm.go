@@ -474,6 +474,8 @@ func (v *ϡvm) dispatch() interface{} {
 				v.p.pop()
 			case ϡastackID:
 				v.a.pop()
+			case ϡvstackID:
+				v.v.pop()
 			default:
 				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
 			}
