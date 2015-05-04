@@ -1,5 +1,10 @@
 # pigeon performance
 
+## VM implementation notes
+
+* Initializing the stacks capacities to 128 elements seems to help a little bit, but there is no noticeable improvement by using 512 or 1024.
+* Removing the bounds checks in the stacks don't translate to any noticeable improvement.
+
 // Commit df3f721 (recursive)
 BenchmarkParseUnicodeClass         10000            169352 ns/op           15013 B/op        234 allocs/op
 BenchmarkParseKeyword              10000            139439 ns/op           14070 B/op        202 allocs/op
@@ -39,7 +44,6 @@ BenchmarkPigeonJSONMemo               20          93271080 ns/op        56357640
 // Commit 1317e07 (vm+stacks 128)
 BenchmarkPigeonJSONNoMemo             20          93790644 ns/op        56363398 B/op     492369 allocs/op
 BenchmarkPigeonJSONMemo               20          93547428 ns/op        56363254 B/op     492369 allocs/op
-
 
 
 // Go1.4 stdlib

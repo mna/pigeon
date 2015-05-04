@@ -162,7 +162,6 @@ type ϡvm struct {
 	debug   bool
 	memoize bool
 	recover bool
-	// TODO : no bounds checking option (for stacks)? benchmark to see if it's worth it.
 
 	// program data
 	pc  int
@@ -314,11 +313,11 @@ func (v *ϡvm) dumpSnapshot(w io.Writer) {
 // run executes the provided program in this VM, and returns the result.
 func (v *ϡvm) run(pg *ϡprogram) (interface{}, error) {
 	v.pg = pg
-	v.a = make(ϡastack, 0, 256)
-	v.i = make(ϡistack, 0, 256)
-	v.v = make(ϡvstack, 0, 256)
-	v.l = make(ϡlstack, 0, 256)
-	v.p = make(ϡpstack, 0, 256)
+	v.a = make(ϡastack, 0, 128)
+	v.i = make(ϡistack, 0, 128)
+	v.v = make(ϡvstack, 0, 128)
+	v.l = make(ϡlstack, 0, 128)
+	v.p = make(ϡpstack, 0, 128)
 	ret := v.dispatch()
 
 	// if the match failed, translate that to a nil result and make
