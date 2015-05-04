@@ -12,12 +12,15 @@ import (
 func TestLinearTime(t *testing.T) {
 	var buf bytes.Buffer
 
+	if testing.Short() {
+		t.Skip()
+	}
+
 	sizes := []int64{
 		1 << 10,   // 1Kb
 		10 << 10,  // 10Kb
 		100 << 10, // 100Kb
-		// TODO : 1Mb overflows the stack
-		//1 << 20,
+		1 << 20,   // 1MB
 	}
 	for _, sz := range sizes {
 		r := io.LimitReader(rand.Reader, sz)
@@ -32,6 +35,6 @@ func TestLinearTime(t *testing.T) {
 		if _, err := Parse("", buf.Bytes(), Memoize(true)); err != nil {
 			t.Fatal(err)
 		}
-		t.Log(time.Now().Sub(start))
+		t.Logf("%dKB: %s", sz/1024, time.Now().Sub(start))
 	}
 }

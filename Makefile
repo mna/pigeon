@@ -54,12 +54,12 @@ $(BINDIR)/pigeon: $(ROOT_SRC) $(ROOT)/pigeon.go
 	go build -o $@ $(ROOT)
 
 $(CODE_FILE): $(CODE_SRC)
-	(rm $(CODE_FILE) || true) && files=$$(grep -n "//+pigeon" $(CODE_SRC) | cut -f1 -d:) && \
+	@(rm $(CODE_FILE) || true) && files=$$(grep -n "//+pigeon" $(CODE_SRC) | cut -f1 -d:) && \
 		echo -e "package vm\n\nvar staticCode = \`" > $(CODE_FILE) && { \
-		  for var in $$files; do \
-		  tail -n +`grep -n "//+pigeon" $$var | cut -f1 -d:` $$var >> $(CODE_FILE); \
-		  done; \
-		  echo "\`" >> $(CODE_FILE); \
+			for var in $$files; do \
+			tail -n +`grep -n "//+pigeon" $$var | cut -f1 -d:` $$var >> $(CODE_FILE); \
+			done; \
+			echo "\`" >> $(CODE_FILE); \
 		}
 
 $(BOOTSTRAP_GRAMMAR):
@@ -90,8 +90,8 @@ lint:
 	go vet ./...
 
 cmp:
-	@boot=$$(mktemp) && $(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR) | goimports > $$boot && \
-	official=$$(mktemp) && $(BINDIR)/pigeon $(PIGEON_GRAMMAR) | goimports > $$official && \
+	@boot=$$(mktemp) && $(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR) | goimports | tail -n +3 > $$boot && \
+	official=$$(mktemp) && $(BINDIR)/pigeon $(PIGEON_GRAMMAR) | goimports | tail -n +3 > $$official && \
 	cmp $$boot $$official && \
 	unlink $$boot && \
 	unlink $$official
