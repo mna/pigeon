@@ -9,8 +9,9 @@ BenchmarkParseUnicodeClass          2000           1657522 ns/op          361434
 BenchmarkParseKeyword               1000           1972652 ns/op          207480 B/op       1870 allocs/op
 
 // Commit 1317e07 (vm+stacks 128)
-BenchmarkParseUnicodeClass          2000            991382 ns/op          361434 B/op       3016 allocs/op
-BenchmarkParseKeyword               2000            657234 ns/op          207480 B/op       1870 allocs/op
+BenchmarkParseUnicodeClass          2000           2845717 ns/op          367405 B/op       2990 allocs/op
+BenchmarkParseKeyword               2000            649629 ns/op          213968 B/op       1845 allocs/op
+
 
 
 // Commit df3f721 (recursive)
@@ -22,8 +23,9 @@ BenchmarkParsePigeonNoMemo            10         143073240 ns/op        87630939
 BenchmarkParsePigeonMemo              10         142642384 ns/op        87630939 B/op     693740 allocs/op
 
 // Commit 1317e07 (vm+stacks 128)
-BenchmarkParsePigeonNoMemo            10         141508295 ns/op        87630939 B/op     693740 allocs/op
-BenchmarkParsePigeonMemo              10         143317953 ns/op        87630939 B/op     693740 allocs/op
+BenchmarkParsePigeonNoMemo            10         141237021 ns/op        87629233 B/op     693708 allocs/op
+BenchmarkParsePigeonMemo              10         141600274 ns/op        87629233 B/op     693708 allocs/op
+
 
 
 // Commit df3f721 (recursive)
@@ -35,8 +37,9 @@ BenchmarkPigeonJSONNoMemo             20          93411006 ns/op        56357596
 BenchmarkPigeonJSONMemo               20          93271080 ns/op        56357640 B/op     492396 allocs/op
 
 // Commit 1317e07 (vm+stacks 128)
-BenchmarkPigeonJSONNoMemo             20          94468129 ns/op        56357323 B/op     492395 allocs/op
-BenchmarkPigeonJSONMemo               20          95478650 ns/op        56357121 B/op     492394 allocs/op
+BenchmarkPigeonJSONNoMemo             20          93790644 ns/op        56363398 B/op     492369 allocs/op
+BenchmarkPigeonJSONMemo               20          93547428 ns/op        56363254 B/op     492369 allocs/op
+
 
 
 // Go1.4 stdlib
