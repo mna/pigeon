@@ -3,103 +3,141 @@ package vm
 //+pigeon: stacks.go
 
 // ϡpstack implements the Position stack. It stores savepoints.
-type ϡpstack []ϡsvpt
+type ϡpstack struct {
+	ar []ϡsvpt
+	sp int
+}
 
 // push adds a value on the stack.
 func (p *ϡpstack) push(pt ϡsvpt) {
-	*p = append(*p, pt)
+	if p.sp >= len(p.ar) {
+		p.ar = append(p.ar, pt)
+	} else {
+		p.ar[p.sp] = pt
+	}
+	p.sp++
 }
 
 // pop removes a value from the stack.
 func (p *ϡpstack) pop() ϡsvpt {
-	n := len(*p)
-	if n == 0 {
-		panic("pstack is empty")
-	}
-	v := (*p)[n-1]
-	*p = (*p)[:n-1]
-	return v
+	p.sp--
+	return p.ar[p.sp]
+}
+
+func (p *ϡpstack) len() int {
+	return p.sp
+}
+
+func newPstack(cap int) *ϡpstack {
+	return &ϡpstack{ar: make([]ϡsvpt, cap)}
 }
 
 // ϡistack implements the Instruction index stack. It stores integers.
-type ϡistack []int
+type ϡistack struct {
+	ar []int
+	sp int
+}
 
 // push adds a value on the stack.
 func (i *ϡistack) push(v int) {
-	*i = append(*i, v)
+	if i.sp >= len(i.ar) {
+		i.ar = append(i.ar, v)
+	} else {
+		i.ar[i.sp] = v
+	}
+	i.sp++
 }
 
 // pop removes a value from the stack.
 func (i *ϡistack) pop() int {
-	n := len(*i)
-	if n == 0 {
-		panic("istack is empty")
-	}
-	v := (*i)[n-1]
-	*i = (*i)[:n-1]
-	return v
+	i.sp--
+	return i.ar[i.sp]
+}
+
+func (i *ϡistack) len() int {
+	return i.sp
+}
+
+func newIstack(cap int) *ϡistack {
+	return &ϡistack{ar: make([]int, cap)}
 }
 
 // ϡvstack implements the Value stack. It stores empty interfaces.
-type ϡvstack []interface{}
+type ϡvstack struct {
+	ar []interface{}
+	sp int
+}
 
 // push adds a value on the stack.
 func (v *ϡvstack) push(i interface{}) {
-	*v = append(*v, i)
+	if v.sp >= len(v.ar) {
+		v.ar = append(v.ar, i)
+	} else {
+		v.ar[v.sp] = i
+	}
+	v.sp++
 }
 
 // pop removes a value from the stack.
 func (v *ϡvstack) pop() interface{} {
-	i := v.peek()
-	*v = (*v)[:len(*v)-1]
-	return i
+	v.sp--
+	return v.ar[v.sp]
 }
 
 // peek returns the value at the top of the stack, leaving it there.
 func (v *ϡvstack) peek() interface{} {
-	n := len(*v)
-	if n == 0 {
-		panic("vstack is empty")
-	}
-	i := (*v)[n-1]
-	return i
+	return v.ar[v.sp-1]
+}
+
+func (v *ϡvstack) len() int {
+	return v.sp
+}
+
+func newVstack(cap int) *ϡvstack {
+	return &ϡvstack{ar: make([]interface{}, cap)}
 }
 
 // ϡlstack implements the Loop stack. It stores slices of integers.
-type ϡlstack [][]int
+type ϡlstack struct {
+	ar [][]int
+	sp int
+}
 
 // push adds a value on the stack.
 func (l *ϡlstack) push(a []int) {
-	*l = append(*l, a)
+	if l.sp >= len(l.ar) {
+		l.ar = append(l.ar, a)
+	} else {
+		l.ar[l.sp] = a
+	}
+	l.sp++
 }
 
 // pop removes a value from the stack.
 func (l *ϡlstack) pop() []int {
-	n := len(*l)
-	if n == 0 {
-		panic("lstack is empty")
-	}
-	a := (*l)[n-1]
-	*l = (*l)[:n-1]
-	return a
+	l.sp--
+	return l.ar[l.sp]
 }
 
 // take removes the integer at index 0 from the slice at the top of the
 // stack. It returns -1 if the slice is empty. The slice is left on the
 // stack.
 func (l *ϡlstack) take() int {
-	n := len(*l)
-	if n == 0 {
-		panic("lstack is empty")
-	}
-
 	v := -1
-	a := (*l)[n-1]
+	a := l.ar[l.sp-1]
 	if len(a) > 0 {
 		v = a[0]
-		(*l)[n-1] = a[1:]
+		l.ar[l.sp-1] = a[1:]
 	}
 	return v
+}
+
+func (l *ϡlstack) len() int {
+	return l.sp
+}
+
+func newLstack(cap int) *ϡlstack {
+	return &ϡlstack{ar: make([][]int, cap)}
 }
 
 // ϡargsSet holds the list of arguments (key and value) to pass
@@ -107,28 +145,40 @@ func (l *ϡlstack) take() int {
 type ϡargsSet map[string]interface{}
 
 // ϡastack is a stack of ϡargsSet.
-type ϡastack []ϡargsSet
+type ϡastack struct {
+	ar []ϡargsSet
+	sp int
+}
 
 // push adds an empty ϡargsSet on top of the stack.
 func (a *ϡastack) push() {
-	*a = append(*a, ϡargsSet{})
+	if a.sp >= len(a.ar) {
+		a.ar = append(a.ar, nil)
+	} else {
+		a.ar[a.sp] = nil
+	}
+	a.sp++
 }
 
 // pop removes the top ϡargsSet from the stack.
 func (a *ϡastack) pop() {
-	n := len(*a)
-	if n == 0 {
-		panic("astack is empty")
-	}
-	*a = (*a)[:n-1]
+	a.sp--
 }
 
 // peek returns the current top ϡargsSet.
 func (a *ϡastack) peek() ϡargsSet {
-	n := len(*a)
-	if n == 0 {
-		panic("astack is empty")
+	as := a.ar[a.sp-1]
+	if as == nil {
+		as = make(ϡargsSet)
+		a.ar[a.sp-1] = as
 	}
-	as := (*a)[n-1]
 	return as
+}
+
+func (a *ϡastack) len() int {
+	return a.sp
+}
+
+func newAstack(cap int) *ϡastack {
+	return &ϡastack{ar: make([]ϡargsSet, cap)}
 }

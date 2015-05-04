@@ -169,11 +169,11 @@ type ϡvm struct {
 	cur current
 
 	// stacks
-	p ϡpstack
-	l ϡlstack
-	v ϡvstack
-	i ϡistack
-	a ϡastack
+	p *ϡpstack
+	l *ϡlstack
+	v *ϡvstack
+	i *ϡistack
+	a *ϡastack
 
 	// TODO: memoization...
 	// TODO: farthest failure position
@@ -261,63 +261,63 @@ func (v *ϡvm) dumpSnapshot(w io.Writer) {
 		}
 	}
 
-	// print the stacks
-	buf.WriteString("[ P: ")
-	for i := 0; i < 3; i++ {
-		if len(v.p) <= i {
-			break
-		}
-		if i > 0 {
-			buf.WriteString(", ")
-		}
-		val := v.p[len(v.p)-i-1]
-		buf.WriteString(fmt.Sprintf("\"%v\"", val))
-	}
-	buf.WriteString(" ]\n[ V: ")
-	for i := 0; i < 3; i++ {
-		if len(v.v) <= i {
-			break
-		}
-		if i > 0 {
-			buf.WriteString(", ")
-		}
-		val := v.v[len(v.v)-i-1]
-		buf.WriteString(fmt.Sprintf("%#v", val))
-	}
-	buf.WriteString(" ]\n[ I: ")
-	for i := 0; i < 3; i++ {
-		if len(v.i) <= i {
-			break
-		}
-		if i > 0 {
-			buf.WriteString(", ")
-		}
-		val := v.i[len(v.i)-i-1]
-		buf.WriteString(fmt.Sprintf("%d", val))
-	}
-	buf.WriteString(" ]\n[ L: ")
-	for i := 0; i < 3; i++ {
-		if len(v.l) <= i {
-			break
-		}
-		if i > 0 {
-			buf.WriteString(", ")
-		}
-		val := v.l[len(v.l)-i-1]
-		buf.WriteString(fmt.Sprintf("%v", val))
-	}
-	buf.WriteString(" ]\n")
+	// // print the stacks
+	// buf.WriteString("[ P: ")
+	// for i := 0; i < 3; i++ {
+	// 	if len(v.p) <= i {
+	// 		break
+	// 	}
+	// 	if i > 0 {
+	// 		buf.WriteString(", ")
+	// 	}
+	// 	val := v.p[len(v.p)-i-1]
+	// 	buf.WriteString(fmt.Sprintf("\"%v\"", val))
+	// }
+	// buf.WriteString(" ]\n[ V: ")
+	// for i := 0; i < 3; i++ {
+	// 	if len(v.v) <= i {
+	// 		break
+	// 	}
+	// 	if i > 0 {
+	// 		buf.WriteString(", ")
+	// 	}
+	// 	val := v.v[len(v.v)-i-1]
+	// 	buf.WriteString(fmt.Sprintf("%#v", val))
+	// }
+	// buf.WriteString(" ]\n[ I: ")
+	// for i := 0; i < 3; i++ {
+	// 	if len(v.i) <= i {
+	// 		break
+	// 	}
+	// 	if i > 0 {
+	// 		buf.WriteString(", ")
+	// 	}
+	// 	val := v.i[len(v.i)-i-1]
+	// 	buf.WriteString(fmt.Sprintf("%d", val))
+	// }
+	// buf.WriteString(" ]\n[ L: ")
+	// for i := 0; i < 3; i++ {
+	// 	if len(v.l) <= i {
+	// 		break
+	// 	}
+	// 	if i > 0 {
+	// 		buf.WriteString(", ")
+	// 	}
+	// 	val := v.l[len(v.l)-i-1]
+	// 	buf.WriteString(fmt.Sprintf("%v", val))
+	// }
+	// buf.WriteString(" ]\n")
 	fmt.Fprintln(w, buf.String())
 }
 
 // run executes the provided program in this VM, and returns the result.
 func (v *ϡvm) run(pg *ϡprogram) (interface{}, error) {
 	v.pg = pg
-	v.a = make(ϡastack, 0, 128)
-	v.i = make(ϡistack, 0, 128)
-	v.v = make(ϡvstack, 0, 128)
-	v.l = make(ϡlstack, 0, 128)
-	v.p = make(ϡpstack, 0, 128)
+	v.a = newAstack(128) // make(ϡastack, 0, 128)
+	v.i = newIstack(128) // make(ϡistack, 0, 128)
+	v.v = newVstack(128) // make(ϡvstack, 0, 128)
+	v.l = newLstack(128) // make(ϡlstack, 0, 128)
+	v.p = newPstack(128) // make(ϡpstack, 0, 128)
 	ret := v.dispatch()
 
 	// if the match failed, translate that to a nil result and make
