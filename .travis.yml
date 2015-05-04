@@ -1,6 +1,6 @@
 language: go
 
-script: go test -v ./...
+script: go test -v -short ./...
 
 go:
     - 1.1
