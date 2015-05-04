@@ -23,7 +23,9 @@ type errList []error
 
 // ϡadd adds err to the list of errors.
 func (e *errList) ϡadd(err error) {
-	*e = append(*e, err)
+	if err != nil {
+		*e = append(*e, err)
+	}
 }
 
 // ϡerr returns the error list as an error, or nil if the list is empty.

@@ -4,7 +4,7 @@ import "testing"
 
 // ABs must end in Bs, CDs must end in Ds
 var cases = map[string]string{
-	"":             "1:1 (0): no match found",
+	"":             "1:0 (0): no match found",
 	"a":            "1:1 (0): no match found",
 	"b":            "",
 	"ab":           "",

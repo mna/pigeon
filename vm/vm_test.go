@@ -25,18 +25,22 @@ func TestRun(t *testing.T) {
 		{`A = "ab"`, "ab", []byte("ab"), nil},
 		{`A = "ab"`, "abb", []byte("ab"), nil},
 
+		//{`A = ""*`, "", []interface{}{}, nil}, // empty string always matches, infinite loop
 		{`A = 'a'*`, "", []interface{}(nil), nil},
 		{`A = 'a'*`, "a", []interface{}{[]byte("a")}, nil},
 		{`A = 'a'*`, "aa", []interface{}{[]byte("a"), []byte("a")}, nil},
 		{`A = 'a'*`, "aab", []interface{}{[]byte("a"), []byte("a")}, nil},
 		{`A = 'a'*`, "baa", []interface{}(nil), nil},
 
+		//{`A = ""+`, "", []interface{}{}, nil}, // empty string always matches, infinite loop
 		{`A = 'a'+`, "", nil, errNoMatch},
 		{`A = 'a'+`, "a", []interface{}{[]byte("a")}, nil},
 		{`A = 'a'+`, "aa", []interface{}{[]byte("a"), []byte("a")}, nil},
 		{`A = 'a'+`, "aab", []interface{}{[]byte("a"), []byte("a")}, nil},
 		{`A = 'a'+`, "baa", nil, errNoMatch},
 
+		{`A = ""?`, "", []byte(""), nil},
+		{`A = ""?`, "a", []byte(""), nil},
 		{`A = 'a'?`, "", nil, nil},
 		{`A = 'a'?`, "a", []byte("a"), nil},
 		{`A = 'a'?`, "aa", []byte("a"), nil},
@@ -97,6 +101,8 @@ func TestRun(t *testing.T) {
 		{`A = 'a' !{F}`, "aab", []interface{}{[]byte("a"), nil}, nil},
 		{`A = 'a' !{F}`, "baa", nil, errNoMatch},
 
+		{`A = &""`, "", nil, nil},
+		{`A = !""`, "", nil, errNoMatch},
 		{`A = &{T}`, "", nil, nil},
 		{`A = &{F}`, "", nil, errNoMatch},
 		{`A = !{F}`, "", nil, nil},

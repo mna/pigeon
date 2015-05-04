@@ -345,6 +345,19 @@ func (v *ϡvm) dispatch() interface{} {
 		}()
 	}
 
+	if v.recover {
+		defer func() {
+			if e := recover(); e != nil {
+				switch e := e.(type) {
+				case error:
+					v.addErrAt(e, v.pc-1, v.parser.pt.position)
+				default:
+					v.addErrAt(fmt.Errorf("%v", e), v.pc-1, v.parser.pt.position)
+				}
+			}
+		}()
+	}
+
 	// move to first rune before starting the loop
 	v.parser.read()
 	for {

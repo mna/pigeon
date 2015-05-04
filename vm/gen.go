@@ -78,12 +78,12 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 		}
 	}
 
+	g.fillPlaceholders()
+	g.instrToRule()
+
 	if g.err != nil {
 		return nil, g.err
 	}
-
-	g.fillPlaceholders()
-	g.instrToRule()
 	return &g.pg, nil
 }
 
@@ -449,6 +449,11 @@ func (g *Generator) bootstrap(r *ast.Rule) {
 func (g *Generator) fillPlaceholders() {
 	var op ϡop
 	var n, nmIx int
+
+	if g.err != nil {
+		return
+	}
+
 	for i, instr := range g.pg.Instrs {
 		if n > 0 {
 			n -= 4
@@ -458,6 +463,9 @@ func (g *Generator) fillPlaceholders() {
 		n -= 3
 		if op == ϡopPlaceholder {
 			ix := g.pg.ruleNmEntryIx[nmIx]
+			if ix == 0 {
+				g.err = fmt.Errorf("undefined rule %q", g.pg.Ss[nmIx])
+			}
 			newInstrs, _ := ϡencodeInstr(ϡopPush, ϡistackID, ix)
 			g.pg.Instrs[i] = newInstrs[0]
 		}
@@ -465,6 +473,10 @@ func (g *Generator) fillPlaceholders() {
 }
 
 func (g *Generator) instrToRule() {
+	if g.err != nil {
+		return
+	}
+
 	g.pg.InstrToRule = make([]int, len(g.pg.Instrs))
 	// rule start index is necessarily > 0 because of the bootstrap sequence
 	startStartIx := 0

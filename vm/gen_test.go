@@ -1,6 +1,8 @@
 package vm
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"math"
 	"strconv"
@@ -21,6 +23,17 @@ type testProgram struct {
 	InstrToRule []int
 }
 
+func TestNoRule(t *testing.T) {
+	gr := ast.NewGrammar(ast.Pos{})
+	_, err := NewGenerator(ioutil.Discard).toProgram(gr)
+	if err == nil {
+		t.Fatal("want error, got nil")
+	}
+	if err != errNoRule {
+		t.Fatalf("want error %v, got %v", errNoRule, err)
+	}
+}
+
 func TestGenerateProgram(t *testing.T) {
 	cases := []struct {
 		in  string
@@ -28,6 +41,7 @@ func TestGenerateProgram(t *testing.T) {
 		err error
 	}{
 		{"", nil, errNoRule},
+		{"A = B", nil, errors.New(`undefined rule "B"`)},
 
 		// matcher expression
 		{"A = 'm'", &testProgram{
@@ -409,8 +423,15 @@ func TestGenerateProgram(t *testing.T) {
 			t.Errorf("%q: want error? %t, got %v", tc.in, tc.err != nil, err)
 			continue
 		} else if tc.err != err {
-			t.Errorf("%q: want error %v, got %v", tc.in, tc.err, err)
-			continue
+			if tc.err != nil && fmt.Sprintf("%T", tc.err) == fmt.Sprintf("%T", err) {
+				if tc.err.Error() != err.Error() {
+					t.Errorf("%q: want error %v, got %v", tc.in, tc.err, err)
+					continue
+				}
+			} else {
+				t.Errorf("%q: want error %v, got %v", tc.in, tc.err, err)
+				continue
+			}
 		}
 
 		if tc.err == nil {

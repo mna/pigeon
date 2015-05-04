@@ -19,7 +19,9 @@ type errList []error
 
 // ϡadd adds err to the list of errors.
 func (e *errList) ϡadd(err error) {
-	*e = append(*e, err)
+	if err != nil {
+		*e = append(*e, err)
+	}
 }
 
 // ϡerr returns the error list as an error, or nil if the list is empty.
@@ -133,7 +135,7 @@ func (s ϡstringMatcher) String() string {
 // ϡcharClassMatcher is a matcher that matches classes of characters.
 type ϡcharClassMatcher struct {
 	chars   []rune // runes must be lowercase if ignoreCase is true
-	ranges  []rune // TODO : document potential issues if ignore case is used with ranges
+	ranges  []rune // same for ranges
 	classes []*unicode.RangeTable
 
 	ignoreCase bool
@@ -984,6 +986,19 @@ func (v *ϡvm) dispatch() interface{} {
 				buf.WriteString(fmt.Sprintf("[%3d]: %s\n", ix, v.pg.instrToString(v.pg.instrs[ix], ix)))
 			}
 			fmt.Fprintln(os.Stderr, buf.String())
+		}()
+	}
+
+	if v.recover {
+		defer func() {
+			if e := recover(); e != nil {
+				switch e := e.(type) {
+				case error:
+					v.addErrAt(e, v.pc-1, v.parser.pt.position)
+				default:
+					v.addErrAt(fmt.Errorf("%v", e), v.pc-1, v.parser.pt.position)
+				}
+			}
 		}()
 	}
 

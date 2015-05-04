@@ -7,7 +7,7 @@ import (
 )
 
 var invalidParseCases = map[string]string{
-	"":           "file:1:1 (0): no match found",
+	"":           "file:1:0 (0): no match found",
 	"a":          "file:1:1 (0): no match found",
 	"abc":        "file:1:1 (0): no match found",
 	" ":          "file:1:1 (0): no match found",
@@ -17,7 +17,7 @@ var invalidParseCases = map[string]string{
 	"a ←":        "file:1:1 (0): no match found",
 	"a ← b\nb ←": "file:1:1 (0): no match found",
 	"a ← nil:b":  "file:1:5 (6): rule Identifier: identifier is a reserved word",
-	"\xfe":       "file:1:1 (0): invalid encoding",
+	"\xfe":       "file:1:0 (0): invalid encoding",
 	"{}{}":       "file:1:1 (0): no match found",
 
 	// non-terminated, empty, EOF "quoted" tokens
@@ -100,7 +100,7 @@ file:1:5 (4): rule CharClassMatcher: character class not terminated`,
 	"a = [\\p{\n": `file:1:5 (4): rule CharClassMatcher: character class not terminated`,
 
 	// escapes followed by EOF
-	"a = '\\": `file:1:7 (6): rule SingleStringEscape: invalid escape character
+	"a = '\\": `file:1:6 (6): rule SingleStringEscape: invalid escape character
 file:1:5 (4): rule StringLiteral: string literal not terminated`,
 	"a = '\\x": `file:1:7 (6): rule HexEscape: invalid hexadecimal escape
 file:1:5 (4): rule StringLiteral: string literal not terminated`,
@@ -110,7 +110,7 @@ file:1:5 (4): rule StringLiteral: string literal not terminated`,
 file:1:5 (4): rule StringLiteral: string literal not terminated`,
 	"a = '\\U": `file:1:7 (6): rule LongUnicodeEscape: invalid Unicode escape
 file:1:5 (4): rule StringLiteral: string literal not terminated`,
-	"a = \"\\": `file:1:7 (6): rule DoubleStringEscape: invalid escape character
+	"a = \"\\": `file:1:6 (6): rule DoubleStringEscape: invalid escape character
 file:1:5 (4): rule StringLiteral: string literal not terminated`,
 	"a = \"\\x": `file:1:7 (6): rule HexEscape: invalid hexadecimal escape
 file:1:5 (4): rule StringLiteral: string literal not terminated`,
@@ -120,7 +120,7 @@ file:1:5 (4): rule StringLiteral: string literal not terminated`,
 file:1:5 (4): rule StringLiteral: string literal not terminated`,
 	"a = \"\\U": `file:1:7 (6): rule LongUnicodeEscape: invalid Unicode escape
 file:1:5 (4): rule StringLiteral: string literal not terminated`,
-	"a = [\\": `file:1:7 (6): rule CharClassEscape: invalid escape character
+	"a = [\\": `file:1:6 (6): rule CharClassEscape: invalid escape character
 file:1:5 (4): rule CharClassMatcher: character class not terminated`,
 	"a = [\\x": `file:1:7 (6): rule HexEscape: invalid hexadecimal escape
 file:1:5 (4): rule CharClassMatcher: character class not terminated`,
@@ -130,7 +130,7 @@ file:1:5 (4): rule CharClassMatcher: character class not terminated`,
 file:1:5 (4): rule CharClassMatcher: character class not terminated`,
 	"a = [\\U": `file:1:7 (6): rule LongUnicodeEscape: invalid Unicode escape
 file:1:5 (4): rule CharClassMatcher: character class not terminated`,
-	"a = [\\p": `file:1:8 (7): rule UnicodeClassEscape: invalid Unicode class escape
+	"a = [\\p": `file:1:7 (7): rule UnicodeClassEscape: invalid Unicode class escape
 file:1:5 (4): rule CharClassMatcher: character class not terminated`,
 	"a = [\\p{": `file:1:5 (4): rule CharClassMatcher: character class not terminated`,
 
