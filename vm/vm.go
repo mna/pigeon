@@ -86,54 +86,28 @@ func (pg ϡprogram) String() string {
 	var n int
 
 	for i, instr := range pg.instrs {
-		if n > 0 {
-			n -= 4
-			continue
-		}
-		_, n, _, _, _ = instr.decode()
-		n -= 3
-
-		buf.WriteString(fmt.Sprintf("[%3d]: %s\n", i, pg.instrToString(instr, i)))
+		buf.WriteString(fmt.Sprintf("[%3d]: %s\n", i, pg.instrToString(instr)))
 	}
 	return buf.String()
 }
 
 // instrToString formats an instruction in a human-readable format, in the
 // context of the program.
-func (pg ϡprogram) instrToString(instr ϡinstr, ix int) string {
+func (pg ϡprogram) instrToString(instr ϡinstr) string {
 	var buf bytes.Buffer
 
-	op, n, a0, a1, a2 := instr.decode()
-	rule := pg.ruleNameAt(ix)
+	rule := pg.ruleNameAt(instr.ruleNmIx)
 	if rule == "" {
 		rule = "<bootstrap>"
 	}
-	stdFmt := "%s.%s"
-	switch op {
-	case ϡopCall, ϡopCumulOrF, ϡopReturn, ϡopExit, ϡopRestore,
-		ϡopRestoreIfF, ϡopNilIfF, ϡopNilIfT:
-		buf.WriteString(fmt.Sprintf(stdFmt, rule, op))
-	case ϡopCallA, ϡopCallB, ϡopJump, ϡopJumpIfT, ϡopJumpIfF, ϡopPopVJumpIfF, ϡopTakeLOrJump:
-		buf.WriteString(fmt.Sprintf(stdFmt+" %d", rule, op, a0))
-	case ϡopPush:
-		buf.WriteString(fmt.Sprintf(stdFmt+" %s %d %d", rule, op, ϡstackNm[a0], a1, a2))
-		orin := n
-		n -= 3
-		for n > 0 {
-			ix++
-			a0, a1, a2, a3 := pg.instrs[ix].decodeLs()
-			n -= 4
-			buf.WriteString(fmt.Sprintf(" %d %d %d %d", a0, a1, a2, a3))
-		}
-		buf.WriteString(fmt.Sprintf(" (n=%d)", orin))
-	case ϡopPop:
-		buf.WriteString(fmt.Sprintf(stdFmt+" %s", rule, op, ϡstackNm[a0]))
+	buf.WriteString(fmt.Sprintf("%s.%s %v", rule, instr.op, instr.args))
+	switch instr.op {
+	case ϡopPush, ϡopPop:
+		buf.WriteString(" " + ϡstackNm[instr.args[0]])
 	case ϡopMatch:
-		buf.WriteString(fmt.Sprintf(stdFmt+" %d (%s)", rule, op, a0, pg.ms[a0]))
+		buf.WriteString(fmt.Sprintf(" %s", pg.ms[instr.args[0]]))
 	case ϡopStoreIfT:
-		buf.WriteString(fmt.Sprintf(stdFmt+" %d (%s)", rule, op, a0, pg.ss[a0]))
-	default:
-		buf.WriteString(fmt.Sprintf(stdFmt+" %d %d", rule, op, a0, a1))
+		buf.WriteString(" " + pg.ss[instr.args[0]])
 	}
 	return buf.String()
 }
@@ -141,15 +115,11 @@ func (pg ϡprogram) instrToString(instr ϡinstr, ix int) string {
 // ruleNameAt returns the name of the rule that contains the instruction
 // index. It returns an empty string is the instruction is not part of a
 // rule (bootstrap instruction, invalid index).
-func (pg ϡprogram) ruleNameAt(instrIx int) string {
-	if instrIx < 0 || instrIx >= len(pg.instrToRule) {
+func (pg ϡprogram) ruleNameAt(ix int) string {
+	if ix < 0 || ix >= len(pg.ss) {
 		return ""
 	}
-	ssIx := pg.instrToRule[instrIx]
-	if ssIx < 0 || ssIx >= len(pg.ss) {
-		return ""
-	}
-	return pg.ss[ssIx]
+	return pg.ss[ix]
 }
 
 // ϡvm holds the state to execute a compiled grammar.
@@ -164,7 +134,7 @@ type ϡvm struct {
 	recover bool
 
 	// program data
-	pc  int
+	pc  uint16
 	pg  *ϡprogram
 	cur current
 
@@ -197,9 +167,9 @@ func (v *ϡvm) addErr(err error) {
 	v.addErrAt(err, -1, v.parser.pt.position)
 }
 
-// addErrAt adds the error at the specified position, for the instruction
-// at instrIx.
-func (v *ϡvm) addErrAt(err error, instrIx int, pos position) {
+// addErrAt adds the error at the specified position, for the rule name at
+// ruleNmIx.
+func (v *ϡvm) addErrAt(err error, ruleNmIx int, pos position) {
 	var buf bytes.Buffer
 	if v.filename != "" {
 		buf.WriteString(v.filename)
@@ -209,7 +179,7 @@ func (v *ϡvm) addErrAt(err error, instrIx int, pos position) {
 	}
 	buf.WriteString(fmt.Sprintf("%s", pos))
 
-	ruleNm := v.pg.ruleNameAt(instrIx)
+	ruleNm := v.pg.ruleNameAt(ruleNmIx)
 	if ruleNm != "" {
 		buf.WriteString(": ")
 		buf.WriteString("rule " + ruleNm)
@@ -240,23 +210,17 @@ func (v *ϡvm) dumpSnapshot(w io.Writer) {
 			stdFmt = ">" + stdFmt[1:]
 		}
 		instr := v.pg.instrs[ix]
-		op, n, _, _, _ := instr.decode()
-		switch op {
+		switch instr.op {
 		case ϡopCall:
-			buf.WriteString(fmt.Sprintf(stdFmt+"\n", ix, v.pg.instrToString(instr, ix)))
+			buf.WriteString(fmt.Sprintf(stdFmt+"\n", ix, v.pg.instrToString(instr)))
 			ix = v.i.pop() // continue with instructions at this index
 			v.i.push(ix)
 			continue
 		default:
-			buf.WriteString(fmt.Sprintf(stdFmt+"\n", ix, v.pg.instrToString(instr, ix)))
+			buf.WriteString(fmt.Sprintf(stdFmt+"\n", ix, v.pg.instrToString(instr)))
 		}
 		ix++
-		n -= 3
-		for n > 0 {
-			ix++
-			n -= 4
-		}
-		if ix >= len(v.pg.instrs) {
+		if int(ix) >= len(v.pg.instrs) {
 			break
 		}
 	}
@@ -335,7 +299,7 @@ func (v *ϡvm) run(pg *ϡprogram) (interface{}, error) {
 // dispatch is the proper execution method of the VM, it loops over
 // the instructions and executes each opcode.
 func (v *ϡvm) dispatch() interface{} {
-	var instrPath []int
+	var instrPath []uint16
 	if v.debug {
 		fmt.Fprintln(os.Stderr, v.pg)
 		defer func() {
@@ -343,7 +307,7 @@ func (v *ϡvm) dispatch() interface{} {
 
 			buf.WriteString("Execution path:\n")
 			for _, ix := range instrPath {
-				buf.WriteString(fmt.Sprintf("[%3d]: %s\n", ix, v.pg.instrToString(v.pg.instrs[ix], ix)))
+				buf.WriteString(fmt.Sprintf("[%3d]: %s\n", ix, v.pg.instrToString(v.pg.instrs[ix])))
 			}
 			fmt.Fprintln(os.Stderr, buf.String())
 		}()
@@ -354,9 +318,9 @@ func (v *ϡvm) dispatch() interface{} {
 			if e := recover(); e != nil {
 				switch e := e.(type) {
 				case error:
-					v.addErrAt(e, v.pc-1, v.parser.pt.position)
+					v.addErrAt(e, v.pg.instrs[v.pc-1].ruleNmIx, v.parser.pt.position)
 				default:
-					v.addErrAt(fmt.Errorf("%v", e), v.pc-1, v.parser.pt.position)
+					v.addErrAt(fmt.Errorf("%v", e), v.pg.instrs[v.pc-1].ruleNmIx, v.parser.pt.position)
 				}
 			}
 		}()
@@ -367,13 +331,12 @@ func (v *ϡvm) dispatch() interface{} {
 	for {
 		// fetch and decode the instruction
 		instr := v.pg.instrs[v.pc]
-		op, n, a0, a1, a2 := instr.decode()
 		instrPath = append(instrPath, v.pc)
 
 		// increment program counter
 		v.pc++
 
-		switch op {
+		switch instr.op {
 		case ϡopCall:
 			if v.debug {
 				v.dumpSnapshot(os.Stderr)
@@ -390,13 +353,13 @@ func (v *ϡvm) dispatch() interface{} {
 			start := v.p.pop()
 			v.cur.pos = start.position
 			v.cur.text = v.parser.sliceFrom(start)
-			if a0 >= len(v.pg.as) {
-				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+			if int(instr.args[0]) >= len(v.pg.as) {
+				panic(fmt.Sprintf("invalid %s argument: %d", instr.op, instr.args[0]))
 			}
-			fn := v.pg.as[a0]
+			fn := v.pg.as[instr.args[0]]
 			val, err := fn(v)
 			if err != nil {
-				v.addErrAt(err, v.pc-1, start.position)
+				v.addErrAt(err, instr.ruleNmIx, start.position)
 			}
 			v.v.push(val)
 
@@ -406,13 +369,13 @@ func (v *ϡvm) dispatch() interface{} {
 			}
 			v.cur.pos = v.parser.pt.position
 			v.cur.text = nil
-			if a0 >= len(v.pg.bs) {
-				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+			if int(instr.args[0]) >= len(v.pg.bs) {
+				panic(fmt.Sprintf("invalid %s argument: %d", instr.op, instr.args[0]))
 			}
-			fn := v.pg.bs[a0]
+			fn := v.pg.bs[instr.args[0]]
 			val, err := fn(v)
 			if err != nil {
-				v.addErrAt(err, v.pc-1, v.parser.pt.position)
+				v.addErrAt(err, instr.ruleNmIx, v.parser.pt.position)
 			}
 			if !val {
 				v.v.push(ϡmatchFailed)
@@ -433,7 +396,7 @@ func (v *ϡvm) dispatch() interface{} {
 			case ϡsentinel:
 				v.v.push([]interface{}{va})
 			default:
-				panic(fmt.Sprintf("invalid %s value type on the V stack: %T", op, vb))
+				panic(fmt.Sprintf("invalid %s value type on the V stack: %T", instr.op, vb))
 			}
 
 		case ϡopExit:
@@ -454,24 +417,24 @@ func (v *ϡvm) dispatch() interface{} {
 			v.v.push(ϡmatchFailed)
 
 		case ϡopJump:
-			v.pc = a0
+			v.pc = instr.args[0]
 
 		case ϡopJumpIfF:
 			if top := v.v.peek(); top == ϡmatchFailed {
-				v.pc = a0
+				v.pc = instr.args[0]
 			}
 
 		case ϡopJumpIfT:
 			if top := v.v.peek(); top != ϡmatchFailed {
-				v.pc = a0
+				v.pc = instr.args[0]
 			}
 
 		case ϡopMatch:
 			start := v.parser.pt
-			if a0 >= len(v.pg.ms) {
-				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+			if int(instr.args[0]) >= len(v.pg.ms) {
+				panic(fmt.Sprintf("invalid %s argument: %d", instr.op, instr.args[0]))
 			}
-			m := v.pg.ms[a0]
+			m := v.pg.ms[instr.args[0]]
 			if ok := m.match(v.parser); ok {
 				v.v.push(v.parser.sliceFrom(start))
 				break
@@ -484,7 +447,7 @@ func (v *ϡvm) dispatch() interface{} {
 			}
 
 		case ϡopPop:
-			switch a0 {
+			switch instr.args[0] {
 			case ϡlstackID:
 				v.l.pop()
 			case ϡpstackID:
@@ -494,46 +457,32 @@ func (v *ϡvm) dispatch() interface{} {
 			case ϡvstackID:
 				v.v.pop()
 			default:
-				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+				panic(fmt.Sprintf("invalid %s argument: %d", instr.op, instr.args[0]))
 			}
 
 		case ϡopPopVJumpIfF:
 			if top := v.v.peek(); top == ϡmatchFailed {
 				v.v.pop()
-				v.pc = a0
+				v.pc = instr.args[0]
 			}
 
 		case ϡopPush:
-			switch a0 {
+			switch instr.args[0] {
 			case ϡpstackID:
 				v.p.push(v.parser.pt)
 			case ϡistackID:
-				v.i.push(a1)
+				v.i.push(instr.args[1])
 			case ϡvstackID:
-				if a1 >= len(ϡvSpecialValues) {
-					panic(fmt.Sprintf("invalid %s V stack argument: %d", op, a1))
+				if int(instr.args[1]) >= len(ϡvSpecialValues) {
+					panic(fmt.Sprintf("invalid %s V stack argument: %d", instr.op, instr.args[1]))
 				}
-				v.v.push(ϡvSpecialValues[a1])
+				v.v.push(ϡvSpecialValues[instr.args[1]])
 			case ϡastackID:
 				v.a.push()
 			case ϡlstackID:
-				// n = L args to push + 1, for the lstackID
-				n--
-				ar := make([]int, n)
-				src := []int{a1, a2}
-				n -= 2
-				for n > 0 {
-					// need more
-					instr := v.pg.instrs[v.pc]
-					a0, a1, a2, a3 := instr.decodeLs()
-					src = append(src, a0, a1, a2, a3)
-					v.pc++
-					n -= 4
-				}
-				copy(ar, src)
-				v.l.push(ar)
+				v.l.push(instr.args[1:])
 			default:
-				panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+				panic(fmt.Sprintf("invalid %s argument: %d", instr.op, instr.args[0]))
 			}
 
 		case ϡopRestore:
@@ -553,10 +502,10 @@ func (v *ϡvm) dispatch() interface{} {
 		case ϡopStoreIfT:
 			if top := v.v.peek(); top != ϡmatchFailed {
 				// get the label name
-				if a0 >= len(v.pg.ss) {
-					panic(fmt.Sprintf("invalid %s argument: %d", op, a0))
+				if int(instr.args[0]) >= len(v.pg.ss) {
+					panic(fmt.Sprintf("invalid %s argument: %d", instr.op, instr.args[0]))
 				}
-				lbl := v.pg.ss[a0]
+				lbl := v.pg.ss[instr.args[0]]
 
 				// store the value
 				as := v.a.peek()
@@ -566,13 +515,13 @@ func (v *ϡvm) dispatch() interface{} {
 		case ϡopTakeLOrJump:
 			ix := v.l.take()
 			if ix < 0 {
-				v.pc = a0
+				v.pc = instr.args[0]
 				break
 			}
-			v.i.push(ix)
+			v.i.push(uint16(ix))
 
 		default:
-			panic(fmt.Sprintf("unknown opcode %s", op))
+			panic(fmt.Sprintf("unknown opcode %s", instr.op))
 		}
 	}
 }

@@ -34,12 +34,12 @@ func newPstack(cap int) *ϡpstack {
 
 // ϡistack implements the Instruction index stack. It stores integers.
 type ϡistack struct {
-	ar []int
+	ar []uint16
 	sp int
 }
 
 // push adds a value on the stack.
-func (i *ϡistack) push(v int) {
+func (i *ϡistack) push(v uint16) {
 	if i.sp >= len(i.ar) {
 		i.ar = append(i.ar, v)
 	} else {
@@ -49,7 +49,7 @@ func (i *ϡistack) push(v int) {
 }
 
 // pop removes a value from the stack.
-func (i *ϡistack) pop() int {
+func (i *ϡistack) pop() uint16 {
 	i.sp--
 	return i.ar[i.sp]
 }
@@ -59,7 +59,7 @@ func (i *ϡistack) len() int {
 }
 
 func newIstack(cap int) *ϡistack {
-	return &ϡistack{ar: make([]int, cap)}
+	return &ϡistack{ar: make([]uint16, cap)}
 }
 
 // ϡvstack implements the Value stack. It stores empty interfaces.
@@ -99,12 +99,12 @@ func newVstack(cap int) *ϡvstack {
 
 // ϡlstack implements the Loop stack. It stores slices of integers.
 type ϡlstack struct {
-	ar [][]int
+	ar [][]uint16
 	sp int
 }
 
 // push adds a value on the stack.
-func (l *ϡlstack) push(a []int) {
+func (l *ϡlstack) push(a []uint16) {
 	if l.sp >= len(l.ar) {
 		l.ar = append(l.ar, a)
 	} else {
@@ -114,7 +114,7 @@ func (l *ϡlstack) push(a []int) {
 }
 
 // pop removes a value from the stack.
-func (l *ϡlstack) pop() []int {
+func (l *ϡlstack) pop() []uint16 {
 	l.sp--
 	return l.ar[l.sp]
 }
@@ -126,7 +126,7 @@ func (l *ϡlstack) take() int {
 	v := -1
 	a := l.ar[l.sp-1]
 	if len(a) > 0 {
-		v = a[0]
+		v = int(a[0])
 		l.ar[l.sp-1] = a[1:]
 	}
 	return v
@@ -137,7 +137,7 @@ func (l *ϡlstack) len() int {
 }
 
 func newLstack(cap int) *ϡlstack {
-	return &ϡlstack{ar: make([][]int, cap)}
+	return &ϡlstack{ar: make([][]uint16, cap)}
 }
 
 // ϡargsSet holds the list of arguments (key and value) to pass
