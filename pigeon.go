@@ -3332,16 +3332,12 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 		}
 	}
 
-	//+vm POP return index
-	start := p.pt                     //+vm PUSH_PT
-	p.rstack = append(p.rstack, rule) //+vm no need to keep stack of current rule, just a mapping of instr ix to rule
-	p.pushV()                         //+vm ?
-	//+vm PUSH return instr index, JUMP to expr instr
+	start := p.pt
+	p.rstack = append(p.rstack, rule)
+	p.pushV()
 	val, ok := p.parseExpr(rule.expr)
-	p.popV()                              //+vm ?
-	p.rstack = p.rstack[:len(p.rstack)-1] //+vm not necessary
-	//+vm POP return value, POP match
-	//+vm POP the PT, discard (except if memoize)
+	p.popV()
+	p.rstack = p.rstack[:len(p.rstack)-1]
 	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
@@ -3412,16 +3408,11 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 		defer p.out(p.in("parseActionExpr"))
 	}
 
-	//+vm POP return index
-	start := p.pt //+vm PUSH_PT
-	//+vm PUSH return instr index, JUMP to instr
+	start := p.pt
 	val, ok := p.parseExpr(act.expr)
-	//+vm POP return value, POP match
-	//+vm POP the PT, if match, use it to call the action
 	if ok {
 		p.cur.pos = start.position
 		p.cur.text = p.sliceFrom(start)
-		//+vm CALL thunk ix (maybe CALLA)
 		actVal, err := act.run(p)
 		if err != nil {
 			p.addErrAt(err, start.position)
@@ -3431,8 +3422,6 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
-	//+vm PUSH match, PUSH return value
-	//+vm JUMP to return index
 	return val, ok
 }
 
@@ -3441,14 +3430,10 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
 		defer p.out(p.in("parseAndCodeExpr"))
 	}
 
-	//+vm POP return index
-	//+vm CALL thunk ix (maybe CALLB)
 	ok, err := and.run(p)
 	if err != nil {
 		p.addErr(err)
 	}
-	//+vm PUSH match, PUSH nil
-	//+vm JUMP to return index
 	return nil, ok
 }
 
@@ -3457,16 +3442,12 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 		defer p.out(p.in("parseAndExpr"))
 	}
 
-	//+vm POP return index
-	pt := p.pt //+vm PUSH_PT
-	p.pushV()  //+vm ?
-	//+vm PUSH return instr, JUMP to instr
+	pt := p.pt
+	p.pushV()
 	_, ok := p.parseExpr(and.expr)
-	p.popV() //+vm ?
-	//+vm POP value, POP match
-	p.restore(pt)  //+vm POP PT, restore
-	return nil, ok //+vm PUSH match, PUSH nil
-	//+vm JUMP to return index
+	p.popV()
+	p.restore(pt)
+	return nil, ok
 }
 
 func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
@@ -3474,7 +3455,6 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 		defer p.out(p.in("parseAnyMatcher"))
 	}
 
-	//+vm POP return index
 	if p.pt.rn != utf8.RuneError {
 		start := p.pt
 		p.read()
