@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -464,41 +465,37 @@ func combineInstrs(instrs ...[]ϡinstr) []ϡinstr {
 	return ret
 }
 
-func mustEncodeInstr(t *testing.T, op ϡop, args ...int) []ϡinstr {
-	instrs, err := ϡencodeInstr(op, args...)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return instrs
+func mustEncodeInstr(t *testing.T, op ϡop, args ...uint16) ϡinstr {
+	return ϡinstr{op: op, args: args}
 }
 
-func encodeBootstrap(t *testing.T, start int) []ϡinstr {
-	return combineInstrs(
+func encodeBootstrap(t *testing.T, start uint16) []ϡinstr {
+	return []ϡinstr{
 		mustEncodeInstr(t, ϡopPush, ϡistackID, start),
 		mustEncodeInstr(t, ϡopPush, ϡastackID),
 		mustEncodeInstr(t, ϡopCall),
 		mustEncodeInstr(t, ϡopExit),
-	)
+	}
 }
 
-func encodeMatcher(t *testing.T, mIx int) []ϡinstr {
-	return combineInstrs(
+func encodeMatcher(t *testing.T, mIx uint16) []ϡinstr {
+	return []ϡinstr{
 		mustEncodeInstr(t, ϡopPush, ϡpstackID),
 		mustEncodeInstr(t, ϡopMatch, mIx),
 		mustEncodeInstr(t, ϡopRestoreIfF),
 		mustEncodeInstr(t, ϡopReturn),
-	)
+	}
 }
 
-func encodeSequence(t *testing.T, start int, ls ...int) []ϡinstr {
-	delta := 0
+func encodeSequence(t *testing.T, start uint16, ls ...uint16) []ϡinstr {
+	var delta uint16
 	if len(ls) > 2 {
-		delta += int(math.Ceil(float64(len(ls)-2) / 4.0))
+		delta += uint16(math.Ceil(float64(len(ls)-2) / 4.0))
 	}
-	return combineInstrs(
+	return []ϡinstr{
 		mustEncodeInstr(t, ϡopPush, ϡpstackID),
 		mustEncodeInstr(t, ϡopPush, ϡvstackID, ϡvValFailed),
-		mustEncodeInstr(t, ϡopPush, append([]int{ϡlstackID}, ls...)...),
+		mustEncodeInstr(t, ϡopPush, append([]uint16{ϡlstackID}, ls...)...),
 		mustEncodeInstr(t, ϡopTakeLOrJump, start+8+delta),
 		mustEncodeInstr(t, ϡopCall),
 		mustEncodeInstr(t, ϡopCumulOrF),
@@ -507,12 +504,12 @@ func encodeSequence(t *testing.T, start int, ls ...int) []ϡinstr {
 		mustEncodeInstr(t, ϡopPop, ϡlstackID),
 		mustEncodeInstr(t, ϡopRestoreIfF),
 		mustEncodeInstr(t, ϡopReturn),
-	)
+	}
 }
 
-func encodeChoice(t *testing.T, start int, ls ...int) []ϡinstr {
-	return combineInstrs(
-		mustEncodeInstr(t, ϡopPush, append([]int{ϡlstackID}, ls...)...),
+func encodeChoice(t *testing.T, start uint16, ls ...uint16) []ϡinstr {
+	return []ϡinstr{
+		mustEncodeInstr(t, ϡopPush, append([]uint16{ϡlstackID}, ls...)...),
 		mustEncodeInstr(t, ϡopTakeLOrJump, start+8),
 		mustEncodeInstr(t, ϡopPush, ϡastackID),
 		mustEncodeInstr(t, ϡopCall),
@@ -523,11 +520,11 @@ func encodeChoice(t *testing.T, start int, ls ...int) []ϡinstr {
 		mustEncodeInstr(t, ϡopPush, ϡvstackID, ϡvValFailed),
 		mustEncodeInstr(t, ϡopPop, ϡlstackID),
 		mustEncodeInstr(t, ϡopReturn),
-	)
+	}
 }
 
-func encodeRepetition(t *testing.T, start int, vVal int, ix int) []ϡinstr {
-	return combineInstrs(
+func encodeRepetition(t *testing.T, start uint16, vVal uint16, ix uint16) []ϡinstr {
+	return []ϡinstr{
 		mustEncodeInstr(t, ϡopPush, ϡvstackID, vVal),
 		mustEncodeInstr(t, ϡopPush, ϡistackID, ix),
 		mustEncodeInstr(t, ϡopPush, ϡastackID),
@@ -537,11 +534,11 @@ func encodeRepetition(t *testing.T, start int, vVal int, ix int) []ϡinstr {
 		mustEncodeInstr(t, ϡopCumulOrF),
 		mustEncodeInstr(t, ϡopJump, start+1),
 		mustEncodeInstr(t, ϡopReturn),
-	)
+	}
 }
 
-func encodeOption(t *testing.T, start int, ix int) []ϡinstr {
-	return combineInstrs(
+func encodeOption(t *testing.T, start uint16, ix uint16) []ϡinstr {
+	return []ϡinstr{
 		mustEncodeInstr(t, ϡopPush, ϡistackID, ix),
 		mustEncodeInstr(t, ϡopPush, ϡastackID),
 		mustEncodeInstr(t, ϡopCall),
@@ -550,25 +547,25 @@ func encodeOption(t *testing.T, start int, ix int) []ϡinstr {
 		mustEncodeInstr(t, ϡopReturn),
 		mustEncodeInstr(t, ϡopPush, ϡvstackID, ϡvValNil),
 		mustEncodeInstr(t, ϡopReturn),
-	)
+	}
 }
 
-func encodeRuleRef(t *testing.T, ix int) []ϡinstr {
-	return combineInstrs(
+func encodeRuleRef(t *testing.T, ix uint16) []ϡinstr {
+	return []ϡinstr{
 		mustEncodeInstr(t, ϡopPush, ϡistackID, ix),
 		mustEncodeInstr(t, ϡopPush, ϡastackID),
 		mustEncodeInstr(t, ϡopCall),
 		mustEncodeInstr(t, ϡopPop, ϡastackID),
 		mustEncodeInstr(t, ϡopReturn),
-	)
+	}
 }
 
-func encodePredicate(t *testing.T, and bool, ix int) []ϡinstr {
+func encodePredicate(t *testing.T, and bool, ix uint16) []ϡinstr {
 	op := ϡopNilIfF
 	if and {
 		op = ϡopNilIfT
 	}
-	return combineInstrs(
+	return []ϡinstr{
 		mustEncodeInstr(t, ϡopPush, ϡpstackID),
 		mustEncodeInstr(t, ϡopPush, ϡistackID, ix),
 		mustEncodeInstr(t, ϡopPush, ϡastackID),
@@ -577,34 +574,34 @@ func encodePredicate(t *testing.T, and bool, ix int) []ϡinstr {
 		mustEncodeInstr(t, op),
 		mustEncodeInstr(t, ϡopRestore),
 		mustEncodeInstr(t, ϡopReturn),
-	)
+	}
 }
 
-func encodeCodePredicate(t *testing.T, and bool, bIx int) []ϡinstr {
+func encodeCodePredicate(t *testing.T, and bool, bIx uint16) []ϡinstr {
 	op := ϡopNilIfF
 	if and {
 		op = ϡopNilIfT
 	}
-	return combineInstrs(
+	return []ϡinstr{
 		mustEncodeInstr(t, ϡopCallB, bIx),
 		mustEncodeInstr(t, op),
 		mustEncodeInstr(t, ϡopReturn),
-	)
+	}
 }
 
-func encodeLabel(t *testing.T, lblIx, ix int) []ϡinstr {
-	return combineInstrs(
+func encodeLabel(t *testing.T, lblIx, ix uint16) []ϡinstr {
+	return []ϡinstr{
 		mustEncodeInstr(t, ϡopPush, ϡistackID, ix),
 		mustEncodeInstr(t, ϡopPush, ϡastackID),
 		mustEncodeInstr(t, ϡopCall),
 		mustEncodeInstr(t, ϡopPop, ϡastackID),
 		mustEncodeInstr(t, ϡopStoreIfT, lblIx),
 		mustEncodeInstr(t, ϡopReturn),
-	)
+	}
 }
 
-func encodeAction(t *testing.T, start, actIx, ix int) []ϡinstr {
-	return combineInstrs(
+func encodeAction(t *testing.T, start, actIx, ix uint16) []ϡinstr {
+	return []ϡinstr{
 		mustEncodeInstr(t, ϡopPush, ϡpstackID),
 		mustEncodeInstr(t, ϡopPush, ϡistackID, ix),
 		mustEncodeInstr(t, ϡopCall),
@@ -613,7 +610,7 @@ func encodeAction(t *testing.T, start, actIx, ix int) []ϡinstr {
 		mustEncodeInstr(t, ϡopReturn),
 		mustEncodeInstr(t, ϡopPop, ϡpstackID),
 		mustEncodeInstr(t, ϡopReturn),
-	)
+	}
 }
 
 func comparePrograms(t *testing.T, label string, want *testProgram, got *program) {
@@ -631,11 +628,10 @@ func comparePrograms(t *testing.T, label string, want *testProgram, got *program
 		min = l
 	}
 	for i := 0; i < min; i++ {
-		if want.Instrs[i] != got.Instrs[i] {
-			wop, wn, wa0, wa1, _ := want.Instrs[i].decode()
-			gop, gn, ga0, ga1, _ := got.Instrs[i].decode()
-			t.Errorf("%q: instruction %d: want %s (%d: %d %d), got %s (%d: %d %d)",
-				label, i, wop, wn, wa0, wa1, gop, gn, ga0, ga1)
+		wi, gi := want.Instrs[i], got.Instrs[i]
+		if wi.op != gi.op || !reflect.DeepEqual(wi.args, gi.args) || wi.ruleNmIx != gi.ruleNmIx {
+			t.Errorf("%q: instruction %d: want %s %v (%d), got %s %v (%d)",
+				label, i, wi.op, wi.args, wi.ruleNmIx, gi.op, gi.args, gi.ruleNmIx)
 		}
 	}
 
@@ -676,20 +672,6 @@ func comparePrograms(t *testing.T, label string, want *testProgram, got *program
 	for i := 0; i < min; i++ {
 		if want.Ss[i] != got.Ss[i] {
 			t.Errorf("%q: string %d: want %q, got %q", label, i, want.Ss[i], got.Ss[i])
-		}
-	}
-
-	// compare instruction-to-rule mapping
-	if len(want.InstrToRule) != len(got.InstrToRule) {
-		t.Errorf("%q: want %d instr-to-rule, got %d", label, len(want.InstrToRule), len(got.InstrToRule))
-	}
-	min = len(want.InstrToRule)
-	if l := len(got.InstrToRule); l < min {
-		min = l
-	}
-	for i := 0; i < min; i++ {
-		if want.InstrToRule[i] != got.InstrToRule[i] {
-			t.Errorf("%q: instr-to-rule %d: want %d, got %d", label, i, want.InstrToRule[i], got.InstrToRule[i])
 		}
 	}
 

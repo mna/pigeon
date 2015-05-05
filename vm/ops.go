@@ -62,6 +62,6 @@ func (op ϡop) String() string {
 // ϡinstr holds a single instruction: an opcode with its arguments.
 type ϡinstr struct {
 	op       ϡop
-	ruleNmIx int
+	ruleNmIx uint16
 	args     []uint16
 }

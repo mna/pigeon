@@ -31,9 +31,9 @@ const (
 	ϡastackID
 
 	// special V stack values
-	ϡvValNil    = 0
-	ϡvValFailed = 1
-	ϡvValEmpty  = 2
+	ϡvValNil    uint16 = 0
+	ϡvValFailed uint16 = 1
+	ϡvValEmpty  uint16 = 2
 )
 
 var (
@@ -69,21 +69,11 @@ type ϡprogram struct {
 	as []func(*ϡvm) (interface{}, error)
 	bs []func(*ϡvm) (bool, error)
 	ss []string
-
-	// instrToRule is the mapping of an instruction index to a rule
-	// identifier (or display name) in the ss list:
-	//
-	// ss[instrToRule[instrIndex]] == name of the rule
-	//
-	// Since instructions are limited to 65535, the size of this slice
-	// is bounded.
-	instrToRule []int
 }
 
 // String formats the program's instructions in a human-readable format.
 func (pg ϡprogram) String() string {
 	var buf bytes.Buffer
-	var n int
 
 	for i, instr := range pg.instrs {
 		buf.WriteString(fmt.Sprintf("[%3d]: %s\n", i, pg.instrToString(instr)))
@@ -115,8 +105,8 @@ func (pg ϡprogram) instrToString(instr ϡinstr) string {
 // ruleNameAt returns the name of the rule that contains the instruction
 // index. It returns an empty string is the instruction is not part of a
 // rule (bootstrap instruction, invalid index).
-func (pg ϡprogram) ruleNameAt(ix int) string {
-	if ix < 0 || ix >= len(pg.ss) {
+func (pg ϡprogram) ruleNameAt(ix uint16) string {
+	if ix < 0 || ix >= uint16(len(pg.ss)) {
 		return ""
 	}
 	return pg.ss[ix]
@@ -179,7 +169,7 @@ func (v *ϡvm) addErrAt(err error, ruleNmIx int, pos position) {
 	}
 	buf.WriteString(fmt.Sprintf("%s", pos))
 
-	ruleNm := v.pg.ruleNameAt(ruleNmIx)
+	ruleNm := v.pg.ruleNameAt(uint16(ruleNmIx))
 	if ruleNm != "" {
 		buf.WriteString(": ")
 		buf.WriteString("rule " + ruleNm)
@@ -318,9 +308,9 @@ func (v *ϡvm) dispatch() interface{} {
 			if e := recover(); e != nil {
 				switch e := e.(type) {
 				case error:
-					v.addErrAt(e, v.pg.instrs[v.pc-1].ruleNmIx, v.parser.pt.position)
+					v.addErrAt(e, int(v.pg.instrs[v.pc-1].ruleNmIx), v.parser.pt.position)
 				default:
-					v.addErrAt(fmt.Errorf("%v", e), v.pg.instrs[v.pc-1].ruleNmIx, v.parser.pt.position)
+					v.addErrAt(fmt.Errorf("%v", e), int(v.pg.instrs[v.pc-1].ruleNmIx), v.parser.pt.position)
 				}
 			}
 		}()
@@ -359,7 +349,7 @@ func (v *ϡvm) dispatch() interface{} {
 			fn := v.pg.as[instr.args[0]]
 			val, err := fn(v)
 			if err != nil {
-				v.addErrAt(err, instr.ruleNmIx, start.position)
+				v.addErrAt(err, int(instr.ruleNmIx), start.position)
 			}
 			v.v.push(val)
 
@@ -375,7 +365,7 @@ func (v *ϡvm) dispatch() interface{} {
 			fn := v.pg.bs[instr.args[0]]
 			val, err := fn(v)
 			if err != nil {
-				v.addErrAt(err, instr.ruleNmIx, v.parser.pt.position)
+				v.addErrAt(err, int(instr.ruleNmIx), v.parser.pt.position)
 			}
 			if !val {
 				v.v.push(ϡmatchFailed)

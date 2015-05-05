@@ -175,9 +175,8 @@ func toϡprogram(t *testing.T, pg *program,
 	bmock func(*thunkInfo) func(*ϡvm) (bool, error)) *ϡprogram {
 
 	vmpg := ϡprogram{
-		instrs:      pg.Instrs,
-		ss:          pg.Ss,
-		instrToRule: pg.InstrToRule,
+		instrs: pg.Instrs,
+		ss:     pg.Ss,
 	}
 
 	// convert matchers

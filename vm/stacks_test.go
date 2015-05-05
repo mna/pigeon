@@ -110,8 +110,8 @@ func TestVStack(t *testing.T) {
 
 func TestLStack(t *testing.T) {
 	l := ϡlstack{}
-	l.push([]int{4})
-	l.push([]int{2, 1})
+	l.push([]uint16{4})
+	l.push([]uint16{2, 1})
 
 	i := l.take()
 	if i != 2 {
@@ -145,7 +145,7 @@ func TestLStack(t *testing.T) {
 		t.Errorf("want empty array, got %v", a)
 	}
 
-	l.push([]int{3})
+	l.push([]uint16{3})
 	a = l.pop()
 	if len(a) != 1 {
 		t.Errorf("want array of 1 element, got %v", a)

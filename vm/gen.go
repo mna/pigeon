@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -54,10 +55,16 @@ func (g *Generator) write(pg *program) error {
 	return err
 }
 
-func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
+func (g *Generator) toProgram(gr *ast.Grammar) (pg *program, err error) {
 	if len(gr.Rules) == 0 {
 		return nil, errNoRule
 	}
+
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("%v", e)
+		}
+	}()
 
 	g.pg.RecvrNm = g.RecvrName
 	g.pg.Now = time.Now()
@@ -65,9 +72,9 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 	if gr.Init != nil {
 		g.pg.Init = unwrapCode(gr.Init.Val)
 	}
-	g.pg.ruleNmStartIx = make(map[int]int)
-	g.pg.ruleNmEntryIx = make(map[int]int)
-	g.pg.ruleNmToDisNm = make(map[int]int)
+	g.pg.ruleNmStartIx = make(map[uint16]uint16)
+	g.pg.ruleNmEntryIx = make(map[uint16]uint16)
+	g.pg.ruleNmToDisNm = make(map[uint16]uint16)
 	for i, r := range gr.Rules {
 		if i == 0 {
 			g.bootstrap(r)
@@ -90,7 +97,7 @@ func (g *Generator) toProgram(gr *ast.Grammar) (*program, error) {
 type thunkInfo struct {
 	Parms  []string
 	RuleNm string
-	ExprIx int
+	ExprIx uint16
 	Code   string
 }
 
@@ -105,17 +112,15 @@ type program struct {
 	Bs []*thunkInfo
 	Ss []string
 
-	InstrToRule []int
+	mss map[string]uint16 // reverse map of string to index in Ss
+	mms map[string]uint16 // reverse map of matcher's raw value to index in Ms
 
-	mss map[string]int // reverse map of string to index in Ss
-	mms map[string]int // reverse map of matcher's raw value to index in Ms
-
-	ruleNmIx      int
-	exprIx        int
-	parmsSet      [][]string  // stack of parms set for code blocks
-	ruleNmStartIx map[int]int // rule name ix to first rule instr ix
-	ruleNmEntryIx map[int]int // rule name ix to entry point instr ix
-	ruleNmToDisNm map[int]int // rule name ix to rule display name ix
+	ruleNmIx      uint16
+	exprIx        uint16
+	parmsSet      [][]string        // stack of parms set for code blocks
+	ruleNmStartIx map[uint16]uint16 // rule name ix to first rule instr ix
+	ruleNmEntryIx map[uint16]uint16 // rule name ix to entry point instr ix
+	ruleNmToDisNm map[uint16]uint16 // rule name ix to rule display name ix
 }
 
 func (pg *program) pushParmsSet() {
@@ -135,33 +140,39 @@ func (pg *program) pushParm(v string) {
 	pg.parmsSet[ix] = append(pg.parmsSet[ix], v)
 }
 
-func (pg *program) matcher(raw string, expr ast.Expression) int {
+func (pg *program) matcher(raw string, expr ast.Expression) uint16 {
 	if pg.mms == nil {
-		pg.mms = make(map[string]int)
+		pg.mms = make(map[string]uint16)
 	}
 	ix, ok := pg.mms[raw]
 	if !ok {
+		if len(pg.Ms) >= math.MaxUint16 {
+			panic("too many matchers")
+		}
 		pg.Ms = append(pg.Ms, expr)
-		ix = len(pg.Ms) - 1
+		ix = uint16(len(pg.Ms) - 1)
 		pg.mms[raw] = ix
 	}
 	return ix
 }
 
-func (pg *program) string(s string) int {
+func (pg *program) string(s string) uint16 {
 	if pg.mss == nil {
-		pg.mss = make(map[string]int)
+		pg.mss = make(map[string]uint16)
 	}
 	ix, ok := pg.mss[s]
 	if !ok {
+		if len(pg.Ss) >= math.MaxUint16 {
+			panic("too many strings")
+		}
 		pg.Ss = append(pg.Ss, s)
-		ix = len(pg.Ss) - 1
+		ix = uint16(len(pg.Ss) - 1)
 		pg.mss[s] = ix
 	}
 	return ix
 }
 
-func (g *Generator) rule(r *ast.Rule) int {
+func (g *Generator) rule(r *ast.Rule) uint16 {
 	// store the rule's Identifier and Display name in the strings array
 	g.pg.ruleNmIx = g.pg.string(r.Name.Val)
 	disNmIx := g.pg.ruleNmIx
@@ -170,7 +181,7 @@ func (g *Generator) rule(r *ast.Rule) int {
 	}
 	g.pg.exprIx = 0
 
-	start := len(g.pg.Instrs)
+	start := uint16(len(g.pg.Instrs))
 
 	g.pg.pushParmsSet()
 	entry := g.expr(r.Expr)
@@ -182,7 +193,7 @@ func (g *Generator) rule(r *ast.Rule) int {
 	return start
 }
 
-func (g *Generator) expr(expr ast.Expression) int {
+func (g *Generator) expr(expr ast.Expression) uint16 {
 	g.pg.exprIx++
 
 	switch expr := expr.(type) {
@@ -222,19 +233,19 @@ func (g *Generator) expr(expr ast.Expression) int {
 	return 0
 }
 
-func (g *Generator) anyMatcher(e *ast.AnyMatcher) int {
+func (g *Generator) anyMatcher(e *ast.AnyMatcher) uint16 {
 	// Val is a dot `.` for the any matcher
 	mIx := g.pg.matcher(e.Val, e)
 	return g.matcher(mIx)
 }
 
-func (g *Generator) charClassMatcher(e *ast.CharClassMatcher) int {
+func (g *Generator) charClassMatcher(e *ast.CharClassMatcher) uint16 {
 	// Val is the raw char class literal, including [] and optional `i`
 	mIx := g.pg.matcher(e.Val, e)
 	return g.matcher(mIx)
 }
 
-func (g *Generator) litMatcher(e *ast.LitMatcher) int {
+func (g *Generator) litMatcher(e *ast.LitMatcher) uint16 {
 	raw := strconv.Quote(e.Val)
 	if e.IgnoreCase {
 		raw += "i"
@@ -248,16 +259,19 @@ func (g *Generator) litMatcher(e *ast.LitMatcher) int {
 	return g.matcher(mIx)
 }
 
-func (g *Generator) andNotCode(code *ast.CodeBlock, and bool) int {
+func (g *Generator) andNotCode(code *ast.CodeBlock, and bool) uint16 {
 	th := &thunkInfo{
 		Parms:  g.pg.peekParmsSet(),
 		RuleNm: g.pg.Ss[g.pg.ruleNmIx],
 		ExprIx: g.pg.exprIx,
 		Code:   unwrapCode(code.Val),
 	}
+	if len(g.pg.Bs) >= math.MaxUint16 {
+		panic("too many code predicates")
+	}
 	g.pg.Bs = append(g.pg.Bs, th)
 
-	start := g.encode(ϡopCallB, len(g.pg.Bs)-1)
+	start := g.encode(ϡopCallB, uint16(len(g.pg.Bs)-1))
 	if and {
 		g.encode(ϡopNilIfT)
 	} else {
@@ -267,7 +281,7 @@ func (g *Generator) andNotCode(code *ast.CodeBlock, and bool) int {
 	return start
 }
 
-func (g *Generator) action(e *ast.ActionExpr) int {
+func (g *Generator) action(e *ast.ActionExpr) uint16 {
 	actIx := g.pg.exprIx
 	ix := g.expr(e.Expr)
 
@@ -277,20 +291,23 @@ func (g *Generator) action(e *ast.ActionExpr) int {
 		ExprIx: actIx,
 		Code:   unwrapCode(e.Code.Val),
 	}
+	if len(g.pg.As) >= math.MaxUint16 {
+		panic("too many actions")
+	}
 	g.pg.As = append(g.pg.As, th)
 
 	start := g.encode(ϡopPush, ϡpstackID)
 	g.encode(ϡopPush, ϡistackID, ix)
 	g.encode(ϡopCall)
 	g.encodeJumpDelta(ϡopJumpIfF, +3)
-	g.encode(ϡopCallA, len(g.pg.As)-1)
+	g.encode(ϡopCallA, uint16(len(g.pg.As)-1))
 	g.encode(ϡopReturn)
 	g.encode(ϡopPop, ϡpstackID)
 	g.encode(ϡopReturn)
 	return start
 }
 
-func (g *Generator) labeled(e *ast.LabeledExpr) int {
+func (g *Generator) labeled(e *ast.LabeledExpr) uint16 {
 	lbl := e.Label.Val
 	lblIx := g.pg.string(lbl)
 	g.pg.pushParm(lbl)
@@ -308,7 +325,7 @@ func (g *Generator) labeled(e *ast.LabeledExpr) int {
 	return start
 }
 
-func (g *Generator) andNot(subExpr ast.Expression, and bool) int {
+func (g *Generator) andNot(subExpr ast.Expression, and bool) uint16 {
 	g.pg.pushParmsSet()
 	ix := g.expr(subExpr)
 	g.pg.popParmsSet()
@@ -328,11 +345,11 @@ func (g *Generator) andNot(subExpr ast.Expression, and bool) int {
 	return start
 }
 
-func (g *Generator) ruleRef(e *ast.RuleRefExpr) int {
+func (g *Generator) ruleRef(e *ast.RuleRefExpr) uint16 {
 	nm := e.Name.Val
 	ix := g.pg.string(nm)
 
-	start := g.encode(ϡopPlaceholder, ix)
+	start := g.encode(ϡopPlaceholder, ix, 0)
 	g.encode(ϡopPush, ϡastackID)
 	g.encode(ϡopCall)
 	g.encode(ϡopPop, ϡastackID)
@@ -340,7 +357,7 @@ func (g *Generator) ruleRef(e *ast.RuleRefExpr) int {
 	return start
 }
 
-func (g *Generator) zeroOrOne(e *ast.ZeroOrOneExpr) int {
+func (g *Generator) zeroOrOne(e *ast.ZeroOrOneExpr) uint16 {
 	g.pg.pushParmsSet()
 	ix := g.expr(e.Expr)
 	g.pg.popParmsSet()
@@ -356,7 +373,7 @@ func (g *Generator) zeroOrOne(e *ast.ZeroOrOneExpr) int {
 	return start
 }
 
-func (g *Generator) repetition(subExpr ast.Expression, zeroOk bool) int {
+func (g *Generator) repetition(subExpr ast.Expression, zeroOk bool) uint16 {
 	g.pg.pushParmsSet()
 	ix := g.expr(subExpr)
 	g.pg.popParmsSet()
@@ -377,9 +394,9 @@ func (g *Generator) repetition(subExpr ast.Expression, zeroOk bool) int {
 	return start
 }
 
-func (g *Generator) choice(e *ast.ChoiceExpr) int {
+func (g *Generator) choice(e *ast.ChoiceExpr) uint16 {
 	// first generate code for each of the choice's expressions
-	indices := make([]int, len(e.Alternatives)+1)
+	indices := make([]uint16, len(e.Alternatives)+1)
 	for i, se := range e.Alternatives {
 		g.pg.pushParmsSet()
 		indices[i+1] = g.expr(se)
@@ -402,9 +419,9 @@ func (g *Generator) choice(e *ast.ChoiceExpr) int {
 	return start
 }
 
-func (g *Generator) sequence(e *ast.SeqExpr) int {
+func (g *Generator) sequence(e *ast.SeqExpr) uint16 {
 	// first generate code for each of the sequence's expressions
-	indices := make([]int, len(e.Exprs)+1)
+	indices := make([]uint16, len(e.Exprs)+1)
 	for i, se := range e.Exprs {
 		indices[i+1] = g.expr(se)
 	}
@@ -426,7 +443,7 @@ func (g *Generator) sequence(e *ast.SeqExpr) int {
 }
 
 // matcher generates the instructions to call the matcher at index mIx.
-func (g *Generator) matcher(mIx int) int {
+func (g *Generator) matcher(mIx uint16) uint16 {
 	start := g.encode(ϡopPush, ϡpstackID)
 	g.encode(ϡopMatch, mIx)
 	g.encode(ϡopRestoreIfF)
@@ -440,34 +457,27 @@ func (g *Generator) bootstrap(r *ast.Rule) {
 	nm := r.Name.Val
 	ix := g.pg.string(nm)
 
-	g.encode(ϡopPlaceholder, ix)
+	g.encode(ϡopPlaceholder, ix, 0)
 	g.encode(ϡopPush, ϡastackID)
 	g.encode(ϡopCall)
 	g.encode(ϡopExit)
 }
 
 func (g *Generator) fillPlaceholders() {
-	var op ϡop
-	var n, nmIx int
-
 	if g.err != nil {
 		return
 	}
 
 	for i, instr := range g.pg.Instrs {
-		if n > 0 {
-			n -= 4
-			continue
-		}
-		op, n, nmIx, _, _ = instr.decode()
-		n -= 3
-		if op == ϡopPlaceholder {
-			ix := g.pg.ruleNmEntryIx[nmIx]
+		if instr.op == ϡopPlaceholder {
+			ix := g.pg.ruleNmEntryIx[instr.args[0]]
 			if ix == 0 {
-				g.err = fmt.Errorf("undefined rule %q", g.pg.Ss[nmIx])
+				g.err = fmt.Errorf("undefined rule %q", g.pg.Ss[instr.args[0]])
 			}
-			newInstrs, _ := ϡencodeInstr(ϡopPush, ϡistackID, ix)
-			g.pg.Instrs[i] = newInstrs[0]
+			instr.op = ϡopPush
+			instr.args[0] = ϡistackID
+			instr.args[1] = ix
+			g.pg.Instrs[i] = instr
 		}
 	}
 }
@@ -477,37 +487,37 @@ func (g *Generator) instrToRule() {
 		return
 	}
 
-	g.pg.InstrToRule = make([]int, len(g.pg.Instrs))
 	// rule start index is necessarily > 0 because of the bootstrap sequence
-	startStartIx := 0
+	var startStartIx uint16
 	for ruleNmIx, startIx := range g.pg.ruleNmStartIx {
 		if startIx < startStartIx || startStartIx == 0 {
 			startStartIx = startIx
 		}
-		g.pg.InstrToRule[startIx] = g.pg.ruleNmToDisNm[ruleNmIx]
+		g.pg.Instrs[startIx].ruleNmIx = g.pg.ruleNmToDisNm[ruleNmIx]
 	}
 
 	// fill the blanks
 	fillIx := -1
-	for i := 0; i < len(g.pg.InstrToRule); i++ {
-		if ruleNmIx := g.pg.InstrToRule[i]; ruleNmIx != 0 || i == startStartIx {
-			fillIx = ruleNmIx
+	for i := uint16(0); i < uint16(len(g.pg.Instrs)); i++ {
+		if ruleNmIx := g.pg.Instrs[i].ruleNmIx; ruleNmIx != 0 || i == startStartIx {
+			fillIx = int(ruleNmIx)
 		}
-		g.pg.InstrToRule[i] = fillIx
+		g.pg.Instrs[i].ruleNmIx = uint16(fillIx)
 	}
 }
 
-func (g *Generator) encodeJumpDelta(op ϡop, delta int) int {
-	return g.encode(op, delta+len(g.pg.Instrs))
+func (g *Generator) encodeJumpDelta(op ϡop, delta int) uint16 {
+	return g.encode(op, uint16(delta+len(g.pg.Instrs)))
 }
 
-func (g *Generator) encode(op ϡop, args ...int) int {
+func (g *Generator) encode(op ϡop, args ...uint16) uint16 {
 	if g.err == nil {
-		instr, err := ϡencodeInstr(op, args...)
-		g.err = err
 		start := len(g.pg.Instrs)
-		g.pg.Instrs = append(g.pg.Instrs, instr...)
-		return start
+		if start >= math.MaxUint16 {
+			panic("too many instructions")
+		}
+		g.pg.Instrs = append(g.pg.Instrs, ϡinstr{op: op, args: args})
+		return uint16(start)
 	}
 	return 0
 }
