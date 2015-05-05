@@ -17,10 +17,9 @@ BenchmarkParseKeyword               1000           1972652 ns/op          207480
 BenchmarkParseUnicodeClass          2000           2845717 ns/op          367405 B/op       2990 allocs/op
 BenchmarkParseKeyword               2000            649629 ns/op          213968 B/op       1845 allocs/op
 
-// Commit ? (stack rewritten with sp)
+// Commit 0b32ca6 (stack rewritten with sp)
 BenchmarkParseUnicodeClass          2000            826942 ns/op          338877 B/op       2399 allocs/op
 BenchmarkParseKeyword               3000            549708 ns/op          195856 B/op       1471 allocs/op
-
 
 
 // Commit df3f721 (recursive)
@@ -35,10 +34,9 @@ BenchmarkParsePigeonMemo              10         142642384 ns/op        87630939
 BenchmarkParsePigeonNoMemo            10         141237021 ns/op        87629233 B/op     693708 allocs/op
 BenchmarkParsePigeonMemo              10         141600274 ns/op        87629233 B/op     693708 allocs/op
 
-// Commit ? (stack rewritten with sp)
+// Commit 0b32ca6 (stack rewritten with sp)
 BenchmarkParsePigeonNoMemo            10         116394376 ns/op        80393633 B/op     542970 allocs/op
 BenchmarkParsePigeonMemo              10         116237323 ns/op        80393633 B/op     542970 allocs/op
-
 
 
 // Commit df3f721 (recursive)
@@ -53,7 +51,7 @@ BenchmarkPigeonJSONMemo               20          93271080 ns/op        56357640
 BenchmarkPigeonJSONNoMemo             20          93790644 ns/op        56363398 B/op     492369 allocs/op
 BenchmarkPigeonJSONMemo               20          93547428 ns/op        56363254 B/op     492369 allocs/op
 
-// Commit ? (stack rewritten with sp)
+// Commit 0b32ca6 (stack rewritten with sp)
 BenchmarkPigeonJSONNoMemo             20          75739611 ns/op        52532741 B/op     412572 allocs/op
 BenchmarkPigeonJSONMemo               20          75758382 ns/op        52533317 B/op     412574 allocs/op
 

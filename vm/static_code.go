@@ -1007,11 +1007,11 @@ func (v *ϡvm) dumpSnapshot(w io.Writer) {
 // run executes the provided program in this VM, and returns the result.
 func (v *ϡvm) run(pg *ϡprogram) (interface{}, error) {
 	v.pg = pg
-	v.a = newAstack(128) // make(ϡastack, 0, 128)
-	v.i = newIstack(128) // make(ϡistack, 0, 128)
-	v.v = newVstack(128) // make(ϡvstack, 0, 128)
-	v.l = newLstack(128) // make(ϡlstack, 0, 128)
-	v.p = newPstack(128) // make(ϡpstack, 0, 128)
+	v.a = newAstack(256) // make(ϡastack, 0, 128)
+	v.i = newIstack(256) // make(ϡistack, 0, 128)
+	v.v = newVstack(256) // make(ϡvstack, 0, 128)
+	v.l = newLstack(256) // make(ϡlstack, 0, 128)
+	v.p = newPstack(256) // make(ϡpstack, 0, 128)
 	ret := v.dispatch()
 
 	// if the match failed, translate that to a nil result and make
