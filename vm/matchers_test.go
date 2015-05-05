@@ -211,11 +211,11 @@ type testPeekReader struct {
 	ix  int
 }
 
-func (pr *testPeekReader) peek() ϡsvpt {
+func (pr *testPeekReader) peek() rune {
 	if pr.ix >= len(pr.rns) {
-		return ϡsvpt{rn: utf8.RuneError}
+		return utf8.RuneError
 	}
-	return ϡsvpt{rn: pr.rns[pr.ix]}
+	return pr.rns[pr.ix]
 }
 
 func (pr *testPeekReader) read() {

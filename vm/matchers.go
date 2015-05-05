@@ -13,7 +13,7 @@ import (
 // ϡpeekReader is the interface that defines the peek and read
 // methods.
 type ϡpeekReader interface {
-	peek() ϡsvpt
+	peek() rune
 	read()
 }
 
@@ -28,9 +28,9 @@ type ϡanyMatcher struct{}
 
 // match tries to match a character in the peekReader.
 func (a ϡanyMatcher) match(pr ϡpeekReader) bool {
-	pt := pr.peek()
+	rn := pr.peek()
 	pr.read()
-	return pt.rn != utf8.RuneError
+	return rn != utf8.RuneError
 }
 
 func (a ϡanyMatcher) String() string {
@@ -46,11 +46,11 @@ type ϡstringMatcher struct {
 // match tries to match the string in the peekReader.
 func (s ϡstringMatcher) match(pr ϡpeekReader) bool {
 	for _, want := range s.value {
-		pt := pr.peek()
+		rn := pr.peek()
 		if s.ignoreCase {
-			pt.rn = unicode.ToLower(pt.rn)
+			rn = unicode.ToLower(rn)
 		}
-		if pt.rn != want {
+		if rn != want {
 			return false
 		}
 		pr.read()
@@ -102,30 +102,30 @@ func (c ϡcharClassMatcher) String() string {
 
 // match tries to match classes of characters in the peekReader.
 func (c ϡcharClassMatcher) match(pr ϡpeekReader) bool {
-	pt := pr.peek()
+	rn := pr.peek()
 	pr.read()
 
 	if c.ignoreCase {
-		pt.rn = unicode.ToLower(pt.rn)
+		rn = unicode.ToLower(rn)
 	}
 
 	// try to match in the list of available chars
-	for _, rn := range c.chars {
-		if pt.rn == rn {
+	for _, ch := range c.chars {
+		if rn == ch {
 			return !c.inverted
 		}
 	}
 
 	// try to match in the list of ranges
 	for i := 0; i < len(c.ranges); i += 2 {
-		if pt.rn >= c.ranges[i] && pt.rn <= c.ranges[i+1] {
+		if rn >= c.ranges[i] && rn <= c.ranges[i+1] {
 			return !c.inverted
 		}
 	}
 
 	// try to match in the list of Unicode classes
 	for _, cl := range c.classes {
-		if unicode.Is(cl, pt.rn) {
+		if unicode.Is(cl, rn) {
 			return !c.inverted
 		}
 	}

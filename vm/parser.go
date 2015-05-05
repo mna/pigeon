@@ -49,9 +49,9 @@ type ϡparser struct {
 	cur  current
 }
 
-// peek returns the current savepoint information.
-func (p *ϡparser) peek() ϡsvpt {
-	return p.pt
+// peek returns the current rune.
+func (p *ϡparser) peek() rune {
+	return p.pt.rn
 }
 
 // read advances the parser to the next rune.
