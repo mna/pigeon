@@ -2,6 +2,10 @@ package main
 
 import "testing"
 
+var longishExpr = `
+18 + 3 - 27012 * ( (1234 - 43) / 7 ) + -4 * 8129
+`
+
 var validCases = map[string]int{
 	"0":   0,
 	"1":   1,
@@ -39,6 +43,7 @@ var validCases = map[string]int{
 	" (1 + 2 - 3) * 4 / 5 ":     0,
 	" 1 + 2 - (3 * 4) / 5 ":     1,
 	" 18 + 3 - 27 * (-18 / -3)": -141,
+	longishExpr:                 -4624535,
 }
 
 func TestValidCases(t *testing.T) {
@@ -129,6 +134,7 @@ func TestMemoization(t *testing.T) {
 	if goti != want {
 		t.Errorf("want %d, got %d", want, goti)
 	}
+	// TODO : stats & memoize
 	// if p.exprCnt != 415 {
 	// 	t.Errorf("with Memoize=false, want %d expressions evaluated, got %d", 415, p.exprCnt)
 	// }
@@ -141,8 +147,29 @@ func TestMemoization(t *testing.T) {
 	if goti != want {
 		t.Errorf("want %d, got %d", want, goti)
 	}
-	// TODO: implement memoization, stats
 	// if p.exprCnt != 389 {
 	// 	t.Errorf("with Memoize=true, want %d expressions evaluated, got %d", 389, p.exprCnt)
 	// }
+}
+
+func BenchmarkPigeonCalculatorNoMemo(b *testing.B) {
+	d := []byte(longishExpr)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		if _, err := Parse("", d, Memoize(false)); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkPigeonCalculatorMemo(b *testing.B) {
+	d := []byte(longishExpr)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		if _, err := Parse("", d, Memoize(true)); err != nil {
+			b.Fatal(err)
+		}
+	}
 }

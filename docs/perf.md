@@ -56,5 +56,14 @@ BenchmarkPigeonJSONNoMemo             20          75739611 ns/op        52532741
 BenchmarkPigeonJSONMemo               20          75758382 ns/op        52533317 B/op     412574 allocs/op
 
 
+// Commit df3f721 (recursive)
+BenchmarkPigeonCalculatorNoMemo    10000            169574 ns/op           17958 B/op        390 allocs/op
+BenchmarkPigeonCalculatorMemo       2000            672838 ns/op          132173 B/op        515 allocs/op
+
+// Commit 0b32ca6 (stack rewritten with sp)
+BenchmarkPigeonCalculatorNoMemo     3000            494580 ns/op          167408 B/op       1329 allocs/op
+BenchmarkPigeonCalculatorMemo       3000            498565 ns/op          167408 B/op       1329 allocs/op
+
+
 // Go1.4 stdlib
 BenchmarkStdlibJSON                 2000            861586 ns/op           74094 B/op       1055 allocs/op
