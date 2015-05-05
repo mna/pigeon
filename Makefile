@@ -96,10 +96,13 @@ cmp:
 	unlink $$boot && \
 	unlink $$official
 
+profile:
+	cd misc/cmd/profile && go run main.go
+
 clean:
 	rm $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go \
 		$(TEST_GENERATED_SRC) $(CODE_FILE)
 	rm -rf $(BINDIR)
 
-.PHONY: all clean lint cmp
+.PHONY: all clean lint cmp profile
 

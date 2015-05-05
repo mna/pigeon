@@ -6,8 +6,6 @@ import (
 )
 
 func BenchmarkParsePigeonNoMemo(b *testing.B) {
-	//defer profile.Start(profile.CPUProfile).Stop()
-
 	d, err := ioutil.ReadFile("../../../grammar/pigeon.peg")
 	if err != nil {
 		b.Fatal(err)
