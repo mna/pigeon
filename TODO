@@ -1,4 +1,3 @@
-- return an error if there is a duplicate rule name (may already be caught, but add a test). Also, unused rule, missing rule tests.
 - return an error if there is a duplicate label name in the same scope (test it).
 - run tests with go-fuzz as input (https://github.com/dvyukov/go-fuzz)
 - all tests in test/ dir can be rewritten with bootstrap.Parse and vm.Run?

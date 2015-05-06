@@ -198,7 +198,6 @@ LongUnicodeEscape ← 'U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit 
 ShortUnicodeEscape ← 'u' HexDigit HexDigit HexDigit HexDigit
 
 OctalDigit ← [0-7]
-DecimalDigit ← [0-9]
 HexDigit ← [0-9a-f]i
 
 CharClassMatcher ← '[' ( ClassCharRange / ClassChar / "\\" UnicodeClassEscape )* ']' 'i'? {

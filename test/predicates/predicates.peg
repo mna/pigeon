@@ -2,6 +2,8 @@
 package predicates
 }
 
+_ = A B C
+
 A ← a:'a' !{
     fmt.Println(string(c.text))
     return true, nil

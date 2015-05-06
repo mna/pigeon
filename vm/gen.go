@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -180,6 +181,10 @@ func (g *Generator) rule(r *ast.Rule) uint16 {
 		disNmIx = g.pg.string(r.DisplayName.Val)
 	}
 	g.pg.exprIx = 0
+
+	if _, ok := g.pg.ruleNmEntryIx[g.pg.ruleNmIx]; ok {
+		panic(fmt.Sprintf("duplicate rule %q", r.Name.Val))
+	}
 
 	start := uint16(len(g.pg.Instrs))
 
@@ -468,17 +473,43 @@ func (g *Generator) fillPlaceholders() {
 		return
 	}
 
+	referenced := make(map[uint16]bool, len(g.pg.ruleNmEntryIx))
 	for i, instr := range g.pg.Instrs {
 		if instr.op == ϡopPlaceholder {
 			ix := g.pg.ruleNmEntryIx[instr.args[0]]
+			referenced[instr.args[0]] = true
 			if ix == 0 {
-				g.err = fmt.Errorf("undefined rule %q", g.pg.Ss[instr.args[0]])
+				panic(fmt.Errorf("undefined rule %q", g.pg.Ss[instr.args[0]]))
 			}
 			instr.op = ϡopPush
 			instr.args[0] = ϡistackID
 			instr.args[1] = ix
 			g.pg.Instrs[i] = instr
 		}
+	}
+
+	// remove rules that were referenced
+	for ref := range referenced {
+		delete(g.pg.ruleNmEntryIx, ref)
+	}
+
+	if len(g.pg.ruleNmEntryIx) > 0 {
+		var buf bytes.Buffer
+		buf.WriteString("unused rule")
+		if len(g.pg.ruleNmEntryIx) > 1 {
+			buf.WriteString("s")
+		}
+		buf.WriteString(" ")
+
+		comma := false
+		for ix := range g.pg.ruleNmEntryIx {
+			if comma {
+				buf.WriteString(", ")
+			}
+			buf.WriteString(fmt.Sprintf("%q", g.pg.Ss[ix]))
+			comma = true
+		}
+		panic(buf.String())
 	}
 }
 

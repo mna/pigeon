@@ -39,7 +39,19 @@ func TestGenerateProgram(t *testing.T) {
 		out *testProgram
 		err error
 	}{
+		// no rule
 		{"", nil, errNoRule},
+
+		// duplicate rule name
+		{"A = B\nB = 'b'\nA = 'c'", nil, errors.New(`duplicate rule "A"`)},
+
+		// unused rule
+		{"A = 'a'\nB = 'b'", nil, errors.New(`unused rule "B"`)},
+
+		// unused rules
+		{"A = 'a'\nB = 'b'\nC = 'c'", nil, errors.New(`unused rules "B", "C"`)},
+
+		// missing rule
 		{"A = B", nil, errors.New(`undefined rule "B"`)},
 
 		// matcher expression
