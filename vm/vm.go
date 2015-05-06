@@ -306,11 +306,15 @@ func (v *ϡvm) dispatch() interface{} {
 	if v.recover {
 		defer func() {
 			if e := recover(); e != nil {
+				ruleIx := -1
+				if v.pc > 0 {
+					ruleIx = v.pg.instrs[v.pc-1].ruleNmIx
+				}
 				switch e := e.(type) {
 				case error:
-					v.addErrAt(e, int(v.pg.instrs[v.pc-1].ruleNmIx), v.parser.pt.position)
+					v.addErrAt(e, ruleIx, v.parser.pt.position)
 				default:
-					v.addErrAt(fmt.Errorf("%v", e), int(v.pg.instrs[v.pc-1].ruleNmIx), v.parser.pt.position)
+					v.addErrAt(fmt.Errorf("%v", e), ruleIx, v.parser.pt.position)
 				}
 			}
 		}()
