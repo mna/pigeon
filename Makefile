@@ -97,7 +97,8 @@ cmp:
 	unlink $$official
 
 profile:
-	cd misc/cmd/profile && go run main.go
+	go test -c
+	./pigeon.test -test.run TestProfile$$ -profile
 
 clean:
 	rm $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go \

@@ -1,6 +1,31 @@
 package main
 
-import "testing"
+import (
+	"flag"
+	"io/ioutil"
+	"log"
+	"testing"
+
+	"github.com/davecheney/profile"
+)
+
+var profileFlag = flag.Bool("profile", false, "generate cpu profile")
+
+func TestProfile(t *testing.T) {
+	if !*profileFlag {
+		t.Skip()
+	}
+
+	d, err := ioutil.ReadFile("grammar/pigeon.peg")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer profile.Start(profile.CPUProfile).Stop()
+
+	if _, err := Parse("", d, Memoize(false)); err != nil {
+		log.Fatal(err)
+	}
+}
 
 // With Unicode classes in the grammar:
 // BenchmarkParseUnicodeClass          2000            548233 ns/op           96615 B/op        978 allocs/op

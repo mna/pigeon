@@ -21,6 +21,7 @@ func TestLinearTime(t *testing.T) {
 		10 << 10,  // 10Kb
 		100 << 10, // 100Kb
 		1 << 20,   // 1MB
+		10 << 20,  // 10MB
 	}
 	for _, sz := range sizes {
 		r := io.LimitReader(rand.Reader, sz)
