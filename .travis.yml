@@ -1,5 +1,8 @@
 language: go
 
+install:
+    - go get github.com/davecheney/profile
+
 script: go test -v -short ./...
 
 go:
