@@ -6,9 +6,9 @@ The transition to a Virtual Machine (VM) based implementation could be relativel
 
 The goals of this reimplementation, in no particular order, are:
 
-* Avoid stack overflows due to too many recursive calls.
-* More memory-efficient implementation.
-* Better performance.
+✓ Avoid stack overflows due to too many recursive calls : goal achieved, can even go to 10MB in the linear test case.
+✗ More memory-efficient implementation : failed, uses more memory than the recursive approach.
+✗ Better performance : failed, about 2-2.5x slower than the recursive approach, but a VM is definitely optimizable.
 * Better error reporting with the "farthest failure position" technique.
 * Less code, though not at the expense of readability (should still be simple code).
 * Better isolation of implementation details vs exposed API, using a prefix to avoid clashes with user code for internal symbols.
