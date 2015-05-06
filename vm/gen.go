@@ -493,7 +493,7 @@ func (g *Generator) instrToRule() {
 		if startIx < startStartIx || startStartIx == 0 {
 			startStartIx = startIx
 		}
-		g.pg.Instrs[startIx].ruleNmIx = g.pg.ruleNmToDisNm[ruleNmIx]
+		g.pg.Instrs[startIx].ruleNmIx = int(g.pg.ruleNmToDisNm[ruleNmIx])
 	}
 
 	// fill the blanks
@@ -502,7 +502,7 @@ func (g *Generator) instrToRule() {
 		if ruleNmIx := g.pg.Instrs[i].ruleNmIx; ruleNmIx != 0 || i == startStartIx {
 			fillIx = int(ruleNmIx)
 		}
-		g.pg.Instrs[i].ruleNmIx = uint16(fillIx)
+		g.pg.Instrs[i].ruleNmIx = fillIx
 	}
 }
 

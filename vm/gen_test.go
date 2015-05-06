@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -15,13 +14,12 @@ import (
 )
 
 type testProgram struct {
-	Init        string
-	Instrs      []ϡinstr
-	Ms          []string
-	Ss          []string
-	As          []*thunkInfo
-	Bs          []*thunkInfo
-	InstrToRule []int
+	Init   string
+	Instrs []ϡinstr
+	Ms     []string
+	Ss     []string
+	As     []*thunkInfo
+	Bs     []*thunkInfo
 }
 
 func TestNoRule(t *testing.T) {
@@ -47,139 +45,128 @@ func TestGenerateProgram(t *testing.T) {
 		// matcher expression
 		{"A = 'm'", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 4),
-				encodeMatcher(t, 0), // 'm'
+				setRuleNmIx(encodeBootstrap(t, 4), -1),
+				setRuleNmIx(encodeMatcher(t, 0), 0), // 'm'
 			),
-			Ms:          []string{`"m"`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 4)),
+			Ms: []string{`"m"`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// matcher expression with an Init
 		{"{x}\nA = 'm'", &testProgram{
 			Init: "x",
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 4),
-				encodeMatcher(t, 0), // 'm'
+				setRuleNmIx(encodeBootstrap(t, 4), -1),
+				setRuleNmIx(encodeMatcher(t, 0), 0), // 'm'
 			),
-			Ms:          []string{`"m"`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 4)),
+			Ms: []string{`"m"`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// matcher with rule display name
 		{`A "Z" = 'm'`, &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 4),
-				encodeMatcher(t, 0), // 'm'
+				setRuleNmIx(encodeBootstrap(t, 4), -1),
+				setRuleNmIx(encodeMatcher(t, 0), 1), // 'm'
 			),
-			Ms:          []string{`"m"`},
-			Ss:          []string{"A", "Z"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(1, 4)),
+			Ms: []string{`"m"`},
+			Ss: []string{"A", "Z"},
 		}, nil},
 
 		// sequence expression
 		{`A  = 'm' 'n'`, &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 12),
+				setRuleNmIx(encodeBootstrap(t, 12), -1),
 				encodeMatcher(t, 0), // 4: 'm'
 				encodeMatcher(t, 1), // 8: 'n'
 				encodeSequence(t, 12, 4, 8),
 			),
-			Ms:          []string{`"m"`, `"n"`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 19)),
+			Ms: []string{`"m"`, `"n"`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// choice expression
 		{`A  = 'm' / 'n'`, &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 12),
+				setRuleNmIx(encodeBootstrap(t, 12), -1),
 				encodeMatcher(t, 0), // 4: 'm'
 				encodeMatcher(t, 1), // 8: 'n'
 				encodeChoice(t, 12, 4, 8),
 			),
-			Ms:          []string{`"m"`, `"n"`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 19)),
+			Ms: []string{`"m"`, `"n"`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// zero or more expression
 		{`A  = 'm'*`, &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 8),
+				setRuleNmIx(encodeBootstrap(t, 8), -1),
 				encodeMatcher(t, 0), // 4: 'm'
 				encodeRepetition(t, 8, ϡvValEmpty, 4),
 			),
-			Ms:          []string{`"m"`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 13)),
+			Ms: []string{`"m"`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// one or more expression
 		{`A  = 'm'+`, &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 8),
+				setRuleNmIx(encodeBootstrap(t, 8), -1),
 				encodeMatcher(t, 0), // 4: 'm'
 				encodeRepetition(t, 8, ϡvValFailed, 4),
 			),
-			Ms:          []string{`"m"`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 13)),
+			Ms: []string{`"m"`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// zero or one expression
 		{`A  = 'm'?`, &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 8),
+				setRuleNmIx(encodeBootstrap(t, 8), -1),
 				encodeMatcher(t, 0), // 4: 'm'
 				encodeOption(t, 8, 4),
 			),
-			Ms:          []string{`"m"`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 12)),
+			Ms: []string{`"m"`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// rule ref expression
 		{"A = B\nB = 'm'", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 4),
-				encodeRuleRef(t, 9),
-				encodeMatcher(t, 0), // 9: 'm'
+				setRuleNmIx(encodeBootstrap(t, 4), -1),
+				setRuleNmIx(encodeRuleRef(t, 9), 0),
+				setRuleNmIx(encodeMatcher(t, 0), 1), // 9: 'm'
 			),
-			Ms:          []string{`"m"`},
-			Ss:          []string{"A", "B"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 5), rpt(1, 4)),
+			Ms: []string{`"m"`},
+			Ss: []string{"A", "B"},
 		}, nil},
 
 		// and expression
 		{"A = &'m'", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 8),
+				setRuleNmIx(encodeBootstrap(t, 8), -1),
 				encodeMatcher(t, 0), // 4: 'm'
 				encodePredicate(t, true, 4),
 			),
-			Ms:          []string{`"m"`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 12)),
+			Ms: []string{`"m"`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// not expression
 		{"A = !'m'", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 8),
+				setRuleNmIx(encodeBootstrap(t, 8), -1),
 				encodeMatcher(t, 0), // 4: 'm'
 				encodePredicate(t, false, 4),
 			),
-			Ms:          []string{`"m"`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 12)),
+			Ms: []string{`"m"`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// and code expression
 		{"A = &{x}", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 4),
+				setRuleNmIx(encodeBootstrap(t, 4), -1),
 				encodeCodePredicate(t, true, 0),
 			),
 			Ss: []string{"A"},
@@ -188,13 +175,12 @@ func TestGenerateProgram(t *testing.T) {
 				Code:   "x",
 				ExprIx: 1,
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 3)),
 		}, nil},
 
 		// not code expression
 		{"A = !{x}", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 4),
+				setRuleNmIx(encodeBootstrap(t, 4), -1),
 				encodeCodePredicate(t, false, 0),
 			),
 			Ss: []string{"A"},
@@ -203,25 +189,23 @@ func TestGenerateProgram(t *testing.T) {
 				Code:   "x",
 				ExprIx: 1,
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 3)),
 		}, nil},
 
 		// labeled expression
 		{"A = label:'m'", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 8),
+				setRuleNmIx(encodeBootstrap(t, 8), -1),
 				encodeMatcher(t, 0), // 4: 'm'
 				encodeLabel(t, 1, 4),
 			),
-			Ms:          []string{`"m"`},
-			Ss:          []string{"A", "label"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 10)),
+			Ms: []string{`"m"`},
+			Ss: []string{"A", "label"},
 		}, nil},
 
 		// action expression
 		{"A = 'm' {x}", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 8),
+				setRuleNmIx(encodeBootstrap(t, 8), -1),
 				encodeMatcher(t, 0), // 4: 'm'
 				encodeAction(t, 8, 0, 4),
 			),
@@ -232,13 +216,12 @@ func TestGenerateProgram(t *testing.T) {
 				ExprIx: 1,
 				Code:   "x",
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 12)),
 		}, nil},
 
 		// label+action expression
 		{"A = label:'m' {x}", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 14),
+				setRuleNmIx(encodeBootstrap(t, 14), -1),
 				encodeMatcher(t, 0),  // 4: 'm'
 				encodeLabel(t, 1, 4), // 8
 				encodeAction(t, 14, 0, 8),
@@ -251,13 +234,12 @@ func TestGenerateProgram(t *testing.T) {
 				ExprIx: 1,
 				Code:   "x",
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 18)),
 		}, nil},
 
 		// multi-label+action expression
 		{"A = l1:'m' l2:'n' {x}", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 35),
+				setRuleNmIx(encodeBootstrap(t, 35), -1),
 				encodeMatcher(t, 0),          // 4: 'm'
 				encodeLabel(t, 1, 4),         // 8: l1
 				encodeMatcher(t, 1),          // 14: 'n'
@@ -273,13 +255,12 @@ func TestGenerateProgram(t *testing.T) {
 				ExprIx: 1,
 				Code:   "x",
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 39)),
 		}, nil},
 
 		// choice resets the params
 		{"A = l1:'m' / l2:'n' {x}", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 32),
+				setRuleNmIx(encodeBootstrap(t, 32), -1),
 				encodeMatcher(t, 0),        // 4: 'm'
 				encodeLabel(t, 1, 4),       // 8: l1
 				encodeMatcher(t, 1),        // 14: 'n'
@@ -295,13 +276,12 @@ func TestGenerateProgram(t *testing.T) {
 				ExprIx: 4,
 				Code:   "x",
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 39)),
 		}, nil},
 
 		// scope of params
 		{"A = l1:'m' l2:(l3:'n' {y}) {x}", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 49),
+				setRuleNmIx(encodeBootstrap(t, 49), -1),
 				encodeMatcher(t, 0),          // 4: 'm'
 				encodeLabel(t, 1, 4),         // 8: l1
 				encodeMatcher(t, 1),          // 14: 'n'
@@ -324,13 +304,12 @@ func TestGenerateProgram(t *testing.T) {
 				ExprIx: 1,
 				Code:   "x",
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 53)),
 		}, nil},
 
 		// code predicates have access to params too
 		{"A = l1:'m' / l2:'n' &{x} l3:'o' {y}", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 57),
+				setRuleNmIx(encodeBootstrap(t, 56), -1),
 				encodeMatcher(t, 0),               // 4: 'm'
 				encodeLabel(t, 1, 4),              // 8: l1
 				encodeMatcher(t, 1),               // 14: 'n'
@@ -339,8 +318,8 @@ func TestGenerateProgram(t *testing.T) {
 				encodeMatcher(t, 2),               // 27: 'o'
 				encodeLabel(t, 3, 27),             // 31: l3
 				encodeSequence(t, 37, 18, 24, 31), // 37
-				encodeAction(t, 49, 0, 37),        // 49
-				encodeChoice(t, 57, 8, 49),        // 57
+				encodeAction(t, 48, 0, 37),        // 48
+				encodeChoice(t, 56, 8, 48),        // 56
 			),
 			Ms: []string{`"m"`, `"n"`, `"o"`},
 			Ss: []string{"A", "l1", "l2", "l3"},
@@ -356,50 +335,47 @@ func TestGenerateProgram(t *testing.T) {
 				ExprIx: 8,
 				Code:   "x",
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 64)),
 		}, nil},
 
 		// normalization of matchers
 		{"A = `m` 'm' `m`i", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 16),
+				setRuleNmIx(encodeBootstrap(t, 16), -1),
 				encodeMatcher(t, 0), // 4: 'm'
 				encodeMatcher(t, 0), // 8: 'm'
 				encodeMatcher(t, 1), // 12: 'm'i
 				encodeSequence(t, 16, 4, 8, 12),
 			),
-			Ms:          []string{`"m"`, `"m"i`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 24)),
+			Ms: []string{`"m"`, `"m"i`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// test char class and any matchers
 		{"A = [a-z] .", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 12),
+				setRuleNmIx(encodeBootstrap(t, 12), -1),
 				encodeMatcher(t, 0), // 4: [a-z]
 				encodeMatcher(t, 1), // 8: .
 				encodeSequence(t, 12, 4, 8),
 			),
-			Ms:          []string{`[a-z]`, `.`},
-			Ss:          []string{"A"},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 19)),
+			Ms: []string{`[a-z]`, `.`},
+			Ss: []string{"A"},
 		}, nil},
 
 		// action with a sequence of 4 (the grammar's Grammar rule bug)
 		{"A = B C D E {x}\nB = 'b'\nC = 'c'\nD = 'd'\nE = 'e'", &testProgram{
 			Instrs: combineInstrs(
-				encodeBootstrap(t, 36),
-				encodeRuleRef(t, 44),                // 4
-				encodeRuleRef(t, 48),                // 9
-				encodeRuleRef(t, 52),                // 14
-				encodeRuleRef(t, 56),                // 19
+				setRuleNmIx(encodeBootstrap(t, 35), -1),
+				encodeRuleRef(t, 43),                // 4
+				encodeRuleRef(t, 47),                // 9
+				encodeRuleRef(t, 51),                // 14
+				encodeRuleRef(t, 55),                // 19
 				encodeSequence(t, 24, 4, 9, 14, 19), // 24
-				encodeAction(t, 36, 0, 24),          // 36
-				encodeMatcher(t, 0),                 // 44
-				encodeMatcher(t, 1),                 // 48
-				encodeMatcher(t, 2),                 // 52
-				encodeMatcher(t, 3),                 // 56
+				encodeAction(t, 35, 0, 24),          // 35
+				setRuleNmIx(encodeMatcher(t, 0), 1), // 43
+				setRuleNmIx(encodeMatcher(t, 1), 2), // 47
+				setRuleNmIx(encodeMatcher(t, 2), 3), // 51
+				setRuleNmIx(encodeMatcher(t, 3), 4), // 55
 			),
 			Ms: []string{`"b"`, `"c"`, `"d"`, `"e"`},
 			Ss: []string{"A", "B", "C", "D", "E"},
@@ -408,7 +384,6 @@ func TestGenerateProgram(t *testing.T) {
 				ExprIx: 1,
 				Code:   "x",
 			}},
-			InstrToRule: combineInts(rpt(-1, 4), rpt(0, 40), rpt(1, 4), rpt(2, 4), rpt(3, 4), rpt(4, 4)),
 		}, nil},
 	}
 
@@ -441,20 +416,12 @@ func TestGenerateProgram(t *testing.T) {
 	}
 }
 
-func combineInts(ints ...[]int) []int {
-	var ret []int
-	for _, ar := range ints {
-		ret = append(ret, ar...)
+func setRuleNmIx(instrs []ϡinstr, ix int) []ϡinstr {
+	for i, ins := range instrs {
+		ins.ruleNmIx = ix
+		instrs[i] = ins
 	}
-	return ret
-}
-
-func rpt(n, x int) []int {
-	ret := make([]int, x)
-	for i := 0; i < x; i++ {
-		ret[i] = n
-	}
-	return ret
+	return instrs
 }
 
 func combineInstrs(instrs ...[]ϡinstr) []ϡinstr {
@@ -488,19 +455,15 @@ func encodeMatcher(t *testing.T, mIx uint16) []ϡinstr {
 }
 
 func encodeSequence(t *testing.T, start uint16, ls ...uint16) []ϡinstr {
-	var delta uint16
-	if len(ls) > 2 {
-		delta += uint16(math.Ceil(float64(len(ls)-2) / 4.0))
-	}
 	return []ϡinstr{
 		mustEncodeInstr(t, ϡopPush, ϡpstackID),
 		mustEncodeInstr(t, ϡopPush, ϡvstackID, ϡvValFailed),
 		mustEncodeInstr(t, ϡopPush, append([]uint16{ϡlstackID}, ls...)...),
-		mustEncodeInstr(t, ϡopTakeLOrJump, start+8+delta),
+		mustEncodeInstr(t, ϡopTakeLOrJump, start+8),
 		mustEncodeInstr(t, ϡopCall),
 		mustEncodeInstr(t, ϡopCumulOrF),
-		mustEncodeInstr(t, ϡopJumpIfF, start+8+delta),
-		mustEncodeInstr(t, ϡopJump, start+3+delta),
+		mustEncodeInstr(t, ϡopJumpIfF, start+8),
+		mustEncodeInstr(t, ϡopJump, start+3),
 		mustEncodeInstr(t, ϡopPop, ϡlstackID),
 		mustEncodeInstr(t, ϡopRestoreIfF),
 		mustEncodeInstr(t, ϡopReturn),

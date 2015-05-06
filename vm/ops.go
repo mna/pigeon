@@ -1,6 +1,9 @@
 package vm
 
-import "strconv"
+import (
+	"bytes"
+	"strconv"
+)
 
 //+pigeon: ops.go
 
@@ -62,6 +65,30 @@ func (op ϡop) String() string {
 // ϡinstr holds a single instruction: an opcode with its arguments.
 type ϡinstr struct {
 	op       ϡop
-	ruleNmIx uint16
+	ruleNmIx int // because bootstrap instructions have rule index -1
 	args     []uint16
+}
+
+// String returns the string representation of the instruction.
+func (ins ϡinstr) String() string {
+	var buf bytes.Buffer
+
+	buf.WriteString("{" + strconv.Itoa(int(ins.op)) + ", " +
+		strconv.Itoa(int(ins.ruleNmIx)) + ", ")
+
+	if len(ins.args) > 0 {
+		buf.WriteString("[]uint16{")
+		for i, arg := range ins.args {
+			if i > 0 {
+				buf.WriteString(", ")
+			}
+			buf.WriteString(strconv.Itoa(int(arg)))
+		}
+		buf.WriteString("}")
+	} else {
+		buf.WriteString("nil")
+	}
+
+	buf.WriteString("}")
+	return buf.String()
 }

@@ -105,8 +105,8 @@ func (pg ϡprogram) instrToString(instr ϡinstr) string {
 // ruleNameAt returns the name of the rule that contains the instruction
 // index. It returns an empty string is the instruction is not part of a
 // rule (bootstrap instruction, invalid index).
-func (pg ϡprogram) ruleNameAt(ix uint16) string {
-	if ix < 0 || ix >= uint16(len(pg.ss)) {
+func (pg ϡprogram) ruleNameAt(ix int) string {
+	if ix < 0 || ix >= len(pg.ss) {
 		return ""
 	}
 	return pg.ss[ix]
@@ -169,7 +169,7 @@ func (v *ϡvm) addErrAt(err error, ruleNmIx int, pos position) {
 	}
 	buf.WriteString(fmt.Sprintf("%s", pos))
 
-	ruleNm := v.pg.ruleNameAt(uint16(ruleNmIx))
+	ruleNm := v.pg.ruleNameAt(ruleNmIx)
 	if ruleNm != "" {
 		buf.WriteString(": ")
 		buf.WriteString("rule " + ruleNm)

@@ -31,10 +31,7 @@ func (v *ϡvm) callOn{{.RuleNm}}{{.ExprIx}}() (bool, error) {
 {{end}}
 var ϡtheProgram = &ϡprogram{
 instrs: []ϡinstr{
-{{range $index, $elem := .Instrs}}{{if (not (mod $index 3))}}{{printf "\n"}}{{end}}{{$elem}}, {{end}}
-},
-instrToRule: []int{
-{{range $index, $elem := .InstrToRule}}{{if (not (mod $index 10))}}{{printf "\n"}}{{end}}{{$elem}}, {{end}}
+{{range $index, $elem := .Instrs}}{{if (not (mod $index 2))}}{{printf "\n"}}{{end}}{{$elem.String}}, {{end}}
 },
 ss: []string{
 {{range $index, $elem := .Ss}}{{if (not (mod $index 3))}}{{printf "\n"}}{{end}}{{printf "%q" $elem}}, {{end}}
