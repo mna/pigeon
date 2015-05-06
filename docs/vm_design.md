@@ -10,8 +10,8 @@ The goals of this reimplementation, in no particular order, are:
 ✗ More memory-efficient implementation : failed, uses more memory than the recursive approach.
 ✗ Better performance : failed, about 2-2.5x slower than the recursive approach, but a VM is definitely optimizable.
 * Better error reporting with the "farthest failure position" technique.
-* Less code, though not at the expense of readability (should still be simple code).
-* Better isolation of implementation details vs exposed API, using a prefix to avoid clashes with user code for internal symbols.
+~ Less code, though not at the expense of readability (should still be simple code) : about the same number of lines as in the recursive approach, though the static code (minus the program and the custom code + thunks) is only ~1000 lines. Still simple (simpler?) and relatively clean code.
+✓ Better isolation of implementation details vs exposed API, using a prefix to avoid clashes with user code for internal symbols : goal achieve, though this could've been done in the recursive approach too.
 
 ## Overview
 
