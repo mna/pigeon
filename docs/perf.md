@@ -9,6 +9,7 @@
 
 * 6be069a : change parser.peek to return a rune instead of the svpt struct.
 * cffe69a : use decoded instruction (struct instead of encoded uint64).
+* 45748c0 : add basic memoization (for matchers).
 
 // Commit df3f721 (recursive)
 BenchmarkParseUnicodeClass         10000            169352 ns/op           15013 B/op        234 allocs/op
@@ -33,6 +34,10 @@ BenchmarkParseKeyword               3000            579195 ns/op          195856
 // Commit cffe69a
 BenchmarkParseUnicodeClass          2000            670882 ns/op          105810 B/op       1949 allocs/op
 BenchmarkParseKeyword               3000            432649 ns/op           68926 B/op       1204 allocs/op
+
+// Commit 45748c0
+BenchmarkParseUnicodeClass          2000            696996 ns/op          105809 B/op       1949 allocs/op
+BenchmarkParseKeyword               3000            448947 ns/op           68926 B/op       1204 allocs/op
 
 
 
@@ -60,6 +65,11 @@ BenchmarkParsePigeonMemo              10         117390138 ns/op        80393633
 BenchmarkParsePigeonNoMemo            20          89610719 ns/op        25281650 B/op     458273 allocs/op
 BenchmarkParsePigeonMemo              20          88681471 ns/op        25281651 B/op     458273 allocs/op
 
+// Commit 45748c0
+BenchmarkParsePigeonNoMemo            20          89316501 ns/op        25257458 B/op     456672 allocs/op
+BenchmarkParsePigeonMemo              10         115600578 ns/op        31635014 B/op     450986 allocs/op
+
+
 
 // Commit df3f721 (recursive)
 BenchmarkPigeonJSONNoMemo             50          25212587 ns/op         3328296 B/op      86105 allocs/op
@@ -85,6 +95,11 @@ BenchmarkPigeonJSONMemo               20          77146195 ns/op        52533188
 BenchmarkPigeonJSONNoMemo             20          60564462 ns/op        18194950 B/op     371580 allocs/op
 BenchmarkPigeonJSONMemo               20          61545542 ns/op        18195112 B/op     371580 allocs/op
 
+// Commit 45748c0
+BenchmarkPigeonJSONNoMemo             20          60906362 ns/op        18195253 B/op     371581 allocs/op
+BenchmarkPigeonJSONMemo               10         112160756 ns/op        31246513 B/op     415857 allocs/op
+
+
 
 // Commit df3f721 (recursive)
 BenchmarkPigeonCalculatorNoMemo    10000            169574 ns/op           17958 B/op        390 allocs/op
@@ -101,6 +116,10 @@ BenchmarkPigeonCalculatorMemo       3000            426319 ns/op          155104
 // Commit cffe69a
 BenchmarkPigeonCalculatorNoMemo     5000            389739 ns/op           64723 B/op       1224 allocs/op
 BenchmarkPigeonCalculatorMemo       5000            389930 ns/op           64723 B/op       1224 allocs/op
+
+// Commit 45748c0
+BenchmarkPigeonCalculatorNoMemo     5000            382203 ns/op           64722 B/op       1224 allocs/op
+BenchmarkPigeonCalculatorMemo       3000            482778 ns/op           92923 B/op       1356 allocs/op
 
 
 // Go1.4 stdlib
