@@ -120,6 +120,7 @@ type program struct {
 	ruleNmIx      uint16
 	exprIx        uint16
 	parmsSet      [][]string        // stack of parms set for code blocks
+	parmsSetMap   []map[string]bool // stack of sets of existing parms, to detect duplicates
 	ruleNmStartIx map[uint16]uint16 // rule name ix to first rule instr ix
 	ruleNmEntryIx map[uint16]uint16 // rule name ix to entry point instr ix
 	ruleNmToDisNm map[uint16]uint16 // rule name ix to rule display name ix
@@ -127,10 +128,12 @@ type program struct {
 
 func (pg *program) pushParmsSet() {
 	pg.parmsSet = append(pg.parmsSet, nil)
+	pg.parmsSetMap = append(pg.parmsSetMap, nil)
 }
 
 func (pg *program) popParmsSet() {
 	pg.parmsSet = pg.parmsSet[:len(pg.parmsSet)-1]
+	pg.parmsSetMap = pg.parmsSetMap[:len(pg.parmsSetMap)-1]
 }
 
 func (pg *program) peekParmsSet() []string {
@@ -139,6 +142,13 @@ func (pg *program) peekParmsSet() []string {
 
 func (pg *program) pushParm(v string) {
 	ix := len(pg.parmsSet) - 1
+	if pg.parmsSetMap[ix] == nil {
+		pg.parmsSetMap[ix] = make(map[string]bool)
+	}
+	if pg.parmsSetMap[ix][v] {
+		panic(fmt.Sprintf("duplicate label %q", v))
+	}
+	pg.parmsSetMap[ix][v] = true
 	pg.parmsSet[ix] = append(pg.parmsSet[ix], v)
 }
 

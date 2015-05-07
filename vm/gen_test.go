@@ -54,6 +54,9 @@ func TestGenerateProgram(t *testing.T) {
 		// missing rule
 		{"A = B", nil, errors.New(`undefined rule "B"`)},
 
+		// duplicate label
+		{"A = l1:'a' l1:'b'", nil, errors.New(`duplicate label "l1"`)},
+
 		// matcher expression
 		{"A = 'm'", &testProgram{
 			Instrs: combineInstrs(
