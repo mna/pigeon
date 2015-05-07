@@ -53,6 +53,7 @@ var ϡvSpecialValues = []interface{}{
 	[]interface{}(nil),
 }
 
+// ϡmemoizedResult holds the state required to reuse a memoized result.
 type ϡmemoizedResult struct {
 	v  interface{}
 	pt ϡsvpt
@@ -138,6 +139,12 @@ type ϡvm struct {
 	// memoized results: by instruction index, then by byte offset
 	memo map[uint16]map[int]ϡmemoizedResult
 	// TODO: farthest failure position
+
+	// stats
+	matchCnt    int
+	callCnt     int
+	actionCnt   int
+	codePredCnt int
 
 	// error list
 	errs errList
@@ -339,6 +346,7 @@ func (v *ϡvm) dispatch() interface{} {
 	}
 
 	if v.recover {
+		// if recover is set, recover from panics and convert to error.
 		defer func() {
 			if e := recover(); e != nil {
 				ruleIx := -1
@@ -373,6 +381,7 @@ func (v *ϡvm) dispatch() interface{} {
 			ix := v.i.pop()
 			v.i.push(v.pc)
 			v.pc = ix
+			v.callCnt++
 
 		case ϡopCallA:
 			if v.debug {
@@ -391,6 +400,7 @@ func (v *ϡvm) dispatch() interface{} {
 				v.addErrAt(err, int(instr.ruleNmIx), start.position)
 			}
 			v.v.push(val)
+			v.actionCnt++
 
 		case ϡopCallB:
 			if v.debug {
@@ -406,6 +416,7 @@ func (v *ϡvm) dispatch() interface{} {
 			if err != nil {
 				v.addErrAt(err, int(instr.ruleNmIx), v.parser.pt.position)
 			}
+			v.codePredCnt++
 			if !val {
 				v.v.push(ϡmatchFailed)
 				break
@@ -430,20 +441,6 @@ func (v *ϡvm) dispatch() interface{} {
 
 		case ϡopExit:
 			return v.v.pop()
-
-		case ϡopNilIfF:
-			if top := v.v.pop(); top == ϡmatchFailed {
-				v.v.push(nil)
-				break
-			}
-			v.v.push(ϡmatchFailed)
-
-		case ϡopNilIfT:
-			if top := v.v.pop(); top != ϡmatchFailed {
-				v.v.push(nil)
-				break
-			}
-			v.v.push(ϡmatchFailed)
 
 		case ϡopJump:
 			v.pc = instr.args[0]
@@ -472,6 +469,7 @@ func (v *ϡvm) dispatch() interface{} {
 			if v.memoize {
 				v.memoizeMatch(v.pc-1, start, ok)
 			}
+			v.matchCnt++
 			if ok {
 				v.v.push(v.parser.sliceFrom(start))
 				break
@@ -482,6 +480,20 @@ func (v *ϡvm) dispatch() interface{} {
 			if v.debug {
 				v.dumpSnapshot(os.Stderr)
 			}
+
+		case ϡopNilIfF:
+			if top := v.v.pop(); top == ϡmatchFailed {
+				v.v.push(nil)
+				break
+			}
+			v.v.push(ϡmatchFailed)
+
+		case ϡopNilIfT:
+			if top := v.v.pop(); top != ϡmatchFailed {
+				v.v.push(nil)
+				break
+			}
+			v.v.push(ϡmatchFailed)
 
 		case ϡopPop:
 			switch instr.args[0] {

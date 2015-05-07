@@ -126,7 +126,17 @@ func TestMemoization(t *testing.T) {
 	in := " 2 + 35 * ( 18 - -4 / ( 5 + 1) ) * 456 + -1"
 	want := 287281
 
-	got, err := Parse("", []byte(in), Memoize(false))
+	p := &ϡparser{
+		data: []byte(in),
+		pt:   ϡsvpt{position: position{line: 1}},
+	}
+	v := &ϡvm{
+		parser:  p,
+		recover: true,
+		memoize: false,
+	}
+
+	got, err := v.run(ϡtheProgram)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,12 +144,18 @@ func TestMemoization(t *testing.T) {
 	if goti != want {
 		t.Errorf("want %d, got %d", want, goti)
 	}
-	// TODO : stats & memoize
-	// if p.exprCnt != 415 {
-	// 	t.Errorf("with Memoize=false, want %d expressions evaluated, got %d", 415, p.exprCnt)
-	// }
 
-	got, err = Parse("", []byte(in), Memoize(true))
+	if v.matchCnt != 124 {
+		t.Errorf("with Memoize=false, want %d matches, got %d", 124, v.matchCnt)
+	}
+
+	p.pt = ϡsvpt{position: position{line: 1}}
+	v = &ϡvm{
+		parser:  p,
+		recover: true,
+		memoize: true,
+	}
+	got, err = v.run(ϡtheProgram)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,9 +163,9 @@ func TestMemoization(t *testing.T) {
 	if goti != want {
 		t.Errorf("want %d, got %d", want, goti)
 	}
-	// if p.exprCnt != 389 {
-	// 	t.Errorf("with Memoize=true, want %d expressions evaluated, got %d", 389, p.exprCnt)
-	// }
+	if v.matchCnt != 108 {
+		t.Errorf("with Memoize=true, want %d matches, got %d", 108, v.matchCnt)
+	}
 }
 
 func BenchmarkPigeonCalculatorNoMemo(b *testing.B) {
