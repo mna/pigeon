@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -501,14 +502,12 @@ func (g *Generator) fillPlaceholders() {
 		}
 		buf.WriteString(" ")
 
-		comma := false
+		rules := make([]string, 0, len(g.pg.ruleNmEntryIx))
 		for ix := range g.pg.ruleNmEntryIx {
-			if comma {
-				buf.WriteString(", ")
-			}
-			buf.WriteString(fmt.Sprintf("%q", g.pg.Ss[ix]))
-			comma = true
+			rules = append(rules, fmt.Sprintf("%q", g.pg.Ss[ix]))
 		}
+		sort.Strings(rules)
+		buf.WriteString(strings.Join(rules, ", "))
 		panic(buf.String())
 	}
 }
