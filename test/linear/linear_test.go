@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"testing"
 	"time"
@@ -21,9 +22,10 @@ func TestLinearTime(t *testing.T) {
 		10 << 10,  // 10Kb
 		100 << 10, // 100Kb
 		1 << 20,   // 1MB
-		10 << 20,  // 10MB
+		//10 << 20,  // 10MB
 	}
 	for _, sz := range sizes {
+		buf.Reset()
 		r := io.LimitReader(rand.Reader, sz)
 		enc := base64.NewEncoder(base64.StdEncoding, &buf)
 		_, err := io.Copy(enc, r)
@@ -32,6 +34,9 @@ func TestLinearTime(t *testing.T) {
 		}
 		enc.Close()
 
+		if testing.Verbose() {
+			fmt.Printf("starting with %dKB...\n", sz/1024)
+		}
 		start := time.Now()
 		if _, err := Parse("", buf.Bytes(), Memoize(true)); err != nil {
 			t.Fatal(err)
