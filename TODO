@@ -1,4 +1,3 @@
 - run tests with go-fuzz as input (https://github.com/dvyukov/go-fuzz)
-- all tests in test/ dir can be rewritten with bootstrap.Parse and vm.Run?
 ? options like current receiver name read directly from the grammar file
 ? type annotations for generated code functions
