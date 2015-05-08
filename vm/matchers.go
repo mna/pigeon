@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
 	"unicode"
@@ -20,6 +19,7 @@ type ϡpeekReader interface {
 // ϡmatcher is the interface that defines the match method.
 type ϡmatcher interface {
 	match(ϡpeekReader) bool
+	toDisplayMsg() string
 }
 
 // ϡanyMatcher is a matcher that matches any character but the
@@ -31,6 +31,10 @@ func (a ϡanyMatcher) match(pr ϡpeekReader) bool {
 	rn := pr.peek()
 	pr.read()
 	return rn != utf8.RuneError
+}
+
+func (a ϡanyMatcher) toDisplayMsg() string {
+	return "<any>"
 }
 
 func (a ϡanyMatcher) String() string {
@@ -47,15 +51,19 @@ type ϡstringMatcher struct {
 func (s ϡstringMatcher) match(pr ϡpeekReader) bool {
 	for _, want := range s.value {
 		rn := pr.peek()
+		pr.read()
 		if s.ignoreCase {
 			rn = unicode.ToLower(rn)
 		}
 		if rn != want {
 			return false
 		}
-		pr.read()
 	}
 	return true
+}
+
+func (s ϡstringMatcher) toDisplayMsg() string {
+	return s.String()
 }
 
 func (s ϡstringMatcher) String() string {
@@ -68,6 +76,7 @@ func (s ϡstringMatcher) String() string {
 
 // ϡcharClassMatcher is a matcher that matches classes of characters.
 type ϡcharClassMatcher struct {
+	raw     string
 	chars   []rune // runes must be lowercase if ignoreCase is true
 	ranges  []rune // same for ranges
 	classes []*unicode.RangeTable
@@ -76,28 +85,12 @@ type ϡcharClassMatcher struct {
 	inverted   bool
 }
 
-func (c ϡcharClassMatcher) String() string {
-	var buf bytes.Buffer
+func (c ϡcharClassMatcher) toDisplayMsg() string {
+	return c.raw
+}
 
-	buf.WriteString("[")
-	if c.inverted {
-		buf.WriteString("^")
-	}
-	for _, c := range c.chars {
-		buf.WriteRune(c)
-	}
-	for i := 0; i < len(c.ranges); i += 2 {
-		buf.WriteString(fmt.Sprintf("%c-%c", c.ranges[i], c.ranges[i+1]))
-	}
-	// unicode classes can't be stringified
-	if l := len(c.classes); l > 0 {
-		buf.WriteString(fmt.Sprintf("\\p{%d classes}", l))
-	}
-	buf.WriteString("]")
-	if c.ignoreCase {
-		buf.WriteString("i")
-	}
-	return buf.String()
+func (c ϡcharClassMatcher) String() string {
+	return c.raw
 }
 
 // match tries to match classes of characters in the peekReader.

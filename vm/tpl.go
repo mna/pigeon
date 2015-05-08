@@ -75,7 +75,7 @@ var funcMap = template.FuncMap{
 				}
 			}
 			var buf bytes.Buffer
-			buf.WriteString(fmt.Sprintf("ϡcharClassMatcher{\nignoreCase: %t,\ninverted: %t,\nchars: []rune{", m.IgnoreCase, m.Inverted))
+			buf.WriteString(fmt.Sprintf("ϡcharClassMatcher{\nraw: %q,\nignoreCase: %t,\ninverted: %t,\nchars: []rune{", m.Val, m.IgnoreCase, m.Inverted))
 			for i, rn := range m.Chars {
 				if i > 0 {
 					buf.WriteString(", ")

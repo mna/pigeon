@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"errors"
 	"io/ioutil"
 	"reflect"
 	"strings"
@@ -11,6 +12,68 @@ import (
 	"github.com/PuerkitoBio/pigeon/bootstrap"
 )
 
+func TestFFP(t *testing.T) {
+	cases := []struct {
+		grammar string
+		input   string
+		errMsg  string
+	}{
+		{`A = .`, "", `1:0 (0): rule A: expected <any>, got ""`},
+		{`A "Z" = .`, "", `1:0 (0): rule Z: expected <any>, got ""`},
+		{`A = 'a'`, "", `1:0 (0): rule A: expected "a", got ""`},
+		{`A = 'a'`, "b", `1:1 (0): rule A: expected "a", got "b"`},
+		{`A = '\n'`, "b", `1:1 (0): rule A: expected "\n", got "b"`},
+		{`A = 'a'`, "bc", `1:1 (0): rule A: expected "a", got "b"`},
+		{`A = 'a'i`, "B", `1:1 (0): rule A: expected "a"i, got "B"`},
+		{`A = "a"`, "", `1:0 (0): rule A: expected "a", got ""`},
+		{`A = "a"`, "b", `1:1 (0): rule A: expected "a", got "b"`},
+		{`A = "\n"`, "b", `1:1 (0): rule A: expected "\n", got "b"`},
+		{`A = "a"`, "bc", `1:1 (0): rule A: expected "a", got "b"`},
+		{`A = "ab"`, "a", `1:1 (0): rule A: expected "ab", got "a"`},
+		{`A = "ab"`, "ac", `1:1 (0): rule A: expected "ab", got "ac"`},
+		{`A = "ab"i`, "AC", `1:1 (0): rule A: expected "ab"i, got "AC"`},
+		{`A = "ab"i`, "ACD", `1:1 (0): rule A: expected "ab"i, got "AC"`},
+		{`A = [a]`, "", `1:0 (0): rule A: expected [a], got ""`},
+		{`A = [a]`, "b", `1:1 (0): rule A: expected [a], got "b"`},
+		{`A = [a-c]`, "d", `1:1 (0): rule A: expected [a-c], got "d"`},
+		{`A = [a-c]i`, "D", `1:1 (0): rule A: expected [a-c]i, got "D"`},
+		{`A = [^a-c]i`, "C", `1:1 (0): rule A: expected [^a-c]i, got "C"`},
+		{`A = [\n\pL]`, "=", `1:1 (0): rule A: expected [\n\pL], got "="`},
+		{`A = [\p{Latin}]`, "=", `1:1 (0): rule A: expected [\p{Latin}], got "="`},
+
+		// TODO : for choices, would be interesting to list all alternatives
+		{`A = 'a' / 'b'`, "", `1:0 (0): rule A: expected "a", got ""`},
+		{`A = 'a' &'b'`, "a", `1:1 (1): rule A: expected "b", got ""`},
+		// TODO : in this case there's no match failure, but the ! failure
+		// could be recorded as ffp.
+		{`A = 'a' !'b'`, "ab", `1:1 (0): ` + errNoMatch.Error()},
+	}
+	for i, tc := range cases {
+		gr, err := bootstrap.NewParser().Parse("", strings.NewReader(tc.grammar))
+		if err != nil {
+			t.Errorf("%d: parse error: %v", i, err)
+			continue
+		}
+
+		pg, err := NewGenerator(ioutil.Discard).toProgram(gr)
+		if err != nil {
+			t.Errorf("%d: generate error: %v", i, err)
+			continue
+		}
+
+		ϡtheProgram = toϡprogram(t, pg, amockRetCode, bmockRetTrueIfT)
+		_, err = Parse("", []byte(tc.input), Debug(testing.Verbose()), Recover(false))
+		if err == nil {
+			t.Errorf("%d: want error %s, got none", i, tc.errMsg)
+			continue
+		}
+		if err.Error() != tc.errMsg {
+			t.Errorf("%d: want \n%s\ngot\n%s", i, tc.errMsg, err)
+			continue
+		}
+	}
+}
+
 func TestRun(t *testing.T) {
 	cases := []struct {
 		grammar string
@@ -19,9 +82,9 @@ func TestRun(t *testing.T) {
 		err     error
 	}{
 		{`A = 'a'`, "a", []byte("a"), nil},
-		{`A = 'a'`, "b", nil, errNoMatch},
-		{`A = "ab"`, "a", nil, errNoMatch},
-		{`A = "ab"`, "b", nil, errNoMatch},
+		{`A = 'a'`, "b", nil, errors.New(`expected "a", got "b"`)},
+		{`A = "ab"`, "a", nil, errors.New(`expected "ab", got "a"`)},
+		{`A = "ab"`, "b", nil, errors.New(`expected "ab", got "b"`)},
 		{`A = "ab"`, "ab", []byte("ab"), nil},
 		{`A = "ab"`, "abb", []byte("ab"), nil},
 
@@ -33,11 +96,11 @@ func TestRun(t *testing.T) {
 		{`A = 'a'*`, "baa", []interface{}(nil), nil},
 
 		//{`A = ""+`, "", []interface{}{}, nil}, // empty string always matches, infinite loop
-		{`A = 'a'+`, "", nil, errNoMatch},
+		{`A = 'a'+`, "", nil, errors.New(`expected "a", got ""`)},
 		{`A = 'a'+`, "a", []interface{}{[]byte("a")}, nil},
 		{`A = 'a'+`, "aa", []interface{}{[]byte("a"), []byte("a")}, nil},
 		{`A = 'a'+`, "aab", []interface{}{[]byte("a"), []byte("a")}, nil},
-		{`A = 'a'+`, "baa", nil, errNoMatch},
+		{`A = 'a'+`, "baa", nil, errors.New(`expected "a", got "b"`)},
 
 		{`A = ""?`, "", []byte(""), nil},
 		{`A = ""?`, "a", []byte(""), nil},
@@ -47,59 +110,59 @@ func TestRun(t *testing.T) {
 		{`A = 'a'?`, "aab", []byte("a"), nil},
 		{`A = 'a'?`, "baa", nil, nil},
 
-		{`A = 'a' 'b'`, "", nil, errNoMatch},
-		{`A = 'a' 'b'`, "a", nil, errNoMatch},
+		{`A = 'a' 'b'`, "", nil, errors.New(`expected "a", got ""`)},
+		{`A = 'a' 'b'`, "a", nil, errors.New(`expected "b", got ""`)},
 		{`A = 'a' 'b'`, "ab", []interface{}{[]byte("a"), []byte("b")}, nil},
-		{`A = 'a' 'b'`, "aab", nil, errNoMatch},
-		{`A = 'a' 'b'`, "baa", nil, errNoMatch},
+		{`A = 'a' 'b'`, "aab", nil, errors.New(`expected "b", got "a"`)},
+		{`A = 'a' 'b'`, "baa", nil, errors.New(`expected "a", got "b"`)},
 
-		{`A = 'a' / 'b'`, "", nil, errNoMatch},
+		{`A = 'a' / 'b'`, "", nil, errors.New(`expected "a", got ""`)},
 		{`A = 'a' / 'b'`, "a", []byte("a"), nil},
 		{`A = 'a' / 'b'`, "ab", []byte("a"), nil},
 		{`A = 'a' / 'b'`, "aab", []byte("a"), nil},
 		{`A = 'a' / 'b'`, "baa", []byte("b"), nil},
 
-		{"A = B\nB= 'a'", "", nil, errNoMatch},
+		{"A = B\nB= 'a'", "", nil, errors.New(`expected "a", got ""`)},
 		{"A = B\nB= 'a'", "a", []byte("a"), nil},
 		{"A = B\nB = 'a'", "ab", []byte("a"), nil},
 		{"A = B\nB = 'a'", "aab", []byte("a"), nil},
-		{"A = B\nB = 'a'", "baa", nil, errNoMatch},
+		{"A = B\nB = 'a'", "baa", nil, errors.New(`expected "a", got "b"`)},
 
-		{`A = 'a' &'b'`, "", nil, errNoMatch},
-		{`A = 'a' &'b'`, "a", nil, errNoMatch},
+		{`A = 'a' &'b'`, "", nil, errors.New(`expected "a", got ""`)},
+		{`A = 'a' &'b'`, "a", nil, errors.New(`expected "b", got ""`)},
 		{`A = 'a' &'b'`, "ab", []interface{}{[]byte("a"), nil}, nil},
-		{`A = 'a' &'b'`, "aab", nil, errNoMatch},
-		{`A = 'a' &'b'`, "baa", nil, errNoMatch},
+		{`A = 'a' &'b'`, "aab", nil, errors.New(`expected "b", got "a"`)},
+		{`A = 'a' &'b'`, "baa", nil, errors.New(`expected "a", got "b"`)},
 
-		{`A = 'a' !'b'`, "", nil, errNoMatch},
+		{`A = 'a' !'b'`, "", nil, errors.New(`expected "a", got ""`)},
 		{`A = 'a' !'b'`, "a", []interface{}{[]byte("a"), nil}, nil},
-		{`A = 'a' !'b'`, "ab", nil, errNoMatch},
+		{`A = 'a' !'b'`, "ab", nil, errNoMatch}, // TODO : error message...?
 		{`A = 'a' !'b'`, "aab", []interface{}{[]byte("a"), nil}, nil},
-		{`A = 'a' !'b'`, "baa", nil, errNoMatch},
+		{`A = 'a' !'b'`, "baa", nil, errors.New(`expected "a", got "b"`)},
 
-		{`A = 'a' &{T}`, "", nil, errNoMatch},
+		{`A = 'a' &{T}`, "", nil, errors.New(`expected "a", got ""`)},
 		{`A = 'a' &{T}`, "a", []interface{}{[]byte("a"), nil}, nil},
 		{`A = 'a' &{T}`, "ab", []interface{}{[]byte("a"), nil}, nil},
 		{`A = 'a' &{T}`, "aab", []interface{}{[]byte("a"), nil}, nil},
-		{`A = 'a' &{T}`, "baa", nil, errNoMatch},
+		{`A = 'a' &{T}`, "baa", nil, errors.New(`expected "a", got "b"`)},
 
-		{`A = 'a' &{F}`, "", nil, errNoMatch},
+		{`A = 'a' &{F}`, "", nil, errors.New(`expected "a", got ""`)},
 		{`A = 'a' &{F}`, "a", nil, errNoMatch},
 		{`A = 'a' &{F}`, "ab", nil, errNoMatch},
 		{`A = 'a' &{F}`, "aab", nil, errNoMatch},
-		{`A = 'a' &{F}`, "baa", nil, errNoMatch},
+		{`A = 'a' &{F}`, "baa", nil, errors.New(`expected "a", got "b"`)},
 
-		{`A = 'a' !{T}`, "", nil, errNoMatch},
+		{`A = 'a' !{T}`, "", nil, errors.New(`expected "a", got ""`)},
 		{`A = 'a' !{T}`, "a", nil, errNoMatch},
 		{`A = 'a' !{T}`, "ab", nil, errNoMatch},
 		{`A = 'a' !{T}`, "aab", nil, errNoMatch},
-		{`A = 'a' !{T}`, "baa", nil, errNoMatch},
+		{`A = 'a' !{T}`, "baa", nil, errors.New(`expected "a", got "b"`)},
 
-		{`A = 'a' !{F}`, "", nil, errNoMatch},
+		{`A = 'a' !{F}`, "", nil, errors.New(`expected "a", got ""`)},
 		{`A = 'a' !{F}`, "a", []interface{}{[]byte("a"), nil}, nil},
 		{`A = 'a' !{F}`, "ab", []interface{}{[]byte("a"), nil}, nil},
 		{`A = 'a' !{F}`, "aab", []interface{}{[]byte("a"), nil}, nil},
-		{`A = 'a' !{F}`, "baa", nil, errNoMatch},
+		{`A = 'a' !{F}`, "baa", nil, errors.New(`expected "a", got "b"`)},
 
 		{`A = &""`, "", nil, nil},
 		{`A = !""`, "", nil, errNoMatch},
@@ -108,23 +171,23 @@ func TestRun(t *testing.T) {
 		{`A = !{F}`, "", nil, nil},
 		{`A = !{T}`, "", nil, errNoMatch},
 
-		{`A = 'a' {x}`, "", nil, errNoMatch},
+		{`A = 'a' {x}`, "", nil, errors.New(`expected "a", got ""`)},
 		{`A = 'a' {x}`, "a", "x", nil},
 		{`A = 'a' {x}`, "aa", "x", nil},
 		{`A = 'a' {x}`, "aab", "x", nil},
-		{`A = 'a' {x}`, "baa", nil, errNoMatch},
+		{`A = 'a' {x}`, "baa", nil, errors.New(`expected "a", got "b"`)},
 
-		{`A = l1:'a' l2:'b' {x}`, "", nil, errNoMatch},
-		{`A = l1:'a' l2:'b' {x}`, "a", nil, errNoMatch},
+		{`A = l1:'a' l2:'b' {x}`, "", nil, errors.New(`expected "a", got ""`)},
+		{`A = l1:'a' l2:'b' {x}`, "a", nil, errors.New(`expected "b", got ""`)},
 		{`A = l1:'a' l2:'b' {x}`, "ab", "x", nil},
-		{`A = l1:'a' l2:'b' {x}`, "aab", nil, errNoMatch},
-		{`A = l1:'a' l2:'b' {x}`, "baa", nil, errNoMatch},
+		{`A = l1:'a' l2:'b' {x}`, "aab", nil, errors.New(`expected "b", got "a"`)},
+		{`A = l1:'a' l2:'b' {x}`, "baa", nil, errors.New(`expected "a", got "b"`)},
 
-		{`A = 'a' 'b' 'c' 'd'`, "", nil, errNoMatch},
-		{`A = 'a' 'b' 'c' 'd'`, "a", nil, errNoMatch},
+		{`A = 'a' 'b' 'c' 'd'`, "", nil, errors.New(`expected "a", got ""`)},
+		{`A = 'a' 'b' 'c' 'd'`, "a", nil, errors.New(`expected "b", got ""`)},
 		{`A = 'a' 'b' 'c' 'd'`, "abcd", []interface{}{[]byte("a"), []byte("b"), []byte("c"), []byte("d")}, nil},
-		{`A = 'a' 'b' 'c' 'd'`, "aab", nil, errNoMatch},
-		{`A = 'a' 'b' 'c' 'd'`, "baa", nil, errNoMatch},
+		{`A = 'a' 'b' 'c' 'd'`, "aab", nil, errors.New(`expected "b", got "a"`)},
+		{`A = 'a' 'b' 'c' 'd'`, "baa", nil, errors.New(`expected "a", got "b"`)},
 	}
 	for i, tc := range cases {
 		gr, err := bootstrap.NewParser().Parse("", strings.NewReader(tc.grammar))
@@ -146,8 +209,8 @@ func TestRun(t *testing.T) {
 			continue
 		} else if tc.err != nil {
 			pe := err.(errList)[0].(*parserError)
-			if tc.err != pe.Inner {
-				t.Errorf("%d: want error %v, got %v", i, tc.err, err)
+			if tc.err != pe.Inner && tc.err.Error() != pe.Inner.Error() {
+				t.Errorf("%d: want error %v, got %v", i, tc.err, pe.Inner)
 				continue
 			}
 		}
@@ -207,6 +270,7 @@ func toϡprogram(t *testing.T, pg *program,
 				classes[j] = ϡrangeTable(cl)
 			}
 			vmpg.ms[i] = ϡcharClassMatcher{
+				raw:        m.Val,
 				ignoreCase: m.IgnoreCase,
 				inverted:   m.Inverted,
 				chars:      m.Chars,
