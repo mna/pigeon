@@ -98,7 +98,7 @@ cmp:
 
 profile:
 	go test -c
-	./pigeon.test -test.run TestProfile$$ -profile
+	./pigeon.test -test.run ^TestProfile -profile-cpu=5 -profile-mem=5
 
 clean:
 	rm $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go \

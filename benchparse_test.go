@@ -9,10 +9,11 @@ import (
 	"github.com/davecheney/profile"
 )
 
-var profileFlag = flag.Bool("profile", false, "generate cpu profile")
+var profileCPUFlag = flag.Int("profile-cpu", 0, "generate cpu profile, value is the number of Parse iterations")
+var profileMemFlag = flag.Int("profile-mem", 0, "generate memory profile, value is the number of Parse iterations")
 
-func TestProfile(t *testing.T) {
-	if !*profileFlag {
+func TestProfileCPU(t *testing.T) {
+	if *profileCPUFlag == 0 {
 		t.Skip()
 	}
 
@@ -22,8 +23,28 @@ func TestProfile(t *testing.T) {
 	}
 	defer profile.Start(profile.CPUProfile).Stop()
 
-	if _, err := Parse("", d, Memoize(false)); err != nil {
+	for i := 0; i < *profileCPUFlag; i++ {
+		if _, err := Parse("", d, Memoize(false)); err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
+func TestProfileMemory(t *testing.T) {
+	if *profileMemFlag == 0 {
+		t.Skip()
+	}
+
+	d, err := ioutil.ReadFile("grammar/pigeon.peg")
+	if err != nil {
 		log.Fatal(err)
+	}
+	defer profile.Start(profile.MemProfile).Stop()
+
+	for i := 0; i < *profileMemFlag; i++ {
+		if _, err := Parse("", d, Memoize(false)); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
