@@ -742,6 +742,10 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	}
 
 	cur := p.pt.rn
+	// can't match EOF
+	if cur == utf8.RuneError {
+		return nil, false
+	}
 	start := p.pt
 	if chr.ignoreCase {
 		cur = unicode.ToLower(cur)

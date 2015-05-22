@@ -139,10 +139,10 @@ func TestParseCharClassMatcher(t *testing.T) {
 		iv      bool
 		out     []byte
 	}{
-		{in: "", val: "[]", out: nil}, // empty char class means no char matches
-		{in: "", val: "[^]", iv: true, out: []byte{}},
+		{in: "", val: "[]", out: nil},            // empty char class means no char matches
+		{in: "", val: "[^]", iv: true, out: nil}, // can't match EOF
 		{in: "", val: "[]i", ic: true, out: nil},
-		{in: "", val: "[^]i", ic: true, iv: true, out: []byte{}},
+		{in: "", val: "[^]i", ic: true, iv: true, out: nil}, // can't match EOF
 		{in: "a", val: "[]", out: nil},
 		{in: "a", val: "[^]", iv: true, out: []byte("a")},
 		{in: "a", val: "[]i", ic: true, out: nil},
@@ -227,6 +227,8 @@ func TestParseCharClassMatcher(t *testing.T) {
 		{in: "b", val: "[^\\p{Latin}]", iv: true, classes: []string{"Latin"}, out: nil},
 		{in: "b", val: "[^\\p{Latin}]i", ic: true, iv: true, classes: []string{"Latin"}, out: nil},
 		{in: "B", val: "[^\\p{Latin}]i", iv: true, ic: true, classes: []string{"Latin"}, out: nil},
+
+		{in: "", val: "[^<]", iv: true, chars: []rune{'<'}, out: nil},
 	}
 
 	for _, tc := range cases {
