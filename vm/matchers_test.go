@@ -97,10 +97,10 @@ func TestCharClassMatcher(t *testing.T) {
 		iv      bool
 		out     bool
 	}{
-		{in: "", val: "[]", out: false}, // empty char class means no char matches
-		{in: "", val: "[^]", iv: true, out: true},
+		{in: "", val: "[]", out: false},            // empty char class means no char matches
+		{in: "", val: "[^]", iv: true, out: false}, // can't match EOF
 		{in: "", val: "[]i", ic: true, out: false},
-		{in: "", val: "[^]i", ic: true, iv: true, out: true},
+		{in: "", val: "[^]i", ic: true, iv: true, out: false}, // can't match EOF
 		{in: "a", val: "[]", out: false},
 		{in: "a", val: "[^]", iv: true, out: true},
 		{in: "a", val: "[]i", ic: true, out: false},
@@ -185,6 +185,8 @@ func TestCharClassMatcher(t *testing.T) {
 		{in: "b", val: "[^\\p{Latin}]", iv: true, classes: []string{"Latin"}, out: false},
 		{in: "b", val: "[^\\p{Latin}]i", ic: true, iv: true, classes: []string{"Latin"}, out: false},
 		{in: "B", val: "[^\\p{Latin}]i", iv: true, ic: true, classes: []string{"Latin"}, out: false},
+
+		{in: "", val: "[^<]", iv: true, chars: []rune{'<'}, out: false},
 	}
 
 	var m ϡcharClassMatcher

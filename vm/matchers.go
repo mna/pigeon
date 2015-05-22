@@ -96,6 +96,10 @@ func (c ϡcharClassMatcher) String() string {
 // match tries to match classes of characters in the peekReader.
 func (c ϡcharClassMatcher) match(pr ϡpeekReader) bool {
 	rn := pr.peek()
+	// can't ever match EOF
+	if rn == utf8.RuneError {
+		return false
+	}
 	pr.read()
 
 	if c.ignoreCase {
