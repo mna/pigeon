@@ -1,0 +1,28 @@
+{
+package main
+
+func main() {
+	in := os.Stdin
+	if len(os.Args) > 1 {
+		f, err := os.Open(os.Args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		in = f
+	}
+	got, err := ParseReader("", in, Debug(true))
+	fmt.Println(got, err)
+}
+
+}
+
+start = &{c.state["countCs"] = 0; return true,nil } ((x/y) ws*)* { return c.state["countCs"],nil }
+
+x = "ab" c "d"
+y = "a" bc "e"
+
+c = "c" &{ c.state["countCs"] = c.state["countCs"].(int)+3; return true,nil }
+bc = "bc" &{ c.state["countCs"] = c.state["countCs"].(int)+1; return true,nil}
+
+ws = " " / "\n"

@@ -17,60 +17,60 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "A",
-			pos:  position{line: 5, col: 1, offset: 24},
+			pos:  position{line: 5, col: 1, offset: 28},
 			expr: &choiceExpr{
-				pos: position{line: 5, col: 5, offset: 30},
+				pos: position{line: 5, col: 5, offset: 34},
 				alternatives: []interface{}{
 					&seqExpr{
-						pos: position{line: 5, col: 5, offset: 30},
+						pos: position{line: 5, col: 5, offset: 34},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 5, col: 5, offset: 30},
+								pos:   position{line: 5, col: 5, offset: 34},
 								label: "a",
 								expr: &litMatcher{
-									pos:        position{line: 5, col: 7, offset: 32},
+									pos:        position{line: 5, col: 7, offset: 36},
 									val:        "a",
 									ignoreCase: false,
 								},
 							},
 							&notCodeExpr{
-								pos: position{line: 5, col: 11, offset: 36},
+								pos: position{line: 5, col: 11, offset: 40},
 								run: (*parser).callonA5,
 							},
 						},
 					},
 					&seqExpr{
-						pos: position{line: 10, col: 3, offset: 98},
+						pos: position{line: 10, col: 3, offset: 107},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 10, col: 3, offset: 98},
+								pos:   position{line: 10, col: 3, offset: 107},
 								label: "b",
 								expr: &litMatcher{
-									pos:        position{line: 10, col: 5, offset: 100},
+									pos:        position{line: 10, col: 5, offset: 109},
 									val:        "b",
 									ignoreCase: false,
 								},
 							},
 							&notCodeExpr{
-								pos: position{line: 10, col: 9, offset: 104},
+								pos: position{line: 10, col: 9, offset: 113},
 								run: (*parser).callonA9,
 							},
 						},
 					},
 					&seqExpr{
-						pos: position{line: 15, col: 3, offset: 165},
+						pos: position{line: 15, col: 3, offset: 179},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 15, col: 3, offset: 165},
+								pos:   position{line: 15, col: 3, offset: 179},
 								label: "d",
 								expr: &litMatcher{
-									pos:        position{line: 15, col: 5, offset: 167},
+									pos:        position{line: 15, col: 5, offset: 181},
 									val:        "d",
 									ignoreCase: false,
 								},
 							},
 							&andCodeExpr{
-								pos: position{line: 15, col: 9, offset: 171},
+								pos: position{line: 15, col: 9, offset: 185},
 								run: (*parser).callonA13,
 							},
 						},
@@ -80,52 +80,52 @@ var g = &grammar{
 		},
 		{
 			name: "B",
-			pos:  position{line: 20, col: 1, offset: 230},
+			pos:  position{line: 20, col: 1, offset: 249},
 			expr: &seqExpr{
-				pos: position{line: 20, col: 5, offset: 236},
+				pos: position{line: 20, col: 5, offset: 255},
 				exprs: []interface{}{
 					&labeledExpr{
-						pos:   position{line: 20, col: 5, offset: 236},
+						pos:   position{line: 20, col: 5, offset: 255},
 						label: "out",
 						expr: &seqExpr{
-							pos: position{line: 20, col: 11, offset: 242},
+							pos: position{line: 20, col: 11, offset: 261},
 							exprs: []interface{}{
 								&labeledExpr{
-									pos:   position{line: 20, col: 11, offset: 242},
+									pos:   position{line: 20, col: 11, offset: 261},
 									label: "inner",
 									expr: &seqExpr{
-										pos: position{line: 20, col: 19, offset: 250},
+										pos: position{line: 20, col: 19, offset: 269},
 										exprs: []interface{}{
 											&charClassMatcher{
-												pos:        position{line: 20, col: 19, offset: 250},
+												pos:        position{line: 20, col: 19, offset: 269},
 												val:        "[^abd]",
 												chars:      []rune{'a', 'b', 'd'},
 												ignoreCase: false,
 												inverted:   true,
 											},
 											&labeledExpr{
-												pos:   position{line: 20, col: 26, offset: 257},
+												pos:   position{line: 20, col: 26, offset: 276},
 												label: "innermost",
 												expr: &anyMatcher{
-													line: 20, col: 36, offset: 267,
+													line: 20, col: 36, offset: 286,
 												},
 											},
 											&andCodeExpr{
-												pos: position{line: 20, col: 38, offset: 269},
+												pos: position{line: 20, col: 38, offset: 288},
 												run: (*parser).callonB9,
 											},
 										},
 									},
 								},
 								&andCodeExpr{
-									pos: position{line: 20, col: 60, offset: 291},
+									pos: position{line: 20, col: 60, offset: 310},
 									run: (*parser).callonB10,
 								},
 							},
 						},
 					},
 					&andCodeExpr{
-						pos: position{line: 20, col: 82, offset: 313},
+						pos: position{line: 20, col: 82, offset: 332},
 						run: (*parser).callonB11,
 					},
 				},
@@ -133,20 +133,20 @@ var g = &grammar{
 		},
 		{
 			name: "C",
-			pos:  position{line: 22, col: 1, offset: 334},
+			pos:  position{line: 22, col: 1, offset: 355},
 			expr: &actionExpr{
-				pos: position{line: 22, col: 5, offset: 340},
+				pos: position{line: 22, col: 5, offset: 361},
 				run: (*parser).callonC1,
 				expr: &seqExpr{
-					pos: position{line: 22, col: 5, offset: 340},
+					pos: position{line: 22, col: 5, offset: 361},
 					exprs: []interface{}{
 						&andExpr{
-							pos: position{line: 22, col: 5, offset: 340},
+							pos: position{line: 22, col: 5, offset: 361},
 							expr: &labeledExpr{
-								pos:   position{line: 22, col: 7, offset: 342},
+								pos:   position{line: 22, col: 7, offset: 363},
 								label: "inand",
 								expr: &charClassMatcher{
-									pos:        position{line: 22, col: 13, offset: 348},
+									pos:        position{line: 22, col: 13, offset: 369},
 									val:        "[efg]",
 									chars:      []rune{'e', 'f', 'g'},
 									ignoreCase: false,
@@ -155,10 +155,10 @@ var g = &grammar{
 							},
 						},
 						&labeledExpr{
-							pos:   position{line: 22, col: 20, offset: 355},
+							pos:   position{line: 22, col: 20, offset: 376},
 							label: "rest",
 							expr: &ruleRefExpr{
-								pos:  position{line: 22, col: 25, offset: 360},
+								pos:  position{line: 22, col: 25, offset: 381},
 								name: "hij",
 							},
 						},
@@ -170,6 +170,7 @@ var g = &grammar{
 }
 
 func (c *current) onA5(a interface{}) (bool, error) {
+
 	fmt.Println(string(c.text))
 	return true, nil
 }
@@ -181,6 +182,7 @@ func (p *parser) callonA5() (bool, error) {
 }
 
 func (c *current) onA9(b interface{}) (bool, error) {
+
 	fmt.Println(string(c.text))
 	return true, nil
 }
@@ -192,6 +194,7 @@ func (p *parser) callonA9() (bool, error) {
 }
 
 func (c *current) onA13(d interface{}) (bool, error) {
+
 	fmt.Println(string(c.text))
 	return true, nil
 }
@@ -233,6 +236,7 @@ func (p *parser) callonB11() (bool, error) {
 }
 
 func (c *current) onC1(rest interface{}) (interface{}, error) {
+
 	return nil, nil
 }
 
@@ -357,9 +361,13 @@ type current struct {
 	pos  position // start position of the match
 	text []byte   // raw text of the match
 
+	// the state allows the parser to store arbitrary values and rollback them if needed
+	state statedict
 	// the globalStore allows the parser to store arbitrary values
 	globalStore map[string]interface{}
 }
+
+type statedict map[string]interface{}
 
 // the AST types...
 
@@ -511,6 +519,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		pt:       savepoint{position: position{line: 1}},
 		recover:  true,
 		cur: current{
+			state:       make(statedict),
 			globalStore: make(map[string]interface{}),
 		},
 		maxFailPos:      position{col: 1, line: 1},
@@ -693,6 +702,29 @@ func (p *parser) restore(pt savepoint) {
 		return
 	}
 	p.pt = pt
+}
+
+// copy and return parser current state.
+func (p *parser) copyState() (state statedict) {
+	if p.debug {
+		defer p.out(p.in("copyState"))
+	}
+	state = make(statedict)
+	for k, v := range p.cur.state {
+		state[k] = v
+	}
+	return state
+}
+
+// restore parser current state to the state statedict.
+func (p *parser) restoreState(state statedict) {
+	if p.debug {
+		defer p.out(p.in("restoreState"))
+	}
+	p.cur.state = make(statedict)
+	for k, v := range state {
+		p.cur.state[k] = v
+	}
 }
 
 // get the slice of bytes from the savepoint start to the current position.
@@ -926,10 +958,12 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	state := p.copyState()
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
 	p.popV()
 	p.restore(pt)
+	p.restoreState(state)
 	return nil, ok
 }
 
@@ -1090,12 +1124,14 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	state := p.copyState()
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	_, ok := p.parseExpr(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
 	p.restore(pt)
+	p.restoreState(state)
 	return nil, !ok
 }
 
@@ -1146,10 +1182,12 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
+	state := p.copyState()
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
 			p.restore(pt)
+			p.restoreState(state)
 			return nil, false
 		}
 		vals = append(vals, val)

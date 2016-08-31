@@ -26,27 +26,27 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "TableRef",
-			pos:  position{line: 14, col: 1, offset: 174},
+			pos:  position{line: 14, col: 1, offset: 187},
 			expr: &actionExpr{
-				pos: position{line: 14, col: 13, offset: 186},
+				pos: position{line: 14, col: 13, offset: 199},
 				run: (*parser).callonTableRef1,
 				expr: &seqExpr{
-					pos: position{line: 14, col: 13, offset: 186},
+					pos: position{line: 14, col: 13, offset: 199},
 					exprs: []interface{}{
 						&labeledExpr{
-							pos:   position{line: 14, col: 13, offset: 186},
+							pos:   position{line: 14, col: 13, offset: 199},
 							label: "database",
 							expr: &zeroOrOneExpr{
-								pos: position{line: 14, col: 22, offset: 195},
+								pos: position{line: 14, col: 22, offset: 208},
 								expr: &seqExpr{
-									pos: position{line: 14, col: 23, offset: 196},
+									pos: position{line: 14, col: 23, offset: 209},
 									exprs: []interface{}{
 										&ruleRefExpr{
-											pos:  position{line: 14, col: 23, offset: 196},
+											pos:  position{line: 14, col: 23, offset: 209},
 											name: "ID",
 										},
 										&litMatcher{
-											pos:        position{line: 14, col: 26, offset: 199},
+											pos:        position{line: 14, col: 26, offset: 212},
 											val:        ".",
 											ignoreCase: false,
 										},
@@ -55,10 +55,10 @@ var g = &grammar{
 							},
 						},
 						&labeledExpr{
-							pos:   position{line: 14, col: 32, offset: 205},
+							pos:   position{line: 14, col: 32, offset: 218},
 							label: "table",
 							expr: &ruleRefExpr{
-								pos:  position{line: 14, col: 38, offset: 211},
+								pos:  position{line: 14, col: 38, offset: 224},
 								name: "ID",
 							},
 						},
@@ -68,14 +68,14 @@ var g = &grammar{
 		},
 		{
 			name: "ID",
-			pos:  position{line: 15, col: 1, offset: 271},
+			pos:  position{line: 15, col: 1, offset: 285},
 			expr: &actionExpr{
-				pos: position{line: 15, col: 7, offset: 277},
+				pos: position{line: 15, col: 7, offset: 291},
 				run: (*parser).callonID1,
 				expr: &oneOrMoreExpr{
-					pos: position{line: 15, col: 7, offset: 277},
+					pos: position{line: 15, col: 7, offset: 291},
 					expr: &charClassMatcher{
-						pos:        position{line: 15, col: 7, offset: 277},
+						pos:        position{line: 15, col: 7, offset: 291},
 						val:        "[a-z]",
 						ranges:     []rune{'a', 'z'},
 						ignoreCase: false,
@@ -222,9 +222,13 @@ type current struct {
 	pos  position // start position of the match
 	text []byte   // raw text of the match
 
+	// the state allows the parser to store arbitrary values and rollback them if needed
+	state statedict
 	// the globalStore allows the parser to store arbitrary values
 	globalStore map[string]interface{}
 }
+
+type statedict map[string]interface{}
 
 // the AST types...
 
@@ -376,6 +380,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		pt:       savepoint{position: position{line: 1}},
 		recover:  true,
 		cur: current{
+			state:       make(statedict),
 			globalStore: make(map[string]interface{}),
 		},
 		maxFailPos:      position{col: 1, line: 1},
@@ -558,6 +563,29 @@ func (p *parser) restore(pt savepoint) {
 		return
 	}
 	p.pt = pt
+}
+
+// copy and return parser current state.
+func (p *parser) copyState() (state statedict) {
+	if p.debug {
+		defer p.out(p.in("copyState"))
+	}
+	state = make(statedict)
+	for k, v := range p.cur.state {
+		state[k] = v
+	}
+	return state
+}
+
+// restore parser current state to the state statedict.
+func (p *parser) restoreState(state statedict) {
+	if p.debug {
+		defer p.out(p.in("restoreState"))
+	}
+	p.cur.state = make(statedict)
+	for k, v := range state {
+		p.cur.state[k] = v
+	}
 }
 
 // get the slice of bytes from the savepoint start to the current position.
@@ -791,10 +819,12 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	state := p.copyState()
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
 	p.popV()
 	p.restore(pt)
+	p.restoreState(state)
 	return nil, ok
 }
 
@@ -955,12 +985,14 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	state := p.copyState()
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	_, ok := p.parseExpr(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
 	p.restore(pt)
+	p.restoreState(state)
 	return nil, !ok
 }
 
@@ -1011,10 +1043,12 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
+	state := p.copyState()
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
 			p.restore(pt)
+			p.restoreState(state)
 			return nil, false
 		}
 		vals = append(vals, val)

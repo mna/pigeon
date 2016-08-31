@@ -42,36 +42,36 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Program",
-			pos:  position{line: 32, col: 1, offset: 318},
+			pos:  position{line: 32, col: 1, offset: 349},
 			expr: &seqExpr{
-				pos: position{line: 32, col: 12, offset: 329},
+				pos: position{line: 32, col: 12, offset: 360},
 				exprs: []interface{}{
 					&ruleRefExpr{
-						pos:  position{line: 32, col: 12, offset: 329},
+						pos:  position{line: 32, col: 12, offset: 360},
 						name: "_",
 					},
 					&zeroOrMoreExpr{
-						pos: position{line: 32, col: 14, offset: 331},
+						pos: position{line: 32, col: 14, offset: 362},
 						expr: &seqExpr{
-							pos: position{line: 32, col: 15, offset: 332},
+							pos: position{line: 32, col: 15, offset: 363},
 							exprs: []interface{}{
 								&ruleRefExpr{
-									pos:  position{line: 32, col: 15, offset: 332},
+									pos:  position{line: 32, col: 15, offset: 363},
 									name: "X",
 								},
 								&ruleRefExpr{
-									pos:  position{line: 32, col: 17, offset: 334},
+									pos:  position{line: 32, col: 17, offset: 365},
 									name: "_",
 								},
 							},
 						},
 					},
 					&ruleRefExpr{
-						pos:  position{line: 32, col: 21, offset: 338},
+						pos:  position{line: 32, col: 21, offset: 369},
 						name: "_",
 					},
 					&ruleRefExpr{
-						pos:  position{line: 32, col: 24, offset: 341},
+						pos:  position{line: 32, col: 24, offset: 372},
 						name: "EOF",
 					},
 				},
@@ -79,9 +79,9 @@ var g = &grammar{
 		},
 		{
 			name: "X",
-			pos:  position{line: 34, col: 1, offset: 346},
+			pos:  position{line: 34, col: 1, offset: 379},
 			expr: &charClassMatcher{
-				pos:        position{line: 34, col: 6, offset: 351},
+				pos:        position{line: 34, col: 6, offset: 384},
 				val:        "[0-9]",
 				ranges:     []rune{'0', '9'},
 				ignoreCase: false,
@@ -91,11 +91,11 @@ var g = &grammar{
 		{
 			name:        "_",
 			displayName: "\"whitespace\"",
-			pos:         position{line: 36, col: 1, offset: 358},
+			pos:         position{line: 36, col: 1, offset: 393},
 			expr: &zeroOrMoreExpr{
-				pos: position{line: 36, col: 19, offset: 376},
+				pos: position{line: 36, col: 19, offset: 411},
 				expr: &charClassMatcher{
-					pos:        position{line: 36, col: 21, offset: 378},
+					pos:        position{line: 36, col: 21, offset: 413},
 					val:        "[ \\t\\r\\n]",
 					chars:      []rune{' ', '\t', '\r', '\n'},
 					ignoreCase: false,
@@ -105,11 +105,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 38, col: 1, offset: 392},
+			pos:  position{line: 38, col: 1, offset: 429},
 			expr: &notExpr{
-				pos: position{line: 38, col: 8, offset: 399},
+				pos: position{line: 38, col: 8, offset: 436},
 				expr: &anyMatcher{
-					line: 38, col: 9, offset: 400,
+					line: 38, col: 9, offset: 437,
 				},
 			},
 		},
@@ -231,9 +231,13 @@ type current struct {
 	pos  position // start position of the match
 	text []byte   // raw text of the match
 
+	// the state allows the parser to store arbitrary values and rollback them if needed
+	state statedict
 	// the globalStore allows the parser to store arbitrary values
 	globalStore map[string]interface{}
 }
+
+type statedict map[string]interface{}
 
 // the AST types...
 
@@ -385,6 +389,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		pt:       savepoint{position: position{line: 1}},
 		recover:  true,
 		cur: current{
+			state:       make(statedict),
 			globalStore: make(map[string]interface{}),
 		},
 		maxFailPos:      position{col: 1, line: 1},
@@ -567,6 +572,29 @@ func (p *parser) restore(pt savepoint) {
 		return
 	}
 	p.pt = pt
+}
+
+// copy and return parser current state.
+func (p *parser) copyState() (state statedict) {
+	if p.debug {
+		defer p.out(p.in("copyState"))
+	}
+	state = make(statedict)
+	for k, v := range p.cur.state {
+		state[k] = v
+	}
+	return state
+}
+
+// restore parser current state to the state statedict.
+func (p *parser) restoreState(state statedict) {
+	if p.debug {
+		defer p.out(p.in("restoreState"))
+	}
+	p.cur.state = make(statedict)
+	for k, v := range state {
+		p.cur.state[k] = v
+	}
 }
 
 // get the slice of bytes from the savepoint start to the current position.
@@ -800,10 +828,12 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	state := p.copyState()
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
 	p.popV()
 	p.restore(pt)
+	p.restoreState(state)
 	return nil, ok
 }
 
@@ -964,12 +994,14 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	state := p.copyState()
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	_, ok := p.parseExpr(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
 	p.restore(pt)
+	p.restoreState(state)
 	return nil, !ok
 }
 
@@ -1020,10 +1052,12 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
+	state := p.copyState()
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
 			p.restore(pt)
+			p.restoreState(state)
 			return nil, false
 		}
 		vals = append(vals, val)

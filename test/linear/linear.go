@@ -20,104 +20,104 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "File",
-			pos:  position{line: 10, col: 1, offset: 102},
+			pos:  position{line: 10, col: 1, offset: 111},
 			expr: &seqExpr{
-				pos: position{line: 10, col: 8, offset: 111},
+				pos: position{line: 10, col: 8, offset: 120},
 				exprs: []interface{}{
 					&choiceExpr{
-						pos: position{line: 10, col: 10, offset: 113},
+						pos: position{line: 10, col: 10, offset: 122},
 						alternatives: []interface{}{
 							&seqExpr{
-								pos: position{line: 10, col: 10, offset: 113},
+								pos: position{line: 10, col: 10, offset: 122},
 								exprs: []interface{}{
 									&ruleRefExpr{
-										pos:  position{line: 10, col: 10, offset: 113},
+										pos:  position{line: 10, col: 10, offset: 122},
 										name: "L",
 									},
 									&zeroOrOneExpr{
-										pos: position{line: 10, col: 12, offset: 115},
+										pos: position{line: 10, col: 12, offset: 124},
 										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 12, offset: 115},
+											pos:  position{line: 10, col: 12, offset: 124},
 											name: "S",
 										},
 									},
 								},
 							},
 							&seqExpr{
-								pos: position{line: 10, col: 17, offset: 120},
+								pos: position{line: 10, col: 17, offset: 129},
 								exprs: []interface{}{
 									&ruleRefExpr{
-										pos:  position{line: 10, col: 17, offset: 120},
+										pos:  position{line: 10, col: 17, offset: 129},
 										name: "L",
 									},
 									&zeroOrOneExpr{
-										pos: position{line: 10, col: 19, offset: 122},
+										pos: position{line: 10, col: 19, offset: 131},
 										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 19, offset: 122},
+											pos:  position{line: 10, col: 19, offset: 131},
 											name: "N",
 										},
 									},
 								},
 							},
 							&seqExpr{
-								pos: position{line: 10, col: 24, offset: 127},
+								pos: position{line: 10, col: 24, offset: 136},
 								exprs: []interface{}{
 									&ruleRefExpr{
-										pos:  position{line: 10, col: 24, offset: 127},
+										pos:  position{line: 10, col: 24, offset: 136},
 										name: "N",
 									},
 									&zeroOrOneExpr{
-										pos: position{line: 10, col: 26, offset: 129},
+										pos: position{line: 10, col: 26, offset: 138},
 										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 26, offset: 129},
+											pos:  position{line: 10, col: 26, offset: 138},
 											name: "L",
 										},
 									},
 								},
 							},
 							&seqExpr{
-								pos: position{line: 10, col: 31, offset: 134},
+								pos: position{line: 10, col: 31, offset: 143},
 								exprs: []interface{}{
 									&ruleRefExpr{
-										pos:  position{line: 10, col: 31, offset: 134},
+										pos:  position{line: 10, col: 31, offset: 143},
 										name: "N",
 									},
 									&zeroOrOneExpr{
-										pos: position{line: 10, col: 33, offset: 136},
+										pos: position{line: 10, col: 33, offset: 145},
 										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 33, offset: 136},
+											pos:  position{line: 10, col: 33, offset: 145},
 											name: "S",
 										},
 									},
 								},
 							},
 							&seqExpr{
-								pos: position{line: 10, col: 38, offset: 141},
+								pos: position{line: 10, col: 38, offset: 150},
 								exprs: []interface{}{
 									&ruleRefExpr{
-										pos:  position{line: 10, col: 38, offset: 141},
+										pos:  position{line: 10, col: 38, offset: 150},
 										name: "S",
 									},
 									&zeroOrOneExpr{
-										pos: position{line: 10, col: 40, offset: 143},
+										pos: position{line: 10, col: 40, offset: 152},
 										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 40, offset: 143},
+											pos:  position{line: 10, col: 40, offset: 152},
 											name: "L",
 										},
 									},
 								},
 							},
 							&seqExpr{
-								pos: position{line: 10, col: 45, offset: 148},
+								pos: position{line: 10, col: 45, offset: 157},
 								exprs: []interface{}{
 									&ruleRefExpr{
-										pos:  position{line: 10, col: 45, offset: 148},
+										pos:  position{line: 10, col: 45, offset: 157},
 										name: "S",
 									},
 									&zeroOrOneExpr{
-										pos: position{line: 10, col: 47, offset: 150},
+										pos: position{line: 10, col: 47, offset: 159},
 										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 47, offset: 150},
+											pos:  position{line: 10, col: 47, offset: 159},
 											name: "N",
 										},
 									},
@@ -126,14 +126,14 @@ var g = &grammar{
 						},
 					},
 					&zeroOrMoreExpr{
-						pos: position{line: 10, col: 52, offset: 155},
+						pos: position{line: 10, col: 52, offset: 164},
 						expr: &ruleRefExpr{
-							pos:  position{line: 10, col: 52, offset: 155},
+							pos:  position{line: 10, col: 52, offset: 164},
 							name: "File",
 						},
 					},
 					&ruleRefExpr{
-						pos:  position{line: 10, col: 58, offset: 161},
+						pos:  position{line: 10, col: 58, offset: 170},
 						name: "EOF",
 					},
 				},
@@ -141,11 +141,11 @@ var g = &grammar{
 		},
 		{
 			name: "L",
-			pos:  position{line: 11, col: 1, offset: 165},
+			pos:  position{line: 11, col: 1, offset: 175},
 			expr: &oneOrMoreExpr{
-				pos: position{line: 11, col: 5, offset: 171},
+				pos: position{line: 11, col: 5, offset: 181},
 				expr: &charClassMatcher{
-					pos:        position{line: 11, col: 5, offset: 171},
+					pos:        position{line: 11, col: 5, offset: 181},
 					val:        "[a-z]i",
 					ranges:     []rune{'a', 'z'},
 					ignoreCase: true,
@@ -155,11 +155,11 @@ var g = &grammar{
 		},
 		{
 			name: "N",
-			pos:  position{line: 12, col: 1, offset: 179},
+			pos:  position{line: 12, col: 1, offset: 190},
 			expr: &oneOrMoreExpr{
-				pos: position{line: 12, col: 5, offset: 185},
+				pos: position{line: 12, col: 5, offset: 196},
 				expr: &charClassMatcher{
-					pos:        position{line: 12, col: 5, offset: 185},
+					pos:        position{line: 12, col: 5, offset: 196},
 					val:        "[0-9]",
 					ranges:     []rune{'0', '9'},
 					ignoreCase: false,
@@ -169,11 +169,11 @@ var g = &grammar{
 		},
 		{
 			name: "S",
-			pos:  position{line: 13, col: 1, offset: 192},
+			pos:  position{line: 13, col: 1, offset: 204},
 			expr: &oneOrMoreExpr{
-				pos: position{line: 13, col: 5, offset: 198},
+				pos: position{line: 13, col: 5, offset: 210},
 				expr: &charClassMatcher{
-					pos:        position{line: 13, col: 5, offset: 198},
+					pos:        position{line: 13, col: 5, offset: 210},
 					val:        "[/+=]",
 					chars:      []rune{'/', '+', '='},
 					ignoreCase: false,
@@ -183,11 +183,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 14, col: 1, offset: 205},
+			pos:  position{line: 14, col: 1, offset: 218},
 			expr: &notExpr{
-				pos: position{line: 14, col: 7, offset: 213},
+				pos: position{line: 14, col: 7, offset: 226},
 				expr: &anyMatcher{
-					line: 14, col: 8, offset: 214,
+					line: 14, col: 8, offset: 227,
 				},
 			},
 		},
@@ -309,9 +309,13 @@ type current struct {
 	pos  position // start position of the match
 	text []byte   // raw text of the match
 
+	// the state allows the parser to store arbitrary values and rollback them if needed
+	state statedict
 	// the globalStore allows the parser to store arbitrary values
 	globalStore map[string]interface{}
 }
+
+type statedict map[string]interface{}
 
 // the AST types...
 
@@ -463,6 +467,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		pt:       savepoint{position: position{line: 1}},
 		recover:  true,
 		cur: current{
+			state:       make(statedict),
 			globalStore: make(map[string]interface{}),
 		},
 		maxFailPos:      position{col: 1, line: 1},
@@ -645,6 +650,29 @@ func (p *parser) restore(pt savepoint) {
 		return
 	}
 	p.pt = pt
+}
+
+// copy and return parser current state.
+func (p *parser) copyState() (state statedict) {
+	if p.debug {
+		defer p.out(p.in("copyState"))
+	}
+	state = make(statedict)
+	for k, v := range p.cur.state {
+		state[k] = v
+	}
+	return state
+}
+
+// restore parser current state to the state statedict.
+func (p *parser) restoreState(state statedict) {
+	if p.debug {
+		defer p.out(p.in("restoreState"))
+	}
+	p.cur.state = make(statedict)
+	for k, v := range state {
+		p.cur.state[k] = v
+	}
 }
 
 // get the slice of bytes from the savepoint start to the current position.
@@ -878,10 +906,12 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	state := p.copyState()
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
 	p.popV()
 	p.restore(pt)
+	p.restoreState(state)
 	return nil, ok
 }
 
@@ -1042,12 +1072,14 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
+	state := p.copyState()
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	_, ok := p.parseExpr(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
 	p.restore(pt)
+	p.restoreState(state)
 	return nil, !ok
 }
 
@@ -1098,10 +1130,12 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
+	state := p.copyState()
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
 			p.restore(pt)
+			p.restoreState(state)
 			return nil, false
 		}
 		vals = append(vals, val)

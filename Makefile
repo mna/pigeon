@@ -79,6 +79,9 @@ $(EXAMPLES_DIR)/json/optimized-grammar/json.go: $(EXAMPLES_DIR)/json/json.peg $(
 $(EXAMPLES_DIR)/calculator/calculator.go: $(EXAMPLES_DIR)/calculator/calculator.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
+$(EXAMPLES_DIR)/indentation/indentation.go: $(EXAMPLES_DIR)/indentation/indentation.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< | goimports > $@
+
 $(TEST_DIR)/andnot/andnot.go: $(TEST_DIR)/andnot/andnot.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
@@ -106,6 +109,10 @@ $(TEST_DIR)/global_store/global_store.go: $(TEST_DIR)/global_store/global_store.
 $(TEST_DIR)/goto/goto.go: $(TEST_DIR)/goto/goto.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
+$(TEST_DIR)/state/state.go: $(TEST_DIR)/state/state.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< | goimports > $@
+
+    
 lint:
 	golint ./...
 	go vet ./...
