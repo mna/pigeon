@@ -274,7 +274,7 @@ func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
 	return newParser(filename, b, opts...).parse(g)
 }
 
-// resultValue store returned value of parse* functions and canMemoized flag
+// resultValue wrap returning value of parse* functions and flag for ability memoize
 type resultValue struct {
 	value      interface{}
 	memoizable bool
