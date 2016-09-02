@@ -76,6 +76,9 @@ $(TEST_DIR)/linear/linear.go: $(TEST_DIR)/linear/linear.peg $(BINDIR)/pigeon
 $(TEST_DIR)/issue_12/issue_12.go: $(TEST_DIR)/issue_12/issue_12.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< | goimports > $@
 
+$(TEST_DIR)/memoize_predicate/memoize_predicate.go: $(TEST_DIR)/memoize_predicate/memoize_predicate.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< | goimports > $@
+    
 lint:
 	golint ./...
 	go vet ./...

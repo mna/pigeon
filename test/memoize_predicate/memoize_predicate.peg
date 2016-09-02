@@ -1,0 +1,26 @@
+{
+package main
+
+func main() {
+	in := os.Stdin
+	if len(os.Args) > 1 {
+		f, err := os.Open(os.Args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		in = f
+	}
+	got, err := ParseReader("", in, Debug(true))
+	fmt.Println(got, err)
+}
+
+var data  = []int{1,2}
+var idx int
+}
+
+input = INIT v:line+ EOF  {return v,nil}
+line = CONDITION "a" {return "cond1",nil} / CONDITION "a" {return "cond2",nil}
+INIT = &{ idx = 0; return true,nil }
+CONDITION = &{b := (data[idx] == 2); idx = 1; return b, nil}
+EOF = !.
