@@ -274,6 +274,19 @@ func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
 	return newParser(filename, b, opts...).parse(g)
 }
 
+// resultValue store returned value of parse* functions and canMemoized flag
+type resultValue struct {
+	value      interface{}
+	memoizable bool
+}
+
+func makeMemoizable(value interface{}) resultValue {
+	return resultValue{value, true}
+}
+func makeUnMemoizable(value interface{}) resultValue {
+	return resultValue{value, false}
+}
+
 // position records a position in the text.
 type position struct {
 	line, col, offset int
@@ -666,7 +679,7 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 
 	// start rule is rule [0]
 	p.read() // advance to first rune
-	val, _, ok := p.parseRule(g.rules[0])
+	val, ok := p.parseRule(g.rules[0])
 	if !ok {
 		if len(*p.errs) == 0 {
 			// make sure this doesn't go out silently
@@ -674,10 +687,10 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		}
 		return nil, p.errs.err()
 	}
-	return val, p.errs.err()
+	return val.(resultValue).value, p.errs.err()
 }
 
-func (p *parser) parseRule(rule *rule) (interface{},bool, bool) {
+func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseRule " + rule.name))
 	}
@@ -686,27 +699,27 @@ func (p *parser) parseRule(rule *rule) (interface{},bool, bool) {
 		res, ok := p.getMemoized(rule)
 		if ok {
 			p.restore(res.end)
-			return res.v,true, res.b
+			return makeMemoizable(res.v), res.b
 		}
 	}
 
 	start := p.pt
 	p.rstack = append(p.rstack, rule)
 	p.pushV()
-	val,mmz, ok := p.parseExpr(rule.expr)
+	val, ok := p.parseExpr(rule.expr)
 	p.popV()
 	p.rstack = p.rstack[:len(p.rstack)-1]
 	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
 
-	if p.memoize && mmz{
-		p.setMemoized(start, rule, resultTuple{val, ok, p.pt})
+	if p.memoize && val.(resultValue).memoizable {
+		p.setMemoized(start, rule, resultTuple{val.(resultValue).value, ok, p.pt})
 	}
-	return val,mmz, ok
+	return val, ok
 }
 
-func (p *parser) parseExpr(expr interface{}) (interface{},bool, bool) {
+func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	var pt savepoint
 	var ok bool
 
@@ -714,61 +727,60 @@ func (p *parser) parseExpr(expr interface{}) (interface{},bool, bool) {
 		res, ok := p.getMemoized(expr)
 		if ok {
 			p.restore(res.end)
-			return res.v,true, res.b
+			return makeMemoizable(res.v), res.b
 		}
 		pt = p.pt
 	}
 
 	p.exprCnt++
 	var val interface{}
-	var mmz bool
 	switch expr := expr.(type) {
 	case *actionExpr:
-		val,mmz, ok = p.parseActionExpr(expr)
+		val, ok = p.parseActionExpr(expr)
 	case *andCodeExpr:
-		val,mmz, ok = p.parseAndCodeExpr(expr)
+		val, ok = p.parseAndCodeExpr(expr)
 	case *andExpr:
-		val,mmz, ok = p.parseAndExpr(expr)
+		val, ok = p.parseAndExpr(expr)
 	case *anyMatcher:
-		val,mmz, ok = p.parseAnyMatcher(expr)
+		val, ok = p.parseAnyMatcher(expr)
 	case *charClassMatcher:
-		val,mmz, ok = p.parseCharClassMatcher(expr)
+		val, ok = p.parseCharClassMatcher(expr)
 	case *choiceExpr:
-		val,mmz, ok = p.parseChoiceExpr(expr)
+		val, ok = p.parseChoiceExpr(expr)
 	case *labeledExpr:
-		val,mmz, ok = p.parseLabeledExpr(expr)
+		val, ok = p.parseLabeledExpr(expr)
 	case *litMatcher:
-		val,mmz, ok = p.parseLitMatcher(expr)
+		val, ok = p.parseLitMatcher(expr)
 	case *notCodeExpr:
-		val,mmz, ok = p.parseNotCodeExpr(expr)
+		val, ok = p.parseNotCodeExpr(expr)
 	case *notExpr:
-		val,mmz, ok = p.parseNotExpr(expr)
+		val, ok = p.parseNotExpr(expr)
 	case *oneOrMoreExpr:
-		val,mmz, ok = p.parseOneOrMoreExpr(expr)
+		val, ok = p.parseOneOrMoreExpr(expr)
 	case *ruleRefExpr:
-		val,mmz, ok = p.parseRuleRefExpr(expr)
+		val, ok = p.parseRuleRefExpr(expr)
 	case *seqExpr:
-		val,mmz, ok = p.parseSeqExpr(expr)
+		val, ok = p.parseSeqExpr(expr)
 	case *zeroOrMoreExpr:
-		val,mmz, ok = p.parseZeroOrMoreExpr(expr)
+		val, ok = p.parseZeroOrMoreExpr(expr)
 	case *zeroOrOneExpr:
-		val,mmz, ok = p.parseZeroOrOneExpr(expr)
+		val, ok = p.parseZeroOrOneExpr(expr)
 	default:
 		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
-	if p.memoize && mmz{
-		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
+	if p.memoize && val.(resultValue).memoizable {
+		p.setMemoized(pt, expr, resultTuple{val.(resultValue).value, ok, p.pt})
 	}
-	return val,mmz, ok
+	return val, ok
 }
 
-func (p *parser) parseActionExpr(act *actionExpr) (interface{},bool,bool) {
+func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseActionExpr"))
 	}
 
 	start := p.pt
-	val, mmz, ok := p.parseExpr(act.expr)
+	val, ok := p.parseExpr(act.expr)
 	if ok {
 		p.cur.pos = start.position
 		p.cur.text = p.sliceFrom(start)
@@ -776,15 +788,15 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{},bool,bool) {
 		if err != nil {
 			p.addErrAt(err, start.position)
 		}
-		val = actVal
+		val = resultValue{actVal, val.(resultValue).memoizable}
 	}
 	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
-	return val, mmz, ok
+	return val, ok
 }
 
-func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool, bool) {
+func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseAndCodeExpr"))
 	}
@@ -793,23 +805,23 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool, bool) {
 	if err != nil {
 		p.addErr(err)
 	}
-	return nil, false, ok
+	return makeUnMemoizable(nil), ok
 }
 
-func (p *parser) parseAndExpr(and *andExpr) (interface{},bool, bool) {
+func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseAndExpr"))
 	}
 
 	pt := p.pt
 	p.pushV()
-	_,mmz, ok := p.parseExpr(and.expr)
+	val, ok := p.parseExpr(and.expr)
 	p.popV()
 	p.restore(pt)
-	return nil,mmz,ok
+	return resultValue{nil, val.(resultValue).memoizable}, ok
 }
 
-func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{},bool,bool) {
+func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseAnyMatcher"))
 	}
@@ -817,12 +829,12 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{},bool,bool) {
 	if p.pt.rn != utf8.RuneError {
 		start := p.pt
 		p.read()
-		return p.sliceFrom(start),true, true
+		return makeMemoizable(p.sliceFrom(start)), true
 	}
-	return nil,true, false
+	return makeMemoizable(nil), false
 }
 
-func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool,  bool) {
+func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseCharClassMatcher"))
 	}
@@ -830,7 +842,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	cur := p.pt.rn
 	// can't match EOF
 	if cur == utf8.RuneError {
-		return nil, true, false
+		return makeMemoizable(nil), false
 	}
 	start := p.pt
 	if chr.ignoreCase {
@@ -841,10 +853,10 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	for _, rn := range chr.chars {
 		if rn == cur {
 			if chr.inverted {
-				return nil,true, false
+				return makeMemoizable(nil), false
 			}
 			p.read()
-			return p.sliceFrom(start),true, true
+			return makeMemoizable(p.sliceFrom(start)), true
 		}
 	}
 
@@ -852,10 +864,10 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	for i := 0; i < len(chr.ranges); i += 2 {
 		if cur >= chr.ranges[i] && cur <= chr.ranges[i+1] {
 			if chr.inverted {
-				return nil,true, false
+				return makeMemoizable(nil), false
 			}
 			p.read()
-			return p.sliceFrom(start),true, true
+			return makeMemoizable(p.sliceFrom(start)), true
 		}
 	}
 
@@ -863,52 +875,53 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	for _, cl := range chr.classes {
 		if unicode.Is(cl, cur) {
 			if chr.inverted {
-				return nil,true, false
+				return makeMemoizable(nil), false
 			}
 			p.read()
-			return p.sliceFrom(start),true, true
+			return makeMemoizable(p.sliceFrom(start)), true
 		}
 	}
 
 	if chr.inverted {
 		p.read()
-		return p.sliceFrom(start),true, true
+		return makeMemoizable(p.sliceFrom(start)), true
 	}
-	return nil,true, false
+	return makeMemoizable(nil), false
 }
 
-func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{},bool, bool) {
+func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseChoiceExpr"))
 	}
-
+	mmzFlag := true
 	for _, alt := range ch.alternatives {
 		p.pushV()
-		val, mmz, ok := p.parseExpr(alt)
+		val, ok := p.parseExpr(alt)
 		p.popV()
+		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if ok {
-			return val,mmz, ok
+			return resultValue{val.(resultValue).value, mmzFlag}, ok
 		}
 	}
-	return nil,false, false
+	return makeUnMemoizable(nil), false
 }
 
-func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{},bool, bool) {
+func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseLabeledExpr"))
 	}
 
 	p.pushV()
-	val,mmz, ok := p.parseExpr(lab.expr)
+	val, ok := p.parseExpr(lab.expr)
 	p.popV()
 	if ok && lab.label != "" {
 		m := p.vstack[len(p.vstack)-1]
-		m[lab.label] = val
+		m[lab.label] = val.(resultValue).value
 	}
-	return val,mmz, ok
+	return val, ok
 }
 
-func (p *parser) parseLitMatcher(lit *litMatcher) (interface{},bool, bool) {
+func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseLitMatcher"))
 	}
@@ -921,14 +934,14 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{},bool, bool) {
 		}
 		if cur != want {
 			p.restore(start)
-			return nil,true, false
+			return makeMemoizable(nil), false
 		}
 		p.read()
 	}
-	return p.sliceFrom(start),true, true
+	return makeMemoizable(p.sliceFrom(start)), true
 }
 
-func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{},bool, bool) {
+func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseNotCodeExpr"))
 	}
@@ -937,46 +950,47 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{},bool, bool) {
 	if err != nil {
 		p.addErr(err)
 	}
-	return nil,false, !ok
+	return makeUnMemoizable(nil), !ok
 }
 
-func (p *parser) parseNotExpr(not *notExpr) (interface{},bool, bool) {
+func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseNotExpr"))
 	}
 
 	pt := p.pt
 	p.pushV()
-	_,mmz, ok := p.parseExpr(not.expr)
+	val, ok := p.parseExpr(not.expr)
 	p.popV()
 	p.restore(pt)
-	return nil,mmz, !ok
+	return resultValue{nil, val.(resultValue).memoizable}, !ok
 }
 
-func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{},bool, bool) {
+func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseOneOrMoreExpr"))
 	}
 
 	var vals []interface{}
-	mmzs := true
+	var mmzFlag bool = true
+
 	for {
 		p.pushV()
-		val,mmz, ok := p.parseExpr(expr.expr)
+		val, ok := p.parseExpr(expr.expr)
 		p.popV()
+		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if !ok {
 			if len(vals) == 0 {
 				// did not match once, no match
-				return nil,true, false
+				return makeUnMemoizable(nil), false
 			}
-			return vals,mmzs, true
+			return resultValue{vals, mmzFlag}, true
 		}
-		vals = append(vals, val)
-		mmzs = mmzs && mmz
+		vals = append(vals, val.(resultValue).value)
 	}
 }
 
-func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{},bool, bool) {
+func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseRuleRefExpr " + ref.name))
 	}
@@ -988,61 +1002,62 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{},bool, bool) {
 	rule := p.rules[ref.name]
 	if rule == nil {
 		p.addErr(fmt.Errorf("undefined rule: %s", ref.name))
-		return nil,false, false
+		return makeUnMemoizable(nil), false
 	}
 	return p.parseRule(rule)
 }
 
-func (p *parser) parseSeqExpr(seq *seqExpr) (interface{},bool, bool) {
+func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseSeqExpr"))
 	}
 
 	var vals []interface{}
-	mmzs := true
+	var mmzFlag bool = true
+
 	pt := p.pt
 	for _, expr := range seq.exprs {
-		val,mmz, ok := p.parseExpr(expr)
+		val, ok := p.parseExpr(expr)
+		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if !ok {
 			p.restore(pt)
-			return nil,false, false
+			return resultValue{nil, mmzFlag}, false
 		}
-		vals = append(vals, val)
-		mmzs = mmzs && mmz
+		vals = append(vals, val.(resultValue).value)
 	}
-	return vals, mmzs,  true
+	return resultValue{vals, mmzFlag}, true
 }
 
-func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool,  bool) {
+func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseZeroOrMoreExpr"))
 	}
 
 	var vals []interface{}
-	mmzs := true
-	
+	var mmzFlag bool = true
+
 	for {
 		p.pushV()
-		val,mmz, ok := p.parseExpr(expr.expr)
+		val, ok := p.parseExpr(expr.expr)
 		p.popV()
+		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if !ok {
-			return vals,mmzs, true
+			return resultValue{vals, mmzFlag}, true
 		}
-		vals = append(vals, val)
-		mmzs = mmzs && mmz
+		vals = append(vals, val.(resultValue).value)
 	}
 }
 
-func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{},bool, bool) {
+func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseZeroOrOneExpr"))
 	}
 
 	p.pushV()
-	val,mmz, _ := p.parseExpr(expr.expr)
+	val, _ := p.parseExpr(expr.expr)
 	p.popV()
 	// whether it matched or not, consider it a match
-	return val,mmz, true
+	return val, true
 }
 
 func rangeTable(class string) *unicode.RangeTable {

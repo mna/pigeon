@@ -84,6 +84,18 @@ func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
 	return newParser(filename, b, opts...).parse(g)
 }
 
+// resultValue store returned value of parse* functions and canMemoized flag
+type resultValue struct{
+	value interface{}
+	memoizable bool
+}
+func makeMemoizable(value interface{}) resultValue {
+	return resultValue{value, true}
+}
+func makeUnMemoizable(value interface{}) resultValue {
+	return resultValue{value, false}
+}
+
 // position records a position in the text.
 type position struct {
 	line, col, offset int
@@ -484,7 +496,7 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		}
 		return nil, p.errs.err()
 	}
-	return val, p.errs.err()
+	return val.(resultValue).value, p.errs.err()
 }
 
 func (p *parser) parseRule(rule *rule) (interface{}, bool) {
@@ -496,7 +508,7 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 		res, ok := p.getMemoized(rule)
 		if ok {
 			p.restore(res.end)
-			return res.v, res.b
+			return makeMemoizable(res.v), res.b
 		}
 	}
 
@@ -510,8 +522,8 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 		p.print(strings.Repeat(" ", p.depth) + "MATCH", string(p.sliceFrom(start)))
 	}
 
-	if p.memoize {
-		p.setMemoized(start, rule, resultTuple{val, ok, p.pt})
+	if p.memoize && val.(resultValue).memoizable {
+		p.setMemoized(start, rule, resultTuple{val.(resultValue).value, ok, p.pt})
 	}
 	return val, ok
 }
@@ -524,7 +536,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 		res, ok := p.getMemoized(expr)
 		if ok {
 			p.restore(res.end)
-			return res.v, res.b
+			return makeMemoizable(res.v), res.b
 		}
 		pt = p.pt
 	}
@@ -565,8 +577,8 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	default:
 		panic(fmt.Sprintf("unknown expression type %%T", expr))
 	}
-	if p.memoize {
-		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
+	if p.memoize && val.(resultValue).memoizable {
+		p.setMemoized(pt, expr, resultTuple{val.(resultValue).value, ok, p.pt})
 	}
 	return val, ok
 }
@@ -585,7 +597,7 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 		if err != nil {
 			p.addErrAt(err, start.position)
 		}
-		val = actVal
+		val = resultValue{actVal, val.(resultValue).memoizable} 
 	}
 	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth) + "MATCH", string(p.sliceFrom(start)))
@@ -602,7 +614,7 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
 	if err != nil {
 		p.addErr(err)
 	}
-	return nil, ok
+	return makeUnMemoizable(nil), ok
 }
 
 func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
@@ -612,10 +624,10 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 
 	pt := p.pt
 	p.pushV()
-	_, ok := p.parseExpr(and.expr)
+	val, ok := p.parseExpr(and.expr)
 	p.popV()
 	p.restore(pt)
-	return nil, ok
+	return resultValue{nil, val.(resultValue).memoizable}, ok
 }
 
 func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
@@ -626,9 +638,9 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 	if p.pt.rn != utf8.RuneError {
 		start := p.pt
 		p.read()
-		return p.sliceFrom(start), true
+		return makeMemoizable(p.sliceFrom(start)), true
 	}
-	return nil, false
+	return makeMemoizable(nil), false
 }
 
 func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool) {
@@ -639,7 +651,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	cur := p.pt.rn
 	// can't match EOF
 	if cur == utf8.RuneError {
-		return nil, false
+		return makeMemoizable(nil), false
 	}
 	start := p.pt
 	if chr.ignoreCase {
@@ -650,10 +662,10 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	for _, rn := range chr.chars {
 		if rn == cur {
 			if chr.inverted {
-				return nil, false
+				return makeMemoizable(nil), false
 			}
 			p.read()
-			return p.sliceFrom(start), true
+			return makeMemoizable(p.sliceFrom(start)), true
 		}
 	}
 
@@ -661,10 +673,10 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	for i := 0; i < len(chr.ranges); i += 2 {
 		if cur >= chr.ranges[i] && cur <= chr.ranges[i+1] {
 			if chr.inverted {
-				return nil, false
+				return makeMemoizable(nil), false
 			}
 			p.read()
-			return p.sliceFrom(start), true
+			return makeMemoizable(p.sliceFrom(start)), true
 		}
 	}
 
@@ -672,34 +684,35 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	for _, cl := range chr.classes {
 		if unicode.Is(cl, cur) {
 			if chr.inverted {
-				return nil, false
+				return makeMemoizable(nil), false
 			}
 			p.read()
-			return p.sliceFrom(start), true
+			return makeMemoizable(p.sliceFrom(start)), true
 		}
 	}
 
 	if chr.inverted {
 		p.read()
-		return p.sliceFrom(start), true
+		return makeMemoizable(p.sliceFrom(start)), true
 	}
-	return nil, false
+	return makeMemoizable(nil), false
 }
 
 func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseChoiceExpr"))
 	}
-
+	mmzFlag := true
 	for _, alt := range ch.alternatives {
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()
+		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if ok {
-			return val, ok
-		}
+			return resultValue{val.(resultValue).value, mmzFlag}, ok
+		}		
 	}
-	return nil, false
+	return makeUnMemoizable(nil), false
 }
 
 func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
@@ -712,7 +725,7 @@ func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
 	p.popV()
 	if ok && lab.label != "" {
 		m := p.vstack[len(p.vstack)-1]
-		m[lab.label] = val
+		m[lab.label] = val.(resultValue).value
 	}
 	return val, ok
 }
@@ -730,11 +743,11 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 		}
 		if cur != want {
 			p.restore(start)
-			return nil, false
+			return makeMemoizable(nil), false
 		}
 		p.read()
 	}
-	return p.sliceFrom(start), true
+	return makeMemoizable(p.sliceFrom(start)), true
 }
 
 func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
@@ -746,7 +759,7 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 	if err != nil {
 		p.addErr(err)
 	}
-	return nil, !ok
+	return makeUnMemoizable(nil), !ok
 }
 
 func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
@@ -756,10 +769,10 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 
 	pt := p.pt
 	p.pushV()
-	_, ok := p.parseExpr(not.expr)
+	val, ok := p.parseExpr(not.expr)
 	p.popV()
 	p.restore(pt)
-	return nil, !ok
+	return resultValue{nil, val.(resultValue).memoizable}, !ok
 }
 
 func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
@@ -768,19 +781,21 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 	}
 
 	var vals []interface{}
+	var mmzFlag bool = true
 
 	for {
 		p.pushV()
 		val, ok := p.parseExpr(expr.expr)
 		p.popV()
+		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if !ok {
 			if len(vals) == 0 {
 				// did not match once, no match
-				return nil, false
+				return makeUnMemoizable(nil), false
 			}
-			return vals, true
+			return resultValue{vals,mmzFlag}, true
 		}
-		vals = append(vals, val)
+		vals = append(vals, val.(resultValue).value)		
 	}
 }
 
@@ -796,7 +811,7 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
 	rule := p.rules[ref.name]
 	if rule == nil {
 		p.addErr(fmt.Errorf("undefined rule: %%s", ref.name))
-		return nil, false
+		return makeUnMemoizable(nil), false
 	}
 	return p.parseRule(rule)
 }
@@ -807,17 +822,19 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	}
 
 	var vals []interface{}
+	var mmzFlag bool = true
 
 	pt := p.pt
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
+		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if !ok {
 			p.restore(pt)
-			return nil, false
+			return resultValue{nil,mmzFlag}, false
 		}
-		vals = append(vals, val)
+		vals = append(vals, val.(resultValue).value)		
 	}
-	return vals, true
+	return resultValue{vals,mmzFlag}, true
 }
 
 func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
@@ -826,15 +843,17 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 	}
 
 	var vals []interface{}
+	var mmzFlag bool = true
 
 	for {
 		p.pushV()
 		val, ok := p.parseExpr(expr.expr)
 		p.popV()
+		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if !ok {
-			return vals, true
+			return resultValue{vals,mmzFlag}, true
 		}
-		vals = append(vals, val)
+		vals = append(vals, val.(resultValue).value)	
 	}
 }
 
