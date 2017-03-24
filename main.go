@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/PuerkitoBio/pigeon/ast"
-	"github.com/PuerkitoBio/pigeon/builder"
+	"github.com/mna/pigeon/ast"
+	"github.com/mna/pigeon/builder"
 )
 
 var exit = os.Exit
@@ -108,7 +108,7 @@ the generated code is written to this file instead.
 	-x
 		do not generate the parser, only parse the grammar.
 
-See https://godoc.org/github.com/PuerkitoBio/pigeon for more
+See https://godoc.org/github.com/mna/pigeon for more
 information.
 `
 

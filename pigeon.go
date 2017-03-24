@@ -12,7 +12,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/PuerkitoBio/pigeon/ast"
+	"github.com/mna/pigeon/ast"
 )
 
 var g = &grammar{

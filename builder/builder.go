@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/PuerkitoBio/pigeon/ast"
+	"github.com/mna/pigeon/ast"
 )
 
 // generated function templates

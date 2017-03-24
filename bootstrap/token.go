@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"fmt"
 
-	"github.com/PuerkitoBio/pigeon/ast"
+	"github.com/mna/pigeon/ast"
 )
 
 type tid int

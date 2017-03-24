@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/PuerkitoBio/pigeon/ast"
-	"github.com/PuerkitoBio/pigeon/builder"
+	"github.com/mna/pigeon/ast"
+	"github.com/mna/pigeon/builder"
 )
 
 func main() {

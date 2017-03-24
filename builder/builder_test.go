@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PuerkitoBio/pigeon/bootstrap"
+	"github.com/mna/pigeon/bootstrap"
 )
 
-var grammar = ` 
+var grammar = `
 {
 var test = "some string"
 

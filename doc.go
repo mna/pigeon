@@ -306,7 +306,7 @@ as a package with public functions to parse input text. The exported API is:
 
 See the godoc page of the generated parser for the test/predicates grammar
 for an example documentation page of the exported API:
-http://godoc.org/github.com/PuerkitoBio/pigeon/test/predicates.
+http://godoc.org/github.com/mna/pigeon/test/predicates.
 
 Like the grammar used to generate the parser, the input text must be
 UTF-8-encoded Unicode.
@@ -432,7 +432,7 @@ the future):
 References:
 
     [5]: https://golang.org/doc/go1compat
-    [6]: http://godoc.org/github.com/PuerkitoBio/pigeon/test/predicates
+    [6]: http://godoc.org/github.com/mna/pigeon/test/predicates
 
 */
 package main

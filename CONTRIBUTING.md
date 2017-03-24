@@ -28,6 +28,6 @@ Once all code is done and tests pass, regenerate the whole tree with `make`, run
 
 All pull requests that get merged will be made available under the BSD 3-Clause license (see the LICENSE file for details), as the rest of the pigeon repository. Do not submit pull requests if you do not want your contributions to be made available under those terms.
 
-[0]: https://github.com/PuerkitoBio/pigeon/issues/new
-[1]: https://github.com/PuerkitoBio/pigeon/pulls
+[0]: https://github.com/mna/pigeon/issues/new
+[1]: https://github.com/mna/pigeon/pulls
 [2]: https://github.com/golang/go/wiki/CodeReviewComments

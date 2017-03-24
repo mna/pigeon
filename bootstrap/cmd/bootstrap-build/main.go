@@ -9,8 +9,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/PuerkitoBio/pigeon/bootstrap"
-	"github.com/PuerkitoBio/pigeon/builder"
+	"github.com/mna/pigeon/bootstrap"
+	"github.com/mna/pigeon/builder"
 )
 
 func main() {
