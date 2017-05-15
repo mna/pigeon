@@ -2683,7 +2683,6 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 
 func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	var pt savepoint
-	var ok bool
 
 	if p.memoize {
 		res, ok := p.getMemoized(expr)
@@ -2696,6 +2695,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 
 	p.exprCnt++
 	var val interface{}
+	var ok bool
 	switch expr := expr.(type) {
 	case *actionExpr:
 		val, ok = p.parseActionExpr(expr)
