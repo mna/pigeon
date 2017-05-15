@@ -17,8 +17,8 @@ type Scanner struct {
 	errh func(ast.Pos, error)
 
 	eof  bool
-	cpos ast.Pos
 	cur  rune
+	cpos ast.Pos
 	cw   int
 
 	tok bytes.Buffer
