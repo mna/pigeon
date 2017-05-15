@@ -155,7 +155,7 @@ var tokenStringLen = 50
 func (t Token) String() string {
 	v := t.lit
 	if len(v) > tokenStringLen {
-		v = v[:tokenStringLen/2] + "[...]" + v[len(v)-(tokenStringLen/2):len(v)]
+		v = v[:tokenStringLen/2] + "[...]" + v[len(v)-(tokenStringLen/2):]
 	}
 	return fmt.Sprintf("%s: %s %q", t.pos, t.id, v)
 }
