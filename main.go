@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"flag"
 	"fmt"
@@ -9,6 +10,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"golang.org/x/tools/imports"
 
 	"github.com/mna/pigeon/ast"
 	"github.com/mna/pigeon/builder"
@@ -63,26 +66,38 @@ func main() {
 		out := output(*outputFlag)
 		defer out.Close()
 
+		outBuf := bytes.NewBuffer([]byte{})
+
 		curNmOpt := builder.ReceiverName(*recvrNmFlag)
-		if err := builder.BuildParser(out, g.(*ast.Grammar), curNmOpt); err != nil {
+		if err := builder.BuildParser(outBuf, g.(*ast.Grammar), curNmOpt); err != nil {
 			fmt.Fprintln(os.Stderr, "build error: ", err)
 			exit(5)
+		}
+
+		// Defaults from golang.org/x/tools/cmd/goimports
+		options := &imports.Options{
+			TabWidth:  8,
+			TabIndent: true,
+			Comments:  true,
+			Fragment:  true,
+		}
+
+		formattedBuf, err := imports.Process("filename", outBuf.Bytes(), options)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "format error: ", err)
+			exit(6)
+		}
+
+		if _, err := out.Write(formattedBuf); err != nil {
+			fmt.Fprintln(os.Stderr, "write error: ", err)
+			exit(7)
 		}
 	}
 }
 
 var usagePage = `usage: %s [options] [GRAMMAR_FILE]
 
-Pigeon generates a parser based on a PEG grammar. It doesn't try
-to format the generated code nor to detect required imports -
-it is recommended to pipe the output of pigeon through a tool
-such as goimports to do this, e.g.:
-
-	pigeon GRAMMAR_FILE | goimports > output.go
-
-Use the following command to install goimports:
-
-	go get golang.org/x/tools/cmd/goimports
+Pigeon generates a parser based on a PEG grammar.
 
 By default, pigeon reads the grammar from stdin and writes the
 generated parser to stdout. If GRAMMAR_FILE is specified, the

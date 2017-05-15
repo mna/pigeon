@@ -24,19 +24,7 @@ This will install or update the package, and the `pigeon` command will be instal
 $ pigeon [options] [PEG_GRAMMAR_FILE]
 ```
 
-By default, the input grammar is read from `stdin` and the generated code is printed to `stdout`. You may save it in a file using the `-o` flag, but pigeon makes no attempt to format the generated code, nor does it try to generate the required imports, because such a tool already exists. The recommended way to generate a properly formatted and working parser is to pipe the output of pigeon through the `goimports` tool:
-
-```
-$ pigeon my_revolutionary_programming_language.peg | goimports > main.go
-```
-
-This way, the generated code has all the necessary imports and is properly formatted. You can install `goimports` using:
-
-```
-$ go get golang.org/x/tools/cmd/goimports
-```
-
-See the [godoc page][3] for detailed usage.
+By default, the input grammar is read from `stdin` and the generated code is printed to `stdout`. You may save it in a file using the `-o` flag.
 
 ## Example
 
