@@ -29,7 +29,13 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(2)
 		}
-		defer outf.Close()
+		defer func() {
+			err := outf.Close()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(3)
+			}
+		}()
 		outw = outf
 	}
 
@@ -38,7 +44,13 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
-	defer f.Close()
+	defer func() {
+		err = f.Close()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(4)
+		}
+	}()
 
 	p := bootstrap.NewParser()
 	g, err := p.Parse(os.Args[1], f)

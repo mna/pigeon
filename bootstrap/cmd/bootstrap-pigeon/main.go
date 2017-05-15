@@ -33,7 +33,13 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(2)
 		}
-		defer f.Close()
+		defer func() {
+			err := f.Close()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(6)
+			}
+		}()
 		inf = f
 		nm = flag.Arg(0)
 	}
@@ -53,7 +59,13 @@ func main() {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(4)
 			}
-			defer f.Close()
+			defer func() {
+				err := f.Close()
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					os.Exit(7)
+				}
+			}()
 			outw = f
 		}
 
