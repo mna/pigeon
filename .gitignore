@@ -8,3 +8,5 @@ bootstrap/cmd/pegscan/pegscan
 bootstrap/cmd/pegparse/pegparse
 bin/
 pigeon
+*.exe
+*~
