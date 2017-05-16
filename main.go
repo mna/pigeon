@@ -57,6 +57,11 @@ func main() {
 		err = rc.Close()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "close file error:\n", err)
+		}
+		if r := recover(); r != nil {
+			panic(r)
+		}
+		if err != nil {
 			exit(7)
 		}
 	}()
