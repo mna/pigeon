@@ -956,18 +956,3 @@ func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
 	// whether it matched or not, consider it a match
 	return val, true
 }
-
-func rangeTable(class string) *unicode.RangeTable {
-	if rt, ok := unicode.Categories[class]; ok {
-		return rt
-	}
-	if rt, ok := unicode.Properties[class]; ok {
-		return rt
-	}
-	if rt, ok := unicode.Scripts[class]; ok {
-		return rt
-	}
-
-	// cannot happen
-	panic(fmt.Sprintf("invalid Unicode class: %s", class))
-}

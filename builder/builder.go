@@ -70,6 +70,8 @@ type builder struct {
 	ruleName  string
 	exprIndex int
 	argsStack [][]string
+
+	rangeTable bool
 }
 
 func (b *builder) setOptions(opts []Option) {
@@ -254,6 +256,7 @@ func (b *builder) writeCharClassMatcher(ch *ast.CharClassMatcher) {
 		b.writelnf("},")
 	}
 	if len(ch.UnicodeClasses) > 0 {
+		b.rangeTable = true
 		b.writef("\tclasses: []*unicode.RangeTable{")
 		for _, cl := range ch.UnicodeClasses {
 			b.writef("rangeTable(%q),", cl)
@@ -556,6 +559,9 @@ func (b *builder) writeFunc(funcIx int, code *ast.CodeBlock, callTpl, funcTpl st
 
 func (b *builder) writeStaticCode() {
 	b.writelnf(staticCode)
+	if b.rangeTable {
+		b.writelnf(rangeTable)
+	}
 }
 
 func (b *builder) funcName(ix int) string {

@@ -851,7 +851,9 @@ func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
 	// whether it matched or not, consider it a match
 	return val, true
 }
+`
 
+var rangeTable = `
 func rangeTable(class string) *unicode.RangeTable {
 	if rt, ok := unicode.Categories[class]; ok {
 		return rt
