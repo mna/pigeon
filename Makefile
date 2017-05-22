@@ -95,6 +95,9 @@ $(TEST_DIR)/issue_18/issue_18.go: $(TEST_DIR)/issue_18/issue_18.peg $(BINDIR)/pi
 $(TEST_DIR)/errorpos/errorpos.go: $(TEST_DIR)/errorpos/errorpos.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
+$(TEST_DIR)/global_store/global_store.go: $(TEST_DIR)/global_store/global_store.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
 lint:
 	golint ./...
 	go vet ./...

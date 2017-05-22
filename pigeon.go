@@ -2887,6 +2887,16 @@ func Recover(b bool) Option {
 	}
 }
 
+// GlobalStore creates an Option to set a key to a certain value in
+// the globalStore.
+func GlobalStore(key string, value interface{}) Option {
+	return func(p *parser) Option {
+		old := p.cur.globalStore[key]
+		p.cur.globalStore[key] = value
+		return GlobalStore(key, old)
+	}
+}
+
 // ParseFile parses the file identified by filename.
 func ParseFile(filename string, opts ...Option) (i interface{}, err error) {
 	f, err := os.Open(filename)
@@ -2936,6 +2946,9 @@ type savepoint struct {
 type current struct {
 	pos  position // start position of the match
 	text []byte   // raw text of the match
+
+	// the globalStore allows the parser to store arbitrary values
+	globalStore map[string]interface{}
 }
 
 // the AST types...
@@ -3081,11 +3094,14 @@ func (p *parserError) Error() string {
 // newParser creates a parser with the specified input source and options.
 func newParser(filename string, b []byte, opts ...Option) *parser {
 	p := &parser{
-		filename:        filename,
-		errs:            new(errList),
-		data:            b,
-		pt:              savepoint{position: position{line: 1}},
-		recover:         true,
+		filename: filename,
+		errs:     new(errList),
+		data:     b,
+		pt:       savepoint{position: position{line: 1}},
+		recover:  true,
+		cur: current{
+			globalStore: make(map[string]interface{}),
+		},
 		maxFailPos:      position{col: 1, line: 1},
 		maxFailExpected: make(map[string]struct{}),
 	}
