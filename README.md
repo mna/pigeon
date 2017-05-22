@@ -8,6 +8,13 @@ The pigeon command generates parsers based on a [parsing expression grammar (PEG
 
 See the [godoc page][3] for detailed usage.
 
+## Releases
+
+* v1.0.0 is the tagged release of the original implementation.
+* Work has started on v2.0.0 with some planned breaking changes.
+
+Github user [@mna][6] created the package in April 2015, and [@breml][5] is the package's maintainer as of May 2017.
+
 ## Installation
 
 Provided you have Go correctly installed with the $GOPATH and $GOBIN environment variables set, run:
@@ -142,3 +149,5 @@ The [BSD 3-Clause license][4]. See the LICENSE file.
 [2]: http://www.codeproject.com/Articles/29713/Parsing-Expression-Grammar-Support-for-C-Part
 [3]: https://godoc.org/github.com/mna/pigeon
 [4]: http://opensource.org/licenses/BSD-3-Clause
+[5]: https://github.com/breml
+[6]: https://github.com/mna
