@@ -15,6 +15,10 @@ See the [godoc page][3] for detailed usage.
 
 Github user [@mna][6] created the package in April 2015, and [@breml][5] is the package's maintainer as of May 2017.
 
+### Breaking Changes since v1.0.0
+
+* Removed support for Go v1.1.x in []() due to an incompatibility of [golang.org/x/tools/imports](https://godoc.org/golang.org/x/tools/imports) with [go/ast](https://godoc.org/go/ast) of go v1.1.x.
+
 ## Installation
 
 Provided you have Go correctly installed with the $GOPATH and $GOBIN environment variables set, run:
