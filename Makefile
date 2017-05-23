@@ -38,14 +38,14 @@ $(BINDIR)/bootstrap-build: $(BOOTSTRAPBUILD_SRC) $(BOOTSTRAP_SRC) $(BUILDER_SRC)
 
 $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go: $(BINDIR)/bootstrap-build \
 	$(BOOTSTRAP_GRAMMAR)
-	$(BINDIR)/bootstrap-build $(BOOTSTRAP_GRAMMAR) | goimports > $@
+	$(BINDIR)/bootstrap-build $(BOOTSTRAP_GRAMMAR) > $@
 
 $(BINDIR)/bootstrap-pigeon: $(BOOTSTRAPPIGEON_SRC) \
 	$(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go
 	go build -o $@ $(BOOTSTRAPPIGEON_DIR)
 
 $(ROOT)/pigeon.go: $(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR)
-	$(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR) | goimports > $@
+	$(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR) > $@
 
 $(BINDIR)/pigeon: $(ROOT_SRC) $(ROOT)/pigeon.go
 	go build -o $@ $(ROOT)
@@ -56,33 +56,33 @@ $(PIGEON_GRAMMAR):
 # surely there's a better way to define the examples and test targets
 
 $(EXAMPLES_DIR)/json/json.go: $(EXAMPLES_DIR)/json/json.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon $< | goimports > $@
+	$(BINDIR)/pigeon $< > $@
 
 $(EXAMPLES_DIR)/calculator/calculator.go: $(EXAMPLES_DIR)/calculator/calculator.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon $< | goimports > $@
+	$(BINDIR)/pigeon $< > $@
 
 $(TEST_DIR)/andnot/andnot.go: $(TEST_DIR)/andnot/andnot.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon $< | goimports > $@
+	$(BINDIR)/pigeon $< > $@
 
 $(TEST_DIR)/predicates/predicates.go: $(TEST_DIR)/predicates/predicates.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon $< | goimports > $@
+	$(BINDIR)/pigeon $< > $@
 
 $(TEST_DIR)/issue_1/issue_1.go: $(TEST_DIR)/issue_1/issue_1.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon $< | goimports > $@
+	$(BINDIR)/pigeon $< > $@
 
 $(TEST_DIR)/linear/linear.go: $(TEST_DIR)/linear/linear.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon $< | goimports > $@
+	$(BINDIR)/pigeon $< > $@
 
 $(TEST_DIR)/issue_12/issue_12.go: $(TEST_DIR)/issue_12/issue_12.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon $< | goimports > $@
+	$(BINDIR)/pigeon $< > $@
 
 lint:
 	golint ./...
 	go vet ./...
 
 cmp:
-	@boot=$$(mktemp) && $(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR) | goimports > $$boot && \
-	official=$$(mktemp) && $(BINDIR)/pigeon $(PIGEON_GRAMMAR) | goimports > $$official && \
+	@boot=$$(mktemp) && $(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR) > $$boot && \
+	official=$$(mktemp) && $(BINDIR)/pigeon $(PIGEON_GRAMMAR) > $$official && \
 	cmp $$boot $$official && \
 	unlink $$boot && \
 	unlink $$official

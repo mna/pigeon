@@ -6,9 +6,12 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"os"
+
+	"golang.org/x/tools/imports"
 
 	"github.com/mna/pigeon/ast"
 	"github.com/mna/pigeon/builder"
@@ -69,9 +72,30 @@ func main() {
 			outw = f
 		}
 
-		if err := builder.BuildParser(outw, g.(*ast.Grammar)); err != nil {
+		outBuf := bytes.NewBuffer([]byte{})
+
+		if err := builder.BuildParser(outBuf, g.(*ast.Grammar)); err != nil {
 			fmt.Fprintln(os.Stderr, "build error: ", err)
 			os.Exit(5)
+		}
+
+		// Defaults from golang.org/x/tools/cmd/goimports
+		options := &imports.Options{
+			TabWidth:  8,
+			TabIndent: true,
+			Comments:  true,
+			Fragment:  true,
+		}
+
+		formattedBuf, err := imports.Process("filename", outBuf.Bytes(), options)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "format error: ", err)
+			os.Exit(6)
+		}
+
+		if _, err := outw.Write(formattedBuf); err != nil {
+			fmt.Fprintln(os.Stderr, "write error: ", err)
+			os.Exit(7)
 		}
 	}
 }

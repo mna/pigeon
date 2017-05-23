@@ -49,14 +49,6 @@ The following options can be specified:
 	code blocks. Non-initializer code blocks in the grammar end up as methods on the
 	*current type, and this option sets the name of the receiver (default: c).
 
-The tool makes no attempt to format the code, nor to detect the
-required imports. It is recommended to use goimports to properly generate
-the output code:
-	pigeon GRAMMAR_FILE | goimports > output_file.go
-
-The goimports tool can be installed with:
-	go get golang.org/x/tools/cmd/goimports
-
 If the code blocks in the grammar (see below, section "Code block") are golint-
 and go vet-compliant, then the resulting generated code will also be golint-
 and go vet-compliant.

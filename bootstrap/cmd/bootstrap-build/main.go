@@ -4,10 +4,13 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"log"
 	"os"
+
+	"golang.org/x/tools/imports"
 
 	"github.com/mna/pigeon/bootstrap"
 	"github.com/mna/pigeon/builder"
@@ -58,7 +61,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := builder.BuildParser(outw, g); err != nil {
+	outBuf := bytes.NewBuffer([]byte{})
+
+	if err := builder.BuildParser(outBuf, g); err != nil {
+		log.Fatal(err)
+	}
+
+	// Defaults from golang.org/x/tools/cmd/goimports
+	options := &imports.Options{
+		TabWidth:  8,
+		TabIndent: true,
+		Comments:  true,
+		Fragment:  true,
+	}
+
+	formattedBuf, err := imports.Process("filename", outBuf.Bytes(), options)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if _, err := outw.Write(formattedBuf); err != nil {
 		log.Fatal(err)
 	}
 }
