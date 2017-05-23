@@ -26,12 +26,12 @@ func TestLinearTime(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		enc.Close()
+		_ = enc.Close()
 
 		start := time.Now()
 		if _, err := Parse("", buf.Bytes(), Memoize(true)); err != nil {
 			t.Fatal(err)
 		}
-		t.Log(time.Now().Sub(start))
+		t.Log(time.Since(start))
 	}
 }

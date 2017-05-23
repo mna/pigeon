@@ -26,7 +26,13 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(2)
 		}
-		defer f.Close()
+		defer func() {
+			err := f.Close()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(3)
+			}
+		}()
 		in = f
 		nm = os.Args[1]
 	} else {

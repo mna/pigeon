@@ -20,7 +20,9 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer f.Close()
+		defer func() {
+			_ = f.Close()
+		}()
 		in = f
 	}
 	got, err := ParseReader("", in)
@@ -40,24 +42,24 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Input",
-			pos:  position{line: 28, col: 1, offset: 406},
+			pos:  position{line: 30, col: 1, offset: 428},
 			expr: &seqExpr{
-				pos: position{line: 28, col: 9, offset: 416},
+				pos: position{line: 30, col: 9, offset: 438},
 				exprs: []interface{}{
 					&ruleRefExpr{
-						pos:  position{line: 28, col: 9, offset: 416},
+						pos:  position{line: 30, col: 9, offset: 438},
 						name: "_",
 					},
 					&ruleRefExpr{
-						pos:  position{line: 28, col: 11, offset: 418},
+						pos:  position{line: 30, col: 11, offset: 440},
 						name: "AB",
 					},
 					&ruleRefExpr{
-						pos:  position{line: 28, col: 14, offset: 421},
+						pos:  position{line: 30, col: 14, offset: 443},
 						name: "_",
 					},
 					&ruleRefExpr{
-						pos:  position{line: 28, col: 16, offset: 423},
+						pos:  position{line: 30, col: 16, offset: 445},
 						name: "EOF",
 					},
 				},
@@ -65,20 +67,20 @@ var g = &grammar{
 		},
 		{
 			name: "AB",
-			pos:  position{line: 30, col: 1, offset: 428},
+			pos:  position{line: 32, col: 1, offset: 450},
 			expr: &choiceExpr{
-				pos: position{line: 30, col: 6, offset: 435},
+				pos: position{line: 32, col: 6, offset: 457},
 				alternatives: []interface{}{
 					&seqExpr{
-						pos: position{line: 30, col: 6, offset: 435},
+						pos: position{line: 32, col: 6, offset: 457},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 30, col: 6, offset: 435},
+								pos:   position{line: 32, col: 6, offset: 457},
 								label: "abees",
 								expr: &oneOrMoreExpr{
-									pos: position{line: 30, col: 12, offset: 441},
+									pos: position{line: 32, col: 12, offset: 463},
 									expr: &charClassMatcher{
-										pos:        position{line: 30, col: 12, offset: 441},
+										pos:        position{line: 32, col: 12, offset: 463},
 										val:        "[ab]",
 										chars:      []rune{'a', 'b'},
 										ignoreCase: false,
@@ -87,13 +89,13 @@ var g = &grammar{
 								},
 							},
 							&andCodeExpr{
-								pos: position{line: 30, col: 18, offset: 447},
+								pos: position{line: 32, col: 18, offset: 469},
 								run: (*parser).callonAB6,
 							},
 						},
 					},
 					&ruleRefExpr{
-						pos:  position{line: 30, col: 77, offset: 506},
+						pos:  position{line: 32, col: 77, offset: 528},
 						name: "CD",
 					},
 				},
@@ -101,17 +103,17 @@ var g = &grammar{
 		},
 		{
 			name: "CD",
-			pos:  position{line: 31, col: 1, offset: 509},
+			pos:  position{line: 33, col: 1, offset: 531},
 			expr: &seqExpr{
-				pos: position{line: 31, col: 6, offset: 516},
+				pos: position{line: 33, col: 6, offset: 538},
 				exprs: []interface{}{
 					&labeledExpr{
-						pos:   position{line: 31, col: 6, offset: 516},
+						pos:   position{line: 33, col: 6, offset: 538},
 						label: "ceedees",
 						expr: &oneOrMoreExpr{
-							pos: position{line: 31, col: 14, offset: 524},
+							pos: position{line: 33, col: 14, offset: 546},
 							expr: &charClassMatcher{
-								pos:        position{line: 31, col: 14, offset: 524},
+								pos:        position{line: 33, col: 14, offset: 546},
 								val:        "[cd]",
 								chars:      []rune{'c', 'd'},
 								ignoreCase: false,
@@ -120,7 +122,7 @@ var g = &grammar{
 						},
 					},
 					&notCodeExpr{
-						pos: position{line: 31, col: 20, offset: 530},
+						pos: position{line: 33, col: 20, offset: 552},
 						run: (*parser).callonCD5,
 					},
 				},
@@ -128,11 +130,11 @@ var g = &grammar{
 		},
 		{
 			name: "_",
-			pos:  position{line: 33, col: 1, offset: 590},
+			pos:  position{line: 35, col: 1, offset: 612},
 			expr: &zeroOrMoreExpr{
-				pos: position{line: 33, col: 5, offset: 596},
+				pos: position{line: 35, col: 5, offset: 618},
 				expr: &charClassMatcher{
-					pos:        position{line: 33, col: 5, offset: 596},
+					pos:        position{line: 35, col: 5, offset: 618},
 					val:        "[ \\t\\n\\r]",
 					chars:      []rune{' ', '\t', '\n', '\r'},
 					ignoreCase: false,
@@ -142,11 +144,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 34, col: 1, offset: 607},
+			pos:  position{line: 36, col: 1, offset: 629},
 			expr: &notExpr{
-				pos: position{line: 34, col: 7, offset: 615},
+				pos: position{line: 36, col: 7, offset: 637},
 				expr: &anyMatcher{
-					line: 34, col: 8, offset: 616,
+					line: 36, col: 8, offset: 638,
 				},
 			},
 		},
@@ -230,12 +232,14 @@ func Recover(b bool) Option {
 }
 
 // ParseFile parses the file identified by filename.
-func ParseFile(filename string, opts ...Option) (interface{}, error) {
+func ParseFile(filename string, opts ...Option) (i interface{}, err error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		err = f.Close()
+	}()
 	return ParseReader(filename, f, opts...)
 }
 
@@ -451,9 +455,9 @@ type parser struct {
 	data []byte
 	errs *errList
 
+	depth   int
 	recover bool
 	debug   bool
-	depth   int
 
 	memoize bool
 	// memoization table for the packrat algorithm:
@@ -690,7 +694,6 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 
 func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	var pt savepoint
-	var ok bool
 
 	if p.memoize {
 		res, ok := p.getMemoized(expr)
@@ -703,6 +706,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 
 	p.exprCnt++
 	var val interface{}
+	var ok bool
 	switch expr := expr.(type) {
 	case *actionExpr:
 		val, ok = p.parseActionExpr(expr)
@@ -1020,19 +1024,4 @@ func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
 	p.popV()
 	// whether it matched or not, consider it a match
 	return val, true
-}
-
-func rangeTable(class string) *unicode.RangeTable {
-	if rt, ok := unicode.Categories[class]; ok {
-		return rt
-	}
-	if rt, ok := unicode.Properties[class]; ok {
-		return rt
-	}
-	if rt, ok := unicode.Scripts[class]; ok {
-		return rt
-	}
-
-	// cannot happen
-	panic(fmt.Sprintf("invalid Unicode class: %s", class))
 }

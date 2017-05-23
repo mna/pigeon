@@ -32,7 +32,11 @@ func main() {
 	)
 
 	fs.Usage = usage
-	fs.Parse(os.Args[1:])
+	err := fs.Parse(os.Args[1:])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "args parse error:\n", err)
+		exit(6)
+	}
 
 	if *shortHelpFlag || *longHelpFlag {
 		fs.Usage()
@@ -49,7 +53,18 @@ func main() {
 		infile = fs.Arg(0)
 	}
 	nm, rc := input(infile)
-	defer rc.Close()
+	defer func() {
+		err = rc.Close()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "close file error:\n", err)
+		}
+		if r := recover(); r != nil {
+			panic(r)
+		}
+		if err != nil {
+			exit(7)
+		}
+	}()
 
 	// parse input
 	g, err := ParseReader(nm, rc, Debug(*dbgFlag), Memoize(*cacheFlag), Recover(!*noRecoverFlag))
@@ -61,7 +76,13 @@ func main() {
 	if !*noBuildFlag {
 		// generate parser
 		out := output(*outputFlag)
-		defer out.Close()
+		defer func() {
+			err := out.Close()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "close file error:\n", err)
+				exit(8)
+			}
+		}()
 
 		curNmOpt := builder.ReceiverName(*recvrNmFlag)
 		if err := builder.BuildParser(out, g.(*ast.Grammar), curNmOpt); err != nil {
