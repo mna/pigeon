@@ -76,6 +76,9 @@ $(TEST_DIR)/linear/linear.go: $(TEST_DIR)/linear/linear.peg $(BINDIR)/pigeon
 $(TEST_DIR)/issue_12/issue_12.go: $(TEST_DIR)/issue_12/issue_12.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
+$(TEST_DIR)/errorpos/errorpos.go: $(TEST_DIR)/errorpos/errorpos.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
 lint:
 	golint ./...
 	go vet ./...
