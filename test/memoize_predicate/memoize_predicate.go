@@ -1,16 +1,206 @@
-package builder
+package main
 
-var staticCode = `
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"os"
+	"strings"
+	"unicode"
+	"unicode/utf8"
+)
+
+func main() {
+	in := os.Stdin
+	if len(os.Args) > 1 {
+		f, err := os.Open(os.Args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		in = f
+	}
+	got, err := ParseReader("", in, Debug(true))
+	fmt.Println(got, err)
+}
+
+var data = []int{1, 2}
+var idx int
+
+var g = &grammar{
+	rules: []*rule{
+		{
+			name: "input",
+			pos:  position{line: 22, col: 1, offset: 302},
+			expr: &actionExpr{
+				pos: position{line: 22, col: 9, offset: 310},
+				run: (*parser).calloninput1,
+				expr: &seqExpr{
+					pos: position{line: 22, col: 9, offset: 310},
+					exprs: []interface{}{
+						&ruleRefExpr{
+							pos:  position{line: 22, col: 9, offset: 310},
+							name: "INIT",
+						},
+						&labeledExpr{
+							pos:   position{line: 22, col: 14, offset: 315},
+							label: "v",
+							expr: &oneOrMoreExpr{
+								pos: position{line: 22, col: 16, offset: 317},
+								expr: &ruleRefExpr{
+									pos:  position{line: 22, col: 16, offset: 317},
+									name: "line",
+								},
+							},
+						},
+						&ruleRefExpr{
+							pos:  position{line: 22, col: 22, offset: 323},
+							name: "EOF",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "line",
+			pos:  position{line: 23, col: 1, offset: 344},
+			expr: &choiceExpr{
+				pos: position{line: 23, col: 8, offset: 351},
+				alternatives: []interface{}{
+					&actionExpr{
+						pos: position{line: 23, col: 8, offset: 351},
+						run: (*parser).callonline2,
+						expr: &seqExpr{
+							pos: position{line: 23, col: 8, offset: 351},
+							exprs: []interface{}{
+								&ruleRefExpr{
+									pos:  position{line: 23, col: 8, offset: 351},
+									name: "CONDITION",
+								},
+								&litMatcher{
+									pos:        position{line: 23, col: 18, offset: 361},
+									val:        "a",
+									ignoreCase: false,
+								},
+							},
+						},
+					},
+					&actionExpr{
+						pos: position{line: 23, col: 45, offset: 388},
+						run: (*parser).callonline6,
+						expr: &seqExpr{
+							pos: position{line: 23, col: 45, offset: 388},
+							exprs: []interface{}{
+								&ruleRefExpr{
+									pos:  position{line: 23, col: 45, offset: 388},
+									name: "CONDITION",
+								},
+								&litMatcher{
+									pos:        position{line: 23, col: 55, offset: 398},
+									val:        "a",
+									ignoreCase: false,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "INIT",
+			pos:  position{line: 24, col: 1, offset: 424},
+			expr: &andCodeExpr{
+				pos: position{line: 24, col: 8, offset: 431},
+				run: (*parser).callonINIT1,
+			},
+		},
+		{
+			name: "CONDITION",
+			pos:  position{line: 25, col: 1, offset: 462},
+			expr: &andCodeExpr{
+				pos: position{line: 25, col: 13, offset: 474},
+				run: (*parser).callonCONDITION1,
+			},
+		},
+		{
+			name: "EOF",
+			pos:  position{line: 26, col: 1, offset: 524},
+			expr: &notExpr{
+				pos: position{line: 26, col: 7, offset: 530},
+				expr: &anyMatcher{
+					line: 26, col: 8, offset: 531,
+				},
+			},
+		},
+	},
+}
+
+func (c *current) oninput1(v interface{}) (interface{}, error) {
+	return v, nil
+}
+
+func (p *parser) calloninput1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.oninput1(stack["v"])
+}
+
+func (c *current) online2() (interface{}, error) {
+	return "cond1", nil
+}
+
+func (p *parser) callonline2() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.online2()
+}
+
+func (c *current) online6() (interface{}, error) {
+	return "cond2", nil
+}
+
+func (p *parser) callonline6() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.online6()
+}
+
+func (c *current) onINIT1() (bool, error) {
+	idx = 0
+	return true, nil
+}
+
+func (p *parser) callonINIT1() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onINIT1()
+}
+
+func (c *current) onCONDITION1() (bool, error) {
+	b := (data[idx] == 2)
+	idx = 1
+	return b, nil
+}
+
+func (p *parser) callonCONDITION1() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onCONDITION1()
+}
+
 var (
 	// errNoRule is returned when the grammar to parse has no rule.
-	errNoRule          = errors.New("grammar has no rule")
+	errNoRule = errors.New("grammar has no rule")
 
 	// errInvalidEncoding is returned when the source is not properly
 	// utf8-encoded.
 	errInvalidEncoding = errors.New("invalid encoding")
 
 	// errNoMatch is returned if no match could be found.
-	errNoMatch         = errors.New("no match found")
+	errNoMatch = errors.New("no match found")
 )
 
 // Option is a function that can set an option on the parser. It returns
@@ -58,14 +248,12 @@ func Recover(b bool) Option {
 }
 
 // ParseFile parses the file identified by filename.
-func ParseFile(filename string, opts ...Option) (i interface{}, err error) {
+func ParseFile(filename string, opts ...Option) (interface{}, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = f.Close()
-	}()
+	defer f.Close()
 	return ParseReader(filename, f, opts...)
 }
 
@@ -86,11 +274,12 @@ func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
 	return newParser(filename, b, opts...).parse(g)
 }
 
-// resultValue wrap returning value of parse* functions and flag for ability memoize 
-type resultValue struct{
-	value interface{}
+// resultValue wrap returning value of parse* functions and flag for ability memoize
+type resultValue struct {
+	value      interface{}
 	memoizable bool
 }
+
 func makeMemoizable(value interface{}) resultValue {
 	return resultValue{value, true}
 }
@@ -104,7 +293,7 @@ type position struct {
 }
 
 func (p position) String() string {
-	return fmt.Sprintf("%%d:%%d [%%d]", p.line, p.col, p.offset)
+	return fmt.Sprintf("%d:%d [%d]", p.line, p.col, p.offset)
 }
 
 // savepoint stores all state required to go back to this point in the
@@ -140,9 +329,9 @@ type choiceExpr struct {
 }
 
 type actionExpr struct {
-	pos    position
-	expr   interface{}
-	run    func(*parser) (interface{}, error)
+	pos  position
+	expr interface{}
+	run  func(*parser) (interface{}, error)
 }
 
 type seqExpr struct {
@@ -263,10 +452,10 @@ func (p *parserError) Error() string {
 func newParser(filename string, b []byte, opts ...Option) *parser {
 	p := &parser{
 		filename: filename,
-		errs: new(errList),
-		data: b,
-		pt: savepoint{position: position{line: 1}},
-		recover: true,
+		errs:     new(errList),
+		data:     b,
+		pt:       savepoint{position: position{line: 1}},
+		recover:  true,
 	}
 	p.setOptions(opts)
 	return p
@@ -280,8 +469,8 @@ func (p *parser) setOptions(opts []Option) {
 }
 
 type resultTuple struct {
-	v interface{}
-	b bool
+	v   interface{}
+	b   bool
 	end savepoint
 }
 
@@ -293,9 +482,9 @@ type parser struct {
 	data []byte
 	errs *errList
 
-	depth   int
 	recover bool
-	debug bool
+	debug   bool
+	depth   int
 
 	memoize bool
 	// memoization table for the packrat algorithm:
@@ -303,7 +492,7 @@ type parser struct {
 	memo map[int]map[interface{}]resultTuple
 
 	// rules table, maps the rule identifier to the rule node
-	rules  map[string]*rule
+	rules map[string]*rule
 	// variables stack, map of label to value
 	vstack []map[string]interface{}
 	// rule stack, allows identification of the current rule in errors
@@ -350,19 +539,19 @@ func (p *parser) print(prefix, s string) string {
 		return s
 	}
 
-	fmt.Printf("%%s %%d:%%d:%%d: %%s [%%#U]\n",
+	fmt.Printf("%s %d:%d:%d: %s [%#U]\n",
 		prefix, p.pt.line, p.pt.col, p.pt.offset, s, p.pt.rn)
 	return s
 }
 
 func (p *parser) in(s string) string {
 	p.depth++
-	return p.print(strings.Repeat(" ", p.depth) + ">", s)
+	return p.print(strings.Repeat(" ", p.depth)+">", s)
 }
 
 func (p *parser) out(s string) string {
 	p.depth--
-	return p.print(strings.Repeat(" ", p.depth) + "<", s)
+	return p.print(strings.Repeat(" ", p.depth)+"<", s)
 }
 
 func (p *parser) addErr(err error) {
@@ -377,7 +566,7 @@ func (p *parser) addErrAt(err error, pos position) {
 	if buf.Len() > 0 {
 		buf.WriteString(":")
 	}
-	buf.WriteString(fmt.Sprintf("%%d:%%d (%%d)", pos.line, pos.col, pos.offset))
+	buf.WriteString(fmt.Sprintf("%d:%d (%d)", pos.line, pos.col, pos.offset))
 	if len(p.rstack) > 0 {
 		if buf.Len() > 0 {
 			buf.WriteString(": ")
@@ -481,7 +670,7 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 				case error:
 					p.addErr(e)
 				default:
-					p.addErr(fmt.Errorf("%%v", e))
+					p.addErr(fmt.Errorf("%v", e))
 				}
 				err = p.errs.err()
 			}
@@ -521,7 +710,7 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	p.popV()
 	p.rstack = p.rstack[:len(p.rstack)-1]
 	if ok && p.debug {
-		p.print(strings.Repeat(" ", p.depth) + "MATCH", string(p.sliceFrom(start)))
+		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
 
 	if p.memoize && val.(resultValue).memoizable {
@@ -532,6 +721,7 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 
 func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	var pt savepoint
+	var ok bool
 
 	if p.memoize {
 		res, ok := p.getMemoized(expr)
@@ -544,7 +734,6 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 
 	p.exprCnt++
 	var val interface{}
-	var ok bool
 	switch expr := expr.(type) {
 	case *actionExpr:
 		val, ok = p.parseActionExpr(expr)
@@ -577,7 +766,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	case *zeroOrOneExpr:
 		val, ok = p.parseZeroOrOneExpr(expr)
 	default:
-		panic(fmt.Sprintf("unknown expression type %%T", expr))
+		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
 	if p.memoize && val.(resultValue).memoizable {
 		p.setMemoized(pt, expr, resultTuple{val.(resultValue).value, ok, p.pt})
@@ -599,10 +788,10 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 		if err != nil {
 			p.addErrAt(err, start.position)
 		}
-		val = resultValue{actVal, val.(resultValue).memoizable} 
+		val = resultValue{actVal, val.(resultValue).memoizable}
 	}
 	if ok && p.debug {
-		p.print(strings.Repeat(" ", p.depth) + "MATCH", string(p.sliceFrom(start)))
+		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
 	return val, ok
 }
@@ -712,7 +901,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if ok {
 			return resultValue{val.(resultValue).value, mmzFlag}, ok
-		}		
+		}
 	}
 	return makeUnMemoizable(nil), false
 }
@@ -795,9 +984,9 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 				// did not match once, no match
 				return makeUnMemoizable(nil), false
 			}
-			return resultValue{vals,mmzFlag}, true
+			return resultValue{vals, mmzFlag}, true
 		}
-		vals = append(vals, val.(resultValue).value)		
+		vals = append(vals, val.(resultValue).value)
 	}
 }
 
@@ -807,12 +996,12 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
 	}
 
 	if ref.name == "" {
-		panic(fmt.Sprintf("%%s: invalid rule: missing name", ref.pos))
+		panic(fmt.Sprintf("%s: invalid rule: missing name", ref.pos))
 	}
 
 	rule := p.rules[ref.name]
 	if rule == nil {
-		p.addErr(fmt.Errorf("undefined rule: %%s", ref.name))
+		p.addErr(fmt.Errorf("undefined rule: %s", ref.name))
 		return makeUnMemoizable(nil), false
 	}
 	return p.parseRule(rule)
@@ -832,11 +1021,11 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if !ok {
 			p.restore(pt)
-			return resultValue{nil,mmzFlag}, false
+			return resultValue{nil, mmzFlag}, false
 		}
-		vals = append(vals, val.(resultValue).value)		
+		vals = append(vals, val.(resultValue).value)
 	}
-	return resultValue{vals,mmzFlag}, true
+	return resultValue{vals, mmzFlag}, true
 }
 
 func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
@@ -853,9 +1042,9 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 		p.popV()
 		mmzFlag = mmzFlag && val.(resultValue).memoizable
 		if !ok {
-			return resultValue{vals,mmzFlag}, true
+			return resultValue{vals, mmzFlag}, true
 		}
-		vals = append(vals, val.(resultValue).value)	
+		vals = append(vals, val.(resultValue).value)
 	}
 }
 
@@ -870,9 +1059,7 @@ func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
 	// whether it matched or not, consider it a match
 	return val, true
 }
-`
 
-var rangeTable = `
 func rangeTable(class string) *unicode.RangeTable {
 	if rt, ok := unicode.Categories[class]; ok {
 		return rt
@@ -885,6 +1072,5 @@ func rangeTable(class string) *unicode.RangeTable {
 	}
 
 	// cannot happen
-	panic(fmt.Sprintf("invalid Unicode class: %%s", class))
+	panic(fmt.Sprintf("invalid Unicode class: %s", class))
 }
-`
