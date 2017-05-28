@@ -32,6 +32,7 @@ func main() {
 		outputFlag    = fs.String("o", "", "output file, defaults to stdout")
 		recvrNmFlag   = fs.String("receiver-name", "c", "receiver name for the generated methods")
 		noBuildFlag   = fs.Bool("x", false, "do not build, only parse")
+		trackFailFlag = fs.Bool("track-fail", false, "track farthest position of parsing failures to generate meaningful error messages")
 	)
 
 	fs.Usage = usage
@@ -70,7 +71,7 @@ func main() {
 	}()
 
 	// parse input
-	g, err := ParseReader(nm, rc, Debug(*dbgFlag), Memoize(*cacheFlag), Recover(!*noRecoverFlag))
+	g, err := ParseReader(nm, rc, Debug(*dbgFlag), Memoize(*cacheFlag), Recover(!*noRecoverFlag), FailureTracking(*trackFailFlag))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "parse error(s):\n", err)
 		exit(3)
@@ -141,6 +142,9 @@ the generated code is written to this file instead.
 	-receiver-name NAME
 		use NAME as for the receiver name of the generated methods
 		for the grammar's code blocks. Defaults to "c".
+	-track-fail
+		track farthest position of parsing failures to generate 
+		meaningful error messages
 	-x
 		do not generate the parser, only parse the grammar.
 

@@ -2899,7 +2899,7 @@ func FailureTracking(b bool) Option {
 	return func(p *parser) Option {
 		old := p.failureTracking
 		p.failureTracking = b
-		return Recover(old)
+		return FailureTracking(old)
 	}
 }
 

@@ -167,22 +167,53 @@ file:1:26 (25): rule ShortUnicodeEscape: invalid Unicode escape`,
 	`a = "\U0000D801"`: "file:1:7 (6): rule LongUnicodeEscape: invalid Unicode escape",
 }
 
+var invalidParseCasesFailureTracking = map[string]string{
+	"":           `file:1:1 (0): no match found, expected: "/*", "//", "\n", "{", [ \t\r], [\pL_]`,
+	"a":          `file:1:2 (1): no match found, expected: "'", "/*", "//", "<-", "=", "\"", "\n", "` + "`" + `", "←", "⟵", [ \t\r], [\pL_], [\p{Nd}]`,
+	"abc":        `file:1:4 (3): no match found, expected: "'", "/*", "//", "<-", "=", "\"", "\n", "` + "`" + `", "←", "⟵", [ \t\r], [\pL_], [\p{Nd}]`,
+	" ":          `file:1:2 (1): no match found, expected: "/*", "//", "\n", "{", [ \t\r], [\pL_]`,
+	`a = +`:      `file:1:5 (4): no match found, expected: "!", "&", "'", "(", ".", "/*", "//", "[", "\"", "\n", "` + "`" + `", [ \t\r], [\pL_]`,
+	`a = *`:      `file:1:5 (4): no match found, expected: "!", "&", "'", "(", ".", "/*", "//", "[", "\"", "\n", "` + "`" + `", [ \t\r], [\pL_]`,
+	`a = ?`:      `file:1:5 (4): no match found, expected: "!", "&", "'", "(", ".", "/*", "//", "[", "\"", "\n", "` + "`" + `", [ \t\r], [\pL_]`,
+	"a ←":        `file:1:4 (5): no match found, expected: "!", "&", "'", "(", ".", "/*", "//", "[", "\"", "\n", "` + "`" + `", [ \t\r], [\pL_]`,
+	"a ← b\nb ←": `file:2:4 (13): no match found, expected: "!", "&", "'", "(", ".", "/*", "//", "[", "\"", "\n", "` + "`" + `", [ \t\r], [\pL_]`,
+	"{}{}":       `file:1:3 (2): no match found, expected: "/*", "//", ";", "\n", [ \t\r] or EOF`,
+}
+
 func TestInvalidParseCases(t *testing.T) {
-	memo := false
-again:
-	for tc, exp := range invalidParseCases {
-		_, err := Parse("file", []byte(tc), Memoize(memo))
-		if err == nil {
-			t.Errorf("%q: want error, got none", tc)
-			continue
-		}
-		if err.Error() != exp {
-			t.Errorf("%q: want \n%s\n, got \n%s\n", tc, exp, err)
-		}
+	config := []struct {
+		memoize         bool
+		failureTracking bool
+	}{
+		{
+			memoize:         false,
+			failureTracking: false,
+		},
+		{
+			memoize:         true,
+			failureTracking: false,
+		},
+		{
+			memoize:         false,
+			failureTracking: true,
+		},
 	}
-	if !memo {
-		memo = true
-		goto again
+	for _, conf := range config {
+		for tc, exp := range invalidParseCases {
+			_, err := Parse("file", []byte(tc), Memoize(conf.memoize), FailureTracking(conf.failureTracking))
+			if err == nil {
+				t.Errorf("%q: want error, got none", tc)
+				continue
+			}
+			if conf.failureTracking {
+				if failTrackExp, ok := invalidParseCasesFailureTracking[tc]; ok {
+					exp = failTrackExp
+				}
+			}
+			if err.Error() != exp {
+				t.Errorf("%q: want \n%s\n, got \n%s\n", tc, exp, err)
+			}
+		}
 	}
 }
 
