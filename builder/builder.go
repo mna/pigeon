@@ -558,9 +558,9 @@ func (b *builder) writeFunc(funcIx int, code *ast.CodeBlock, callTpl, funcTpl st
 }
 
 func (b *builder) writeStaticCode() {
-	b.writelnf(staticCode)
+	b.writeln(staticCode)
 	if b.rangeTable {
-		b.writelnf(rangeTable)
+		b.writeln(rangeTable)
 	}
 }
 
@@ -576,4 +576,10 @@ func (b *builder) writef(f string, args ...interface{}) {
 
 func (b *builder) writelnf(f string, args ...interface{}) {
 	b.writef(f+"\n", args...)
+}
+
+func (b *builder) writeln(f string) {
+	if b.err == nil {
+		_, b.err = fmt.Fprint(b.w, f+"\n")
+	}
 }
