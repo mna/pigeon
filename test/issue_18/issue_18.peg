@@ -4,7 +4,7 @@ package main
 import "fmt"
 
 func main() {
-    fmt.Println("without FailureTracking:")
+    fmt.Println("with FailureTracking:")
     _, err := Parse("", []byte(`123455`))
     fmt.Println(err)
     _, err = Parse("", []byte(`
@@ -25,28 +25,6 @@ func main() {
 
     x
     `))
-    fmt.Println(err)
-    fmt.Println("\nwith FailureTracking:")
-    _, err = Parse("", []byte(`123455`), FailureTracking(true))
-    fmt.Println(err)
-    _, err = Parse("", []byte(`
-
-    1
-
-    2
-
-    3
-
-    `), FailureTracking(true))
-    fmt.Println(err)
-    _, err = Parse("", []byte(`
-
-    1
-
-    2
-
-    x
-    `), FailureTracking(true))
     fmt.Println(err)
 }
 }

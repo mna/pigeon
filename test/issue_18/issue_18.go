@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	fmt.Println("without FailureTracking:")
+	fmt.Println("with FailureTracking:")
 	_, err := Parse("", []byte(`123455`))
 	fmt.Println(err)
 	_, err = Parse("", []byte(`
@@ -36,64 +36,42 @@ func main() {
     x
     `))
 	fmt.Println(err)
-	fmt.Println("\nwith FailureTracking:")
-	_, err = Parse("", []byte(`123455`), FailureTracking(true))
-	fmt.Println(err)
-	_, err = Parse("", []byte(`
-
-    1
-
-    2
-
-    3
-
-    `), FailureTracking(true))
-	fmt.Println(err)
-	_, err = Parse("", []byte(`
-
-    1
-
-    2
-
-    x
-    `), FailureTracking(true))
-	fmt.Println(err)
 }
 
 var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Program",
-			pos:  position{line: 54, col: 1, offset: 660},
+			pos:  position{line: 32, col: 1, offset: 318},
 			expr: &seqExpr{
-				pos: position{line: 54, col: 12, offset: 671},
+				pos: position{line: 32, col: 12, offset: 329},
 				exprs: []interface{}{
 					&ruleRefExpr{
-						pos:  position{line: 54, col: 12, offset: 671},
+						pos:  position{line: 32, col: 12, offset: 329},
 						name: "_",
 					},
 					&zeroOrMoreExpr{
-						pos: position{line: 54, col: 14, offset: 673},
+						pos: position{line: 32, col: 14, offset: 331},
 						expr: &seqExpr{
-							pos: position{line: 54, col: 15, offset: 674},
+							pos: position{line: 32, col: 15, offset: 332},
 							exprs: []interface{}{
 								&ruleRefExpr{
-									pos:  position{line: 54, col: 15, offset: 674},
+									pos:  position{line: 32, col: 15, offset: 332},
 									name: "X",
 								},
 								&ruleRefExpr{
-									pos:  position{line: 54, col: 17, offset: 676},
+									pos:  position{line: 32, col: 17, offset: 334},
 									name: "_",
 								},
 							},
 						},
 					},
 					&ruleRefExpr{
-						pos:  position{line: 54, col: 21, offset: 680},
+						pos:  position{line: 32, col: 21, offset: 338},
 						name: "_",
 					},
 					&ruleRefExpr{
-						pos:  position{line: 54, col: 24, offset: 683},
+						pos:  position{line: 32, col: 24, offset: 341},
 						name: "EOF",
 					},
 				},
@@ -101,9 +79,9 @@ var g = &grammar{
 		},
 		{
 			name: "X",
-			pos:  position{line: 56, col: 1, offset: 688},
+			pos:  position{line: 34, col: 1, offset: 346},
 			expr: &charClassMatcher{
-				pos:        position{line: 56, col: 6, offset: 693},
+				pos:        position{line: 34, col: 6, offset: 351},
 				val:        "[0-9]",
 				ranges:     []rune{'0', '9'},
 				ignoreCase: false,
@@ -113,11 +91,11 @@ var g = &grammar{
 		{
 			name:        "_",
 			displayName: "\"whitespace\"",
-			pos:         position{line: 58, col: 1, offset: 700},
+			pos:         position{line: 36, col: 1, offset: 358},
 			expr: &zeroOrMoreExpr{
-				pos: position{line: 58, col: 19, offset: 718},
+				pos: position{line: 36, col: 19, offset: 376},
 				expr: &charClassMatcher{
-					pos:        position{line: 58, col: 21, offset: 720},
+					pos:        position{line: 36, col: 21, offset: 378},
 					val:        "[ \\t\\r\\n]",
 					chars:      []rune{' ', '\t', '\r', '\n'},
 					ignoreCase: false,
@@ -127,11 +105,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 60, col: 1, offset: 734},
+			pos:  position{line: 38, col: 1, offset: 392},
 			expr: &notExpr{
-				pos: position{line: 60, col: 8, offset: 741},
+				pos: position{line: 38, col: 8, offset: 399},
 				expr: &anyMatcher{
-					line: 60, col: 9, offset: 742,
+					line: 38, col: 9, offset: 400,
 				},
 			},
 		},
@@ -145,9 +123,6 @@ var (
 	// errInvalidEncoding is returned when the source is not properly
 	// utf8-encoded.
 	errInvalidEncoding = errors.New("invalid encoding")
-
-	// errNoMatch is returned if no match could be found.
-	errNoMatch = errors.New("no match found")
 )
 
 // Option is a function that can set an option on the parser. It returns
@@ -191,19 +166,6 @@ func Recover(b bool) Option {
 		old := p.recover
 		p.recover = b
 		return Recover(old)
-	}
-}
-
-// FailureTracking creates an Option to set failureTracking flag to b.
-// When set to true, this causes the parser to track the farthest failures
-// and report them, if the parsing of the input fails.
-//
-// The default is false.
-func FailureTracking(b bool) Option {
-	return func(p *parser) Option {
-		old := p.failureTracking
-		p.failureTracking = b
-		return FailureTracking(old)
 	}
 }
 
@@ -453,7 +415,6 @@ type parser struct {
 	exprCnt int
 
 	// parse fail
-	failureTracking       bool
 	maxFailPos            position
 	maxFailExpected       map[string]struct{}
 	maxFailInvertExpected bool
@@ -639,28 +600,23 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 	val, ok := p.parseRule(g.rules[0])
 	if !ok {
 		if len(*p.errs) == 0 {
-			if p.failureTracking {
-				// If parsing fails, but no errors have been recorded, the expected values
-				// for the farthest parser position are returned as error.
-				var expected []string
-				eof := ""
-				if _, ok := p.maxFailExpected["!."]; ok {
-					delete(p.maxFailExpected, "!.")
-					if len(p.maxFailExpected) > 0 {
-						eof = " or EOF"
-					} else {
-						eof = "EOF"
-					}
+			// If parsing fails, but no errors have been recorded, the expected values
+			// for the farthest parser position are returned as error.
+			var expected []string
+			eof := ""
+			if _, ok := p.maxFailExpected["!."]; ok {
+				delete(p.maxFailExpected, "!.")
+				if len(p.maxFailExpected) > 0 {
+					eof = " or EOF"
+				} else {
+					eof = "EOF"
 				}
-				for k := range p.maxFailExpected {
-					expected = append(expected, k)
-				}
-				sort.Strings(expected)
-				p.addErrAt(errors.New("no match found, expected: "+strings.Join(expected, ", ")+eof), p.maxFailPos)
-			} else {
-				// make sure this doesn't go out silently
-				p.addErr(errNoMatch)
 			}
+			for k := range p.maxFailExpected {
+				expected = append(expected, k)
+			}
+			sort.Strings(expected)
+			p.addErrAt(errors.New("no match found, expected: "+strings.Join(expected, ", ")+eof), p.maxFailPos)
 		}
 		return nil, p.errs.err()
 	}
@@ -937,7 +893,7 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 
 func (p *parser) failAt(fail bool, pos position, want string) {
 	// process fail if parsing fails and not inverted or parsing succeeds and invert is set
-	if p.failureTracking && fail == p.maxFailInvertExpected {
+	if fail == p.maxFailInvertExpected {
 		if pos.offset < p.maxFailPos.offset {
 			return
 		}

@@ -114,9 +114,6 @@ var (
 	// errInvalidEncoding is returned when the source is not properly
 	// utf8-encoded.
 	errInvalidEncoding = errors.New("invalid encoding")
-
-	// errNoMatch is returned if no match could be found.
-	errNoMatch = errors.New("no match found")
 )
 
 // Option is a function that can set an option on the parser. It returns
@@ -160,19 +157,6 @@ func Recover(b bool) Option {
 		old := p.recover
 		p.recover = b
 		return Recover(old)
-	}
-}
-
-// FailureTracking creates an Option to set failureTracking flag to b.
-// When set to true, this causes the parser to track the farthest failures
-// and report them, if the parsing of the input fails.
-//
-// The default is false.
-func FailureTracking(b bool) Option {
-	return func(p *parser) Option {
-		old := p.failureTracking
-		p.failureTracking = b
-		return FailureTracking(old)
 	}
 }
 
@@ -422,7 +406,6 @@ type parser struct {
 	exprCnt int
 
 	// parse fail
-	failureTracking       bool
 	maxFailPos            position
 	maxFailExpected       map[string]struct{}
 	maxFailInvertExpected bool
@@ -608,28 +591,23 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 	val, ok := p.parseRule(g.rules[0])
 	if !ok {
 		if len(*p.errs) == 0 {
-			if p.failureTracking {
-				// If parsing fails, but no errors have been recorded, the expected values
-				// for the farthest parser position are returned as error.
-				var expected []string
-				eof := ""
-				if _, ok := p.maxFailExpected["!."]; ok {
-					delete(p.maxFailExpected, "!.")
-					if len(p.maxFailExpected) > 0 {
-						eof = " or EOF"
-					} else {
-						eof = "EOF"
-					}
+			// If parsing fails, but no errors have been recorded, the expected values
+			// for the farthest parser position are returned as error.
+			var expected []string
+			eof := ""
+			if _, ok := p.maxFailExpected["!."]; ok {
+				delete(p.maxFailExpected, "!.")
+				if len(p.maxFailExpected) > 0 {
+					eof = " or EOF"
+				} else {
+					eof = "EOF"
 				}
-				for k := range p.maxFailExpected {
-					expected = append(expected, k)
-				}
-				sort.Strings(expected)
-				p.addErrAt(errors.New("no match found, expected: "+strings.Join(expected, ", ")+eof), p.maxFailPos)
-			} else {
-				// make sure this doesn't go out silently
-				p.addErr(errNoMatch)
 			}
+			for k := range p.maxFailExpected {
+				expected = append(expected, k)
+			}
+			sort.Strings(expected)
+			p.addErrAt(errors.New("no match found, expected: "+strings.Join(expected, ", ")+eof), p.maxFailPos)
 		}
 		return nil, p.errs.err()
 	}
@@ -906,7 +884,7 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 
 func (p *parser) failAt(fail bool, pos position, want string) {
 	// process fail if parsing fails and not inverted or parsing succeeds and invert is set
-	if p.failureTracking && fail == p.maxFailInvertExpected {
+	if fail == p.maxFailInvertExpected {
 		if pos.offset < p.maxFailPos.offset {
 			return
 		}

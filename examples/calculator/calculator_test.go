@@ -65,28 +65,6 @@ func TestValidCases(t *testing.T) {
 }
 
 var invalidCases = map[string]string{
-	"":        "1:1 (0): no match found",
-	"(":       "1:1 (0): no match found",
-	")":       "1:1 (0): no match found",
-	"()":      "1:1 (0): no match found",
-	"+":       "1:1 (0): no match found",
-	"-":       "1:1 (0): no match found",
-	"*":       "1:1 (0): no match found",
-	"/":       "1:1 (0): no match found",
-	"+1":      "1:1 (0): no match found",
-	"*1":      "1:1 (0): no match found",
-	"/1":      "1:1 (0): no match found",
-	"1/0":     "1:4 (3): rule Term: runtime error: integer divide by zero",
-	"1+":      "1:1 (0): no match found",
-	"1-":      "1:1 (0): no match found",
-	"1*":      "1:1 (0): no match found",
-	"1/":      "1:1 (0): no match found",
-	"1 (+ 2)": "1:1 (0): no match found",
-	"1 (2)":   "1:1 (0): no match found",
-	"\xfe":    "1:1 (0): invalid encoding",
-}
-
-var invalidCasesFailureTracking = map[string]string{
 	"":        `1:1 (0): no match found, expected: "(", "-", [ \n\t\r], [0-9]`,
 	"(":       `1:2 (1): no match found, expected: "(", "-", [ \n\t\r], [0-9]`,
 	")":       `1:1 (0): no match found, expected: "(", "-", [ \n\t\r], [0-9]`,
@@ -98,50 +76,35 @@ var invalidCasesFailureTracking = map[string]string{
 	"+1":      `1:1 (0): no match found, expected: "(", "-", [ \n\t\r], [0-9]`,
 	"*1":      `1:1 (0): no match found, expected: "(", "-", [ \n\t\r], [0-9]`,
 	"/1":      `1:1 (0): no match found, expected: "(", "-", [ \n\t\r], [0-9]`,
+	"1/0":     "1:4 (3): rule Term: runtime error: integer divide by zero",
 	"1+":      `1:3 (2): no match found, expected: "(", "-", [ \n\t\r], [0-9]`,
 	"1-":      `1:3 (2): no match found, expected: "(", "-", [ \n\t\r], [0-9]`,
 	"1*":      `1:3 (2): no match found, expected: "(", "-", [ \n\t\r], [0-9]`,
 	"1/":      `1:3 (2): no match found, expected: "(", "-", [ \n\t\r], [0-9]`,
 	"1 (+ 2)": `1:3 (2): no match found, expected: "*", "+", "-", "/", [ \n\t\r] or EOF`,
 	"1 (2)":   `1:3 (2): no match found, expected: "*", "+", "-", "/", [ \n\t\r] or EOF`,
+	"\xfe":    "1:1 (0): invalid encoding",
 }
 
 func TestInvalidCases(t *testing.T) {
-	config := []struct {
-		failureTracking bool
-	}{
-		{
-			failureTracking: false,
-		},
-		{
-			failureTracking: true,
-		},
-	}
-	for _, conf := range config {
-		for tc, exp := range invalidCases {
-			got, err := Parse("", []byte(tc), FailureTracking(conf.failureTracking))
-			if err == nil {
-				t.Errorf("%q: want error, got none (%v)", tc, got)
-				continue
+	for tc, exp := range invalidCases {
+		got, err := Parse("", []byte(tc))
+		if err == nil {
+			t.Errorf("%q: want error, got none (%v)", tc, got)
+			continue
+		}
+		el, ok := err.(errList)
+		if !ok {
+			t.Errorf("%q: want error type %T, got %T", tc, &errList{}, err)
+			continue
+		}
+		for _, e := range el {
+			if _, ok := e.(*parserError); !ok {
+				t.Errorf("%q: want all individual errors to be %T, got %T (%[3]v)", tc, &parserError{}, e)
 			}
-			el, ok := err.(errList)
-			if !ok {
-				t.Errorf("%q: want error type %T, got %T", tc, &errList{}, err)
-				continue
-			}
-			for _, e := range el {
-				if _, ok := e.(*parserError); !ok {
-					t.Errorf("%q: want all individual errors to be %T, got %T (%[3]v)", tc, &parserError{}, e)
-				}
-			}
-			if conf.failureTracking {
-				if failTrackExp, ok := invalidCasesFailureTracking[tc]; ok {
-					exp = failTrackExp
-				}
-			}
-			if exp != err.Error() {
-				t.Errorf("%q: want \n%s\n, got \n%s\n", tc, exp, err)
-			}
+		}
+		if exp != err.Error() {
+			t.Errorf("%q: want \n%s\n, got \n%s\n", tc, exp, err)
 		}
 	}
 }
