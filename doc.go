@@ -295,7 +295,6 @@ as a package with public functions to parse input text. The exported API is:
 	- Debug(bool) Option
 	- Memoize(bool) Option
 	- Recover(bool) Option
-	- FailureTracking(bool) Option
 
 See the godoc page of the generated parser for the test/predicates grammar
 for an example documentation page of the exported API:
@@ -376,10 +375,6 @@ In order to do this, the grammar can look something like this:
 
 This is just one example, but it illustrates the idea that error reporting
 needs to be thought out when designing the grammar.
-
-By providing the FailureTracking(true) Option, the parser will keep track of the
-failed matches and provide the farthest failed parsing position as the error,
-which in most cases provides a reasonable error message.
 
 API stability
 

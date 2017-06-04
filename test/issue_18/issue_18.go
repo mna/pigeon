@@ -14,97 +14,106 @@ import (
 )
 
 func main() {
-	ast, err := Parse("STDIN", []byte("foo"))
-	if err != nil {
-		fmt.Printf("error: %s\n", err)
-		return
-	}
-	fmt.Printf("%+v\n", ast)
+	fmt.Println("with FailureTracking:")
+	_, err := Parse("", []byte(`123455`))
+	fmt.Println(err)
+	_, err = Parse("", []byte(`
+
+    1
+
+    2
+
+    3
+
+    `))
+	fmt.Println(err)
+	_, err = Parse("", []byte(`
+
+    1
+
+    2
+
+    x
+    `))
+	fmt.Println(err)
 }
 
 var g = &grammar{
 	rules: []*rule{
 		{
-			name: "TableRef",
-			pos:  position{line: 14, col: 1, offset: 174},
-			expr: &actionExpr{
-				pos: position{line: 14, col: 13, offset: 186},
-				run: (*parser).callonTableRef1,
-				expr: &seqExpr{
-					pos: position{line: 14, col: 13, offset: 186},
-					exprs: []interface{}{
-						&labeledExpr{
-							pos:   position{line: 14, col: 13, offset: 186},
-							label: "database",
-							expr: &zeroOrOneExpr{
-								pos: position{line: 14, col: 22, offset: 195},
-								expr: &seqExpr{
-									pos: position{line: 14, col: 23, offset: 196},
-									exprs: []interface{}{
-										&ruleRefExpr{
-											pos:  position{line: 14, col: 23, offset: 196},
-											name: "ID",
-										},
-										&litMatcher{
-											pos:        position{line: 14, col: 26, offset: 199},
-											val:        ".",
-											ignoreCase: false,
-										},
-									},
+			name: "Program",
+			pos:  position{line: 32, col: 1, offset: 318},
+			expr: &seqExpr{
+				pos: position{line: 32, col: 12, offset: 329},
+				exprs: []interface{}{
+					&ruleRefExpr{
+						pos:  position{line: 32, col: 12, offset: 329},
+						name: "_",
+					},
+					&zeroOrMoreExpr{
+						pos: position{line: 32, col: 14, offset: 331},
+						expr: &seqExpr{
+							pos: position{line: 32, col: 15, offset: 332},
+							exprs: []interface{}{
+								&ruleRefExpr{
+									pos:  position{line: 32, col: 15, offset: 332},
+									name: "X",
+								},
+								&ruleRefExpr{
+									pos:  position{line: 32, col: 17, offset: 334},
+									name: "_",
 								},
 							},
 						},
-						&labeledExpr{
-							pos:   position{line: 14, col: 32, offset: 205},
-							label: "table",
-							expr: &ruleRefExpr{
-								pos:  position{line: 14, col: 38, offset: 211},
-								name: "ID",
-							},
-						},
+					},
+					&ruleRefExpr{
+						pos:  position{line: 32, col: 21, offset: 338},
+						name: "_",
+					},
+					&ruleRefExpr{
+						pos:  position{line: 32, col: 24, offset: 341},
+						name: "EOF",
 					},
 				},
 			},
 		},
 		{
-			name: "ID",
-			pos:  position{line: 15, col: 1, offset: 271},
-			expr: &actionExpr{
-				pos: position{line: 15, col: 7, offset: 277},
-				run: (*parser).callonID1,
-				expr: &oneOrMoreExpr{
-					pos: position{line: 15, col: 7, offset: 277},
-					expr: &charClassMatcher{
-						pos:        position{line: 15, col: 7, offset: 277},
-						val:        "[a-z]",
-						ranges:     []rune{'a', 'z'},
-						ignoreCase: false,
-						inverted:   false,
-					},
+			name: "X",
+			pos:  position{line: 34, col: 1, offset: 346},
+			expr: &charClassMatcher{
+				pos:        position{line: 34, col: 6, offset: 351},
+				val:        "[0-9]",
+				ranges:     []rune{'0', '9'},
+				ignoreCase: false,
+				inverted:   false,
+			},
+		},
+		{
+			name:        "_",
+			displayName: "\"whitespace\"",
+			pos:         position{line: 36, col: 1, offset: 358},
+			expr: &zeroOrMoreExpr{
+				pos: position{line: 36, col: 19, offset: 376},
+				expr: &charClassMatcher{
+					pos:        position{line: 36, col: 21, offset: 378},
+					val:        "[ \\t\\r\\n]",
+					chars:      []rune{' ', '\t', '\r', '\n'},
+					ignoreCase: false,
+					inverted:   false,
+				},
+			},
+		},
+		{
+			name: "EOF",
+			pos:  position{line: 38, col: 1, offset: 392},
+			expr: &notExpr{
+				pos: position{line: 38, col: 8, offset: 399},
+				expr: &anyMatcher{
+					line: 38, col: 9, offset: 400,
 				},
 			},
 		},
 	},
-}
-
-func (c *current) onTableRef1(database, table interface{}) (interface{}, error) {
-	return fmt.Sprintf("%v.%s", database, table), nil
-}
-
-func (p *parser) callonTableRef1() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onTableRef1(stack["database"], stack["table"])
-}
-
-func (c *current) onID1() (interface{}, error) {
-	return c.text, nil
-}
-
-func (p *parser) callonID1() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onID1()
 }
 
 var (

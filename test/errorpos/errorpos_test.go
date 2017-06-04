@@ -2,7 +2,6 @@ package errorpos
 
 import "testing"
 
-// ABs must end in Bs, CDs must end in Ds
 var cases = map[string]string{
 	"case01 zero":           ``,
 	" case01 inc dec zero ": ``,
@@ -40,15 +39,15 @@ var cases = map[string]string{
 	"case11 b":        `1:8 (7): no match found, expected: "a"`,
 }
 
-func TestAndNot(t *testing.T) {
+func TestErrorPos(t *testing.T) {
 	for tc, exp := range cases {
-		_, err := Parse("", []byte(tc), FailureTracking(true))
+		_, err := Parse("", []byte(tc))
 		var got string
 		if err != nil {
 			got = err.Error()
 		}
 		if got != exp {
-			_, _ = Parse("", []byte(tc), FailureTracking(true), Debug(true))
+			_, _ = Parse("", []byte(tc), Debug(true))
 			t.Errorf("%q: want %v, got %v", tc, exp, got)
 		}
 	}

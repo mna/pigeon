@@ -7,18 +7,18 @@ import (
 )
 
 var invalidParseCases = map[string]string{
-	"":           "file:1:1 (0): no match found",
-	"a":          "file:1:1 (0): no match found",
-	"abc":        "file:1:1 (0): no match found",
-	" ":          "file:1:1 (0): no match found",
-	`a = +`:      "file:1:1 (0): no match found",
-	`a = *`:      "file:1:1 (0): no match found",
-	`a = ?`:      "file:1:1 (0): no match found",
-	"a ←":        "file:1:1 (0): no match found",
-	"a ← b\nb ←": "file:1:1 (0): no match found",
+	"":           `file:1:1 (0): no match found, expected: "/*", "//", "\n", "{", [ \t\r], [\pL_]`,
+	"a":          `file:1:2 (1): no match found, expected: "'", "/*", "//", "<-", "=", "\"", "\n", "` + "`" + `", "←", "⟵", [ \t\r], [\pL_], [\p{Nd}]`,
+	"abc":        `file:1:4 (3): no match found, expected: "'", "/*", "//", "<-", "=", "\"", "\n", "` + "`" + `", "←", "⟵", [ \t\r], [\pL_], [\p{Nd}]`,
+	" ":          `file:1:2 (1): no match found, expected: "/*", "//", "\n", "{", [ \t\r], [\pL_]`,
+	`a = +`:      `file:1:5 (4): no match found, expected: "!", "&", "'", "(", ".", "/*", "//", "[", "\"", "\n", "` + "`" + `", [ \t\r], [\pL_]`,
+	`a = *`:      `file:1:5 (4): no match found, expected: "!", "&", "'", "(", ".", "/*", "//", "[", "\"", "\n", "` + "`" + `", [ \t\r], [\pL_]`,
+	`a = ?`:      `file:1:5 (4): no match found, expected: "!", "&", "'", "(", ".", "/*", "//", "[", "\"", "\n", "` + "`" + `", [ \t\r], [\pL_]`,
+	"a ←":        `file:1:4 (5): no match found, expected: "!", "&", "'", "(", ".", "/*", "//", "[", "\"", "\n", "` + "`" + `", [ \t\r], [\pL_]`,
+	"a ← b\nb ←": `file:2:4 (13): no match found, expected: "!", "&", "'", "(", ".", "/*", "//", "[", "\"", "\n", "` + "`" + `", [ \t\r], [\pL_]`,
 	"a ← nil:b":  "file:1:5 (6): rule Identifier: identifier is a reserved word",
 	"\xfe":       "file:1:1 (0): invalid encoding",
-	"{}{}":       "file:1:1 (0): no match found",
+	"{}{}":       `file:1:3 (2): no match found, expected: "/*", "//", ";", "\n", [ \t\r] or EOF`,
 
 	// non-terminated, empty, EOF "quoted" tokens
 	"{":         "file:1:1 (0): rule CodeBlock: code block not terminated",
@@ -168,21 +168,27 @@ file:1:26 (25): rule ShortUnicodeEscape: invalid Unicode escape`,
 }
 
 func TestInvalidParseCases(t *testing.T) {
-	memo := false
-again:
-	for tc, exp := range invalidParseCases {
-		_, err := Parse("file", []byte(tc), Memoize(memo))
-		if err == nil {
-			t.Errorf("%q: want error, got none", tc)
-			continue
-		}
-		if err.Error() != exp {
-			t.Errorf("%q: want \n%s\n, got \n%s\n", tc, exp, err)
-		}
+	config := []struct {
+		memoize bool
+	}{
+		{
+			memoize: false,
+		},
+		{
+			memoize: true,
+		},
 	}
-	if !memo {
-		memo = true
-		goto again
+	for _, conf := range config {
+		for tc, exp := range invalidParseCases {
+			_, err := Parse("file", []byte(tc), Memoize(conf.memoize))
+			if err == nil {
+				t.Errorf("%q: want error, got none", tc)
+				continue
+			}
+			if err.Error() != exp {
+				t.Errorf("%q: want \n%s\n, got \n%s\n", tc, exp, err)
+			}
+		}
 	}
 }
 
