@@ -389,8 +389,8 @@ For this reason, it is important to precisely define what is intended to be
 the supported API of pigeon, the parts that will be stable
 in future versions.
 
-The "stability" of the API attempts to make a similar guarantee as the
-Go 1 compatibility [5]. The following lists what part of the
+The "stability" of the version 1.0 API attempts to make a similar guarantee
+as the Go 1 compatibility [5]. The following lists what part of the
 current pigeon code falls under that guarantee (features may be added in
 the future):
 
@@ -420,6 +420,15 @@ the future):
     and this type is guaranteed to have an Inner field that contains the
     original error value. There are no guarantees on other fields and methods
     of this type.
+
+The above guarantee is given to the version 1.0 (https://github.com/mna/pigeon/releases/tag/v1.0.0)
+of pigeon, which has entered maintenance mode (bug fixes only). The current
+master branch includes the development toward a future version 2.0, which
+intends to further improve pigeon.
+While the given API stability should be maintained as far as it makes sense,
+breaking changes may be necessary to be able to improve pigeon.
+The new version 2.0 API has not yet stabilized and therefore changes to the API
+may occur at any time.
 
 References:
 
