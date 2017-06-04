@@ -1,16 +1,589 @@
-package builder
+package errorpos
 
-var staticCode = `
+import (
+	"bytes"
+	"errors"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
+	"sort"
+	"strings"
+	"unicode"
+	"unicode/utf8"
+)
+
+var g = &grammar{
+	rules: []*rule{
+		{
+			name: "Input",
+			pos:  position{line: 5, col: 1, offset: 22},
+			expr: &seqExpr{
+				pos: position{line: 5, col: 9, offset: 32},
+				exprs: []interface{}{
+					&ruleRefExpr{
+						pos:  position{line: 5, col: 9, offset: 32},
+						name: "_",
+					},
+					&choiceExpr{
+						pos: position{line: 5, col: 12, offset: 35},
+						alternatives: []interface{}{
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 12, offset: 35},
+								name: "case01",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 21, offset: 44},
+								name: "case02",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 30, offset: 53},
+								name: "case03",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 39, offset: 62},
+								name: "case04",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 48, offset: 71},
+								name: "case05",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 57, offset: 80},
+								name: "case06",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 66, offset: 89},
+								name: "case07",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 75, offset: 98},
+								name: "case08",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 84, offset: 107},
+								name: "case09",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 93, offset: 116},
+								name: "case10",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 5, col: 102, offset: 125},
+								name: "case11",
+							},
+						},
+					},
+					&ruleRefExpr{
+						pos:  position{line: 5, col: 110, offset: 133},
+						name: "EOF",
+					},
+				},
+			},
+		},
+		{
+			name: "case01",
+			pos:  position{line: 7, col: 1, offset: 138},
+			expr: &seqExpr{
+				pos: position{line: 7, col: 10, offset: 149},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 7, col: 10, offset: 149},
+						val:        "case01",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 7, col: 19, offset: 158},
+						name: "_",
+					},
+					&oneOrMoreExpr{
+						pos: position{line: 7, col: 21, offset: 160},
+						expr: &seqExpr{
+							pos: position{line: 7, col: 22, offset: 161},
+							exprs: []interface{}{
+								&choiceExpr{
+									pos: position{line: 7, col: 23, offset: 162},
+									alternatives: []interface{}{
+										&ruleRefExpr{
+											pos:  position{line: 7, col: 23, offset: 162},
+											name: "increment",
+										},
+										&ruleRefExpr{
+											pos:  position{line: 7, col: 35, offset: 174},
+											name: "decrement",
+										},
+										&ruleRefExpr{
+											pos:  position{line: 7, col: 47, offset: 186},
+											name: "zero",
+										},
+									},
+								},
+								&ruleRefExpr{
+									pos:  position{line: 7, col: 53, offset: 192},
+									name: "_",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "case02",
+			pos:  position{line: 8, col: 1, offset: 197},
+			expr: &seqExpr{
+				pos: position{line: 8, col: 10, offset: 208},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 8, col: 10, offset: 208},
+						val:        "case02",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 8, col: 19, offset: 217},
+						name: "__",
+					},
+					&oneOrMoreExpr{
+						pos: position{line: 8, col: 22, offset: 220},
+						expr: &charClassMatcher{
+							pos:        position{line: 8, col: 22, offset: 220},
+							val:        "[^abc]",
+							chars:      []rune{'a', 'b', 'c'},
+							ignoreCase: false,
+							inverted:   true,
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "case03",
+			pos:  position{line: 9, col: 1, offset: 228},
+			expr: &seqExpr{
+				pos: position{line: 9, col: 10, offset: 239},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 9, col: 10, offset: 239},
+						val:        "case03",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 9, col: 19, offset: 248},
+						name: "__",
+					},
+					&zeroOrOneExpr{
+						pos: position{line: 9, col: 22, offset: 251},
+						expr: &litMatcher{
+							pos:        position{line: 9, col: 22, offset: 251},
+							val:        "x",
+							ignoreCase: false,
+						},
+					},
+					&charClassMatcher{
+						pos:        position{line: 9, col: 27, offset: 256},
+						val:        "[0-9]",
+						ranges:     []rune{'0', '9'},
+						ignoreCase: false,
+						inverted:   false,
+					},
+				},
+			},
+		},
+		{
+			name: "case04",
+			pos:  position{line: 10, col: 1, offset: 262},
+			expr: &seqExpr{
+				pos: position{line: 10, col: 10, offset: 273},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 10, col: 10, offset: 273},
+						val:        "case04",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 10, col: 19, offset: 282},
+						name: "__",
+					},
+					&charClassMatcher{
+						pos:        position{line: 10, col: 22, offset: 285},
+						val:        "[\\x30-\\x39]",
+						ranges:     []rune{'0', '9'},
+						ignoreCase: false,
+						inverted:   false,
+					},
+					&charClassMatcher{
+						pos:        position{line: 10, col: 34, offset: 297},
+						val:        "[^\\x30-\\x39]",
+						ranges:     []rune{'0', '9'},
+						ignoreCase: false,
+						inverted:   true,
+					},
+					&charClassMatcher{
+						pos:        position{line: 10, col: 47, offset: 310},
+						val:        "[\\pN]",
+						classes:    []*unicode.RangeTable{rangeTable("N")},
+						ignoreCase: false,
+						inverted:   false,
+					},
+					&charClassMatcher{
+						pos:        position{line: 10, col: 53, offset: 316},
+						val:        "[^\\pN]",
+						classes:    []*unicode.RangeTable{rangeTable("N")},
+						ignoreCase: false,
+						inverted:   true,
+					},
+				},
+			},
+		},
+		{
+			name: "case05",
+			pos:  position{line: 11, col: 1, offset: 323},
+			expr: &seqExpr{
+				pos: position{line: 11, col: 10, offset: 334},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 11, col: 10, offset: 334},
+						val:        "case05",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 11, col: 19, offset: 343},
+						name: "__",
+					},
+					&notExpr{
+						pos: position{line: 11, col: 22, offset: 346},
+						expr: &litMatcher{
+							pos:        position{line: 11, col: 23, offset: 347},
+							val:        "not",
+							ignoreCase: false,
+						},
+					},
+					&litMatcher{
+						pos:        position{line: 11, col: 29, offset: 353},
+						val:        "yes",
+						ignoreCase: false,
+					},
+				},
+			},
+		},
+		{
+			name: "case06",
+			pos:  position{line: 12, col: 1, offset: 359},
+			expr: &seqExpr{
+				pos: position{line: 12, col: 10, offset: 370},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 12, col: 10, offset: 370},
+						val:        "case06",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 12, col: 19, offset: 379},
+						name: "__",
+					},
+					&notExpr{
+						pos: position{line: 12, col: 22, offset: 382},
+						expr: &charClassMatcher{
+							pos:        position{line: 12, col: 23, offset: 383},
+							val:        "[0-9]",
+							ranges:     []rune{'0', '9'},
+							ignoreCase: false,
+							inverted:   false,
+						},
+					},
+					&litMatcher{
+						pos:        position{line: 12, col: 29, offset: 389},
+						val:        "x",
+						ignoreCase: false,
+					},
+				},
+			},
+		},
+		{
+			name: "case07",
+			pos:  position{line: 13, col: 1, offset: 393},
+			expr: &seqExpr{
+				pos: position{line: 13, col: 10, offset: 404},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 13, col: 10, offset: 404},
+						val:        "case07",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 13, col: 19, offset: 413},
+						name: "__",
+					},
+					&notExpr{
+						pos: position{line: 13, col: 22, offset: 416},
+						expr: &choiceExpr{
+							pos: position{line: 13, col: 24, offset: 418},
+							alternatives: []interface{}{
+								&litMatcher{
+									pos:        position{line: 13, col: 24, offset: 418},
+									val:        "abc",
+									ignoreCase: true,
+								},
+								&charClassMatcher{
+									pos:        position{line: 13, col: 33, offset: 427},
+									val:        "[a-c]i",
+									ranges:     []rune{'a', 'c'},
+									ignoreCase: true,
+									inverted:   false,
+								},
+								&charClassMatcher{
+									pos:        position{line: 13, col: 42, offset: 436},
+									val:        "[\\pL]",
+									classes:    []*unicode.RangeTable{rangeTable("L")},
+									ignoreCase: false,
+									inverted:   false,
+								},
+							},
+						},
+					},
+					&charClassMatcher{
+						pos:        position{line: 13, col: 49, offset: 443},
+						val:        "[0-9]",
+						ranges:     []rune{'0', '9'},
+						ignoreCase: false,
+						inverted:   false,
+					},
+				},
+			},
+		},
+		{
+			name: "case08",
+			pos:  position{line: 14, col: 1, offset: 449},
+			expr: &seqExpr{
+				pos: position{line: 14, col: 10, offset: 460},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 14, col: 10, offset: 460},
+						val:        "case08",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 14, col: 19, offset: 469},
+						name: "__",
+					},
+					&andExpr{
+						pos: position{line: 14, col: 22, offset: 472},
+						expr: &litMatcher{
+							pos:        position{line: 14, col: 23, offset: 473},
+							val:        "a",
+							ignoreCase: true,
+						},
+					},
+					&anyMatcher{
+						line: 14, col: 28, offset: 478,
+					},
+				},
+			},
+		},
+		{
+			name: "case09",
+			pos:  position{line: 15, col: 1, offset: 480},
+			expr: &seqExpr{
+				pos: position{line: 15, col: 10, offset: 491},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 15, col: 10, offset: 491},
+						val:        "case09",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 15, col: 19, offset: 500},
+						name: "__",
+					},
+					&andExpr{
+						pos: position{line: 15, col: 22, offset: 503},
+						expr: &charClassMatcher{
+							pos:        position{line: 15, col: 23, offset: 504},
+							val:        "[0-9]",
+							ranges:     []rune{'0', '9'},
+							ignoreCase: false,
+							inverted:   false,
+						},
+					},
+					&anyMatcher{
+						line: 15, col: 29, offset: 510,
+					},
+				},
+			},
+		},
+		{
+			name: "case10",
+			pos:  position{line: 16, col: 1, offset: 512},
+			expr: &seqExpr{
+				pos: position{line: 16, col: 10, offset: 523},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 16, col: 10, offset: 523},
+						val:        "case10",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 16, col: 19, offset: 532},
+						name: "__",
+					},
+					&andExpr{
+						pos: position{line: 16, col: 22, offset: 535},
+						expr: &choiceExpr{
+							pos: position{line: 16, col: 24, offset: 537},
+							alternatives: []interface{}{
+								&litMatcher{
+									pos:        position{line: 16, col: 24, offset: 537},
+									val:        "0",
+									ignoreCase: false,
+								},
+								&charClassMatcher{
+									pos:        position{line: 16, col: 30, offset: 543},
+									val:        "[012]",
+									chars:      []rune{'0', '1', '2'},
+									ignoreCase: false,
+									inverted:   false,
+								},
+								&charClassMatcher{
+									pos:        position{line: 16, col: 38, offset: 551},
+									val:        "[3-9]",
+									ranges:     []rune{'3', '9'},
+									ignoreCase: false,
+									inverted:   false,
+								},
+								&charClassMatcher{
+									pos:        position{line: 16, col: 46, offset: 559},
+									val:        "[\\pN]",
+									classes:    []*unicode.RangeTable{rangeTable("N")},
+									ignoreCase: false,
+									inverted:   false,
+								},
+							},
+						},
+					},
+					&anyMatcher{
+						line: 16, col: 53, offset: 566,
+					},
+				},
+			},
+		},
+		{
+			name: "case11",
+			pos:  position{line: 17, col: 1, offset: 568},
+			expr: &seqExpr{
+				pos: position{line: 17, col: 10, offset: 579},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 17, col: 10, offset: 579},
+						val:        "case11",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 17, col: 19, offset: 588},
+						name: "__",
+					},
+					&notExpr{
+						pos: position{line: 17, col: 22, offset: 591},
+						expr: &notExpr{
+							pos: position{line: 17, col: 24, offset: 593},
+							expr: &litMatcher{
+								pos:        position{line: 17, col: 26, offset: 595},
+								val:        "a",
+								ignoreCase: false,
+							},
+						},
+					},
+					&litMatcher{
+						pos:        position{line: 17, col: 32, offset: 601},
+						val:        "a",
+						ignoreCase: false,
+					},
+				},
+			},
+		},
+		{
+			name: "increment",
+			pos:  position{line: 19, col: 1, offset: 606},
+			expr: &litMatcher{
+				pos:        position{line: 19, col: 13, offset: 620},
+				val:        "inc",
+				ignoreCase: false,
+			},
+		},
+		{
+			name: "decrement",
+			pos:  position{line: 20, col: 1, offset: 626},
+			expr: &litMatcher{
+				pos:        position{line: 20, col: 13, offset: 640},
+				val:        "dec",
+				ignoreCase: false,
+			},
+		},
+		{
+			name: "zero",
+			pos:  position{line: 21, col: 1, offset: 646},
+			expr: &litMatcher{
+				pos:        position{line: 21, col: 8, offset: 655},
+				val:        "zero",
+				ignoreCase: false,
+			},
+		},
+		{
+			name: "oneOrMore",
+			pos:  position{line: 22, col: 1, offset: 662},
+			expr: &litMatcher{
+				pos:        position{line: 22, col: 13, offset: 676},
+				val:        "oneOrMore",
+				ignoreCase: false,
+			},
+		},
+		{
+			name: "_",
+			pos:  position{line: 23, col: 1, offset: 688},
+			expr: &zeroOrMoreExpr{
+				pos: position{line: 23, col: 5, offset: 694},
+				expr: &charClassMatcher{
+					pos:        position{line: 23, col: 5, offset: 694},
+					val:        "[ \\t\\n\\r]",
+					chars:      []rune{' ', '\t', '\n', '\r'},
+					ignoreCase: false,
+					inverted:   false,
+				},
+			},
+		},
+		{
+			name: "__",
+			pos:  position{line: 24, col: 1, offset: 705},
+			expr: &charClassMatcher{
+				pos:        position{line: 24, col: 6, offset: 712},
+				val:        "[ ]",
+				chars:      []rune{' '},
+				ignoreCase: false,
+				inverted:   false,
+			},
+		},
+		{
+			name: "EOF",
+			pos:  position{line: 25, col: 1, offset: 716},
+			expr: &notExpr{
+				pos: position{line: 25, col: 7, offset: 724},
+				expr: &anyMatcher{
+					line: 25, col: 8, offset: 725,
+				},
+			},
+		},
+	},
+}
+
 var (
 	// errNoRule is returned when the grammar to parse has no rule.
-	errNoRule          = errors.New("grammar has no rule")
+	errNoRule = errors.New("grammar has no rule")
 
 	// errInvalidEncoding is returned when the source is not properly
 	// utf8-encoded.
 	errInvalidEncoding = errors.New("invalid encoding")
 
 	// errNoMatch is returned if no match could be found.
-	errNoMatch         = errors.New("no match found")
+	errNoMatch = errors.New("no match found")
 )
 
 // Option is a function that can set an option on the parser. It returns
@@ -105,7 +678,7 @@ type position struct {
 }
 
 func (p position) String() string {
-	return fmt.Sprintf("%%d:%%d [%%d]", p.line, p.col, p.offset)
+	return fmt.Sprintf("%d:%d [%d]", p.line, p.col, p.offset)
 }
 
 // savepoint stores all state required to go back to this point in the
@@ -141,9 +714,9 @@ type choiceExpr struct {
 }
 
 type actionExpr struct {
-	pos    position
-	expr   interface{}
-	run    func(*parser) (interface{}, error)
+	pos  position
+	expr interface{}
+	run  func(*parser) (interface{}, error)
 }
 
 type seqExpr struct {
@@ -263,11 +836,11 @@ func (p *parserError) Error() string {
 // newParser creates a parser with the specified input source and options.
 func newParser(filename string, b []byte, opts ...Option) *parser {
 	p := &parser{
-		filename: filename,
-		errs: new(errList),
-		data: b,
-		pt: savepoint{position: position{line: 1}},
-		recover: true,
+		filename:        filename,
+		errs:            new(errList),
+		data:            b,
+		pt:              savepoint{position: position{line: 1}},
+		recover:         true,
 		maxFailPos:      position{col: 1, line: 1},
 		maxFailExpected: make(map[string]struct{}),
 	}
@@ -283,8 +856,8 @@ func (p *parser) setOptions(opts []Option) {
 }
 
 type resultTuple struct {
-	v interface{}
-	b bool
+	v   interface{}
+	b   bool
 	end savepoint
 }
 
@@ -298,7 +871,7 @@ type parser struct {
 
 	depth   int
 	recover bool
-	debug bool
+	debug   bool
 
 	memoize bool
 	// memoization table for the packrat algorithm:
@@ -306,7 +879,7 @@ type parser struct {
 	memo map[int]map[interface{}]resultTuple
 
 	// rules table, maps the rule identifier to the rule node
-	rules  map[string]*rule
+	rules map[string]*rule
 	// variables stack, map of label to value
 	vstack []map[string]interface{}
 	// rule stack, allows identification of the current rule in errors
@@ -359,19 +932,19 @@ func (p *parser) print(prefix, s string) string {
 		return s
 	}
 
-	fmt.Printf("%%s %%d:%%d:%%d: %%s [%%#U]\n",
+	fmt.Printf("%s %d:%d:%d: %s [%#U]\n",
 		prefix, p.pt.line, p.pt.col, p.pt.offset, s, p.pt.rn)
 	return s
 }
 
 func (p *parser) in(s string) string {
 	p.depth++
-	return p.print(strings.Repeat(" ", p.depth) + ">", s)
+	return p.print(strings.Repeat(" ", p.depth)+">", s)
 }
 
 func (p *parser) out(s string) string {
 	p.depth--
-	return p.print(strings.Repeat(" ", p.depth) + "<", s)
+	return p.print(strings.Repeat(" ", p.depth)+"<", s)
 }
 
 func (p *parser) addErr(err error) {
@@ -386,7 +959,7 @@ func (p *parser) addErrAt(err error, pos position) {
 	if buf.Len() > 0 {
 		buf.WriteString(":")
 	}
-	buf.WriteString(fmt.Sprintf("%%d:%%d (%%d)", pos.line, pos.col, pos.offset))
+	buf.WriteString(fmt.Sprintf("%d:%d (%d)", pos.line, pos.col, pos.offset))
 	if len(p.rstack) > 0 {
 		if buf.Len() > 0 {
 			buf.WriteString(": ")
@@ -490,7 +1063,7 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 				case error:
 					p.addErr(e)
 				default:
-					p.addErr(fmt.Errorf("%%v", e))
+					p.addErr(fmt.Errorf("%v", e))
 				}
 				err = p.errs.err()
 			}
@@ -550,7 +1123,7 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	p.popV()
 	p.rstack = p.rstack[:len(p.rstack)-1]
 	if ok && p.debug {
-		p.print(strings.Repeat(" ", p.depth) + "MATCH", string(p.sliceFrom(start)))
+		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
 
 	if p.memoize {
@@ -606,7 +1179,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	case *zeroOrOneExpr:
 		val, ok = p.parseZeroOrOneExpr(expr)
 	default:
-		panic(fmt.Sprintf("unknown expression type %%T", expr))
+		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
 	if p.memoize {
 		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
@@ -631,7 +1204,7 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 		val = actVal
 	}
 	if ok && p.debug {
-		p.print(strings.Repeat(" ", p.depth) + "MATCH", string(p.sliceFrom(start)))
+		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
 	return val, ok
 }
@@ -780,7 +1353,7 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 	if lit.ignoreCase {
 		ignoreCase = "i"
 	}
-	val := fmt.Sprintf("%%q%%s", lit.val, ignoreCase)
+	val := fmt.Sprintf("%q%s", lit.val, ignoreCase)
 	start := p.pt
 	for _, want := range lit.val {
 		cur := p.pt.rn
@@ -872,12 +1445,12 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
 	}
 
 	if ref.name == "" {
-		panic(fmt.Sprintf("%%s: invalid rule: missing name", ref.pos))
+		panic(fmt.Sprintf("%s: invalid rule: missing name", ref.pos))
 	}
 
 	rule := p.rules[ref.name]
 	if rule == nil {
-		p.addErr(fmt.Errorf("undefined rule: %%s", ref.name))
+		p.addErr(fmt.Errorf("undefined rule: %s", ref.name))
 		return nil, false
 	}
 	return p.parseRule(rule)
@@ -931,9 +1504,7 @@ func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
 	// whether it matched or not, consider it a match
 	return val, true
 }
-`
 
-var rangeTable = `
 func rangeTable(class string) *unicode.RangeTable {
 	if rt, ok := unicode.Categories[class]; ok {
 		return rt
@@ -946,6 +1517,5 @@ func rangeTable(class string) *unicode.RangeTable {
 	}
 
 	// cannot happen
-	panic(fmt.Sprintf("invalid Unicode class: %%s", class))
+	panic(fmt.Sprintf("invalid Unicode class: %s", class))
 }
-`
