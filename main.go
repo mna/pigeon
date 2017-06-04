@@ -147,8 +147,7 @@ the generated code is written to this file instead.
 	-x
 		do not generate the parser, only parse the grammar.
 
-See https://godoc.org/github.com/mna/pigeon for more
-information.
+See https://godoc.org/github.com/mna/pigeon for more information.
 `
 
 // usage prints the help page of the command-line tool.
