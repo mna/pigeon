@@ -20,6 +20,8 @@ BOOTSTRAPBUILD_DIR = $(BOOTSTRAP_DIR)/cmd/bootstrap-build
 BOOTSTRAPBUILD_SRC = $(BOOTSTRAPBUILD_DIR)/*.go
 BOOTSTRAPPIGEON_DIR = $(BOOTSTRAP_DIR)/cmd/bootstrap-pigeon
 BOOTSTRAPPIGEON_SRC = $(BOOTSTRAPPIGEON_DIR)/*.go
+STATICCODEGENERATOR_DIR = $(BOOTSTRAP_DIR)/cmd/static_code_generator
+STATICCODEGENERATOR_SRC = $(STATICCODEGENERATOR_DIR)/*.go
 
 # grammar variables
 GRAMMAR_DIR = $(ROOT)/grammar
@@ -28,9 +30,14 @@ PIGEON_GRAMMAR = $(GRAMMAR_DIR)/pigeon.peg
 
 TEST_GENERATED_SRC = $(patsubst %.peg,%.go,$(shell echo ./{examples,test}/**/*.peg))
 
-all: $(BINDIR)/bootstrap-build $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go \
+all: $(BUILDER_DIR)/generated_static_code.go $(BINDIR)/static_code_generator \
+	$(BUILDER_DIR)/generated_static_code_range_table.go \
+	$(BINDIR)/bootstrap-build $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go \
 	$(BINDIR)/bootstrap-pigeon $(ROOT)/pigeon.go $(BINDIR)/pigeon \
 	$(TEST_GENERATED_SRC)
+
+$(BINDIR)/static_code_generator: $(STATICCODEGENERATOR_SRC)
+	go build -o $@ $(STATICCODEGENERATOR_DIR)
 
 $(BINDIR)/bootstrap-build: $(BOOTSTRAPBUILD_SRC) $(BOOTSTRAP_SRC) $(BUILDER_SRC) \
 	$(AST_SRC)
@@ -49,6 +56,12 @@ $(ROOT)/pigeon.go: $(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR)
 
 $(BINDIR)/pigeon: $(ROOT_SRC) $(ROOT)/pigeon.go
 	go build -o $@ $(ROOT)
+
+$(BUILDER_DIR)/generated_static_code.go: $(BUILDER_DIR)/static_code.go $(BINDIR)/static_code_generator
+	$(BINDIR)/static_code_generator $(BUILDER_DIR)/static_code.go $@ staticCode
+
+$(BUILDER_DIR)/generated_static_code_range_table.go: $(BUILDER_DIR)/static_code_range_table.go $(BINDIR)/static_code_generator
+	$(BINDIR)/static_code_generator $(BUILDER_DIR)/static_code_range_table.go $@ rangeTable
 
 $(BOOTSTRAP_GRAMMAR):
 $(PIGEON_GRAMMAR):
@@ -94,6 +107,7 @@ cmp:
 	unlink $$official
 
 clean:
+	rm $(BUILDER_DIR)/generated_static_code.go $(BUILDER_DIR)/generated_static_code_range_table.go
 	rm $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC)
 	rm -rf $(BINDIR)
 
