@@ -89,6 +89,10 @@ func main() {
 
 		formattedBuf, err := imports.Process("filename", outBuf.Bytes(), options)
 		if err != nil {
+			if _, err := outw.Write(outBuf.Bytes()); err != nil {
+				fmt.Fprintln(os.Stderr, "write error: ", err)
+				os.Exit(7)
+			}
 			fmt.Fprintln(os.Stderr, "format error: ", err)
 			os.Exit(6)
 		}

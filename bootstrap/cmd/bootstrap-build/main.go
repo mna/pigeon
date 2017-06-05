@@ -77,7 +77,10 @@ func main() {
 
 	formattedBuf, err := imports.Process("filename", outBuf.Bytes(), options)
 	if err != nil {
-		log.Fatal(err)
+		if _, err := outw.Write(outBuf.Bytes()); err != nil {
+			log.Fatal(err)
+		}
+		log.Fatal("format error" + err.Error())
 	}
 
 	if _, err := outw.Write(formattedBuf); err != nil {
