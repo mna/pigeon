@@ -1,35 +1,10 @@
 {
-// Command json parses JSON as defined by [1].
+// Package json parses JSON as defined by [1].
 //
 // BUGS: the escaped forward solidus (`\/`) is not currently handled.
 //
 // [1]: http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
-package main
-
-func main() {
-    in := os.Stdin
-    nm := "stdin"
-    if len(os.Args) > 1 {
-        f, err := os.Open(os.Args[1])
-        if err != nil {
-            log.Fatal(err)
-        }
-        defer func() {
-            err := f.Close()
-            if err != nil {
-                log.Fatal(err)
-            }
-        }()
-        in = f
-        nm = os.Args[1]
-    }
-
-    got, err := ParseReader(nm, in)
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Println(got)
-}
+package json
 
 func toIfaceSlice(v interface{}) []interface{} {
     if v == nil {
