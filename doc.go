@@ -351,8 +351,8 @@ error).
 
 Providing good error reporting in a parser is not a trivial task. Part
 of it is provided by the pigeon tool, by offering features such as
-filename, position and rule name in the error message, but an
-important part of good error reporting needs to be done by the grammar
+filename, position, expected literals and rule name in the error message,
+but an important part of good error reporting needs to be done by the grammar
 author.
 
 For example, many programming languages use double-quotes for string literals.
@@ -375,6 +375,15 @@ In order to do this, the grammar can look something like this:
 
 This is just one example, but it illustrates the idea that error reporting
 needs to be thought out when designing the grammar.
+
+Because the above mentioned error types (errList and parserError) are not
+exported, additional steps have to be taken, ff the generated parser is used as
+library package in other packages (e.g. if the same parser is used in multiple
+command line tools).
+One possible implementation for exported errors (based on interfaces) and
+customized error reporting (caret style formatting of the position, where
+the parsing failed) is available in the json example and its command line tool:
+http://godoc.org/github.com/mna/pigeon/examples/json
 
 API stability
 
