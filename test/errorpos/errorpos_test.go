@@ -5,8 +5,8 @@ import "testing"
 var cases = map[string]string{
 	"case01 zero":           ``,
 	" case01 inc dec zero ": ``,
-	"":                `1:1 (0): no match found, expected: "case01", "case02", "case03", "case04", "case05", "case06", "case07", "case08", "case09", "case10", "case11", [ \t\n\r]`,
-	"kase01":          `1:1 (0): no match found, expected: "case01", "case02", "case03", "case04", "case05", "case06", "case07", "case08", "case09", "case10", "case11", [ \t\n\r]`,
+	"":                `1:1 (0): no match found, expected: "case01", "case02", "case03", "case04", "case05", "case06", "case07", "case08", "case09", "case10", "case11" or [ \t\n\r]`,
+	"kase01":          `1:1 (0): no match found, expected: "case01", "case02", "case03", "case04", "case05", "case06", "case07", "case08", "case09", "case10", "case11" or [ \t\n\r]`,
 	"case01 zero ink": `1:13 (12): no match found, expected: "dec", "inc", "zero", [ \t\n\r] or EOF`,
 	"case02 xyz":      ``,
 	"case02 ":         `1:8 (7): no match found, expected: [^abc]`,
@@ -15,7 +15,7 @@ var cases = map[string]string{
 	"case02 xya":      `1:10 (9): no match found, expected: [^abc] or EOF`,
 	"case03 0":        ``,
 	"case03 x0":       ``,
-	"case03 y":        `1:8 (7): no match found, expected: "x", [0-9]`,
+	"case03 y":        `1:8 (7): no match found, expected: "x" or [0-9]`,
 	"case03 xy":       `1:9 (8): no match found, expected: [0-9]`,
 	"case03 10":       `1:9 (8): no match found, expected: EOF`,
 	"case04 0x0x":     ``,
@@ -34,7 +34,7 @@ var cases = map[string]string{
 	"case09 0":        ``,
 	"case09 a":        `1:8 (7): no match found, expected: [0-9]`,
 	"case10 9":        ``,
-	"case10 x":        `1:8 (7): no match found, expected: "0", [012], [3-9], [\pN]`,
+	"case10 x":        `1:8 (7): no match found, expected: "0", [012], [3-9] or [\pN]`,
 	"case11 a":        ``,
 	"case11 b":        `1:8 (7): no match found, expected: "a"`,
 }

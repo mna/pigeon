@@ -649,11 +649,7 @@ func listJoin(list []string, sep string, lastSep string) string {
 	case 1:
 		return list[0]
 	default:
-		if list[len(list)-1] == "EOF" {
-			return fmt.Sprintf("%s %s %s", strings.Join(list[:len(list)-1], sep), lastSep, list[len(list)-1])
-		} else {
-			return fmt.Sprintf("%s", strings.Join(list, sep))
-		}
+		return fmt.Sprintf("%s %s %s", strings.Join(list[:len(list)-1], sep), lastSep, list[len(list)-1])
 	}
 }
 
