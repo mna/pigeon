@@ -145,9 +145,6 @@ the generated code is written to this file instead.
 	-receiver-name NAME
 		use NAME as for the receiver name of the generated methods
 		for the grammar's code blocks. Defaults to "c".
-	-track-fail
-		track farthest position of parsing failures to generate 
-		meaningful error messages
 	-x
 		do not generate the parser, only parse the grammar.
 
