@@ -8,7 +8,10 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"text/template"
 	"unicode"
+
+	"regexp"
 
 	"github.com/mna/pigeon/ast"
 )
@@ -52,6 +55,17 @@ func ReceiverName(nm string) Option {
 	}
 }
 
+// Optimize returns an option that specifies the optimize option
+// If optimize is true, the Debug and Memoize code is completely
+// removed from the resulting parser
+func Optimize(optimize bool) Option {
+	return func(b *builder) Option {
+		prev := b.optimize
+		b.optimize = optimize
+		return Optimize(prev)
+	}
+}
+
 // BuildParser builds the PEG parser using the provider grammar. The code is
 // written to the specified w.
 func BuildParser(w io.Writer, g *ast.Grammar, opts ...Option) error {
@@ -66,6 +80,7 @@ type builder struct {
 
 	// options
 	recvName string
+	optimize bool
 
 	ruleName  string
 	exprIndex int
@@ -558,7 +573,35 @@ func (b *builder) writeFunc(funcIx int, code *ast.CodeBlock, callTpl, funcTpl st
 }
 
 func (b *builder) writeStaticCode() {
-	b.writeln(staticCode)
+	buffer := bytes.NewBufferString("")
+	params := struct {
+		Optimize bool
+	}{
+		Optimize: b.optimize,
+	}
+	t := template.Must(template.New("static_code").Parse(staticCode))
+
+	err := t.Execute(buffer, params)
+	if err != nil {
+		// This is very unlikely to ever happen
+		panic("executing template: " + err.Error())
+	}
+
+	// Clean the ==template== comments from the generated parser
+	lines := strings.Split(buffer.String(), "\n")
+	buffer.Reset()
+	re := regexp.MustCompile(`^\s*//\s*(==template==\s*)+$`)
+	for _, line := range lines {
+		if !re.MatchString(line) {
+			_, err := buffer.WriteString(line + "\n")
+			if err != nil {
+				// This is very unlikely to ever happen
+				panic("unable to write to byte buffer: " + err.Error())
+			}
+		}
+	}
+
+	b.writeln(buffer.String())
 	if b.rangeTable {
 		b.writeln(rangeTable)
 	}
