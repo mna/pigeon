@@ -42,6 +42,11 @@ The following options can be specified:
 	-o=FILE : string, output file where the generated parser will be
 	written (default: stdout).
 
+	-optimize-basic-latin : boolean, if set, a lookup table for the first 128
+	characters of the Unicode table (Basic Latin) is generated for each character
+	class matcher. This speeds up the parsing, if parsed data mainly consists
+	of characters from this range (default: false).
+
 	-optimize-parser : boolean, if set, the options Debug and Memoize are removed
 	from the resulting parser. This saves a few cpu cycles, when using the
 	generated parser (default: false).

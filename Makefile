@@ -61,7 +61,7 @@ $(BUILDER_DIR)/generated_static_code.go: $(BUILDER_DIR)/static_code.go $(BINDIR)
 	$(BINDIR)/static_code_generator $(BUILDER_DIR)/static_code.go $@ staticCode
 
 $(BUILDER_DIR)/generated_static_code_range_table.go: $(BUILDER_DIR)/static_code_range_table.go $(BINDIR)/static_code_generator
-	$(BINDIR)/static_code_generator $(BUILDER_DIR)/static_code_range_table.go $@ rangeTable
+	$(BINDIR)/static_code_generator $(BUILDER_DIR)/static_code_range_table.go $@ rangeTable0
 
 $(BOOTSTRAP_GRAMMAR):
 $(PIGEON_GRAMMAR):
@@ -72,7 +72,7 @@ $(EXAMPLES_DIR)/json/json.go: $(EXAMPLES_DIR)/json/json.peg $(EXAMPLES_DIR)/json
 	$(BINDIR)/pigeon $< > $@
 
 $(EXAMPLES_DIR)/json/optimized/json.go: $(EXAMPLES_DIR)/json/json.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon -optimize-parser $< > $@
+	$(BINDIR)/pigeon -optimize-parser -optimize-basic-latin $< > $@
 
 $(EXAMPLES_DIR)/calculator/calculator.go: $(EXAMPLES_DIR)/calculator/calculator.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@

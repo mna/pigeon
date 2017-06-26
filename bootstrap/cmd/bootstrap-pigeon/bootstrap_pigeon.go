@@ -2353,13 +2353,14 @@ type litMatcher struct {
 }
 
 type charClassMatcher struct {
-	pos        position
-	val        string
-	chars      []rune
-	ranges     []rune
-	classes    []*unicode.RangeTable
-	ignoreCase bool
-	inverted   bool
+	pos             position
+	val             string
+	basicLatinChars [128]bool
+	chars           []rune
+	ranges          []rune
+	classes         []*unicode.RangeTable
+	ignoreCase      bool
+	inverted        bool
 }
 
 type anyMatcher position
@@ -2877,11 +2878,13 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 
 	cur := p.pt.rn
 	start := p.pt
+
 	// can't match EOF
 	if cur == utf8.RuneError {
 		p.failAt(false, start.position, chr.val)
 		return nil, false
 	}
+
 	if chr.ignoreCase {
 		cur = unicode.ToLower(cur)
 	}
