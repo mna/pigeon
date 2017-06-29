@@ -982,7 +982,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 			globalStore: make(map[string]interface{}),
 		},
 		maxFailPos:      position{col: 1, line: 1},
-		maxFailExpected: make(map[string]struct{}),
+		maxFailExpected: make([]string, 0, 20),
 	}
 	p.setOptions(opts)
 	return p
@@ -1021,7 +1021,7 @@ type parser struct {
 
 	// parse fail
 	maxFailPos            position
-	maxFailExpected       map[string]struct{}
+	maxFailExpected       []string
 	maxFailInvertExpected bool
 }
 
@@ -1094,13 +1094,13 @@ func (p *parser) failAt(fail bool, pos position, want string) {
 
 		if pos.offset > p.maxFailPos.offset {
 			p.maxFailPos = pos
-			p.maxFailExpected = make(map[string]struct{})
+			p.maxFailExpected = p.maxFailExpected[:0]
 		}
 
 		if p.maxFailInvertExpected {
 			want = "!" + want
 		}
-		p.maxFailExpected[want] = struct{}{}
+		p.maxFailExpected = append(p.maxFailExpected, want)
 	}
 }
 
@@ -1176,13 +1176,17 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		if len(*p.errs) == 0 {
 			// If parsing fails, but no errors have been recorded, the expected values
 			// for the farthest parser position are returned as error.
-			expected := make([]string, 0, len(p.maxFailExpected))
+			maxFailExpectedMap := make(map[string]struct{}, len(p.maxFailExpected))
+			for _, v := range p.maxFailExpected {
+				maxFailExpectedMap[v] = struct{}{}
+			}
+			expected := make([]string, 0, len(maxFailExpectedMap))
 			eof := false
-			if _, ok := p.maxFailExpected["!."]; ok {
-				delete(p.maxFailExpected, "!.")
+			if _, ok := maxFailExpectedMap["!."]; ok {
+				delete(maxFailExpectedMap, "!.")
 				eof = true
 			}
-			for k := range p.maxFailExpected {
+			for k := range maxFailExpectedMap {
 				expected = append(expected, k)
 			}
 			sort.Strings(expected)
