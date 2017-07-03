@@ -47,6 +47,23 @@ The following options can be specified:
 	class matcher. This speeds up the parsing, if parsed data mainly consists
 	of characters from this range (default: false).
 
+	-optimize-grammar : boolean, (EXPERIMENTAL FEATURE) if set, several performance
+	optimizations on the grammar are performed, with focus to the reduction of the
+	grammar depth.
+	Optimization:
+		* removal of unreferenced rules
+		* replace rule references with a copy of the referenced Rule, if the
+		  referenced rule it self has no references.
+		* resolve nested choice expressions
+		* resolve choice expressions with only one alternative
+		* resolve nested sequences expression
+		* resolve sequence expressions with only one element
+		* combine character class matcher and literal matcher, where possible
+	The resulting grammar is usually more memory consuming, but faster for parsing.
+	The optimization of the grammar is done in multiple rounds (optimize until no
+	more optimizations have applied). This process takes some time, depending on the
+	optimization potential of the grammar.
+
 	-optimize-parser : boolean, if set, the options Debug and Memoize are removed
 	from the resulting parser. This saves a few cpu cycles, when using the
 	generated parser (default: false).
