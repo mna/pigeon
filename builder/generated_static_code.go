@@ -949,7 +949,7 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	}
 
 	// {{ end }} ==template==
-	var vals []interface{}
+	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
 	for _, expr := range seq.exprs {

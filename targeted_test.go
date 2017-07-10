@@ -459,6 +459,9 @@ func TestParseSeqExpr(t *testing.T) {
 			want = vals
 			match = true
 		}
+		if tc.lits == nil {
+			want = make([]interface{}, 0) // empty seq (impossible case via the parser) always matches
+		}
 		lbl := fmt.Sprintf("%v: %q", tc.lits, tc.in)
 
 		lits := make([]interface{}, len(tc.lits))
