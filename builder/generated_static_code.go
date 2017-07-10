@@ -17,6 +17,7 @@ var (
 // the previous setting as an Option.
 type Option func(*parser) Option
 
+// ==template== {{ if not .Optimize }}
 // Debug creates an Option to set the debug flag to b. When set to true,
 // debugging information is printed to stdout while parsing.
 //
@@ -42,6 +43,8 @@ func Memoize(b bool) Option {
 		return Memoize(old)
 	}
 }
+
+// {{ end }} ==template==
 
 // Recover creates an Option to set the recover flag to b. When set to
 // true, this causes the parser to recover from panics and convert it
@@ -302,12 +305,14 @@ type parser struct {
 
 	depth   int
 	recover bool
-	debug   bool
+	// ==template== {{ if not .Optimize }}
+	debug bool
 
 	memoize bool
 	// memoization table for the packrat algorithm:
 	// map[offset in source] map[expression or rule] {value, match}
 	memo map[int]map[interface{}]resultTuple
+	// {{ end }} ==template==
 
 	// rules table, maps the rule identifier to the rule node
 	rules map[string]*rule
@@ -316,8 +321,10 @@ type parser struct {
 	// rule stack, allows identification of the current rule in errors
 	rstack []*rule
 
+	// ==template== {{ if not .Optimize }}
 	// stats
 	exprCnt int
+	// {{ end }} ==template==
 
 	// parse fail
 	maxFailPos            position
@@ -357,6 +364,7 @@ func (p *parser) popV() {
 	p.vstack = p.vstack[:len(p.vstack)-1]
 }
 
+// ==template== {{ if not .Optimize }}
 func (p *parser) print(prefix, s string) string {
 	if !p.debug {
 		return s
@@ -376,6 +384,8 @@ func (p *parser) out(s string) string {
 	p.depth--
 	return p.print(strings.Repeat(" ", p.depth)+"<", s)
 }
+
+// {{ end }} ==template==
 
 func (p *parser) addErr(err error) {
 	p.addErrAt(err, p.pt.position, []string{})
@@ -445,9 +455,11 @@ func (p *parser) read() {
 
 // restore parser position to the savepoint pt.
 func (p *parser) restore(pt savepoint) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("restore"))
 	}
+	// {{ end }} ==template==
 	if pt.offset == p.pt.offset {
 		return
 	}
@@ -459,6 +471,7 @@ func (p *parser) sliceFrom(start savepoint) []byte {
 	return p.data[start.position.offset:p.pt.position.offset]
 }
 
+// ==template== {{ if not .Optimize }}
 func (p *parser) getMemoized(node interface{}) (resultTuple, bool) {
 	if len(p.memo) == 0 {
 		return resultTuple{}, false
@@ -483,6 +496,8 @@ func (p *parser) setMemoized(pt savepoint, node interface{}, tuple resultTuple) 
 	m[node] = tuple
 }
 
+// {{ end }} ==template==
+
 func (p *parser) buildRulesTable(g *grammar) {
 	p.rules = make(map[string]*rule, len(g.rules))
 	for _, r := range g.rules {
@@ -504,9 +519,11 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		// and return the panic as an error.
 		defer func() {
 			if e := recover(); e != nil {
+				// ==template== {{ if not .Optimize }}
 				if p.debug {
 					defer p.out(p.in("panic handler"))
 				}
+				// {{ end }} ==template==
 				val = nil
 				switch e := e.(type) {
 				case error:
@@ -558,6 +575,7 @@ func listJoin(list []string, sep string, lastSep string) string {
 }
 
 func (p *parser) parseRule(rule *rule) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseRule " + rule.name))
 	}
@@ -571,11 +589,13 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	}
 
 	start := p.pt
+	// {{ end }} ==template==
 	p.rstack = append(p.rstack, rule)
 	p.pushV()
 	val, ok := p.parseExpr(rule.expr)
 	p.popV()
 	p.rstack = p.rstack[:len(p.rstack)-1]
+	// ==template== {{ if not .Optimize }}
 	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
@@ -583,10 +603,12 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	if p.memoize {
 		p.setMemoized(start, rule, resultTuple{val, ok, p.pt})
 	}
+	// {{ end }} ==template==
 	return val, ok
 }
 
 func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	var pt savepoint
 
 	if p.memoize {
@@ -599,6 +621,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	}
 
 	p.exprCnt++
+	// {{ end }} ==template==
 	var val interface{}
 	var ok bool
 	switch expr := expr.(type) {
@@ -635,17 +658,21 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	default:
 		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
+	// ==template== {{ if not .Optimize }}
 	if p.memoize {
 		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
 	}
+	// {{ end }} ==template==
 	return val, ok
 }
 
 func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseActionExpr"))
 	}
 
+	// {{ end }} ==template==
 	start := p.pt
 	val, ok := p.parseExpr(act.expr)
 	if ok {
@@ -657,17 +684,21 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 		}
 		val = actVal
 	}
+	// ==template== {{ if not .Optimize }}
 	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
+	// {{ end }} ==template==
 	return val, ok
 }
 
 func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseAndCodeExpr"))
 	}
 
+	// {{ end }} ==template==
 	ok, err := and.run(p)
 	if err != nil {
 		p.addErr(err)
@@ -676,10 +707,12 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseAndExpr"))
 	}
 
+	// {{ end }} ==template==
 	pt := p.pt
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
@@ -689,10 +722,12 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseAnyMatcher"))
 	}
 
+	// {{ end }} ==template==
 	if p.pt.rn != utf8.RuneError {
 		start := p.pt
 		p.read()
@@ -704,10 +739,12 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 }
 
 func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseCharClassMatcher"))
 	}
 
+	// {{ end }} ==template==
 	cur := p.pt.rn
 	start := p.pt
 	// can't match EOF
@@ -768,10 +805,12 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 }
 
 func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseChoiceExpr"))
 	}
 
+	// {{ end }} ==template==
 	for _, alt := range ch.alternatives {
 		p.pushV()
 		val, ok := p.parseExpr(alt)
@@ -784,10 +823,12 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseLabeledExpr"))
 	}
 
+	// {{ end }} ==template==
 	p.pushV()
 	val, ok := p.parseExpr(lab.expr)
 	p.popV()
@@ -799,10 +840,12 @@ func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseLitMatcher"))
 	}
 
+	// {{ end }} ==template==
 	ignoreCase := ""
 	if lit.ignoreCase {
 		ignoreCase = "i"
@@ -826,10 +869,12 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 }
 
 func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseNotCodeExpr"))
 	}
 
+	// {{ end }} ==template==
 	ok, err := not.run(p)
 	if err != nil {
 		p.addErr(err)
@@ -838,10 +883,12 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseNotExpr"))
 	}
 
+	// {{ end }} ==template==
 	pt := p.pt
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
@@ -853,10 +900,12 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseOneOrMoreExpr"))
 	}
 
+	// {{ end }} ==template==
 	var vals []interface{}
 
 	for {
@@ -875,10 +924,12 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseRuleRefExpr " + ref.name))
 	}
 
+	// {{ end }} ==template==
 	if ref.name == "" {
 		panic(fmt.Sprintf("%s: invalid rule: missing name", ref.pos))
 	}
@@ -892,10 +943,12 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseSeqExpr"))
 	}
 
+	// {{ end }} ==template==
 	var vals []interface{}
 
 	pt := p.pt
@@ -911,10 +964,12 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseZeroOrMoreExpr"))
 	}
 
+	// {{ end }} ==template==
 	var vals []interface{}
 
 	for {
@@ -929,10 +984,12 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseZeroOrOneExpr"))
 	}
 
+	// {{ end }} ==template==
 	p.pushV()
 	val, _ := p.parseExpr(expr.expr)
 	p.popV()

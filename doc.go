@@ -42,6 +42,10 @@ The following options can be specified:
 	-o=FILE : string, output file where the generated parser will be
 	written (default: stdout).
 
+	-optimize-parser : boolean, if set, the options Debug and Memoize are removed
+	from the resulting parser. This saves a few cpu cycles, when using the
+	generated parser (default: false).
+
 	-x : boolean, if set, do not build the parser, just parse the input grammar
 	(default: false).
 
