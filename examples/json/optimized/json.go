@@ -368,11 +368,12 @@ var g = &grammar{
 					&zeroOrOneExpr{
 						pos: position{line: 70, col: 17, offset: 1703},
 						expr: &charClassMatcher{
-							pos:        position{line: 70, col: 17, offset: 1703},
-							val:        "[+-]",
-							chars:      []rune{'+', '-'},
-							ignoreCase: false,
-							inverted:   false,
+							pos:             position{line: 70, col: 17, offset: 1703},
+							val:             "[+-]",
+							chars:           []rune{'+', '-'},
+							basicLatinChars: [128]bool{false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
+							ignoreCase:      false,
+							inverted:        false,
 						},
 					},
 					&oneOrMoreExpr{
@@ -449,12 +450,13 @@ var g = &grammar{
 			name: "EscapedChar",
 			pos:  position{line: 78, col: 1, offset: 1953},
 			expr: &charClassMatcher{
-				pos:        position{line: 78, col: 15, offset: 1969},
-				val:        "[\\x00-\\x1f\"\\\\]",
-				chars:      []rune{'"', '\\'},
-				ranges:     []rune{'\x00', '\x1f'},
-				ignoreCase: false,
-				inverted:   false,
+				pos:             position{line: 78, col: 15, offset: 1969},
+				val:             "[\\x00-\\x1f\"\\\\]",
+				chars:           []rune{'"', '\\'},
+				ranges:          []rune{'\x00', '\x1f'},
+				basicLatinChars: [128]bool{true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
+				ignoreCase:      false,
+				inverted:        false,
 			},
 		},
 		{
@@ -478,11 +480,12 @@ var g = &grammar{
 			name: "SingleCharEscape",
 			pos:  position{line: 82, col: 1, offset: 2038},
 			expr: &charClassMatcher{
-				pos:        position{line: 82, col: 20, offset: 2059},
-				val:        "[\"\\\\/bfnrt]",
-				chars:      []rune{'"', '\\', '/', 'b', 'f', 'n', 'r', 't'},
-				ignoreCase: false,
-				inverted:   false,
+				pos:             position{line: 82, col: 20, offset: 2059},
+				val:             "[\"\\\\/bfnrt]",
+				chars:           []rune{'"', '\\', '/', 'b', 'f', 'n', 'r', 't'},
+				basicLatinChars: [128]bool{false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, true, false, false, false, true, false, false, false, false, false, false, false, true, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, false, false},
+				ignoreCase:      false,
+				inverted:        false,
 			},
 		},
 		{
@@ -519,33 +522,36 @@ var g = &grammar{
 			name: "DecimalDigit",
 			pos:  position{line: 86, col: 1, offset: 2131},
 			expr: &charClassMatcher{
-				pos:        position{line: 86, col: 16, offset: 2148},
-				val:        "[0-9]",
-				ranges:     []rune{'0', '9'},
-				ignoreCase: false,
-				inverted:   false,
+				pos:             position{line: 86, col: 16, offset: 2148},
+				val:             "[0-9]",
+				ranges:          []rune{'0', '9'},
+				basicLatinChars: [128]bool{false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
+				ignoreCase:      false,
+				inverted:        false,
 			},
 		},
 		{
 			name: "NonZeroDecimalDigit",
 			pos:  position{line: 88, col: 1, offset: 2155},
 			expr: &charClassMatcher{
-				pos:        position{line: 88, col: 23, offset: 2179},
-				val:        "[1-9]",
-				ranges:     []rune{'1', '9'},
-				ignoreCase: false,
-				inverted:   false,
+				pos:             position{line: 88, col: 23, offset: 2179},
+				val:             "[1-9]",
+				ranges:          []rune{'1', '9'},
+				basicLatinChars: [128]bool{false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
+				ignoreCase:      false,
+				inverted:        false,
 			},
 		},
 		{
 			name: "HexDigit",
 			pos:  position{line: 90, col: 1, offset: 2186},
 			expr: &charClassMatcher{
-				pos:        position{line: 90, col: 12, offset: 2199},
-				val:        "[0-9a-f]i",
-				ranges:     []rune{'0', '9', 'a', 'f'},
-				ignoreCase: true,
-				inverted:   false,
+				pos:             position{line: 90, col: 12, offset: 2199},
+				val:             "[0-9a-f]i",
+				ranges:          []rune{'0', '9', 'a', 'f'},
+				basicLatinChars: [128]bool{false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
+				ignoreCase:      true,
+				inverted:        false,
 			},
 		},
 		{
@@ -595,11 +601,12 @@ var g = &grammar{
 			expr: &zeroOrMoreExpr{
 				pos: position{line: 96, col: 18, offset: 2336},
 				expr: &charClassMatcher{
-					pos:        position{line: 96, col: 18, offset: 2336},
-					val:        "[ \\t\\r\\n]",
-					chars:      []rune{' ', '\t', '\r', '\n'},
-					ignoreCase: false,
-					inverted:   false,
+					pos:             position{line: 96, col: 18, offset: 2336},
+					val:             "[ \\t\\r\\n]",
+					chars:           []rune{' ', '\t', '\r', '\n'},
+					basicLatinChars: [128]bool{false, false, false, false, false, false, false, false, false, true, true, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false},
+					ignoreCase:      false,
+					inverted:        false,
 				},
 			},
 		},
@@ -899,13 +906,14 @@ type litMatcher struct {
 }
 
 type charClassMatcher struct {
-	pos        position
-	val        string
-	chars      []rune
-	ranges     []rune
-	classes    []*unicode.RangeTable
-	ignoreCase bool
-	inverted   bool
+	pos             position
+	val             string
+	basicLatinChars [128]bool
+	chars           []rune
+	ranges          []rune
+	classes         []*unicode.RangeTable
+	ignoreCase      bool
+	inverted        bool
 }
 
 type anyMatcher position
@@ -1306,11 +1314,23 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool) {
 	cur := p.pt.rn
 	start := p.pt
+
+	if cur < 128 {
+		if chr.basicLatinChars[cur] != chr.inverted {
+			p.read()
+			p.failAt(true, start.position, chr.val)
+			return p.sliceFrom(start), true
+		}
+		p.failAt(false, start.position, chr.val)
+		return nil, false
+	}
+
 	// can't match EOF
 	if cur == utf8.RuneError {
 		p.failAt(false, start.position, chr.val)
 		return nil, false
 	}
+
 	if chr.ignoreCase {
 		cur = unicode.ToLower(cur)
 	}

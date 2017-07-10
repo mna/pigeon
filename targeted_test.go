@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"testing"
 	"unicode"
+
+	"github.com/mna/pigeon/builder"
 )
 
 func TestParseNoRule(t *testing.T) {
@@ -251,12 +253,13 @@ func TestParseCharClassMatcher(t *testing.T) {
 		}
 
 		got, ok := p.parseCharClassMatcher(&charClassMatcher{
-			val:        tc.val,
-			chars:      tc.chars,
-			ranges:     tc.ranges,
-			classes:    classes,
-			ignoreCase: tc.ic,
-			inverted:   tc.iv,
+			val:             tc.val,
+			chars:           tc.chars,
+			ranges:          tc.ranges,
+			classes:         classes,
+			basicLatinChars: builder.BasicLatinLookup(tc.chars, tc.ranges, tc.classes, tc.ic),
+			ignoreCase:      tc.ic,
+			inverted:        tc.iv,
 		})
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("%s: want %v, got %v", lbl, tc.out, got)

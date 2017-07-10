@@ -207,13 +207,14 @@ type litMatcher struct {
 }
 
 type charClassMatcher struct {
-	pos        position
-	val        string
-	chars      []rune
-	ranges     []rune
-	classes    []*unicode.RangeTable
-	ignoreCase bool
-	inverted   bool
+	pos             position
+	val             string
+	basicLatinChars [128]bool
+	chars           []rune
+	ranges          []rune
+	classes         []*unicode.RangeTable
+	ignoreCase      bool
+	inverted        bool
 }
 
 type anyMatcher position
@@ -765,11 +766,25 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	// {{ end }} ==template==
 	cur := p.pt.rn
 	start := p.pt
+
+	// ==template== {{ if .BasicLatinLookupTable }}
+	if cur < 128 {
+		if chr.basicLatinChars[cur] != chr.inverted {
+			p.read()
+			p.failAt(true, start.position, chr.val)
+			return p.sliceFrom(start), true
+		}
+		p.failAt(false, start.position, chr.val)
+		return nil, false
+	}
+	// {{ end }} ==template==
+
 	// can't match EOF
 	if cur == utf8.RuneError {
 		p.failAt(false, start.position, chr.val)
 		return nil, false
 	}
+
 	if chr.ignoreCase {
 		cur = unicode.ToLower(cur)
 	}
