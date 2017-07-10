@@ -67,12 +67,14 @@ $(BOOTSTRAP_GRAMMAR):
 $(PIGEON_GRAMMAR):
 
 # surely there's a better way to define the examples and test targets
-
-$(EXAMPLES_DIR)/json/json.go: $(EXAMPLES_DIR)/json/json.peg $(EXAMPLES_DIR)/json/optimized/json.go $(BINDIR)/pigeon
+$(EXAMPLES_DIR)/json/json.go: $(EXAMPLES_DIR)/json/json.peg $(EXAMPLES_DIR)/json/optimized/json.go $(EXAMPLES_DIR)/json/optimized-grammar/json.go $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
 $(EXAMPLES_DIR)/json/optimized/json.go: $(EXAMPLES_DIR)/json/json.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -optimize-parser -optimize-basic-latin $< > $@
+
+$(EXAMPLES_DIR)/json/optimized-grammar/json.go: $(EXAMPLES_DIR)/json/json.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -optimize-grammar $< > $@
 
 $(EXAMPLES_DIR)/calculator/calculator.go: $(EXAMPLES_DIR)/calculator/calculator.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
@@ -117,7 +119,7 @@ cmp:
 
 clean:
 	rm -f $(BUILDER_DIR)/generated_static_code.go $(BUILDER_DIR)/generated_static_code_range_table.go
-	rm -f $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC) $(EXAMPLES_DIR)/json/optimized/json.go
+	rm -f $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC) $(EXAMPLES_DIR)/json/optimized/json.go $(EXAMPLES_DIR)/json/optimized-grammar/json.go
 	rm -rf $(BINDIR)
 
 .PHONY: all clean lint cmp

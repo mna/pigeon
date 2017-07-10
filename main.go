@@ -31,6 +31,7 @@ func main() {
 		noRecoverFlag          = fs.Bool("no-recover", false, "do not recover from panic")
 		outputFlag             = fs.String("o", "", "output file, defaults to stdout")
 		optimizeBasicLatinFlag = fs.Bool("optimize-basic-latin", false, "generate optimized parser for Unicode Basic Latin character sets")
+		optimizeGrammar        = fs.Bool("optimize-grammar", false, "optimize the given grammar (EXPERIMENTAL FEATURE)")
 		optimizeParserFlag     = fs.Bool("optimize-parser", false, "generate optimized parser without Debug and Memoize options")
 		recvrNmFlag            = fs.String("receiver-name", "c", "receiver name for the generated methods")
 		noBuildFlag            = fs.Bool("x", false, "do not build, only parse")
@@ -79,6 +80,10 @@ func main() {
 	}
 
 	if !*noBuildFlag {
+		if *optimizeGrammar {
+			ast.Optimize(g.(*ast.Grammar))
+		}
+
 		// generate parser
 		out := output(*outputFlag)
 		defer func() {
@@ -148,6 +153,8 @@ the generated code is written to this file instead.
 		write the generated parser to OUTPUT_FILE. Defaults to stdout.
 	-optimize-basic-latin
 		generate optimized parser for Unicode Basic Latin character set
+	-optimize-grammar
+		performes several performance optimizations on the grammar (EXPERIMENTAL FEATURE)
 	-optimize-parser
 		generate optimized parser without Debug and Memoize options
 	-receiver-name NAME
