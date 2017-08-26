@@ -644,10 +644,10 @@ func (p *parser) restore(pt savepoint) {
 	p.pt = pt
 }
 
-// copy and return parser current state.
-func (p *parser) copyState() (state statedict) {
+// clone and return parser current state.
+func (p *parser) cloneState() (state statedict) {
 	if p.debug {
-		defer p.out(p.in("copyState"))
+		defer p.out(p.in("cloneState"))
 	}
 	state = make(statedict)
 	for k, v := range p.cur.state {
@@ -661,7 +661,10 @@ func (p *parser) restoreState(state statedict) {
 	if p.debug {
 		defer p.out(p.in("restoreState"))
 	}
-	p.cur.state = state
+	p.cur.state = make(statedict)
+	for k, v := range state {
+		p.cur.state[k] = v
+	}
 }
 
 // get the slice of bytes from the savepoint start to the current position.
@@ -895,12 +898,10 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
-	state := p.copyState()
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
 	p.popV()
 	p.restore(pt)
-	p.restoreState(state)
 	return nil, ok
 }
 
@@ -990,6 +991,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		defer p.out(p.in("parseChoiceExpr"))
 	}
 
+	state := p.cloneState()
 	for _, alt := range ch.alternatives {
 		p.pushV()
 		val, ok := p.parseExpr(alt)
@@ -997,6 +999,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		if ok {
 			return val, ok
 		}
+		p.restoreState(state)
 	}
 	return nil, false
 }
@@ -1061,14 +1064,12 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
-	state := p.copyState()
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	_, ok := p.parseExpr(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
 	p.restore(pt)
-	p.restoreState(state)
 	return nil, !ok
 }
 
@@ -1119,12 +1120,10 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
-	state := p.copyState()
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
 			p.restore(pt)
-			p.restoreState(state)
 			return nil, false
 		}
 		vals = append(vals, val)
