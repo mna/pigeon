@@ -669,10 +669,7 @@ func (p *parser) restoreState(state statedict) {
 	if p.debug {
 		defer p.out(p.in("restoreState"))
 	}
-	p.cur.state = make(statedict)
-	for k, v := range state {
-		p.cur.state[k] = v
-	}
+	p.cur.state = state
 }
 
 // get the slice of bytes from the savepoint start to the current position.

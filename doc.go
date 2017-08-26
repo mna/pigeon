@@ -315,7 +315,7 @@ The "store" field is a global store with backtrack support of type "map[string]i
 which allows to store arbitrary values, which are available in action and
 predicate code blocks for read as well as write access.
 It is important to notice, that the global store is dependent from
-the backtrack mechanism of PEG and is can be set back to its old state
+the backtrack mechanism of PEG and and it is set back to its old state
 during backtrack.
 Changes of "store" field in predicate expressions is not keeped.
 

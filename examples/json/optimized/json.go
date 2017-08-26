@@ -1163,10 +1163,7 @@ func (p *parser) copyState() (state statedict) {
 
 // restore parser current state to the state statedict.
 func (p *parser) restoreState(state statedict) {
-	p.cur.state = make(statedict)
-	for k, v := range state {
-		p.cur.state[k] = v
-	}
+	p.cur.state = state
 }
 
 // get the slice of bytes from the savepoint start to the current position.

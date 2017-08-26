@@ -112,7 +112,6 @@ $(TEST_DIR)/goto/goto.go: $(TEST_DIR)/goto/goto.peg $(BINDIR)/pigeon
 $(TEST_DIR)/state/state.go: $(TEST_DIR)/state/state.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< | goimports > $@
 
-    
 lint:
 	golint ./...
 	go vet ./...
