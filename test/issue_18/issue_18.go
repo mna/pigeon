@@ -42,36 +42,36 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Program",
-			pos:  position{line: 32, col: 1, offset: 349},
+			pos:  position{line: 32, col: 1, offset: 318},
 			expr: &seqExpr{
-				pos: position{line: 32, col: 12, offset: 360},
+				pos: position{line: 32, col: 12, offset: 329},
 				exprs: []interface{}{
 					&ruleRefExpr{
-						pos:  position{line: 32, col: 12, offset: 360},
+						pos:  position{line: 32, col: 12, offset: 329},
 						name: "_",
 					},
 					&zeroOrMoreExpr{
-						pos: position{line: 32, col: 14, offset: 362},
+						pos: position{line: 32, col: 14, offset: 331},
 						expr: &seqExpr{
-							pos: position{line: 32, col: 15, offset: 363},
+							pos: position{line: 32, col: 15, offset: 332},
 							exprs: []interface{}{
 								&ruleRefExpr{
-									pos:  position{line: 32, col: 15, offset: 363},
+									pos:  position{line: 32, col: 15, offset: 332},
 									name: "X",
 								},
 								&ruleRefExpr{
-									pos:  position{line: 32, col: 17, offset: 365},
+									pos:  position{line: 32, col: 17, offset: 334},
 									name: "_",
 								},
 							},
 						},
 					},
 					&ruleRefExpr{
-						pos:  position{line: 32, col: 21, offset: 369},
+						pos:  position{line: 32, col: 21, offset: 338},
 						name: "_",
 					},
 					&ruleRefExpr{
-						pos:  position{line: 32, col: 24, offset: 372},
+						pos:  position{line: 32, col: 24, offset: 341},
 						name: "EOF",
 					},
 				},
@@ -79,9 +79,9 @@ var g = &grammar{
 		},
 		{
 			name: "X",
-			pos:  position{line: 34, col: 1, offset: 379},
+			pos:  position{line: 34, col: 1, offset: 346},
 			expr: &charClassMatcher{
-				pos:        position{line: 34, col: 6, offset: 384},
+				pos:        position{line: 34, col: 6, offset: 351},
 				val:        "[0-9]",
 				ranges:     []rune{'0', '9'},
 				ignoreCase: false,
@@ -91,11 +91,11 @@ var g = &grammar{
 		{
 			name:        "_",
 			displayName: "\"whitespace\"",
-			pos:         position{line: 36, col: 1, offset: 393},
+			pos:         position{line: 36, col: 1, offset: 358},
 			expr: &zeroOrMoreExpr{
-				pos: position{line: 36, col: 19, offset: 411},
+				pos: position{line: 36, col: 19, offset: 376},
 				expr: &charClassMatcher{
-					pos:        position{line: 36, col: 21, offset: 413},
+					pos:        position{line: 36, col: 21, offset: 378},
 					val:        "[ \\t\\r\\n]",
 					chars:      []rune{' ', '\t', '\r', '\n'},
 					ignoreCase: false,
@@ -105,11 +105,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 38, col: 1, offset: 429},
+			pos:  position{line: 38, col: 1, offset: 392},
 			expr: &notExpr{
-				pos: position{line: 38, col: 8, offset: 436},
+				pos: position{line: 38, col: 8, offset: 399},
 				expr: &anyMatcher{
-					line: 38, col: 9, offset: 437,
+					line: 38, col: 9, offset: 400,
 				},
 			},
 		},

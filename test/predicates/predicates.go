@@ -17,60 +17,60 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "A",
-			pos:  position{line: 5, col: 1, offset: 28},
+			pos:  position{line: 5, col: 1, offset: 24},
 			expr: &choiceExpr{
-				pos: position{line: 5, col: 5, offset: 34},
+				pos: position{line: 5, col: 5, offset: 30},
 				alternatives: []interface{}{
 					&seqExpr{
-						pos: position{line: 5, col: 5, offset: 34},
+						pos: position{line: 5, col: 5, offset: 30},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 5, col: 5, offset: 34},
+								pos:   position{line: 5, col: 5, offset: 30},
 								label: "a",
 								expr: &litMatcher{
-									pos:        position{line: 5, col: 7, offset: 36},
+									pos:        position{line: 5, col: 7, offset: 32},
 									val:        "a",
 									ignoreCase: false,
 								},
 							},
 							&notCodeExpr{
-								pos: position{line: 5, col: 11, offset: 40},
+								pos: position{line: 5, col: 11, offset: 36},
 								run: (*parser).callonA5,
 							},
 						},
 					},
 					&seqExpr{
-						pos: position{line: 10, col: 3, offset: 107},
+						pos: position{line: 10, col: 3, offset: 98},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 10, col: 3, offset: 107},
+								pos:   position{line: 10, col: 3, offset: 98},
 								label: "b",
 								expr: &litMatcher{
-									pos:        position{line: 10, col: 5, offset: 109},
+									pos:        position{line: 10, col: 5, offset: 100},
 									val:        "b",
 									ignoreCase: false,
 								},
 							},
 							&notCodeExpr{
-								pos: position{line: 10, col: 9, offset: 113},
+								pos: position{line: 10, col: 9, offset: 104},
 								run: (*parser).callonA9,
 							},
 						},
 					},
 					&seqExpr{
-						pos: position{line: 15, col: 3, offset: 179},
+						pos: position{line: 15, col: 3, offset: 165},
 						exprs: []interface{}{
 							&labeledExpr{
-								pos:   position{line: 15, col: 3, offset: 179},
+								pos:   position{line: 15, col: 3, offset: 165},
 								label: "d",
 								expr: &litMatcher{
-									pos:        position{line: 15, col: 5, offset: 181},
+									pos:        position{line: 15, col: 5, offset: 167},
 									val:        "d",
 									ignoreCase: false,
 								},
 							},
 							&andCodeExpr{
-								pos: position{line: 15, col: 9, offset: 185},
+								pos: position{line: 15, col: 9, offset: 171},
 								run: (*parser).callonA13,
 							},
 						},
@@ -80,52 +80,52 @@ var g = &grammar{
 		},
 		{
 			name: "B",
-			pos:  position{line: 20, col: 1, offset: 249},
+			pos:  position{line: 20, col: 1, offset: 230},
 			expr: &seqExpr{
-				pos: position{line: 20, col: 5, offset: 255},
+				pos: position{line: 20, col: 5, offset: 236},
 				exprs: []interface{}{
 					&labeledExpr{
-						pos:   position{line: 20, col: 5, offset: 255},
+						pos:   position{line: 20, col: 5, offset: 236},
 						label: "out",
 						expr: &seqExpr{
-							pos: position{line: 20, col: 11, offset: 261},
+							pos: position{line: 20, col: 11, offset: 242},
 							exprs: []interface{}{
 								&labeledExpr{
-									pos:   position{line: 20, col: 11, offset: 261},
+									pos:   position{line: 20, col: 11, offset: 242},
 									label: "inner",
 									expr: &seqExpr{
-										pos: position{line: 20, col: 19, offset: 269},
+										pos: position{line: 20, col: 19, offset: 250},
 										exprs: []interface{}{
 											&charClassMatcher{
-												pos:        position{line: 20, col: 19, offset: 269},
+												pos:        position{line: 20, col: 19, offset: 250},
 												val:        "[^abd]",
 												chars:      []rune{'a', 'b', 'd'},
 												ignoreCase: false,
 												inverted:   true,
 											},
 											&labeledExpr{
-												pos:   position{line: 20, col: 26, offset: 276},
+												pos:   position{line: 20, col: 26, offset: 257},
 												label: "innermost",
 												expr: &anyMatcher{
-													line: 20, col: 36, offset: 286,
+													line: 20, col: 36, offset: 267,
 												},
 											},
 											&andCodeExpr{
-												pos: position{line: 20, col: 38, offset: 288},
+												pos: position{line: 20, col: 38, offset: 269},
 												run: (*parser).callonB9,
 											},
 										},
 									},
 								},
 								&andCodeExpr{
-									pos: position{line: 20, col: 60, offset: 310},
+									pos: position{line: 20, col: 60, offset: 291},
 									run: (*parser).callonB10,
 								},
 							},
 						},
 					},
 					&andCodeExpr{
-						pos: position{line: 20, col: 82, offset: 332},
+						pos: position{line: 20, col: 82, offset: 313},
 						run: (*parser).callonB11,
 					},
 				},
@@ -133,20 +133,20 @@ var g = &grammar{
 		},
 		{
 			name: "C",
-			pos:  position{line: 22, col: 1, offset: 355},
+			pos:  position{line: 22, col: 1, offset: 334},
 			expr: &actionExpr{
-				pos: position{line: 22, col: 5, offset: 361},
+				pos: position{line: 22, col: 5, offset: 340},
 				run: (*parser).callonC1,
 				expr: &seqExpr{
-					pos: position{line: 22, col: 5, offset: 361},
+					pos: position{line: 22, col: 5, offset: 340},
 					exprs: []interface{}{
 						&andExpr{
-							pos: position{line: 22, col: 5, offset: 361},
+							pos: position{line: 22, col: 5, offset: 340},
 							expr: &labeledExpr{
-								pos:   position{line: 22, col: 7, offset: 363},
+								pos:   position{line: 22, col: 7, offset: 342},
 								label: "inand",
 								expr: &charClassMatcher{
-									pos:        position{line: 22, col: 13, offset: 369},
+									pos:        position{line: 22, col: 13, offset: 348},
 									val:        "[efg]",
 									chars:      []rune{'e', 'f', 'g'},
 									ignoreCase: false,
@@ -155,10 +155,10 @@ var g = &grammar{
 							},
 						},
 						&labeledExpr{
-							pos:   position{line: 22, col: 20, offset: 376},
+							pos:   position{line: 22, col: 20, offset: 355},
 							label: "rest",
 							expr: &ruleRefExpr{
-								pos:  position{line: 22, col: 25, offset: 381},
+								pos:  position{line: 22, col: 25, offset: 360},
 								name: "hij",
 							},
 						},
@@ -170,7 +170,6 @@ var g = &grammar{
 }
 
 func (c *current) onA5(a interface{}) (bool, error) {
-
 	fmt.Println(string(c.text))
 	return true, nil
 }
@@ -182,7 +181,6 @@ func (p *parser) callonA5() (bool, error) {
 }
 
 func (c *current) onA9(b interface{}) (bool, error) {
-
 	fmt.Println(string(c.text))
 	return true, nil
 }
@@ -194,7 +192,6 @@ func (p *parser) callonA9() (bool, error) {
 }
 
 func (c *current) onA13(d interface{}) (bool, error) {
-
 	fmt.Println(string(c.text))
 	return true, nil
 }
@@ -236,7 +233,6 @@ func (p *parser) callonB11() (bool, error) {
 }
 
 func (c *current) onC1(rest interface{}) (interface{}, error) {
-
 	return nil, nil
 }
 

@@ -26,39 +26,39 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Input",
-			pos:  position{line: 14, col: 1, offset: 182},
+			pos:  position{line: 14, col: 1, offset: 169},
 			expr: &actionExpr{
-				pos: position{line: 14, col: 9, offset: 192},
+				pos: position{line: 14, col: 9, offset: 179},
 				run: (*parser).callonInput1,
 				expr: &seqExpr{
-					pos: position{line: 14, col: 9, offset: 192},
+					pos: position{line: 14, col: 9, offset: 179},
 					exprs: []interface{}{
 						&andCodeExpr{
-							pos: position{line: 14, col: 9, offset: 192},
+							pos: position{line: 14, col: 9, offset: 179},
 							run: (*parser).callonInput3,
 						},
 						&oneOrMoreExpr{
-							pos: position{line: 14, col: 89, offset: 272},
+							pos: position{line: 14, col: 89, offset: 259},
 							expr: &choiceExpr{
-								pos: position{line: 14, col: 90, offset: 273},
+								pos: position{line: 14, col: 90, offset: 260},
 								alternatives: []interface{}{
 									&ruleRefExpr{
-										pos:  position{line: 14, col: 90, offset: 273},
+										pos:  position{line: 14, col: 90, offset: 260},
 										name: "increment",
 									},
 									&ruleRefExpr{
-										pos:  position{line: 14, col: 102, offset: 285},
+										pos:  position{line: 14, col: 102, offset: 272},
 										name: "decrement",
 									},
 									&ruleRefExpr{
-										pos:  position{line: 14, col: 114, offset: 297},
+										pos:  position{line: 14, col: 114, offset: 284},
 										name: "zero",
 									},
 								},
 							},
 						},
 						&ruleRefExpr{
-							pos:  position{line: 14, col: 121, offset: 304},
+							pos:  position{line: 14, col: 121, offset: 291},
 							name: "EOF",
 						},
 					},
@@ -67,17 +67,17 @@ var g = &grammar{
 		},
 		{
 			name: "increment",
-			pos:  position{line: 16, col: 1, offset: 357},
+			pos:  position{line: 16, col: 1, offset: 342},
 			expr: &seqExpr{
-				pos: position{line: 16, col: 13, offset: 371},
+				pos: position{line: 16, col: 13, offset: 356},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 16, col: 13, offset: 371},
+						pos:        position{line: 16, col: 13, offset: 356},
 						val:        "i",
 						ignoreCase: false,
 					},
 					&andCodeExpr{
-						pos: position{line: 16, col: 17, offset: 375},
+						pos: position{line: 16, col: 17, offset: 360},
 						run: (*parser).callonincrement3,
 					},
 				},
@@ -85,17 +85,17 @@ var g = &grammar{
 		},
 		{
 			name: "decrement",
-			pos:  position{line: 17, col: 1, offset: 459},
+			pos:  position{line: 17, col: 1, offset: 443},
 			expr: &seqExpr{
-				pos: position{line: 17, col: 13, offset: 473},
+				pos: position{line: 17, col: 13, offset: 457},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 17, col: 13, offset: 473},
+						pos:        position{line: 17, col: 13, offset: 457},
 						val:        "d",
 						ignoreCase: false,
 					},
 					&andCodeExpr{
-						pos: position{line: 17, col: 17, offset: 477},
+						pos: position{line: 17, col: 17, offset: 461},
 						run: (*parser).callondecrement3,
 					},
 				},
@@ -103,17 +103,17 @@ var g = &grammar{
 		},
 		{
 			name: "zero",
-			pos:  position{line: 18, col: 1, offset: 561},
+			pos:  position{line: 18, col: 1, offset: 544},
 			expr: &seqExpr{
-				pos: position{line: 18, col: 8, offset: 570},
+				pos: position{line: 18, col: 8, offset: 553},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 18, col: 8, offset: 570},
+						pos:        position{line: 18, col: 8, offset: 553},
 						val:        "z",
 						ignoreCase: false,
 					},
 					&andCodeExpr{
-						pos: position{line: 18, col: 12, offset: 574},
+						pos: position{line: 18, col: 12, offset: 557},
 						run: (*parser).callonzero3,
 					},
 				},
@@ -121,11 +121,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 19, col: 1, offset: 626},
+			pos:  position{line: 19, col: 1, offset: 608},
 			expr: &notExpr{
-				pos: position{line: 19, col: 7, offset: 634},
+				pos: position{line: 19, col: 7, offset: 616},
 				expr: &anyMatcher{
-					line: 19, col: 8, offset: 635,
+					line: 19, col: 8, offset: 617,
 				},
 			},
 		},

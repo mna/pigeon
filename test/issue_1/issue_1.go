@@ -26,27 +26,27 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "TableRef",
-			pos:  position{line: 14, col: 1, offset: 187},
+			pos:  position{line: 14, col: 1, offset: 174},
 			expr: &actionExpr{
-				pos: position{line: 14, col: 13, offset: 199},
+				pos: position{line: 14, col: 13, offset: 186},
 				run: (*parser).callonTableRef1,
 				expr: &seqExpr{
-					pos: position{line: 14, col: 13, offset: 199},
+					pos: position{line: 14, col: 13, offset: 186},
 					exprs: []interface{}{
 						&labeledExpr{
-							pos:   position{line: 14, col: 13, offset: 199},
+							pos:   position{line: 14, col: 13, offset: 186},
 							label: "database",
 							expr: &zeroOrOneExpr{
-								pos: position{line: 14, col: 22, offset: 208},
+								pos: position{line: 14, col: 22, offset: 195},
 								expr: &seqExpr{
-									pos: position{line: 14, col: 23, offset: 209},
+									pos: position{line: 14, col: 23, offset: 196},
 									exprs: []interface{}{
 										&ruleRefExpr{
-											pos:  position{line: 14, col: 23, offset: 209},
+											pos:  position{line: 14, col: 23, offset: 196},
 											name: "ID",
 										},
 										&litMatcher{
-											pos:        position{line: 14, col: 26, offset: 212},
+											pos:        position{line: 14, col: 26, offset: 199},
 											val:        ".",
 											ignoreCase: false,
 										},
@@ -55,10 +55,10 @@ var g = &grammar{
 							},
 						},
 						&labeledExpr{
-							pos:   position{line: 14, col: 32, offset: 218},
+							pos:   position{line: 14, col: 32, offset: 205},
 							label: "table",
 							expr: &ruleRefExpr{
-								pos:  position{line: 14, col: 38, offset: 224},
+								pos:  position{line: 14, col: 38, offset: 211},
 								name: "ID",
 							},
 						},
@@ -68,14 +68,14 @@ var g = &grammar{
 		},
 		{
 			name: "ID",
-			pos:  position{line: 15, col: 1, offset: 285},
+			pos:  position{line: 15, col: 1, offset: 271},
 			expr: &actionExpr{
-				pos: position{line: 15, col: 7, offset: 291},
+				pos: position{line: 15, col: 7, offset: 277},
 				run: (*parser).callonID1,
 				expr: &oneOrMoreExpr{
-					pos: position{line: 15, col: 7, offset: 291},
+					pos: position{line: 15, col: 7, offset: 277},
 					expr: &charClassMatcher{
-						pos:        position{line: 15, col: 7, offset: 291},
+						pos:        position{line: 15, col: 7, offset: 277},
 						val:        "[a-z]",
 						ranges:     []rune{'a', 'z'},
 						ignoreCase: false,
