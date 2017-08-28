@@ -1156,11 +1156,9 @@ func (p *parser) cloneState() (state statedict) {
 }
 
 // restore parser current state to the state statedict.
+// every restoreState should applied only one time for every cloned state
 func (p *parser) restoreState(state statedict) {
-	p.cur.state = make(statedict)
-	for k, v := range state {
-		p.cur.state[k] = v
-	}
+	p.cur.state = state
 }
 
 // get the slice of bytes from the savepoint start to the current position.
@@ -1408,8 +1406,8 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 }
 
 func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
-	state := p.cloneState()
 	for _, alt := range ch.alternatives {
+		state := p.cloneState()
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()

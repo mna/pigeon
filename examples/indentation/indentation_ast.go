@@ -31,12 +31,12 @@ func main() {
 
 var lvalues = make(map[string]int)
 
-// element of statements
-type Executor interface {
+// Statement is the smallest standalone element 
+type Statement interface {
 	exec() error
 }
 
-// ProgramNode
+// ProgramNode is a root node
 type ProgramNode struct {
 	statements StatementsNode
 	ret        ReturnNode
@@ -53,17 +53,17 @@ func (n ProgramNode) exec() (int, error) {
 	return n.ret.exec()
 }
 
-// StatementsNode
+// StatementsNode is a list of statement
 type StatementsNode struct {
-	statements []Executor
+	statements []Statement
 }
 
 func newStatementsNode(stmts interface{}) (StatementsNode, error) {
 
 	st := toIfaceSlice(stmts)
-	ex := make([]Executor, len(st))
+	ex := make([]Statement, len(st))
 	for i, v := range st {
-		ex[i] = v.(Executor)
+		ex[i] = v.(Statement)
 	}
 	return StatementsNode{ex}, nil
 }
@@ -77,7 +77,7 @@ func (n StatementsNode) exec() error {
 	return nil
 }
 
-// ReturnNode
+// ReturnNode return value to the caller. 
 type ReturnNode struct {
 	arg IdentifierNode
 }
@@ -90,7 +90,7 @@ func (n ReturnNode) exec() (int, error) {
 	return v, err
 }
 
-// IfNode
+// IfNode controls conditional branching. 
 type IfNode struct {
 	arg        LogicalExpressionNode
 	statements StatementsNode
@@ -111,7 +111,7 @@ func (n IfNode) exec() error {
 	return nil
 }
 
-// AssignmentNode
+// AssignmentNode gives a value to a variable
 type AssignmentNode struct {
 	lvalue string
 	rvalue AdditiveExpressionNode
@@ -129,7 +129,7 @@ func (n AssignmentNode) exec() error {
 	return nil
 }
 
-// LogicalExpressionNode
+// LogicalExpressionNode is a logical expression
 type LogicalExpressionNode struct {
 	expr PrimaryExpressionNode
 }
@@ -143,7 +143,7 @@ func (n LogicalExpressionNode) exec() (bool, error) {
 	return b, err
 }
 
-// AdditiveExpressionNode
+// AdditiveExpressionNode is a additive expression
 type AdditiveExpressionNode struct {
 	arg1 interface{}
 	arg2 PrimaryExpressionNode
@@ -195,7 +195,7 @@ func (n AdditiveExpressionNode) exec() (int, error) {
 	return v, err
 }
 
-// PrimaryExpressionNode
+// PrimaryExpressionNode is a basic element
 type PrimaryExpressionNode struct {
 	arg interface{}
 }
@@ -217,7 +217,7 @@ func (n PrimaryExpressionNode) exec() (int, error) {
 	return v, err
 }
 
-// IntegerNode
+// IntegerNode is a integer number
 type IntegerNode struct {
 	val int
 }
@@ -230,7 +230,7 @@ func (n IntegerNode) exec() (int, error) {
 	return n.val, nil
 }
 
-// IdentifierNode
+// IdentifierNode is a reference to variable
 type IdentifierNode struct {
 	val string
 }
