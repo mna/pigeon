@@ -80,7 +80,7 @@ $(EXAMPLES_DIR)/calculator/calculator.go: $(EXAMPLES_DIR)/calculator/calculator.
 	$(BINDIR)/pigeon $< > $@
 
 $(EXAMPLES_DIR)/indentation/indentation.go: $(EXAMPLES_DIR)/indentation/indentation.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon $< | goimports > $@
+	$(BINDIR)/pigeon $< > $@
 
 $(TEST_DIR)/andnot/andnot.go: $(TEST_DIR)/andnot/andnot.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
@@ -122,7 +122,7 @@ $(TEST_DIR)/alternate_entrypoint/altentry.go: $(TEST_DIR)/alternate_entrypoint/a
 	$(BINDIR)/pigeon -optimize-grammar -alternate-entrypoints Entry2,Entry3,C $< > $@
 
 $(TEST_DIR)/state/state.go: $(TEST_DIR)/state/state.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon $< | goimports > $@
+	$(BINDIR)/pigeon $< > $@
 
 lint:
 	golint ./...

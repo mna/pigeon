@@ -309,7 +309,7 @@ parser will return. E.g.:
 	}
 
 The current type is a struct that provides four useful fields that can be
-accessed in action and predicate code blocks: "pos", "text", "store" and "globalStore".
+accessed in action and predicate code blocks: "pos", "text", "state" and "globalStore".
 
 The "pos" field indicates the current position of the parser in the source
 input. It is itself a struct with three fields: "line", "col" and "offset".
@@ -319,13 +319,12 @@ runes from the start of the line, and offset is a 0-based byte offset.
 The "text" field is the slice of bytes of the current match. It is empty
 in a predicate code block.
 
-The "store" field is a global store with backtrack support of type "map[string]interface{}",
+The "state" field is a global store with backtrack support of type "map[string]interface{}",
 which allows to store arbitrary values, which are available in action and
 predicate code blocks for read as well as write access.
 It is important to notice, that the global store is dependent from
 the backtrack mechanism of PEG and and it is set back to its old state
 during backtrack.
-Changes of "store" field in predicate expressions is not keeped.
 
 The "globalStore" field is a global store of type "map[string]interface{}",
 which allows to store arbitrary values, which are available in action and
