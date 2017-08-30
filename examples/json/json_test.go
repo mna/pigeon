@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	optimized "github.com/mna/pigeon/examples/json/optimized"
+	optimizedgrammar "github.com/mna/pigeon/examples/json/optimized-grammar"
 )
 
 func TestCmpStdlib(t *testing.T) {
@@ -22,6 +23,12 @@ func TestCmpStdlib(t *testing.T) {
 		pogot, err := optimized.ParseFile(file)
 		if err != nil {
 			t.Errorf("%s: optimized.ParseFile: %v", file, err)
+			continue
+		}
+
+		poggot, err := optimizedgrammar.ParseFile(file)
+		if err != nil {
+			t.Errorf("%s: optimizedgrammar.ParseFile: %v", file, err)
 			continue
 		}
 
@@ -43,6 +50,11 @@ func TestCmpStdlib(t *testing.T) {
 
 		if !reflect.DeepEqual(pogot, jgot) {
 			t.Errorf("%s: optimized not equal", file)
+			continue
+		}
+
+		if !reflect.DeepEqual(poggot, jgot) {
+			t.Errorf("%s: optimized grammar not equal", file)
 			continue
 		}
 	}
@@ -101,6 +113,20 @@ func BenchmarkPigeonJSONOptimized(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		if _, err := optimized.Parse("", d); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkPigeonJSONOptimizedGrammar(b *testing.B) {
+	d, err := ioutil.ReadFile("testdata/github-octokit-repos.json")
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		if _, err := optimizedgrammar.Parse("", d); err != nil {
 			b.Fatal(err)
 		}
 	}
