@@ -11,10 +11,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-<<<<<<< HEAD
 	"math"
-=======
->>>>>>> upstream/master
 	"os"
 	"sort"
 	"strconv"
@@ -921,20 +918,16 @@ var (
 	// errInvalidEncoding is returned when the source is not properly
 	// utf8-encoded.
 	errInvalidEncoding = errors.New("invalid encoding")
-<<<<<<< HEAD
 
 	// errMaxExprCnt is used to signal that the maximum number of
 	// expressions have been parsed.
 	errMaxExprCnt = errors.New("max number of expresssions parsed")
-=======
->>>>>>> upstream/master
 )
 
 // Option is a function that can set an option on the parser. It returns
 // the previous setting as an Option.
 type Option func(*parser) Option
 
-<<<<<<< HEAD
 // MaxExpressions creates an Option to stop parsing after the provided
 // number of expressions have been parsed, if the value is 0 then the parser will
 // parse for as many steps as needed (possibly an infinite number).
@@ -952,8 +945,6 @@ func MaxExpressions(maxExprCnt uint64, maxExprCntMsg string) Option {
 	}
 }
 
-=======
->>>>>>> upstream/master
 // Debug creates an Option to set the debug flag to b. When set to true,
 // debugging information is printed to stdout while parsing.
 //
@@ -1011,13 +1002,7 @@ func ParseFile(filename string, opts ...Option) (i interface{}, err error) {
 		return nil, err
 	}
 	defer func() {
-<<<<<<< HEAD
 		err = f.Close()
-=======
-		if closeErr := f.Close(); closeErr != nil {
-			err = closeErr
-		}
->>>>>>> upstream/master
 	}()
 	return ParseReader(filename, f, opts...)
 }
@@ -1220,14 +1205,11 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		maxFailExpected: make([]string, 0, 20),
 	}
 	p.setOptions(opts)
-<<<<<<< HEAD
 
 	if p.maxExprCnt == 0 {
 		p.maxExprCnt = math.MaxUint64
 	}
 
-=======
->>>>>>> upstream/master
 	return p
 }
 
@@ -1268,17 +1250,10 @@ type parser struct {
 	// rule stack, allows identification of the current rule in errors
 	rstack []*rule
 
-<<<<<<< HEAD
-=======
-	// stats
-	exprCnt int
-
->>>>>>> upstream/master
 	// parse fail
 	maxFailPos            position
 	maxFailExpected       []string
 	maxFailInvertExpected bool
-<<<<<<< HEAD
 
 	// stats and used for stopping the parser
 	// after a maximum number of expressions are parsed.
@@ -1288,8 +1263,6 @@ type parser struct {
 	// along with a user defined message to be reported.
 	maxExprCnt    uint64
 	maxExprCntMsg string
-=======
->>>>>>> upstream/master
 }
 
 // push a variable set on the vstack.
@@ -1477,15 +1450,11 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 				val = nil
 				switch e := e.(type) {
 				case error:
-<<<<<<< HEAD
 					if e == errMaxExprCnt {
 						p.addErr(errors.New(p.maxExprCntMsg))
 					} else {
 						p.addErr(e)
 					}
-=======
-					p.addErr(e)
->>>>>>> upstream/master
 				default:
 					p.addErr(fmt.Errorf("%v", e))
 				}
@@ -1520,10 +1489,7 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 			}
 			p.addErrAt(errors.New("no match found, expected: "+listJoin(expected, ", ", "or")), p.maxFailPos, expected)
 		}
-<<<<<<< HEAD
 
-=======
->>>>>>> upstream/master
 		return nil, p.errs.err()
 	}
 	return val, p.errs.err()
@@ -1582,13 +1548,10 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	}
 
 	p.exprCnt++
-<<<<<<< HEAD
 	if p.exprCnt > p.maxExprCnt {
 		panic(errMaxExprCnt)
 	}
 
-=======
->>>>>>> upstream/master
 	var val interface{}
 	var ok bool
 	switch expr := expr.(type) {

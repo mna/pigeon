@@ -2259,9 +2259,7 @@ func ParseFile(filename string, opts ...Option) (i interface{}, err error) {
 		return nil, err
 	}
 	defer func() {
-		if closeErr := f.Close(); closeErr != nil {
-			err = closeErr
-		}
+		err = f.Close()
 	}()
 	return ParseReader(filename, f, opts...)
 }
