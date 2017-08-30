@@ -333,6 +333,7 @@ as a package with public functions to parse input text. The exported API is:
 	- ParseReader(string, io.Reader, ...Option) (interface{}, error)
 	- Debug(bool) Option
 	- GlobalStore(string, interface{}) Option
+	- MaxExpressions(uint64) Option
 	- Memoize(bool) Option
 	- Recover(bool) Option
 
