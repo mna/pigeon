@@ -6,7 +6,7 @@
 
 The pigeon command generates parsers based on a [parsing expression grammar (PEG)][0]. Its grammar and syntax is inspired by the [PEG.js project][1], while the implementation is loosely based on the [parsing expression grammar for C# 3.0][2] article. It parses Unicode text encoded in UTF-8.
 
-See the [godoc page][3] for detailed usage.
+See the [godoc page][3] for detailed usage. Also have a look at the [Pigeon Wiki](https://github.com/mna/pigeon/wiki) for additional information about Pigeon and PEG in general.
 
 ## Releases
 
