@@ -1,9 +1,4 @@
-// Package json parses JSON as defined by [1].
-//
-// BUGS: the escaped forward solidus (`\/`) is not currently handled.
-//
-// [1]: http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
-package json
+package thrownrecover
 
 import (
 	"bytes"
@@ -20,334 +15,111 @@ import (
 	"unicode/utf8"
 )
 
-func toIfaceSlice(v interface{}) []interface{} {
-	if v == nil {
-		return nil
-	}
-	return v.([]interface{})
-}
-
 var g = &grammar{
 	rules: []*rule{
 		{
-			name: "JSON",
-			pos:  position{line: 17, col: 1, offset: 347},
-			expr: &actionExpr{
-				pos: position{line: 17, col: 8, offset: 356},
-				run: (*parser).callonJSON1,
-				expr: &seqExpr{
-					pos: position{line: 17, col: 8, offset: 356},
-					exprs: []interface{}{
-						&ruleRefExpr{
-							pos:  position{line: 17, col: 8, offset: 356},
-							name: "_",
-						},
-						&labeledExpr{
-							pos:   position{line: 17, col: 10, offset: 358},
-							label: "vals",
-							expr: &oneOrMoreExpr{
-								pos: position{line: 17, col: 15, offset: 363},
-								expr: &ruleRefExpr{
-									pos:  position{line: 17, col: 15, offset: 363},
-									name: "Value",
-								},
-							},
-						},
-						&ruleRefExpr{
-							pos:  position{line: 17, col: 22, offset: 370},
-							name: "EOF",
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Value",
-			pos:  position{line: 29, col: 1, offset: 561},
-			expr: &actionExpr{
-				pos: position{line: 29, col: 9, offset: 571},
-				run: (*parser).callonValue1,
-				expr: &seqExpr{
-					pos: position{line: 29, col: 9, offset: 571},
-					exprs: []interface{}{
-						&labeledExpr{
-							pos:   position{line: 29, col: 9, offset: 571},
-							label: "val",
-							expr: &choiceExpr{
-								pos: position{line: 29, col: 15, offset: 577},
-								alternatives: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 29, col: 15, offset: 577},
-										name: "Object",
-									},
-									&ruleRefExpr{
-										pos:  position{line: 29, col: 24, offset: 586},
-										name: "Array",
-									},
-									&ruleRefExpr{
-										pos:  position{line: 29, col: 32, offset: 594},
-										name: "Number",
-									},
-									&ruleRefExpr{
-										pos:  position{line: 29, col: 41, offset: 603},
-										name: "String",
-									},
-									&ruleRefExpr{
-										pos:  position{line: 29, col: 50, offset: 612},
-										name: "Bool",
-									},
-									&ruleRefExpr{
-										pos:  position{line: 29, col: 57, offset: 619},
-										name: "Null",
-									},
-								},
-							},
-						},
-						&ruleRefExpr{
-							pos:  position{line: 29, col: 64, offset: 626},
-							name: "_",
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Object",
-			pos:  position{line: 33, col: 1, offset: 653},
-			expr: &actionExpr{
-				pos: position{line: 33, col: 10, offset: 664},
-				run: (*parser).callonObject1,
-				expr: &seqExpr{
-					pos: position{line: 33, col: 10, offset: 664},
-					exprs: []interface{}{
-						&litMatcher{
-							pos:        position{line: 33, col: 10, offset: 664},
-							val:        "{",
-							ignoreCase: false,
-						},
-						&ruleRefExpr{
-							pos:  position{line: 33, col: 14, offset: 668},
-							name: "_",
-						},
-						&labeledExpr{
-							pos:   position{line: 33, col: 16, offset: 670},
-							label: "vals",
-							expr: &zeroOrOneExpr{
-								pos: position{line: 33, col: 21, offset: 675},
-								expr: &seqExpr{
-									pos: position{line: 33, col: 23, offset: 677},
-									exprs: []interface{}{
-										&ruleRefExpr{
-											pos:  position{line: 33, col: 23, offset: 677},
-											name: "String",
-										},
-										&ruleRefExpr{
-											pos:  position{line: 33, col: 30, offset: 684},
-											name: "_",
-										},
-										&litMatcher{
-											pos:        position{line: 33, col: 32, offset: 686},
-											val:        ":",
-											ignoreCase: false,
-										},
-										&ruleRefExpr{
-											pos:  position{line: 33, col: 36, offset: 690},
-											name: "_",
-										},
-										&ruleRefExpr{
-											pos:  position{line: 33, col: 38, offset: 692},
-											name: "Value",
-										},
-										&zeroOrMoreExpr{
-											pos: position{line: 33, col: 44, offset: 698},
-											expr: &seqExpr{
-												pos: position{line: 33, col: 46, offset: 700},
-												exprs: []interface{}{
-													&litMatcher{
-														pos:        position{line: 33, col: 46, offset: 700},
-														val:        ",",
-														ignoreCase: false,
-													},
-													&ruleRefExpr{
-														pos:  position{line: 33, col: 50, offset: 704},
-														name: "_",
-													},
-													&ruleRefExpr{
-														pos:  position{line: 33, col: 52, offset: 706},
-														name: "String",
-													},
-													&ruleRefExpr{
-														pos:  position{line: 33, col: 59, offset: 713},
-														name: "_",
-													},
-													&litMatcher{
-														pos:        position{line: 33, col: 61, offset: 715},
-														val:        ":",
-														ignoreCase: false,
-													},
-													&ruleRefExpr{
-														pos:  position{line: 33, col: 65, offset: 719},
-														name: "_",
-													},
-													&ruleRefExpr{
-														pos:  position{line: 33, col: 67, offset: 721},
-														name: "Value",
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-						&litMatcher{
-							pos:        position{line: 33, col: 79, offset: 733},
-							val:        "}",
-							ignoreCase: false,
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Array",
-			pos:  position{line: 48, col: 1, offset: 1075},
-			expr: &actionExpr{
-				pos: position{line: 48, col: 9, offset: 1085},
-				run: (*parser).callonArray1,
-				expr: &seqExpr{
-					pos: position{line: 48, col: 9, offset: 1085},
-					exprs: []interface{}{
-						&litMatcher{
-							pos:        position{line: 48, col: 9, offset: 1085},
-							val:        "[",
-							ignoreCase: false,
-						},
-						&ruleRefExpr{
-							pos:  position{line: 48, col: 13, offset: 1089},
-							name: "_",
-						},
-						&labeledExpr{
-							pos:   position{line: 48, col: 15, offset: 1091},
-							label: "vals",
-							expr: &zeroOrOneExpr{
-								pos: position{line: 48, col: 20, offset: 1096},
-								expr: &seqExpr{
-									pos: position{line: 48, col: 22, offset: 1098},
-									exprs: []interface{}{
-										&ruleRefExpr{
-											pos:  position{line: 48, col: 22, offset: 1098},
-											name: "Value",
-										},
-										&zeroOrMoreExpr{
-											pos: position{line: 48, col: 28, offset: 1104},
-											expr: &seqExpr{
-												pos: position{line: 48, col: 30, offset: 1106},
-												exprs: []interface{}{
-													&litMatcher{
-														pos:        position{line: 48, col: 30, offset: 1106},
-														val:        ",",
-														ignoreCase: false,
-													},
-													&ruleRefExpr{
-														pos:  position{line: 48, col: 34, offset: 1110},
-														name: "_",
-													},
-													&ruleRefExpr{
-														pos:  position{line: 48, col: 36, offset: 1112},
-														name: "Value",
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-						&litMatcher{
-							pos:        position{line: 48, col: 48, offset: 1124},
-							val:        "]",
-							ignoreCase: false,
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Number",
-			pos:  position{line: 62, col: 1, offset: 1430},
-			expr: &actionExpr{
-				pos: position{line: 62, col: 10, offset: 1441},
-				run: (*parser).callonNumber1,
-				expr: &seqExpr{
-					pos: position{line: 62, col: 10, offset: 1441},
-					exprs: []interface{}{
-						&zeroOrOneExpr{
-							pos: position{line: 62, col: 10, offset: 1441},
-							expr: &litMatcher{
-								pos:        position{line: 62, col: 10, offset: 1441},
-								val:        "-",
-								ignoreCase: false,
-							},
-						},
-						&ruleRefExpr{
-							pos:  position{line: 62, col: 15, offset: 1446},
-							name: "Integer",
-						},
-						&zeroOrOneExpr{
-							pos: position{line: 62, col: 23, offset: 1454},
-							expr: &seqExpr{
-								pos: position{line: 62, col: 25, offset: 1456},
-								exprs: []interface{}{
-									&litMatcher{
-										pos:        position{line: 62, col: 25, offset: 1456},
-										val:        ".",
-										ignoreCase: false,
-									},
-									&oneOrMoreExpr{
-										pos: position{line: 62, col: 29, offset: 1460},
-										expr: &ruleRefExpr{
-											pos:  position{line: 62, col: 29, offset: 1460},
-											name: "DecimalDigit",
-										},
-									},
-								},
-							},
-						},
-						&zeroOrOneExpr{
-							pos: position{line: 62, col: 46, offset: 1477},
-							expr: &ruleRefExpr{
-								pos:  position{line: 62, col: 46, offset: 1477},
-								name: "Exponent",
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Integer",
-			pos:  position{line: 68, col: 1, offset: 1632},
+			name: "Start",
+			pos:  position{line: 6, col: 1, offset: 28},
 			expr: &choiceExpr{
-				pos: position{line: 68, col: 11, offset: 1644},
+				pos: position{line: 6, col: 9, offset: 36},
 				alternatives: []interface{}{
-					&litMatcher{
-						pos:        position{line: 68, col: 11, offset: 1644},
-						val:        "0",
-						ignoreCase: false,
+					&ruleRefExpr{
+						pos:  position{line: 6, col: 9, offset: 36},
+						name: "case01",
 					},
-					&seqExpr{
-						pos: position{line: 68, col: 17, offset: 1650},
-						exprs: []interface{}{
-							&ruleRefExpr{
-								pos:  position{line: 68, col: 17, offset: 1650},
-								name: "NonZeroDecimalDigit",
+					&ruleRefExpr{
+						pos:  position{line: 6, col: 18, offset: 45},
+						name: "case02",
+					},
+					&ruleRefExpr{
+						pos:  position{line: 6, col: 27, offset: 54},
+						name: "case03",
+					},
+					&ruleRefExpr{
+						pos:  position{line: 6, col: 36, offset: 63},
+						name: "case04",
+					},
+				},
+			},
+		},
+		{
+			name: "case01",
+			pos:  position{line: 11, col: 1, offset: 108},
+			expr: &actionExpr{
+				pos: position{line: 11, col: 10, offset: 117},
+				run: (*parser).calloncase011,
+				expr: &seqExpr{
+					pos: position{line: 11, col: 10, offset: 117},
+					exprs: []interface{}{
+						&litMatcher{
+							pos:        position{line: 11, col: 10, offset: 117},
+							val:        "case01:",
+							ignoreCase: false,
+						},
+						&labeledExpr{
+							pos:   position{line: 11, col: 20, offset: 127},
+							label: "case01",
+							expr: &ruleRefExpr{
+								pos:  position{line: 11, col: 27, offset: 134},
+								name: "MultiLabelRecover",
 							},
-							&zeroOrMoreExpr{
-								pos: position{line: 68, col: 37, offset: 1670},
-								expr: &ruleRefExpr{
-									pos:  position{line: 68, col: 37, offset: 1670},
-									name: "DecimalDigit",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "MultiLabelRecover",
+			pos:  position{line: 13, col: 1, offset: 177},
+			expr: &recoveryExpr{
+				pos: position{line: 13, col: 21, offset: 197},
+				expr: &ruleRefExpr{
+					pos:  position{line: 13, col: 21, offset: 197},
+					name: "number",
+				},
+				recoverExpr: &ruleRefExpr{
+					pos:  position{line: 13, col: 51, offset: 227},
+					name: "ErrNonNumber",
+				},
+				failureLabel: []string{
+					"errAlpha",
+					"errOther",
+				},
+			},
+		},
+		{
+			name: "number",
+			pos:  position{line: 15, col: 1, offset: 241},
+			expr: &choiceExpr{
+				pos: position{line: 15, col: 10, offset: 250},
+				alternatives: []interface{}{
+					&notExpr{
+						pos: position{line: 15, col: 10, offset: 250},
+						expr: &anyMatcher{
+							line: 15, col: 11, offset: 251,
+						},
+					},
+					&actionExpr{
+						pos: position{line: 15, col: 15, offset: 255},
+						run: (*parser).callonnumber4,
+						expr: &seqExpr{
+							pos: position{line: 15, col: 15, offset: 255},
+							exprs: []interface{}{
+								&labeledExpr{
+									pos:   position{line: 15, col: 15, offset: 255},
+									label: "d",
+									expr: &ruleRefExpr{
+										pos:  position{line: 15, col: 17, offset: 257},
+										name: "digit",
+									},
+								},
+								&labeledExpr{
+									pos:   position{line: 15, col: 23, offset: 263},
+									label: "n",
+									expr: &ruleRefExpr{
+										pos:  position{line: 15, col: 25, offset: 265},
+										name: "number",
+									},
 								},
 							},
 						},
@@ -356,388 +128,999 @@ var g = &grammar{
 			},
 		},
 		{
-			name: "Exponent",
-			pos:  position{line: 70, col: 1, offset: 1685},
-			expr: &seqExpr{
-				pos: position{line: 70, col: 12, offset: 1698},
-				exprs: []interface{}{
-					&litMatcher{
-						pos:        position{line: 70, col: 12, offset: 1698},
-						val:        "e",
-						ignoreCase: true,
-					},
-					&zeroOrOneExpr{
-						pos: position{line: 70, col: 17, offset: 1703},
+			name: "digit",
+			pos:  position{line: 22, col: 1, offset: 372},
+			expr: &choiceExpr{
+				pos: position{line: 22, col: 9, offset: 380},
+				alternatives: []interface{}{
+					&actionExpr{
+						pos: position{line: 22, col: 9, offset: 380},
+						run: (*parser).callondigit2,
 						expr: &charClassMatcher{
-							pos:        position{line: 70, col: 17, offset: 1703},
-							val:        "[+-]",
-							chars:      []rune{'+', '-'},
+							pos:        position{line: 22, col: 9, offset: 380},
+							val:        "[0-9]",
+							ranges:     []rune{'0', '9'},
 							ignoreCase: false,
 							inverted:   false,
 						},
 					},
-					&oneOrMoreExpr{
-						pos: position{line: 70, col: 23, offset: 1709},
-						expr: &ruleRefExpr{
-							pos:  position{line: 70, col: 23, offset: 1709},
-							name: "DecimalDigit",
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "String",
-			pos:  position{line: 72, col: 1, offset: 1724},
-			expr: &actionExpr{
-				pos: position{line: 72, col: 10, offset: 1735},
-				run: (*parser).callonString1,
-				expr: &seqExpr{
-					pos: position{line: 72, col: 10, offset: 1735},
-					exprs: []interface{}{
-						&litMatcher{
-							pos:        position{line: 72, col: 10, offset: 1735},
-							val:        "\"",
-							ignoreCase: false,
-						},
-						&zeroOrMoreExpr{
-							pos: position{line: 72, col: 14, offset: 1739},
-							expr: &choiceExpr{
-								pos: position{line: 72, col: 16, offset: 1741},
-								alternatives: []interface{}{
-									&seqExpr{
-										pos: position{line: 72, col: 16, offset: 1741},
-										exprs: []interface{}{
-											&notExpr{
-												pos: position{line: 72, col: 16, offset: 1741},
-												expr: &ruleRefExpr{
-													pos:  position{line: 72, col: 17, offset: 1742},
-													name: "EscapedChar",
-												},
-											},
-											&anyMatcher{
-												line: 72, col: 29, offset: 1754,
-											},
+					&actionExpr{
+						pos: position{line: 22, col: 48, offset: 419},
+						run: (*parser).callondigit4,
+						expr: &labeledExpr{
+							pos:   position{line: 22, col: 48, offset: 419},
+							label: "x",
+							expr: &seqExpr{
+								pos: position{line: 22, col: 52, offset: 423},
+								exprs: []interface{}{
+									&andExpr{
+										pos: position{line: 22, col: 52, offset: 423},
+										expr: &charClassMatcher{
+											pos:        position{line: 22, col: 53, offset: 424},
+											val:        "[a-z]",
+											ranges:     []rune{'a', 'z'},
+											ignoreCase: false,
+											inverted:   false,
 										},
 									},
-									&seqExpr{
-										pos: position{line: 72, col: 33, offset: 1758},
-										exprs: []interface{}{
-											&litMatcher{
-												pos:        position{line: 72, col: 33, offset: 1758},
-												val:        "\\",
-												ignoreCase: false,
-											},
-											&ruleRefExpr{
-												pos:  position{line: 72, col: 38, offset: 1763},
-												name: "EscapeSequence",
-											},
-										},
+									&throwExpr{
+										pos:   position{line: 22, col: 59, offset: 430},
+										label: "errAlpha",
 									},
 								},
 							},
 						},
-						&litMatcher{
-							pos:        position{line: 72, col: 56, offset: 1781},
-							val:        "\"",
-							ignoreCase: false,
+					},
+					&throwExpr{
+						pos:   position{line: 22, col: 112, offset: 483},
+						label: "errOther",
+					},
+				},
+			},
+		},
+		{
+			name: "ErrNonNumber",
+			pos:  position{line: 24, col: 1, offset: 496},
+			expr: &actionExpr{
+				pos: position{line: 24, col: 16, offset: 511},
+				run: (*parser).callonErrNonNumber1,
+				expr: &seqExpr{
+					pos: position{line: 24, col: 16, offset: 511},
+					exprs: []interface{}{
+						&andCodeExpr{
+							pos: position{line: 24, col: 16, offset: 511},
+							run: (*parser).callonErrNonNumber3,
+						},
+						&zeroOrMoreExpr{
+							pos: position{line: 26, col: 3, offset: 566},
+							expr: &seqExpr{
+								pos: position{line: 26, col: 5, offset: 568},
+								exprs: []interface{}{
+									&notExpr{
+										pos: position{line: 26, col: 5, offset: 568},
+										expr: &charClassMatcher{
+											pos:        position{line: 26, col: 6, offset: 569},
+											val:        "[0-9]",
+											ranges:     []rune{'0', '9'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+									&anyMatcher{
+										line: 26, col: 12, offset: 575,
+									},
+								},
+							},
 						},
 					},
 				},
 			},
 		},
 		{
-			name: "EscapedChar",
-			pos:  position{line: 78, col: 1, offset: 1953},
-			expr: &charClassMatcher{
-				pos:        position{line: 78, col: 15, offset: 1969},
-				val:        "[\\x00-\\x1f\"\\\\]",
-				chars:      []rune{'"', '\\'},
-				ranges:     []rune{'\x00', '\x1f'},
-				ignoreCase: false,
-				inverted:   false,
-			},
-		},
-		{
-			name: "EscapeSequence",
-			pos:  position{line: 80, col: 1, offset: 1985},
-			expr: &choiceExpr{
-				pos: position{line: 80, col: 18, offset: 2004},
-				alternatives: []interface{}{
-					&ruleRefExpr{
-						pos:  position{line: 80, col: 18, offset: 2004},
-						name: "SingleCharEscape",
-					},
-					&ruleRefExpr{
-						pos:  position{line: 80, col: 37, offset: 2023},
-						name: "UnicodeEscape",
-					},
-				},
-			},
-		},
-		{
-			name: "SingleCharEscape",
-			pos:  position{line: 82, col: 1, offset: 2038},
-			expr: &charClassMatcher{
-				pos:        position{line: 82, col: 20, offset: 2059},
-				val:        "[\"\\\\/bfnrt]",
-				chars:      []rune{'"', '\\', '/', 'b', 'f', 'n', 'r', 't'},
-				ignoreCase: false,
-				inverted:   false,
-			},
-		},
-		{
-			name: "UnicodeEscape",
-			pos:  position{line: 84, col: 1, offset: 2072},
+			name: "case02",
+			pos:  position{line: 31, col: 1, offset: 637},
 			expr: &seqExpr{
-				pos: position{line: 84, col: 17, offset: 2090},
+				pos: position{line: 31, col: 10, offset: 646},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 84, col: 17, offset: 2090},
-						val:        "u",
+						pos:        position{line: 31, col: 10, offset: 646},
+						val:        "case02:",
 						ignoreCase: false,
 					},
-					&ruleRefExpr{
-						pos:  position{line: 84, col: 21, offset: 2094},
-						name: "HexDigit",
-					},
-					&ruleRefExpr{
-						pos:  position{line: 84, col: 30, offset: 2103},
-						name: "HexDigit",
-					},
-					&ruleRefExpr{
-						pos:  position{line: 84, col: 39, offset: 2112},
-						name: "HexDigit",
-					},
-					&ruleRefExpr{
-						pos:  position{line: 84, col: 48, offset: 2121},
-						name: "HexDigit",
+					&choiceExpr{
+						pos: position{line: 31, col: 21, offset: 657},
+						alternatives: []interface{}{
+							&ruleRefExpr{
+								pos:  position{line: 31, col: 21, offset: 657},
+								name: "ThrowUndefLabel",
+							},
+							&andCodeExpr{
+								pos: position{line: 31, col: 39, offset: 675},
+								run: (*parser).calloncase025,
+							},
+						},
 					},
 				},
 			},
 		},
 		{
-			name: "DecimalDigit",
-			pos:  position{line: 86, col: 1, offset: 2131},
-			expr: &charClassMatcher{
-				pos:        position{line: 86, col: 16, offset: 2148},
-				val:        "[0-9]",
-				ranges:     []rune{'0', '9'},
-				ignoreCase: false,
-				inverted:   false,
+			name: "ThrowUndefLabel",
+			pos:  position{line: 33, col: 1, offset: 734},
+			expr: &throwExpr{
+				pos:   position{line: 33, col: 19, offset: 752},
+				label: "undeflabel",
 			},
 		},
 		{
-			name: "NonZeroDecimalDigit",
-			pos:  position{line: 88, col: 1, offset: 2155},
-			expr: &charClassMatcher{
-				pos:        position{line: 88, col: 23, offset: 2179},
-				val:        "[1-9]",
-				ranges:     []rune{'1', '9'},
-				ignoreCase: false,
-				inverted:   false,
+			name: "case03",
+			pos:  position{line: 38, col: 1, offset: 796},
+			expr: &actionExpr{
+				pos: position{line: 38, col: 10, offset: 805},
+				run: (*parser).calloncase031,
+				expr: &seqExpr{
+					pos: position{line: 38, col: 10, offset: 805},
+					exprs: []interface{}{
+						&litMatcher{
+							pos:        position{line: 38, col: 10, offset: 805},
+							val:        "case03:",
+							ignoreCase: false,
+						},
+						&labeledExpr{
+							pos:   position{line: 38, col: 20, offset: 815},
+							label: "case03",
+							expr: &ruleRefExpr{
+								pos:  position{line: 38, col: 27, offset: 822},
+								name: "OuterRecover03",
+							},
+						},
+					},
+				},
 			},
 		},
 		{
-			name: "HexDigit",
-			pos:  position{line: 90, col: 1, offset: 2186},
-			expr: &charClassMatcher{
-				pos:        position{line: 90, col: 12, offset: 2199},
-				val:        "[0-9a-f]i",
-				ranges:     []rune{'0', '9', 'a', 'f'},
-				ignoreCase: true,
-				inverted:   false,
+			name: "OuterRecover03",
+			pos:  position{line: 40, col: 1, offset: 861},
+			expr: &recoveryExpr{
+				pos: position{line: 40, col: 18, offset: 878},
+				expr: &recoveryExpr{
+					pos: position{line: 40, col: 18, offset: 878},
+					expr: &ruleRefExpr{
+						pos:  position{line: 40, col: 18, offset: 878},
+						name: "InnerRecover03",
+					},
+					recoverExpr: &ruleRefExpr{
+						pos:  position{line: 40, col: 66, offset: 926},
+						name: "ErrAlphaOuter03",
+					},
+					failureLabel: []string{
+						"errAlphaLower",
+						"errAlphaUpper",
+					},
+				},
+				recoverExpr: &ruleRefExpr{
+					pos:  position{line: 40, col: 95, offset: 955},
+					name: "ErrOtherOuter03",
+				},
+				failureLabel: []string{
+					"errOther",
+				},
 			},
 		},
 		{
-			name: "Bool",
-			pos:  position{line: 92, col: 1, offset: 2210},
+			name: "InnerRecover03",
+			pos:  position{line: 42, col: 1, offset: 972},
+			expr: &recoveryExpr{
+				pos: position{line: 42, col: 18, offset: 989},
+				expr: &ruleRefExpr{
+					pos:  position{line: 42, col: 18, offset: 989},
+					name: "number03",
+				},
+				recoverExpr: &ruleRefExpr{
+					pos:  position{line: 42, col: 45, offset: 1016},
+					name: "ErrAlphaInner03",
+				},
+				failureLabel: []string{
+					"errAlphaLower",
+				},
+			},
+		},
+		{
+			name: "number03",
+			pos:  position{line: 44, col: 1, offset: 1033},
 			expr: &choiceExpr{
-				pos: position{line: 92, col: 8, offset: 2219},
+				pos: position{line: 44, col: 12, offset: 1044},
+				alternatives: []interface{}{
+					&notExpr{
+						pos: position{line: 44, col: 12, offset: 1044},
+						expr: &anyMatcher{
+							line: 44, col: 13, offset: 1045,
+						},
+					},
+					&actionExpr{
+						pos: position{line: 44, col: 17, offset: 1049},
+						run: (*parser).callonnumber034,
+						expr: &seqExpr{
+							pos: position{line: 44, col: 17, offset: 1049},
+							exprs: []interface{}{
+								&labeledExpr{
+									pos:   position{line: 44, col: 17, offset: 1049},
+									label: "d",
+									expr: &ruleRefExpr{
+										pos:  position{line: 44, col: 19, offset: 1051},
+										name: "digit03",
+									},
+								},
+								&labeledExpr{
+									pos:   position{line: 44, col: 27, offset: 1059},
+									label: "n",
+									expr: &ruleRefExpr{
+										pos:  position{line: 44, col: 29, offset: 1061},
+										name: "number03",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "digit03",
+			pos:  position{line: 51, col: 1, offset: 1170},
+			expr: &choiceExpr{
+				pos: position{line: 51, col: 11, offset: 1180},
 				alternatives: []interface{}{
 					&actionExpr{
-						pos: position{line: 92, col: 8, offset: 2219},
-						run: (*parser).callonBool2,
-						expr: &litMatcher{
-							pos:        position{line: 92, col: 8, offset: 2219},
-							val:        "true",
+						pos: position{line: 51, col: 11, offset: 1180},
+						run: (*parser).callondigit032,
+						expr: &charClassMatcher{
+							pos:        position{line: 51, col: 11, offset: 1180},
+							val:        "[0-9]",
+							ranges:     []rune{'0', '9'},
 							ignoreCase: false,
+							inverted:   false,
 						},
 					},
 					&actionExpr{
-						pos: position{line: 92, col: 38, offset: 2249},
-						run: (*parser).callonBool4,
-						expr: &litMatcher{
-							pos:        position{line: 92, col: 38, offset: 2249},
-							val:        "false",
-							ignoreCase: false,
+						pos: position{line: 51, col: 50, offset: 1219},
+						run: (*parser).callondigit034,
+						expr: &labeledExpr{
+							pos:   position{line: 51, col: 50, offset: 1219},
+							label: "x",
+							expr: &seqExpr{
+								pos: position{line: 51, col: 54, offset: 1223},
+								exprs: []interface{}{
+									&andExpr{
+										pos: position{line: 51, col: 54, offset: 1223},
+										expr: &charClassMatcher{
+											pos:        position{line: 51, col: 55, offset: 1224},
+											val:        "[a-z]",
+											ranges:     []rune{'a', 'z'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+									&throwExpr{
+										pos:   position{line: 51, col: 61, offset: 1230},
+										label: "errAlphaLower",
+									},
+								},
+							},
+						},
+					},
+					&actionExpr{
+						pos: position{line: 51, col: 119, offset: 1288},
+						run: (*parser).callondigit0310,
+						expr: &labeledExpr{
+							pos:   position{line: 51, col: 119, offset: 1288},
+							label: "x",
+							expr: &seqExpr{
+								pos: position{line: 51, col: 123, offset: 1292},
+								exprs: []interface{}{
+									&andExpr{
+										pos: position{line: 51, col: 123, offset: 1292},
+										expr: &charClassMatcher{
+											pos:        position{line: 51, col: 124, offset: 1293},
+											val:        "[A-Z]",
+											ranges:     []rune{'A', 'Z'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+									&throwExpr{
+										pos:   position{line: 51, col: 130, offset: 1299},
+										label: "errAlphaUpper",
+									},
+								},
+							},
+						},
+					},
+					&throwExpr{
+						pos:   position{line: 51, col: 188, offset: 1357},
+						label: "errOther",
+					},
+				},
+			},
+		},
+		{
+			name: "ErrAlphaInner03",
+			pos:  position{line: 53, col: 1, offset: 1370},
+			expr: &actionExpr{
+				pos: position{line: 53, col: 19, offset: 1388},
+				run: (*parser).callonErrAlphaInner031,
+				expr: &seqExpr{
+					pos: position{line: 53, col: 19, offset: 1388},
+					exprs: []interface{}{
+						&andCodeExpr{
+							pos: position{line: 53, col: 19, offset: 1388},
+							run: (*parser).callonErrAlphaInner033,
+						},
+						&zeroOrMoreExpr{
+							pos: position{line: 55, col: 3, offset: 1464},
+							expr: &seqExpr{
+								pos: position{line: 55, col: 5, offset: 1466},
+								exprs: []interface{}{
+									&notExpr{
+										pos: position{line: 55, col: 5, offset: 1466},
+										expr: &charClassMatcher{
+											pos:        position{line: 55, col: 6, offset: 1467},
+											val:        "[0-9]",
+											ranges:     []rune{'0', '9'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+									&anyMatcher{
+										line: 55, col: 12, offset: 1473,
+									},
+								},
+							},
 						},
 					},
 				},
 			},
 		},
 		{
-			name: "Null",
-			pos:  position{line: 94, col: 1, offset: 2280},
+			name: "ErrAlphaOuter03",
+			pos:  position{line: 57, col: 1, offset: 1499},
 			expr: &actionExpr{
-				pos: position{line: 94, col: 8, offset: 2289},
-				run: (*parser).callonNull1,
-				expr: &litMatcher{
-					pos:        position{line: 94, col: 8, offset: 2289},
-					val:        "null",
-					ignoreCase: false,
+				pos: position{line: 57, col: 19, offset: 1517},
+				run: (*parser).callonErrAlphaOuter031,
+				expr: &seqExpr{
+					pos: position{line: 57, col: 19, offset: 1517},
+					exprs: []interface{}{
+						&andCodeExpr{
+							pos: position{line: 57, col: 19, offset: 1517},
+							run: (*parser).callonErrAlphaOuter033,
+						},
+						&zeroOrMoreExpr{
+							pos: position{line: 59, col: 3, offset: 1593},
+							expr: &seqExpr{
+								pos: position{line: 59, col: 5, offset: 1595},
+								exprs: []interface{}{
+									&notExpr{
+										pos: position{line: 59, col: 5, offset: 1595},
+										expr: &charClassMatcher{
+											pos:        position{line: 59, col: 6, offset: 1596},
+											val:        "[0-9]",
+											ranges:     []rune{'0', '9'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+									&anyMatcher{
+										line: 59, col: 12, offset: 1602,
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 		{
-			name:        "_",
-			displayName: "\"whitespace\"",
-			pos:         position{line: 96, col: 1, offset: 2317},
-			expr: &zeroOrMoreExpr{
-				pos: position{line: 96, col: 18, offset: 2336},
-				expr: &charClassMatcher{
-					pos:        position{line: 96, col: 18, offset: 2336},
-					val:        "[ \\t\\r\\n]",
-					chars:      []rune{' ', '\t', '\r', '\n'},
-					ignoreCase: false,
-					inverted:   false,
+			name: "ErrOtherOuter03",
+			pos:  position{line: 61, col: 1, offset: 1628},
+			expr: &actionExpr{
+				pos: position{line: 61, col: 19, offset: 1646},
+				run: (*parser).callonErrOtherOuter031,
+				expr: &seqExpr{
+					pos: position{line: 61, col: 19, offset: 1646},
+					exprs: []interface{}{
+						&andCodeExpr{
+							pos: position{line: 61, col: 19, offset: 1646},
+							run: (*parser).callonErrOtherOuter033,
+						},
+						&zeroOrMoreExpr{
+							pos: position{line: 63, col: 3, offset: 1717},
+							expr: &seqExpr{
+								pos: position{line: 63, col: 5, offset: 1719},
+								exprs: []interface{}{
+									&notExpr{
+										pos: position{line: 63, col: 5, offset: 1719},
+										expr: &charClassMatcher{
+											pos:        position{line: 63, col: 6, offset: 1720},
+											val:        "[0-9]",
+											ranges:     []rune{'0', '9'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+									&anyMatcher{
+										line: 63, col: 12, offset: 1726,
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 		{
-			name: "EOF",
-			pos:  position{line: 98, col: 1, offset: 2348},
-			expr: &notExpr{
-				pos: position{line: 98, col: 7, offset: 2356},
-				expr: &anyMatcher{
-					line: 98, col: 8, offset: 2357,
+			name: "case04",
+			pos:  position{line: 68, col: 1, offset: 1811},
+			expr: &actionExpr{
+				pos: position{line: 68, col: 10, offset: 1820},
+				run: (*parser).calloncase041,
+				expr: &seqExpr{
+					pos: position{line: 68, col: 10, offset: 1820},
+					exprs: []interface{}{
+						&litMatcher{
+							pos:        position{line: 68, col: 10, offset: 1820},
+							val:        "case04:",
+							ignoreCase: false,
+						},
+						&labeledExpr{
+							pos:   position{line: 68, col: 20, offset: 1830},
+							label: "case04",
+							expr: &ruleRefExpr{
+								pos:  position{line: 68, col: 27, offset: 1837},
+								name: "OuterRecover04",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "OuterRecover04",
+			pos:  position{line: 70, col: 1, offset: 1876},
+			expr: &recoveryExpr{
+				pos: position{line: 70, col: 18, offset: 1893},
+				expr: &recoveryExpr{
+					pos: position{line: 70, col: 18, offset: 1893},
+					expr: &ruleRefExpr{
+						pos:  position{line: 70, col: 18, offset: 1893},
+						name: "InnerRecover04",
+					},
+					recoverExpr: &ruleRefExpr{
+						pos:  position{line: 70, col: 66, offset: 1941},
+						name: "ErrAlphaOuter04",
+					},
+					failureLabel: []string{
+						"errAlphaLower",
+						"errAlphaUpper",
+					},
+				},
+				recoverExpr: &ruleRefExpr{
+					pos:  position{line: 70, col: 95, offset: 1970},
+					name: "ErrOtherOuter04",
+				},
+				failureLabel: []string{
+					"errOther",
+				},
+			},
+		},
+		{
+			name: "InnerRecover04",
+			pos:  position{line: 72, col: 1, offset: 1987},
+			expr: &recoveryExpr{
+				pos: position{line: 72, col: 18, offset: 2004},
+				expr: &ruleRefExpr{
+					pos:  position{line: 72, col: 18, offset: 2004},
+					name: "number04",
+				},
+				recoverExpr: &ruleRefExpr{
+					pos:  position{line: 72, col: 45, offset: 2031},
+					name: "ErrAlphaInner04",
+				},
+				failureLabel: []string{
+					"errAlphaLower",
+				},
+			},
+		},
+		{
+			name: "number04",
+			pos:  position{line: 74, col: 1, offset: 2048},
+			expr: &choiceExpr{
+				pos: position{line: 74, col: 12, offset: 2059},
+				alternatives: []interface{}{
+					&notExpr{
+						pos: position{line: 74, col: 12, offset: 2059},
+						expr: &anyMatcher{
+							line: 74, col: 13, offset: 2060,
+						},
+					},
+					&actionExpr{
+						pos: position{line: 74, col: 17, offset: 2064},
+						run: (*parser).callonnumber044,
+						expr: &seqExpr{
+							pos: position{line: 74, col: 17, offset: 2064},
+							exprs: []interface{}{
+								&labeledExpr{
+									pos:   position{line: 74, col: 17, offset: 2064},
+									label: "d",
+									expr: &ruleRefExpr{
+										pos:  position{line: 74, col: 19, offset: 2066},
+										name: "digit04",
+									},
+								},
+								&labeledExpr{
+									pos:   position{line: 74, col: 27, offset: 2074},
+									label: "n",
+									expr: &ruleRefExpr{
+										pos:  position{line: 74, col: 29, offset: 2076},
+										name: "number04",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "digit04",
+			pos:  position{line: 81, col: 1, offset: 2185},
+			expr: &choiceExpr{
+				pos: position{line: 81, col: 11, offset: 2195},
+				alternatives: []interface{}{
+					&actionExpr{
+						pos: position{line: 81, col: 11, offset: 2195},
+						run: (*parser).callondigit042,
+						expr: &charClassMatcher{
+							pos:        position{line: 81, col: 11, offset: 2195},
+							val:        "[0-9]",
+							ranges:     []rune{'0', '9'},
+							ignoreCase: false,
+							inverted:   false,
+						},
+					},
+					&actionExpr{
+						pos: position{line: 81, col: 50, offset: 2234},
+						run: (*parser).callondigit044,
+						expr: &labeledExpr{
+							pos:   position{line: 81, col: 50, offset: 2234},
+							label: "x",
+							expr: &seqExpr{
+								pos: position{line: 81, col: 54, offset: 2238},
+								exprs: []interface{}{
+									&andExpr{
+										pos: position{line: 81, col: 54, offset: 2238},
+										expr: &charClassMatcher{
+											pos:        position{line: 81, col: 55, offset: 2239},
+											val:        "[a-z]",
+											ranges:     []rune{'a', 'z'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+									&throwExpr{
+										pos:   position{line: 81, col: 61, offset: 2245},
+										label: "errAlphaLower",
+									},
+								},
+							},
+						},
+					},
+					&actionExpr{
+						pos: position{line: 81, col: 119, offset: 2303},
+						run: (*parser).callondigit0410,
+						expr: &labeledExpr{
+							pos:   position{line: 81, col: 119, offset: 2303},
+							label: "x",
+							expr: &seqExpr{
+								pos: position{line: 81, col: 123, offset: 2307},
+								exprs: []interface{}{
+									&andExpr{
+										pos: position{line: 81, col: 123, offset: 2307},
+										expr: &charClassMatcher{
+											pos:        position{line: 81, col: 124, offset: 2308},
+											val:        "[A-Z]",
+											ranges:     []rune{'A', 'Z'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+									&throwExpr{
+										pos:   position{line: 81, col: 130, offset: 2314},
+										label: "errAlphaUpper",
+									},
+								},
+							},
+						},
+					},
+					&throwExpr{
+						pos:   position{line: 81, col: 188, offset: 2372},
+						label: "errOther",
+					},
+				},
+			},
+		},
+		{
+			name: "ErrAlphaInner04",
+			pos:  position{line: 83, col: 1, offset: 2385},
+			expr: &andCodeExpr{
+				pos: position{line: 83, col: 19, offset: 2403},
+				run: (*parser).callonErrAlphaInner041,
+			},
+		},
+		{
+			name: "ErrAlphaOuter04",
+			pos:  position{line: 87, col: 1, offset: 2431},
+			expr: &actionExpr{
+				pos: position{line: 87, col: 19, offset: 2449},
+				run: (*parser).callonErrAlphaOuter041,
+				expr: &seqExpr{
+					pos: position{line: 87, col: 19, offset: 2449},
+					exprs: []interface{}{
+						&andCodeExpr{
+							pos: position{line: 87, col: 19, offset: 2449},
+							run: (*parser).callonErrAlphaOuter043,
+						},
+						&zeroOrMoreExpr{
+							pos: position{line: 89, col: 3, offset: 2516},
+							expr: &seqExpr{
+								pos: position{line: 89, col: 5, offset: 2518},
+								exprs: []interface{}{
+									&notExpr{
+										pos: position{line: 89, col: 5, offset: 2518},
+										expr: &charClassMatcher{
+											pos:        position{line: 89, col: 6, offset: 2519},
+											val:        "[0-9]",
+											ranges:     []rune{'0', '9'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+									&anyMatcher{
+										line: 89, col: 12, offset: 2525,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "ErrOtherOuter04",
+			pos:  position{line: 91, col: 1, offset: 2551},
+			expr: &actionExpr{
+				pos: position{line: 91, col: 19, offset: 2569},
+				run: (*parser).callonErrOtherOuter041,
+				expr: &seqExpr{
+					pos: position{line: 91, col: 19, offset: 2569},
+					exprs: []interface{}{
+						&andCodeExpr{
+							pos: position{line: 91, col: 19, offset: 2569},
+							run: (*parser).callonErrOtherOuter043,
+						},
+						&zeroOrMoreExpr{
+							pos: position{line: 93, col: 3, offset: 2640},
+							expr: &seqExpr{
+								pos: position{line: 93, col: 5, offset: 2642},
+								exprs: []interface{}{
+									&notExpr{
+										pos: position{line: 93, col: 5, offset: 2642},
+										expr: &charClassMatcher{
+											pos:        position{line: 93, col: 6, offset: 2643},
+											val:        "[0-9]",
+											ranges:     []rune{'0', '9'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+									&anyMatcher{
+										line: 93, col: 12, offset: 2649,
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
 	},
 }
 
-func (c *current) onJSON1(vals interface{}) (interface{}, error) {
-	valsSl := toIfaceSlice(vals)
-	switch len(valsSl) {
-	case 0:
-		return nil, nil
-	case 1:
-		return valsSl[0], nil
-	default:
-		return valsSl, nil
+func (c *current) oncase011(case01 interface{}) (interface{}, error) {
+	return case01, nil
+}
+
+func (p *parser) calloncase011() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.oncase011(stack["case01"])
+}
+
+func (c *current) onnumber4(d, n interface{}) (interface{}, error) {
+	if n == nil {
+		return d.(string), nil
 	}
+	return d.(string) + n.(string), nil
 }
 
-func (p *parser) callonJSON1() (interface{}, error) {
+func (p *parser) callonnumber4() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onJSON1(stack["vals"])
+	return p.cur.onnumber4(stack["d"], stack["n"])
 }
 
-func (c *current) onValue1(val interface{}) (interface{}, error) {
-	return val, nil
+func (c *current) ondigit2() (interface{}, error) {
+	return string(c.text), nil
 }
 
-func (p *parser) callonValue1() (interface{}, error) {
+func (p *parser) callondigit2() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onValue1(stack["val"])
+	return p.cur.ondigit2()
 }
 
-func (c *current) onObject1(vals interface{}) (interface{}, error) {
-	res := make(map[string]interface{})
-	valsSl := toIfaceSlice(vals)
-	if len(valsSl) == 0 {
-		return res, nil
+func (c *current) ondigit4(x interface{}) (interface{}, error) {
+	return x.([]interface{})[1], nil
+}
+
+func (p *parser) callondigit4() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.ondigit4(stack["x"])
+}
+
+func (c *current) onErrNonNumber3() (bool, error) {
+	return true, errors.New("expecting a number")
+}
+
+func (p *parser) callonErrNonNumber3() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrNonNumber3()
+}
+
+func (c *current) onErrNonNumber1() (interface{}, error) {
+	return "?", nil
+}
+
+func (p *parser) callonErrNonNumber1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrNonNumber1()
+}
+
+func (c *current) oncase025() (bool, error) {
+	return false, errors.New("Throwed undefined label")
+}
+
+func (p *parser) calloncase025() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.oncase025()
+}
+
+func (c *current) oncase031(case03 interface{}) (interface{}, error) {
+	return case03, nil
+}
+
+func (p *parser) calloncase031() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.oncase031(stack["case03"])
+}
+
+func (c *current) onnumber034(d, n interface{}) (interface{}, error) {
+	if n == nil {
+		return d.(string), nil
 	}
-	res[valsSl[0].(string)] = valsSl[4]
-	restSl := toIfaceSlice(valsSl[5])
-	for _, v := range restSl {
-		vSl := toIfaceSlice(v)
-		res[vSl[2].(string)] = vSl[6]
+	return d.(string) + n.(string), nil
+}
+
+func (p *parser) callonnumber034() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onnumber034(stack["d"], stack["n"])
+}
+
+func (c *current) ondigit032() (interface{}, error) {
+	return string(c.text), nil
+}
+
+func (p *parser) callondigit032() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.ondigit032()
+}
+
+func (c *current) ondigit034(x interface{}) (interface{}, error) {
+	return x.([]interface{})[1], nil
+}
+
+func (p *parser) callondigit034() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.ondigit034(stack["x"])
+}
+
+func (c *current) ondigit0310(x interface{}) (interface{}, error) {
+	return x.([]interface{})[1], nil
+}
+
+func (p *parser) callondigit0310() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.ondigit0310(stack["x"])
+}
+
+func (c *current) onErrAlphaInner033() (bool, error) {
+	return true, errors.New("expecting a number, got lower case char")
+}
+
+func (p *parser) callonErrAlphaInner033() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrAlphaInner033()
+}
+
+func (c *current) onErrAlphaInner031() (interface{}, error) {
+	return "<", nil
+}
+
+func (p *parser) callonErrAlphaInner031() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrAlphaInner031()
+}
+
+func (c *current) onErrAlphaOuter033() (bool, error) {
+	return true, errors.New("expecting a number, got upper case char")
+}
+
+func (p *parser) callonErrAlphaOuter033() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrAlphaOuter033()
+}
+
+func (c *current) onErrAlphaOuter031() (interface{}, error) {
+	return ">", nil
+}
+
+func (p *parser) callonErrAlphaOuter031() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrAlphaOuter031()
+}
+
+func (c *current) onErrOtherOuter033() (bool, error) {
+	return true, errors.New("expecting a number, got a non-char")
+}
+
+func (p *parser) callonErrOtherOuter033() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrOtherOuter033()
+}
+
+func (c *current) onErrOtherOuter031() (interface{}, error) {
+	return "?", nil
+}
+
+func (p *parser) callonErrOtherOuter031() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrOtherOuter031()
+}
+
+func (c *current) oncase041(case04 interface{}) (interface{}, error) {
+	return case04, nil
+}
+
+func (p *parser) calloncase041() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.oncase041(stack["case04"])
+}
+
+func (c *current) onnumber044(d, n interface{}) (interface{}, error) {
+	if n == nil {
+		return d.(string), nil
 	}
-	return res, nil
+	return d.(string) + n.(string), nil
 }
 
-func (p *parser) callonObject1() (interface{}, error) {
+func (p *parser) callonnumber044() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onObject1(stack["vals"])
+	return p.cur.onnumber044(stack["d"], stack["n"])
 }
 
-func (c *current) onArray1(vals interface{}) (interface{}, error) {
-	valsSl := toIfaceSlice(vals)
-	if len(valsSl) == 0 {
-		return []interface{}{}, nil
-	}
-	res := []interface{}{valsSl[0]}
-	restSl := toIfaceSlice(valsSl[1])
-	for _, v := range restSl {
-		vSl := toIfaceSlice(v)
-		res = append(res, vSl[2])
-	}
-	return res, nil
+func (c *current) ondigit042() (interface{}, error) {
+	return string(c.text), nil
 }
 
-func (p *parser) callonArray1() (interface{}, error) {
+func (p *parser) callondigit042() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onArray1(stack["vals"])
+	return p.cur.ondigit042()
 }
 
-func (c *current) onNumber1() (interface{}, error) {
-	// JSON numbers have the same syntax as Go's, and are parseable using
-	// strconv.
-	return strconv.ParseFloat(string(c.text), 64)
+func (c *current) ondigit044(x interface{}) (interface{}, error) {
+	return x.([]interface{})[1], nil
 }
 
-func (p *parser) callonNumber1() (interface{}, error) {
+func (p *parser) callondigit044() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onNumber1()
+	return p.cur.ondigit044(stack["x"])
 }
 
-func (c *current) onString1() (interface{}, error) {
-	// TODO : the forward slash (solidus) is not a valid escape in Go, it will
-	// fail if there's one in the string
-	return strconv.Unquote(string(c.text))
+func (c *current) ondigit0410(x interface{}) (interface{}, error) {
+	return x.([]interface{})[1], nil
 }
 
-func (p *parser) callonString1() (interface{}, error) {
+func (p *parser) callondigit0410() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onString1()
+	return p.cur.ondigit0410(stack["x"])
 }
 
-func (c *current) onBool2() (interface{}, error) {
-	return true, nil
-}
-
-func (p *parser) callonBool2() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onBool2()
-}
-
-func (c *current) onBool4() (interface{}, error) {
+func (c *current) onErrAlphaInner041() (bool, error) {
 	return false, nil
 }
 
-func (p *parser) callonBool4() (interface{}, error) {
+func (p *parser) callonErrAlphaInner041() (bool, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onBool4()
+	return p.cur.onErrAlphaInner041()
 }
 
-func (c *current) onNull1() (interface{}, error) {
-	return nil, nil
+func (c *current) onErrAlphaOuter043() (bool, error) {
+	return true, errors.New("expecting a number, got a char")
 }
 
-func (p *parser) callonNull1() (interface{}, error) {
+func (p *parser) callonErrAlphaOuter043() (bool, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onNull1()
+	return p.cur.onErrAlphaOuter043()
+}
+
+func (c *current) onErrAlphaOuter041() (interface{}, error) {
+	return "x", nil
+}
+
+func (p *parser) callonErrAlphaOuter041() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrAlphaOuter041()
+}
+
+func (c *current) onErrOtherOuter043() (bool, error) {
+	return true, errors.New("expecting a number, got a non-char")
+}
+
+func (p *parser) callonErrOtherOuter043() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrOtherOuter043()
+}
+
+func (c *current) onErrOtherOuter041() (interface{}, error) {
+	return "?", nil
+}
+
+func (p *parser) callonErrOtherOuter041() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrOtherOuter041()
 }
 
 var (

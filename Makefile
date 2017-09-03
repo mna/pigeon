@@ -109,6 +109,12 @@ $(TEST_DIR)/goto/goto.go: $(TEST_DIR)/goto/goto.peg $(BINDIR)/pigeon
 $(TEST_DIR)/max_expr_cnt/maxexpr.go: $(TEST_DIR)/max_expr_cnt/maxexpr.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
+$(TEST_DIR)/labeled_failures/labeled_failures.go: $(TEST_DIR)/labeled_failures/labeled_failures.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
+$(TEST_DIR)/thrownrecover/thrownrecover.go: $(TEST_DIR)/thrownrecover/thrownrecover.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
 lint:
 	golint ./...
 	go vet ./...

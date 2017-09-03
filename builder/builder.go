@@ -187,10 +187,14 @@ func (b *builder) writeExpr(expr ast.Expression) {
 		b.writeNotExpr(expr)
 	case *ast.OneOrMoreExpr:
 		b.writeOneOrMoreExpr(expr)
+	case *ast.RecoveryExpr:
+		b.writeRecoveryExpr(expr)
 	case *ast.RuleRefExpr:
 		b.writeRuleRefExpr(expr)
 	case *ast.SeqExpr:
 		b.writeSeqExpr(expr)
+	case *ast.ThrowExpr:
+		b.writeThrowExpr(expr)
 	case *ast.ZeroOrMoreExpr:
 		b.writeZeroOrMoreExpr(expr)
 	case *ast.ZeroOrOneExpr:
@@ -429,6 +433,27 @@ func (b *builder) writeOneOrMoreExpr(one *ast.OneOrMoreExpr) {
 	b.writelnf("},")
 }
 
+func (b *builder) writeRecoveryExpr(recover *ast.RecoveryExpr) {
+	if recover == nil {
+		b.writelnf("nil,")
+		return
+	}
+	b.writelnf("&recoveryExpr{")
+	pos := recover.Pos()
+	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
+
+	b.writef("\texpr: ")
+	b.writeExpr(recover.Expr)
+	b.writef("\trecoverExpr: ")
+	b.writeExpr(recover.RecoverExpr)
+	b.writelnf("\tfailureLabel: []string{")
+	for _, label := range recover.Labels {
+		b.writelnf("%q,", label)
+	}
+	b.writelnf("\t},")
+	b.writelnf("},")
+}
+
 func (b *builder) writeRuleRefExpr(ref *ast.RuleRefExpr) {
 	if ref == nil {
 		b.writelnf("nil,")
@@ -458,6 +483,18 @@ func (b *builder) writeSeqExpr(seq *ast.SeqExpr) {
 		}
 		b.writelnf("\t},")
 	}
+	b.writelnf("},")
+}
+
+func (b *builder) writeThrowExpr(throw *ast.ThrowExpr) {
+	if throw == nil {
+		b.writelnf("nil,")
+		return
+	}
+	b.writelnf("&throwExpr{")
+	pos := throw.Pos()
+	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
+	b.writelnf("\tlabel: %q,", throw.Label)
 	b.writelnf("},")
 }
 
@@ -551,6 +588,11 @@ func (b *builder) writeExprCode(expr ast.Expression) {
 	case *ast.OneOrMoreExpr:
 		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
+		b.popArgsSet()
+	case *ast.RecoveryExpr:
+		b.pushArgsSet()
+		b.writeExprCode(expr.Expr)
+		b.writeExprCode(expr.RecoverExpr)
 		b.popArgsSet()
 	case *ast.SeqExpr:
 		for _, sub := range expr.Exprs {

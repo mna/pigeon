@@ -1,8 +1,4 @@
-//go:generate go run ../bootstrap/cmd/static_code_generator/main.go -- $GOFILE generated_$GOFILE staticCode
-
-// +build static_code
-
-package builder
+package labeledfailures
 
 import (
 	"bytes"
@@ -19,7 +15,329 @@ import (
 	"unicode/utf8"
 )
 
-// IMPORTANT: All code below this line is added to the parser as static code
+func ids(id, list interface{}) (interface{}, error) {
+	l := toStringSlice(list)
+	l = append([]string{id.(string)}, l...)
+	return l, nil
+}
+
+func toStringSlice(v interface{}) []string {
+	if v == nil {
+		return nil
+	}
+	return v.([]string)
+}
+
+var g = &grammar{
+	rules: []*rule{
+		{
+			name: "S",
+			pos:  position{line: 18, col: 1, offset: 268},
+			expr: &recoveryExpr{
+				pos: position{line: 18, col: 5, offset: 274},
+				expr: &recoveryExpr{
+					pos: position{line: 18, col: 5, offset: 274},
+					expr: &actionExpr{
+						pos: position{line: 18, col: 5, offset: 274},
+						run: (*parser).callonS3,
+						expr: &seqExpr{
+							pos: position{line: 18, col: 5, offset: 274},
+							exprs: []interface{}{
+								&labeledExpr{
+									pos:   position{line: 18, col: 5, offset: 274},
+									label: "id",
+									expr: &ruleRefExpr{
+										pos:  position{line: 18, col: 8, offset: 277},
+										name: "ID",
+									},
+								},
+								&labeledExpr{
+									pos:   position{line: 18, col: 11, offset: 280},
+									label: "list",
+									expr: &ruleRefExpr{
+										pos:  position{line: 18, col: 16, offset: 285},
+										name: "List",
+									},
+								},
+							},
+						},
+					},
+					recoverExpr: &ruleRefExpr{
+						pos:  position{line: 20, col: 16, offset: 332},
+						name: "ErrComma",
+					},
+					failureLabel: []string{
+						"errComma",
+					},
+				},
+				recoverExpr: &ruleRefExpr{
+					pos:  position{line: 20, col: 35, offset: 351},
+					name: "ErrID",
+				},
+				failureLabel: []string{
+					"errId",
+				},
+			},
+		},
+		{
+			name: "List",
+			pos:  position{line: 21, col: 1, offset: 357},
+			expr: &choiceExpr{
+				pos: position{line: 21, col: 8, offset: 366},
+				alternatives: []interface{}{
+					&notExpr{
+						pos: position{line: 21, col: 8, offset: 366},
+						expr: &anyMatcher{
+							line: 21, col: 9, offset: 367,
+						},
+					},
+					&actionExpr{
+						pos: position{line: 21, col: 13, offset: 371},
+						run: (*parser).callonList4,
+						expr: &seqExpr{
+							pos: position{line: 21, col: 13, offset: 371},
+							exprs: []interface{}{
+								&ruleRefExpr{
+									pos:  position{line: 21, col: 13, offset: 371},
+									name: "Comma",
+								},
+								&labeledExpr{
+									pos:   position{line: 21, col: 19, offset: 377},
+									label: "id",
+									expr: &ruleRefExpr{
+										pos:  position{line: 21, col: 22, offset: 380},
+										name: "ID",
+									},
+								},
+								&labeledExpr{
+									pos:   position{line: 21, col: 25, offset: 383},
+									label: "list",
+									expr: &ruleRefExpr{
+										pos:  position{line: 21, col: 30, offset: 388},
+										name: "List",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "ID",
+			pos:  position{line: 24, col: 1, offset: 422},
+			expr: &choiceExpr{
+				pos: position{line: 24, col: 6, offset: 429},
+				alternatives: []interface{}{
+					&actionExpr{
+						pos: position{line: 24, col: 6, offset: 429},
+						run: (*parser).callonID2,
+						expr: &seqExpr{
+							pos: position{line: 24, col: 6, offset: 429},
+							exprs: []interface{}{
+								&ruleRefExpr{
+									pos:  position{line: 24, col: 6, offset: 429},
+									name: "Sp",
+								},
+								&oneOrMoreExpr{
+									pos: position{line: 24, col: 9, offset: 432},
+									expr: &charClassMatcher{
+										pos:        position{line: 24, col: 9, offset: 432},
+										val:        "[a-z]",
+										ranges:     []rune{'a', 'z'},
+										ignoreCase: false,
+										inverted:   false,
+									},
+								},
+							},
+						},
+					},
+					&throwExpr{
+						pos:   position{line: 26, col: 5, offset: 505},
+						label: "errId",
+					},
+				},
+			},
+		},
+		{
+			name: "Comma",
+			pos:  position{line: 27, col: 1, offset: 514},
+			expr: &choiceExpr{
+				pos: position{line: 27, col: 9, offset: 524},
+				alternatives: []interface{}{
+					&seqExpr{
+						pos: position{line: 27, col: 9, offset: 524},
+						exprs: []interface{}{
+							&ruleRefExpr{
+								pos:  position{line: 27, col: 9, offset: 524},
+								name: "Sp",
+							},
+							&litMatcher{
+								pos:        position{line: 27, col: 12, offset: 527},
+								val:        ",",
+								ignoreCase: false,
+							},
+						},
+					},
+					&throwExpr{
+						pos:   position{line: 27, col: 18, offset: 533},
+						label: "errComma",
+					},
+				},
+			},
+		},
+		{
+			name: "Sp",
+			pos:  position{line: 28, col: 1, offset: 545},
+			expr: &zeroOrMoreExpr{
+				pos: position{line: 28, col: 6, offset: 552},
+				expr: &charClassMatcher{
+					pos:        position{line: 28, col: 6, offset: 552},
+					val:        "[ \\t\\r\\n]",
+					chars:      []rune{' ', '\t', '\r', '\n'},
+					ignoreCase: false,
+					inverted:   false,
+				},
+			},
+		},
+		{
+			name: "ErrComma",
+			pos:  position{line: 30, col: 1, offset: 564},
+			expr: &seqExpr{
+				pos: position{line: 30, col: 12, offset: 577},
+				exprs: []interface{}{
+					&andCodeExpr{
+						pos: position{line: 30, col: 12, offset: 577},
+						run: (*parser).callonErrComma2,
+					},
+					&zeroOrMoreExpr{
+						pos: position{line: 32, col: 7, offset: 635},
+						expr: &seqExpr{
+							pos: position{line: 32, col: 9, offset: 637},
+							exprs: []interface{}{
+								&notExpr{
+									pos: position{line: 32, col: 9, offset: 637},
+									expr: &oneOrMoreExpr{
+										pos: position{line: 32, col: 11, offset: 639},
+										expr: &charClassMatcher{
+											pos:        position{line: 32, col: 11, offset: 639},
+											val:        "[a-z]",
+											ranges:     []rune{'a', 'z'},
+											ignoreCase: false,
+											inverted:   false,
+										},
+									},
+								},
+								&anyMatcher{
+									line: 32, col: 19, offset: 647,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "ErrID",
+			pos:  position{line: 33, col: 1, offset: 651},
+			expr: &actionExpr{
+				pos: position{line: 33, col: 9, offset: 661},
+				run: (*parser).callonErrID1,
+				expr: &seqExpr{
+					pos: position{line: 33, col: 9, offset: 661},
+					exprs: []interface{}{
+						&andCodeExpr{
+							pos: position{line: 33, col: 9, offset: 661},
+							run: (*parser).callonErrID3,
+						},
+						&zeroOrMoreExpr{
+							pos: position{line: 35, col: 7, offset: 729},
+							expr: &seqExpr{
+								pos: position{line: 35, col: 9, offset: 731},
+								exprs: []interface{}{
+									&notExpr{
+										pos: position{line: 35, col: 9, offset: 731},
+										expr: &litMatcher{
+											pos:        position{line: 35, col: 11, offset: 733},
+											val:        ",",
+											ignoreCase: false,
+										},
+									},
+									&anyMatcher{
+										line: 35, col: 16, offset: 738,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
+func (c *current) onS3(id, list interface{}) (interface{}, error) {
+	return ids(id, list)
+}
+
+func (p *parser) callonS3() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onS3(stack["id"], stack["list"])
+}
+
+func (c *current) onList4(id, list interface{}) (interface{}, error) {
+	return ids(id, list)
+}
+
+func (p *parser) callonList4() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onList4(stack["id"], stack["list"])
+}
+
+func (c *current) onID2() (interface{}, error) {
+	return strings.TrimLeft(string(c.text), " \t\r\n"), nil
+}
+
+func (p *parser) callonID2() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onID2()
+}
+
+func (c *current) onErrComma2() (bool, error) {
+	return true, errors.New("expecting ','")
+
+}
+
+func (p *parser) callonErrComma2() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrComma2()
+}
+
+func (c *current) onErrID3() (bool, error) {
+	return true, errors.New("expecting an identifier")
+
+}
+
+func (p *parser) callonErrID3() (bool, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrID3()
+}
+
+func (c *current) onErrID1() (interface{}, error) {
+	return "NONE", nil
+}
+
+func (p *parser) callonErrID1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onErrID1()
+}
+
 var (
 	// errNoRule is returned when the grammar to parse has no rule.
 	errNoRule = errors.New("grammar has no rule")
@@ -50,7 +368,6 @@ func MaxExpressions(maxExprCnt uint64) Option {
 	}
 }
 
-// ==template== {{ if not .Optimize }}
 // Statistics adds a user provided Stats struct to the parser to allow
 // the user to process the results after the parsing has finished.
 // Also the key for the "no match" counter is set.
@@ -107,8 +424,6 @@ func Memoize(b bool) Option {
 		return Memoize(old)
 	}
 }
-
-// {{ end }} ==template==
 
 // Recover creates an Option to set the recover flag to b. When set to
 // true, this causes the parser to recover from panics and convert it
@@ -418,14 +733,12 @@ type parser struct {
 
 	depth   int
 	recover bool
-	// ==template== {{ if not .Optimize }}
-	debug bool
+	debug   bool
 
 	memoize bool
 	// memoization table for the packrat algorithm:
 	// map[offset in source] map[expression or rule] {value, match}
 	memo map[int]map[interface{}]resultTuple
-	// {{ end }} ==template==
 
 	// rules table, maps the rule identifier to the rule node
 	rules map[string]*rule
@@ -506,7 +819,6 @@ func (p *parser) popRecovery() {
 	p.recoveryStack = p.recoveryStack[:len(p.recoveryStack)-1]
 }
 
-// ==template== {{ if not .Optimize }}
 func (p *parser) print(prefix, s string) string {
 	if !p.debug {
 		return s
@@ -526,8 +838,6 @@ func (p *parser) out(s string) string {
 	p.depth--
 	return p.print(strings.Repeat(" ", p.depth)+"<", s)
 }
-
-// {{ end }} ==template==
 
 func (p *parser) addErr(err error) {
 	p.addErrAt(err, p.pt.position, []string{})
@@ -597,11 +907,9 @@ func (p *parser) read() {
 
 // restore parser position to the savepoint pt.
 func (p *parser) restore(pt savepoint) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("restore"))
 	}
-	// {{ end }} ==template==
 	if pt.offset == p.pt.offset {
 		return
 	}
@@ -613,7 +921,6 @@ func (p *parser) sliceFrom(start savepoint) []byte {
 	return p.data[start.position.offset:p.pt.position.offset]
 }
 
-// ==template== {{ if not .Optimize }}
 func (p *parser) getMemoized(node interface{}) (resultTuple, bool) {
 	if len(p.memo) == 0 {
 		return resultTuple{}, false
@@ -638,8 +945,6 @@ func (p *parser) setMemoized(pt savepoint, node interface{}, tuple resultTuple) 
 	m[node] = tuple
 }
 
-// {{ end }} ==template==
-
 func (p *parser) buildRulesTable(g *grammar) {
 	p.rules = make(map[string]*rule, len(g.rules))
 	for _, r := range g.rules {
@@ -661,11 +966,9 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		// and return the panic as an error.
 		defer func() {
 			if e := recover(); e != nil {
-				// ==template== {{ if not .Optimize }}
 				if p.debug {
 					defer p.out(p.in("panic handler"))
 				}
-				// {{ end }} ==template==
 				val = nil
 				switch e := e.(type) {
 				case error:
@@ -722,7 +1025,6 @@ func listJoin(list []string, sep string, lastSep string) string {
 }
 
 func (p *parser) parseRule(rule *rule) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseRule " + rule.name))
 	}
@@ -736,13 +1038,11 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	}
 
 	start := p.pt
-	// {{ end }} ==template==
 	p.rstack = append(p.rstack, rule)
 	p.pushV()
 	val, ok := p.parseExpr(rule.expr)
 	p.popV()
 	p.rstack = p.rstack[:len(p.rstack)-1]
-	// ==template== {{ if not .Optimize }}
 	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
@@ -750,12 +1050,10 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	if p.memoize {
 		p.setMemoized(start, rule, resultTuple{val, ok, p.pt})
 	}
-	// {{ end }} ==template==
 	return val, ok
 }
 
 func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	var pt savepoint
 
 	if p.memoize {
@@ -766,8 +1064,6 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 		}
 		pt = p.pt
 	}
-
-	// {{ end }} ==template==
 
 	p.ExprCnt++
 	if p.ExprCnt > p.maxExprCnt {
@@ -814,21 +1110,17 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	default:
 		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
-	// ==template== {{ if not .Optimize }}
 	if p.memoize {
 		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
 	}
-	// {{ end }} ==template==
 	return val, ok
 }
 
 func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseActionExpr"))
 	}
 
-	// {{ end }} ==template==
 	start := p.pt
 	val, ok := p.parseExpr(act.expr)
 	if ok {
@@ -840,21 +1132,17 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 		}
 		val = actVal
 	}
-	// ==template== {{ if not .Optimize }}
 	if ok && p.debug {
 		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
 	}
-	// {{ end }} ==template==
 	return val, ok
 }
 
 func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseAndCodeExpr"))
 	}
 
-	// {{ end }} ==template==
 	ok, err := and.run(p)
 	if err != nil {
 		p.addErr(err)
@@ -863,12 +1151,10 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseAndExpr"))
 	}
 
-	// {{ end }} ==template==
 	pt := p.pt
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
@@ -878,12 +1164,10 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseAnyMatcher"))
 	}
 
-	// {{ end }} ==template==
 	if p.pt.rn != utf8.RuneError {
 		start := p.pt
 		p.read()
@@ -895,26 +1179,12 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 }
 
 func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseCharClassMatcher"))
 	}
 
-	// {{ end }} ==template==
 	cur := p.pt.rn
 	start := p.pt
-
-	// ==template== {{ if .BasicLatinLookupTable }}
-	if cur < 128 {
-		if chr.basicLatinChars[cur] != chr.inverted {
-			p.read()
-			p.failAt(true, start.position, chr.val)
-			return p.sliceFrom(start), true
-		}
-		p.failAt(false, start.position, chr.val)
-		return nil, false
-	}
-	// {{ end }} ==template==
 
 	// can't match EOF
 	if cur == utf8.RuneError {
@@ -974,8 +1244,6 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	return nil, false
 }
 
-// ==template== {{ if not .Optimize }}
-
 func (p *parser) incChoiceAltCnt(ch *choiceExpr, altI int) {
 	choiceIdent := fmt.Sprintf("%s %d:%d", p.rstack[len(p.rstack)-1].name, ch.pos.line, ch.pos.col)
 	m := p.ChoiceAltCnt[choiceIdent]
@@ -991,15 +1259,11 @@ func (p *parser) incChoiceAltCnt(ch *choiceExpr, altI int) {
 	m[alt]++
 }
 
-// {{ end }} ==template==
-
 func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseChoiceExpr"))
 	}
 
-	// {{ end }} ==template==
 	for altI, alt := range ch.alternatives {
 		// dummy assignment to prevent compile error if optimized
 		_ = altI
@@ -1008,25 +1272,19 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		val, ok := p.parseExpr(alt)
 		p.popV()
 		if ok {
-			// ==template== {{ if not .Optimize }}
 			p.incChoiceAltCnt(ch, altI)
-			// {{ end }} ==template==
 			return val, ok
 		}
 	}
-	// ==template== {{ if not .Optimize }}
 	p.incChoiceAltCnt(ch, choiceNoMatch)
-	// {{ end }} ==template==
 	return nil, false
 }
 
 func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseLabeledExpr"))
 	}
 
-	// {{ end }} ==template==
 	p.pushV()
 	val, ok := p.parseExpr(lab.expr)
 	p.popV()
@@ -1038,12 +1296,10 @@ func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseLitMatcher"))
 	}
 
-	// {{ end }} ==template==
 	ignoreCase := ""
 	if lit.ignoreCase {
 		ignoreCase = "i"
@@ -1067,12 +1323,10 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 }
 
 func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseNotCodeExpr"))
 	}
 
-	// {{ end }} ==template==
 	ok, err := not.run(p)
 	if err != nil {
 		p.addErr(err)
@@ -1081,12 +1335,10 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseNotExpr"))
 	}
 
-	// {{ end }} ==template==
 	pt := p.pt
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
@@ -1098,12 +1350,10 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseOneOrMoreExpr"))
 	}
 
-	// {{ end }} ==template==
 	var vals []interface{}
 
 	for {
@@ -1122,12 +1372,9 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseRecoveryExpr(recover *recoveryExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseRecoveryExpr (" + strings.Join(recover.failureLabel, ",") + ")"))
 	}
-
-	// {{ end }} ==template==
 
 	p.pushRecovery(recover.failureLabel, recover.recoverExpr)
 	val, ok := p.parseExpr(recover.expr)
@@ -1137,12 +1384,10 @@ func (p *parser) parseRecoveryExpr(recover *recoveryExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseRuleRefExpr " + ref.name))
 	}
 
-	// {{ end }} ==template==
 	if ref.name == "" {
 		panic(fmt.Sprintf("%s: invalid rule: missing name", ref.pos))
 	}
@@ -1156,12 +1401,10 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseSeqExpr"))
 	}
 
-	// {{ end }} ==template==
 	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
@@ -1177,12 +1420,9 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseThrowExpr(expr *throwExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseThrowExpr"))
 	}
-
-	// {{ end }} ==template==
 
 	for i := len(p.recoveryStack) - 1; i >= 0; i-- {
 		if recoverExpr, ok := p.recoveryStack[i][expr.label]; ok {
@@ -1196,12 +1436,10 @@ func (p *parser) parseThrowExpr(expr *throwExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseZeroOrMoreExpr"))
 	}
 
-	// {{ end }} ==template==
 	var vals []interface{}
 
 	for {
@@ -1216,12 +1454,10 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseZeroOrOneExpr"))
 	}
 
-	// {{ end }} ==template==
 	p.pushV()
 	val, _ := p.parseExpr(expr.expr)
 	p.popV()

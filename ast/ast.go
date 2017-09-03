@@ -113,6 +113,40 @@ func (c *ChoiceExpr) String() string {
 	return buf.String()
 }
 
+// FailureLabel is an identifier, which can by thrown and recovered in a grammar
+type FailureLabel string
+
+// RecoveryExpr is an ordered sequence of expressions. The parser tries to
+// match any of the alternatives in sequence and stops at the first one
+// that matches.
+type RecoveryExpr struct {
+	p           Pos
+	Expr        Expression
+	RecoverExpr Expression
+	Labels      []FailureLabel
+}
+
+// NewRecoveryExpr creates a choice expression at the specified position.
+func NewRecoveryExpr(p Pos) *RecoveryExpr {
+	return &RecoveryExpr{p: p}
+}
+
+// Pos returns the starting position of the node.
+func (r *RecoveryExpr) Pos() Pos { return r.p }
+
+// String returns the textual representation of a node.
+func (r *RecoveryExpr) String() string {
+	var buf bytes.Buffer
+
+	buf.WriteString(fmt.Sprintf("%s: %T{Expr: %v, RecoverExpr: %v", r.p, r, r.Expr, r.RecoverExpr))
+	buf.WriteString(fmt.Sprintf(", Labels: [\n"))
+	for _, e := range r.Labels {
+		buf.WriteString(fmt.Sprintf("%s,\n", e))
+	}
+	buf.WriteString("]}")
+	return buf.String()
+}
+
 // ActionExpr is an expression that has an associated block of code to
 // execute when the expression matches.
 type ActionExpr struct {
@@ -133,6 +167,26 @@ func (a *ActionExpr) Pos() Pos { return a.p }
 // String returns the textual representation of a node.
 func (a *ActionExpr) String() string {
 	return fmt.Sprintf("%s: %T{Expr: %v, Code: %v}", a.p, a, a.Expr, a.Code)
+}
+
+// ThrowExpr is an expression that throws an FailureLabel to be catched by a
+// RecoveryChoiceExpr.
+type ThrowExpr struct {
+	p     Pos
+	Label string
+}
+
+// NewThrowExpr creates a new throw expression at the specified position.
+func NewThrowExpr(p Pos) *ThrowExpr {
+	return &ThrowExpr{p: p}
+}
+
+// Pos returns the starting position of the node.
+func (t *ThrowExpr) Pos() Pos { return t.p }
+
+// String returns the textual representation of a node.
+func (t *ThrowExpr) String() string {
+	return fmt.Sprintf("%s: %T{Label: %v}", t.p, t, t.Label)
 }
 
 // SeqExpr is an ordered sequence of expressions, all of which must match
