@@ -64,8 +64,8 @@ The following options can be specified:
 	more optimizations have applied). This process takes some time, depending on the
 	optimization potential of the grammar.
 
-	-optimize-parser : boolean, if set, the options Debug and Memoize are removed
-	from the resulting parser. This saves a few cpu cycles, when using the
+	-optimize-parser : boolean, if set, the options Debug, Memoize and Statistics are
+	removed	from the resulting parser. This saves a few cpu cycles, when using the
 	generated parser (default: false).
 
 	-x : boolean, if set, do not build the parser, just parse the input grammar
@@ -336,6 +336,7 @@ as a package with public functions to parse input text. The exported API is:
 	- MaxExpressions(uint64) Option
 	- Memoize(bool) Option
 	- Recover(bool) Option
+	- Statistics(*Stats) Option
 
 See the godoc page of the generated parser for the test/predicates grammar
 for an example documentation page of the exported API:
