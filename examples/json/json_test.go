@@ -122,7 +122,7 @@ func TestChoiceAltStatistics(t *testing.T) {
 
 	for _, test := range cases {
 		stats := Stats{}
-		_, err := Parse("TestStatistics", []byte(test.json), Statistics(&stats))
+		_, err := Parse("TestStatistics", []byte(test.json), Statistics(&stats, "no match"))
 		if err != nil {
 			t.Fatalf("Expected to parse %s without error, got: %v", test.json, err)
 		}

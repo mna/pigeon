@@ -1039,6 +1039,8 @@ type resultTuple struct {
 	end savepoint
 }
 
+const choiceNoMatch = -1
+
 // Stats stores some statistics, gathered during parsing
 type Stats struct {
 	// ExprCnt counts the number of expressions processed during parsing
@@ -1050,6 +1052,14 @@ type Stats struct {
 	// which alternative is used how may times.
 	// These numbers allow to optimize the order of the ordered choice expression
 	// to increase the performance of the parser
+	//
+	// The outer key of ChoiceAltCnt is composed of the name of the rule as well
+	// as the line and the column of the ordered choice.
+	// The inner key of ChoiceAltCnt is the number (one-based) of the matching alternative.
+	// For each alternative the number of matches are counted. If an ordered choice does not
+	// match, a special counter is incremented. The name of this counter is set with
+	// the parser option Statistics.
+	// For an alternative to be included in ChoiceAltCnt, it has to match at least once.
 	ChoiceAltCnt map[string]map[string]int
 }
 
@@ -1080,6 +1090,8 @@ type parser struct {
 	maxExprCnt uint64
 
 	*Stats
+
+	choiceNoMatch string
 }
 
 // push a variable set on the vstack.
