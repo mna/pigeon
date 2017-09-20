@@ -764,6 +764,10 @@ func TestParseChoiceExpr(t *testing.T) {
 	for _, tc := range cases {
 		p := newParser("", []byte(tc.in))
 
+		// add dummy rule to rule stack of parser
+		r := rule{name: "dummy"}
+		p.rstack = append(p.rstack, &r)
+
 		// advance to the first rune
 		p.read()
 

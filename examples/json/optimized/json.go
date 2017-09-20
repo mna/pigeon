@@ -1000,6 +1000,10 @@ func (p *parserError) Error() string {
 
 // newParser creates a parser with the specified input source and options.
 func newParser(filename string, b []byte, opts ...Option) *parser {
+	stats := Stats{
+		ChoiceAltCnt: make(map[string]map[string]int),
+	}
+
 	p := &parser{
 		filename: filename,
 		errs:     new(errList),
@@ -1011,6 +1015,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		},
 		maxFailPos:      position{col: 1, line: 1},
 		maxFailExpected: make([]string, 0, 20),
+		Stats:           &stats,
 	}
 	p.setOptions(opts)
 
@@ -1032,6 +1037,30 @@ type resultTuple struct {
 	v   interface{}
 	b   bool
 	end savepoint
+}
+
+const choiceNoMatch = -1
+
+// Stats stores some statistics, gathered during parsing
+type Stats struct {
+	// ExprCnt counts the number of expressions processed during parsing
+	// This value is compared to the maximum number of expressions allowed
+	// (set by the MaxExpressions option).
+	ExprCnt uint64
+
+	// ChoiceAltCnt is used to count for each ordered choice expression,
+	// which alternative is used how may times.
+	// These numbers allow to optimize the order of the ordered choice expression
+	// to increase the performance of the parser
+	//
+	// The outer key of ChoiceAltCnt is composed of the name of the rule as well
+	// as the line and the column of the ordered choice.
+	// The inner key of ChoiceAltCnt is the number (one-based) of the matching alternative.
+	// For each alternative the number of matches are counted. If an ordered choice does not
+	// match, a special counter is incremented. The name of this counter is set with
+	// the parser option Statistics.
+	// For an alternative to be included in ChoiceAltCnt, it has to match at least once.
+	ChoiceAltCnt map[string]map[string]int
 }
 
 type parser struct {
@@ -1057,12 +1086,12 @@ type parser struct {
 	maxFailExpected       []string
 	maxFailInvertExpected bool
 
-	// stats and used for stopping the parser
-	// after a maximum number of expressions are parsed
-	exprCnt uint64
-
 	// max number of expressions to be parsed
 	maxExprCnt uint64
+
+	*Stats
+
+	choiceNoMatch string
 }
 
 // push a variable set on the vstack.
@@ -1263,8 +1292,8 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 
 func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 
-	p.exprCnt++
-	if p.exprCnt > p.maxExprCnt {
+	p.ExprCnt++
+	if p.ExprCnt > p.maxExprCnt {
 		panic(errMaxExprCnt)
 	}
 
@@ -1423,7 +1452,10 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 }
 
 func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
-	for _, alt := range ch.alternatives {
+	for altI, alt := range ch.alternatives {
+		// dummy assignment to prevent compile error if optimized
+		_ = altI
+
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()

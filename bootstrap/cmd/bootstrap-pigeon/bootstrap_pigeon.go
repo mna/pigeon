@@ -2198,6 +2198,37 @@ func MaxExpressions(maxExprCnt uint64) Option {
 	}
 }
 
+// Statistics adds a user provided Stats struct to the parser to allow
+// the user to process the results after the parsing has finished.
+// Also the key for "no match" counter is set.
+//
+// Example usage:
+//
+//     input := "input"
+//     stats := Stats{}
+//     _, err := Parse("input-file", []byte(input), Statistics(&stats, "no match"))
+//     if err != nil {
+//         log.Panicln(err)
+//     }
+//     b, err := json.MarshalIndent(stats.ChoiceAltCnt, "", "  ")
+//     if err != nil {
+//         log.Panicln(err)
+//     }
+//     fmt.Println(string(b))
+//
+func Statistics(stats *Stats, choiceNoMatch string) Option {
+	return func(p *parser) Option {
+		oldStats := p.Stats
+		p.Stats = stats
+		oldChoiceNoMatch := p.choiceNoMatch
+		p.choiceNoMatch = choiceNoMatch
+		if p.Stats.ChoiceAltCnt == nil {
+			p.Stats.ChoiceAltCnt = make(map[string]map[string]int)
+		}
+		return Statistics(oldStats, oldChoiceNoMatch)
+	}
+}
+
 // Debug creates an Option to set the debug flag to b. When set to true,
 // debugging information is printed to stdout while parsing.
 //
@@ -2447,6 +2478,10 @@ func (p *parserError) Error() string {
 
 // newParser creates a parser with the specified input source and options.
 func newParser(filename string, b []byte, opts ...Option) *parser {
+	stats := Stats{
+		ChoiceAltCnt: make(map[string]map[string]int),
+	}
+
 	p := &parser{
 		filename: filename,
 		errs:     new(errList),
@@ -2458,6 +2493,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		},
 		maxFailPos:      position{col: 1, line: 1},
 		maxFailExpected: make([]string, 0, 20),
+		Stats:           &stats,
 	}
 	p.setOptions(opts)
 
@@ -2479,6 +2515,30 @@ type resultTuple struct {
 	v   interface{}
 	b   bool
 	end savepoint
+}
+
+const choiceNoMatch = -1
+
+// Stats stores some statistics, gathered during parsing
+type Stats struct {
+	// ExprCnt counts the number of expressions processed during parsing
+	// This value is compared to the maximum number of expressions allowed
+	// (set by the MaxExpressions option).
+	ExprCnt uint64
+
+	// ChoiceAltCnt is used to count for each ordered choice expression,
+	// which alternative is used how may times.
+	// These numbers allow to optimize the order of the ordered choice expression
+	// to increase the performance of the parser
+	//
+	// The outer key of ChoiceAltCnt is composed of the name of the rule as well
+	// as the line and the column of the ordered choice.
+	// The inner key of ChoiceAltCnt is the number (one-based) of the matching alternative.
+	// For each alternative the number of matches are counted. If an ordered choice does not
+	// match, a special counter is incremented. The name of this counter is set with
+	// the parser option Statistics.
+	// For an alternative to be included in ChoiceAltCnt, it has to match at least once.
+	ChoiceAltCnt map[string]map[string]int
 }
 
 type parser struct {
@@ -2510,12 +2570,12 @@ type parser struct {
 	maxFailExpected       []string
 	maxFailInvertExpected bool
 
-	// stats and used for stopping the parser
-	// after a maximum number of expressions are parsed
-	exprCnt uint64
-
 	// max number of expressions to be parsed
 	maxExprCnt uint64
+
+	*Stats
+
+	choiceNoMatch string
 }
 
 // push a variable set on the vstack.
@@ -2796,8 +2856,8 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 		pt = p.pt
 	}
 
-	p.exprCnt++
-	if p.exprCnt > p.maxExprCnt {
+	p.ExprCnt++
+	if p.ExprCnt > p.maxExprCnt {
 		panic(errMaxExprCnt)
 	}
 
@@ -2971,19 +3031,39 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	return nil, false
 }
 
+func (p *parser) incChoiceAltCnt(ch *choiceExpr, altI int) {
+	choiceIdent := fmt.Sprintf("%s %d:%d", p.rstack[len(p.rstack)-1].name, ch.pos.line, ch.pos.col)
+	m := p.ChoiceAltCnt[choiceIdent]
+	if m == nil {
+		m = make(map[string]int)
+		p.ChoiceAltCnt[choiceIdent] = m
+	}
+	// We increment altI by 1, so the keys do not start at 0
+	alt := strconv.Itoa(altI + 1)
+	if altI == choiceNoMatch {
+		alt = p.choiceNoMatch
+	}
+	m[alt]++
+}
+
 func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 	if p.debug {
 		defer p.out(p.in("parseChoiceExpr"))
 	}
 
-	for _, alt := range ch.alternatives {
+	for altI, alt := range ch.alternatives {
+		// dummy assignment to prevent compile error if optimized
+		_ = altI
+
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()
 		if ok {
+			p.incChoiceAltCnt(ch, altI)
 			return val, ok
 		}
 	}
+	p.incChoiceAltCnt(ch, choiceNoMatch)
 	return nil, false
 }
 
