@@ -15,181 +15,43 @@ import (
 	"unicode/utf8"
 )
 
-func main() {
-}
-
 var g = &grammar{
 	rules: []*rule{
 		{
-			name: "File",
-			pos:  position{line: 10, col: 1, offset: 102},
+			name: "Program",
+			pos:  position{line: 5, col: 1, offset: 22},
 			expr: &seqExpr{
-				pos: position{line: 10, col: 8, offset: 111},
+				pos: position{line: 5, col: 12, offset: 33},
 				exprs: []interface{}{
-					&choiceExpr{
-						pos: position{line: 10, col: 10, offset: 113},
-						alternatives: []interface{}{
-							&seqExpr{
-								pos: position{line: 10, col: 10, offset: 113},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 10, offset: 113},
-										name: "L",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 12, offset: 115},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 12, offset: 115},
-											name: "S",
-										},
-									},
-								},
-							},
-							&seqExpr{
-								pos: position{line: 10, col: 17, offset: 120},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 17, offset: 120},
-										name: "L",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 19, offset: 122},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 19, offset: 122},
-											name: "N",
-										},
-									},
-								},
-							},
-							&seqExpr{
-								pos: position{line: 10, col: 24, offset: 127},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 24, offset: 127},
-										name: "N",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 26, offset: 129},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 26, offset: 129},
-											name: "L",
-										},
-									},
-								},
-							},
-							&seqExpr{
-								pos: position{line: 10, col: 31, offset: 134},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 31, offset: 134},
-										name: "N",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 33, offset: 136},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 33, offset: 136},
-											name: "S",
-										},
-									},
-								},
-							},
-							&seqExpr{
-								pos: position{line: 10, col: 38, offset: 141},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 38, offset: 141},
-										name: "S",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 40, offset: 143},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 40, offset: 143},
-											name: "L",
-										},
-									},
-								},
-							},
-							&seqExpr{
-								pos: position{line: 10, col: 45, offset: 148},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 45, offset: 148},
-										name: "S",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 47, offset: 150},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 47, offset: 150},
-											name: "N",
-										},
-									},
-								},
-							},
+					&litMatcher{
+						pos:        position{line: 5, col: 12, offset: 33},
+						val:        "\n",
+						ignoreCase: false,
+					},
+					&oneOrMoreExpr{
+						pos: position{line: 5, col: 17, offset: 38},
+						expr: &charClassMatcher{
+							pos:        position{line: 5, col: 17, offset: 38},
+							val:        "[^\\n]",
+							chars:      []rune{'\n'},
+							ignoreCase: false,
+							inverted:   true,
 						},
 					},
-					&zeroOrMoreExpr{
-						pos: position{line: 10, col: 52, offset: 155},
-						expr: &ruleRefExpr{
-							pos:  position{line: 10, col: 52, offset: 155},
-							name: "File",
+					&litMatcher{
+						pos:        position{line: 5, col: 24, offset: 45},
+						val:        "\n",
+						ignoreCase: false,
+					},
+					&anyMatcher{
+						line: 5, col: 29, offset: 50,
+					},
+					&notExpr{
+						pos: position{line: 5, col: 31, offset: 52},
+						expr: &anyMatcher{
+							line: 5, col: 32, offset: 53,
 						},
 					},
-					&ruleRefExpr{
-						pos:  position{line: 10, col: 58, offset: 161},
-						name: "EOF",
-					},
-				},
-			},
-		},
-		{
-			name: "L",
-			pos:  position{line: 11, col: 1, offset: 165},
-			expr: &oneOrMoreExpr{
-				pos: position{line: 11, col: 5, offset: 171},
-				expr: &charClassMatcher{
-					pos:        position{line: 11, col: 5, offset: 171},
-					val:        "[a-z]i",
-					ranges:     []rune{'a', 'z'},
-					ignoreCase: true,
-					inverted:   false,
-				},
-			},
-		},
-		{
-			name: "N",
-			pos:  position{line: 12, col: 1, offset: 179},
-			expr: &oneOrMoreExpr{
-				pos: position{line: 12, col: 5, offset: 185},
-				expr: &charClassMatcher{
-					pos:        position{line: 12, col: 5, offset: 185},
-					val:        "[0-9]",
-					ranges:     []rune{'0', '9'},
-					ignoreCase: false,
-					inverted:   false,
-				},
-			},
-		},
-		{
-			name: "S",
-			pos:  position{line: 13, col: 1, offset: 192},
-			expr: &oneOrMoreExpr{
-				pos: position{line: 13, col: 5, offset: 198},
-				expr: &charClassMatcher{
-					pos:        position{line: 13, col: 5, offset: 198},
-					val:        "[/+=]",
-					chars:      []rune{'/', '+', '='},
-					ignoreCase: false,
-					inverted:   false,
-				},
-			},
-		},
-		{
-			name: "EOF",
-			pos:  position{line: 14, col: 1, offset: 205},
-			expr: &notExpr{
-				pos: position{line: 14, col: 7, offset: 213},
-				expr: &anyMatcher{
-					line: 14, col: 8, offset: 214,
 				},
 			},
 		},
@@ -756,10 +618,8 @@ func (p *parser) read() {
 		p.pt.col = 0
 	}
 
-	if rn == utf8.RuneError {
-		if n == 1 {
-			p.addErr(errInvalidEncoding)
-		}
+	if rn == utf8.RuneError && n == 1 { // see utf8.DecodeRune
+		p.addErr(errInvalidEncoding)
 	}
 }
 
@@ -1026,7 +886,7 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 		defer p.out(p.in("parseAnyMatcher"))
 	}
 
-	if p.pt.rn != utf8.RuneError {
+	if p.pt.rn != utf8.RuneError || p.pt.w > 1 { // see utf8.DecodeRune
 		start := p.pt
 		p.read()
 		p.failAt(true, start.position, ".")
@@ -1045,7 +905,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	start := p.pt
 
 	// can't match EOF
-	if cur == utf8.RuneError {
+	if cur == utf8.RuneError && p.pt.w == 0 { // see utf8.DecodeRune
 		p.failAt(false, start.position, chr.val)
 		return nil, false
 	}

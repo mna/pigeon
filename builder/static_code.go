@@ -588,10 +588,8 @@ func (p *parser) read() {
 		p.pt.col = 0
 	}
 
-	if rn == utf8.RuneError {
-		if n == 1 {
-			p.addErr(errInvalidEncoding)
-		}
+	if rn == utf8.RuneError && n == 1 { // see utf8.DecodeRune
+		p.addErr(errInvalidEncoding)
 	}
 }
 
@@ -884,7 +882,7 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 	}
 
 	// {{ end }} ==template==
-	if p.pt.rn != utf8.RuneError {
+	if p.pt.rn != utf8.RuneError || p.pt.w > 1 { // see utf8.DecodeRune
 		start := p.pt
 		p.read()
 		p.failAt(true, start.position, ".")
@@ -917,7 +915,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool
 	// {{ end }} ==template==
 
 	// can't match EOF
-	if cur == utf8.RuneError {
+	if cur == utf8.RuneError && p.pt.w == 0 { // see utf8.DecodeRune
 		p.failAt(false, start.position, chr.val)
 		return nil, false
 	}
