@@ -35,6 +35,7 @@ func main() {
 		optimizeParserFlag     = fs.Bool("optimize-parser", false, "generate optimized parser without Debug and Memoize options")
 		recvrNmFlag            = fs.String("receiver-name", "c", "receiver name for the generated methods")
 		noBuildFlag            = fs.Bool("x", false, "do not build, only parse")
+		// TODO(mna): support --alternate-entrypoints flag, comma-separated list of rule names
 	)
 
 	fs.Usage = usage
@@ -80,7 +81,9 @@ func main() {
 	}
 
 	if !*noBuildFlag {
+		// TODO(mna): validate that all alternate entrypoints are valid rule names
 		if *optimizeGrammar {
+			// TODO(mna): pass the alternate entrypoints as rules to keep in the grammar
 			ast.Optimize(g.(*ast.Grammar))
 		}
 
