@@ -91,10 +91,10 @@ $(TEST_DIR)/issue_1/issue_1.go: $(TEST_DIR)/issue_1/issue_1.peg $(BINDIR)/pigeon
 $(TEST_DIR)/linear/linear.go: $(TEST_DIR)/linear/linear.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
-$(TEST_DIR)/issue_12/issue_12.go: $(TEST_DIR)/issue_12/issue_12.peg $(BINDIR)/pigeon
+$(TEST_DIR)/issue_18/issue_18.go: $(TEST_DIR)/issue_18/issue_18.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
-$(TEST_DIR)/issue_18/issue_18.go: $(TEST_DIR)/issue_18/issue_18.peg $(BINDIR)/pigeon
+$(TEST_DIR)/runeerror/runeerror.go: $(TEST_DIR)/runeerror/runeerror.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
 $(TEST_DIR)/errorpos/errorpos.go: $(TEST_DIR)/errorpos/errorpos.peg $(BINDIR)/pigeon
