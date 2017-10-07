@@ -27,9 +27,9 @@ ID ← Sp [a-z]+ {
 Comma ← Sp ',' / %{errComma}
 Sp ← [ \t\r\n]*
 
-ErrComma ← &{
-        return true, errors.New("expecting ','")
+ErrComma ← #{
+        return errors.New("expecting ','")
     } ( !([a-z]+) .)*
-ErrID ← &{
-        return true, errors.New("expecting an identifier")
+ErrID ← #{
+        return errors.New("expecting an identifier")
     } ( !(',') .)* { return "NONE", nil }

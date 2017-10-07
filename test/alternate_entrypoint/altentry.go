@@ -400,9 +400,13 @@ type current struct {
 	pos  position // start position of the match
 	text []byte   // raw text of the match
 
+	// the state allows the parser to store arbitrary values and rollback them if needed
+	state storeDict
 	// the globalStore allows the parser to store arbitrary values
-	globalStore map[string]interface{}
+	globalStore storeDict
 }
+
+type storeDict map[string]interface{}
 
 // the AST types...
 
@@ -466,6 +470,11 @@ type oneOrMoreExpr expr
 type ruleRefExpr struct {
 	pos  position
 	name string
+}
+
+type stateCodeExpr struct {
+	pos position
+	run func(*parser) error
 }
 
 type andCodeExpr struct {
@@ -570,13 +579,15 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		pt:       savepoint{position: position{line: 1}},
 		recover:  true,
 		cur: current{
-			globalStore: make(map[string]interface{}),
+			state:       make(storeDict),
+			globalStore: make(storeDict),
 		},
 		maxFailPos:      position{col: 1, line: 1},
 		maxFailExpected: make([]string, 0, 20),
 		Stats:           &stats,
 		// start rule is rule [0] unless an alternate entrypoint is specified
 		entrypoint: g.rules[0].name,
+		emptyState: make(storeDict),
 	}
 	p.setOptions(opts)
 
@@ -663,6 +674,9 @@ type parser struct {
 	choiceNoMatch string
 	// recovery expression stack, keeps track of the currently available recovery expression, these are traversed in reverse
 	recoveryStack []map[string]interface{}
+
+	// emptyState contains an empty storeDict, which is used to optimize cloneState if global "state" store is not used.
+	emptyState storeDict
 }
 
 // push a variable set on the vstack.
@@ -815,6 +829,31 @@ func (p *parser) restore(pt savepoint) {
 		return
 	}
 	p.pt = pt
+}
+
+// clone and return parser current state.
+func (p *parser) cloneState() storeDict {
+	if p.debug {
+		defer p.out(p.in("cloneState"))
+	}
+	if len(p.cur.state) == 0 {
+		return p.emptyState
+	}
+
+	state := make(storeDict, len(p.cur.state))
+	for k, v := range p.cur.state {
+		state[k] = v
+	}
+	return state
+}
+
+// restore parser current state to the state storeDict.
+// every restoreState should applied only one time for every cloned state
+func (p *parser) restoreState(state storeDict) {
+	if p.debug {
+		defer p.out(p.in("restoreState"))
+	}
+	p.cur.state = state
 }
 
 // get the slice of bytes from the savepoint start to the current position.
@@ -1007,6 +1046,8 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 		val, ok = p.parseRuleRefExpr(expr)
 	case *seqExpr:
 		val, ok = p.parseSeqExpr(expr)
+	case *stateCodeExpr:
+		val, ok = p.parseStateCodeExpr(expr)
 	case *throwExpr:
 		val, ok = p.parseThrowExpr(expr)
 	case *zeroOrMoreExpr:
@@ -1032,10 +1073,13 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 	if ok {
 		p.cur.pos = start.position
 		p.cur.text = p.sliceFrom(start)
+		state := p.cloneState()
 		actVal, err := act.run(p)
 		if err != nil {
 			p.addErrAt(err, start.position, []string{})
 		}
+		p.restoreState(state)
+
 		val = actVal
 	}
 	if ok && p.debug {
@@ -1049,10 +1093,14 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
 		defer p.out(p.in("parseAndCodeExpr"))
 	}
 
+	state := p.cloneState()
+
 	ok, err := and.run(p)
 	if err != nil {
 		p.addErr(err)
 	}
+	p.restoreState(state)
+
 	return nil, ok
 }
 
@@ -1174,6 +1222,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		// dummy assignment to prevent compile error if optimized
 		_ = altI
 
+		state := p.cloneState()
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()
@@ -1181,6 +1230,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 			p.incChoiceAltCnt(ch, altI)
 			return val, ok
 		}
+		p.restoreState(state)
 	}
 	p.incChoiceAltCnt(ch, choiceNoMatch)
 	return nil, false
@@ -1233,10 +1283,14 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 		defer p.out(p.in("parseNotCodeExpr"))
 	}
 
+	state := p.cloneState()
+
 	ok, err := not.run(p)
 	if err != nil {
 		p.addErr(err)
 	}
+	p.restoreState(state)
+
 	return nil, !ok
 }
 
@@ -1323,6 +1377,18 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 		vals = append(vals, val)
 	}
 	return vals, true
+}
+
+func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (interface{}, bool) {
+	if p.debug {
+		defer p.out(p.in("parseStateCodeExpr"))
+	}
+
+	err := state.run(p)
+	if err != nil {
+		p.addErr(err)
+	}
+	return nil, true
 }
 
 func (p *parser) parseThrowExpr(expr *throwExpr) (interface{}, bool) {

@@ -3,16 +3,16 @@ package main
 import "testing"
 
 var cases = map[string]int{
-	"abce":           1,
-	"abcd":           3,
-	"abcd abce abcd": 7,
-	"a":              0,
-	"abcf":           5,
+	"abce":           11,
+	"abcd":           13,
+	"abcd abce abcd": 17,
+	"a":              10,
+	"abcf":           15,
 }
 
 func TestState(t *testing.T) {
 	for tc, exp := range cases {
-		got, err := Parse("", []byte(tc), Memoize(false))
+		got, err := Parse("", []byte(tc), Memoize(false), InitState("countCs", 10))
 
 		if err != nil {
 			t.Errorf(err.Error())

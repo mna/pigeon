@@ -10,7 +10,7 @@ func toIfaceSlice(v interface{}) []interface{} {
 
 }
 
-Input       ← &{ c.state["Indentation"] = 0; return true,nil } s:Statements  r:ReturnOp EOF 
+Input       ← #{ c.state["Indentation"] = 0; return nil } s:Statements  r:ReturnOp EOF 
                                             { return newProgramNode(s.(StatementsNode),r.(ReturnNode)) }
 Statements  ← s:Line+                       { return newStatementsNode(s)}
 Line        ← INDENTATION s:Statement       { return s,nil }
@@ -45,7 +45,7 @@ EOF ← !.
 
 INDENTATION ← spaces:" "* &{ return len(toIfaceSlice(spaces)) == c.state["Indentation"].(int), nil }
 
-INDENT ← &{ c.state["Indentation"] = c.state["Indentation"].(int) + 4; return true,nil }
+INDENT ← #{ c.state["Indentation"] = c.state["Indentation"].(int) + 4; return nil }
 
-DEDENT ← &{ c.state["Indentation"] = c.state["Indentation"].(int) - 4; return true,nil }
+DEDENT ← #{ c.state["Indentation"] = c.state["Indentation"].(int) - 4; return nil }
 

@@ -26,6 +26,10 @@ var (
 %s
 }
 `
+	onStateFuncTemplate = `func (%s *current) %s(%s) (error) {
+%s
+}
+`
 	callFuncTemplate = `func (p *parser) call%s() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
@@ -36,6 +40,12 @@ var (
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.%[1]s(%s)
+}
+`
+	callStateFuncTemplate = `func (p *parser) call%s() error {
+    stack := p.vstack[len(p.vstack)-1]
+    _ = stack
+    return p.cur.%[1]s(%s)
 }
 `
 )
@@ -193,6 +203,8 @@ func (b *builder) writeExpr(expr ast.Expression) {
 		b.writeRuleRefExpr(expr)
 	case *ast.SeqExpr:
 		b.writeSeqExpr(expr)
+	case *ast.StateCodeExpr:
+		b.writeStateCodeExpr(expr)
 	case *ast.ThrowExpr:
 		b.writeThrowExpr(expr)
 	case *ast.ZeroOrMoreExpr:
@@ -486,6 +498,19 @@ func (b *builder) writeSeqExpr(seq *ast.SeqExpr) {
 	b.writelnf("},")
 }
 
+func (b *builder) writeStateCodeExpr(not *ast.StateCodeExpr) {
+	if not == nil {
+		b.writelnf("nil,")
+		return
+	}
+	b.writelnf("&stateCodeExpr{")
+	pos := not.Pos()
+	not.FuncIx = b.exprIndex
+	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
+	b.writelnf("\trun: (*parser).call%s,", b.funcName(not.FuncIx))
+	b.writelnf("},")
+}
+
 func (b *builder) writeThrowExpr(throw *ast.ThrowExpr) {
 	if throw == nil {
 		b.writelnf("nil,")
@@ -575,33 +600,43 @@ func (b *builder) writeExprCode(expr ast.Expression) {
 		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
 		b.popArgsSet()
+
 	case *ast.ChoiceExpr:
 		for _, alt := range expr.Alternatives {
 			b.pushArgsSet()
 			b.writeExprCode(alt)
 			b.popArgsSet()
 		}
+
 	case *ast.NotExpr:
 		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
 		b.popArgsSet()
+
 	case *ast.OneOrMoreExpr:
 		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
 		b.popArgsSet()
+
 	case *ast.RecoveryExpr:
 		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
 		b.writeExprCode(expr.RecoverExpr)
 		b.popArgsSet()
+
 	case *ast.SeqExpr:
 		for _, sub := range expr.Exprs {
 			b.writeExprCode(sub)
 		}
+
+	case *ast.StateCodeExpr:
+		b.writeStateCodeExprCode(expr)
+
 	case *ast.ZeroOrMoreExpr:
 		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
 		b.popArgsSet()
+
 	case *ast.ZeroOrOneExpr:
 		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
@@ -628,6 +663,13 @@ func (b *builder) writeNotCodeExprCode(not *ast.NotCodeExpr) {
 		return
 	}
 	b.writeFunc(not.FuncIx, not.Code, callPredFuncTemplate, onPredFuncTemplate)
+}
+
+func (b *builder) writeStateCodeExprCode(state *ast.StateCodeExpr) {
+	if state == nil {
+		return
+	}
+	b.writeFunc(state.FuncIx, state.Code, callStateFuncTemplate, onStateFuncTemplate)
 }
 
 func (b *builder) writeFunc(funcIx int, code *ast.CodeBlock, callTpl, funcTpl string) {

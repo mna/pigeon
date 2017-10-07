@@ -191,7 +191,8 @@ the generated code is written to this file instead.
 	-optimize-grammar
 		performes several performance optimizations on the grammar (EXPERIMENTAL FEATURE)
 	-optimize-parser
-		generate optimized parser without Debug and Memoize options
+		generate optimized parser without Debug and Memoize options and
+		with some other optimizations applied.
 	-receiver-name NAME
 		use NAME as for the receiver name of the generated methods
 		for the grammar's code blocks. Defaults to "c".

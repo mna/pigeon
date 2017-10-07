@@ -65,8 +65,9 @@ The following options can be specified:
 	optimization potential of the grammar.
 
 	-optimize-parser : boolean, if set, the options Debug, Memoize and Statistics are
-	removed	from the resulting parser. This saves a few cpu cycles, when using the
-	generated parser (default: false).
+	removed	from the resulting parser as well as the restoration of the global "state"
+	store after action and predicate code blocks. This saves a few cpu cycles, when
+	using the generated parser (default: false).
 
 	-x : boolean, if set, do not build the parser, just parse the input grammar
 	(default: false).
@@ -308,6 +309,20 @@ parser will return. E.g.:
 		return true, nil
 	}
 
+State change code blocks are code blocks starting with "#". In distinction to
+the action and predicate code blocks, the state change code blocks are allowed to
+change the state of the parser, especially the global "state" store (see below).
+State change code blocks are also turned into a method on the "*current" type in the
+generated source code.
+The method receives any labeled expression's value as argument (as interface{})
+and must return a value of type error.
+If a non-nil error is returned, it is added to the list of errors that the
+parser will return. E.g.:
+	Rule = [a] #{
+		c.state["a"] = 1
+		return nil
+	}
+
 The current type is a struct that provides four useful fields that can be
 accessed in action and predicate code blocks: "pos", "text", "state" and "globalStore".
 
@@ -321,10 +336,11 @@ in a predicate code block.
 
 The "state" field is a global store with backtrack support of type "map[string]interface{}",
 which allows to store arbitrary values, which are available in action and
-predicate code blocks for read as well as write access.
-It is important to notice, that the global store is dependent from
-the backtrack mechanism of PEG and and it is set back to its old state
-during backtrack.
+predicate code blocks for read access.
+To change the "state", state change code blocks ("#{}") are used.
+It is important to notice, that the global "state" store is controlled by
+the backtrack mechanism of PEG and it is set back to its old state
+during backtracking.
 
 The "globalStore" field is a global store of type "map[string]interface{}",
 which allows to store arbitrary values, which are available in action and
