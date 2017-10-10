@@ -115,6 +115,9 @@ $(TEST_DIR)/labeled_failures/labeled_failures.go: $(TEST_DIR)/labeled_failures/l
 $(TEST_DIR)/thrownrecover/thrownrecover.go: $(TEST_DIR)/thrownrecover/thrownrecover.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
+$(TEST_DIR)/alternate_entrypoint/altentry.go: $(TEST_DIR)/alternate_entrypoint/altentry.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -optimize-grammar -alternate-entrypoints Entry2 $< > $@
+
 lint:
 	golint ./...
 	go vet ./...

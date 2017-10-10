@@ -1,0 +1,18 @@
+{
+  package alternate_entrypoint
+}
+
+Entry1 <- A C EOF {
+  return c.text, nil
+}
+
+Entry2 <- B C EOF {
+  return c.text, nil
+}
+
+A <- 'a'+
+B <- 'b'+
+C <- 'c'+
+
+EOF ← !.
+
