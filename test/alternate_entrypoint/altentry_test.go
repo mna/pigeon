@@ -19,6 +19,18 @@ func TestAlternateEntrypoint(t *testing.T) {
 	}
 }
 
+func TestInvalidAlternateEntrypoint(t *testing.T) {
+	src := "bbbcc"
+
+	_, err := Parse("", []byte(src), Entrypoint("Z"))
+	if err == nil {
+		t.Fatal("want error, got none")
+	}
+	if !strings.Contains(err.Error(), errInvalidEntrypoint.Error()) {
+		t.Fatalf("want %s, got %s", errInvalidEntrypoint, err)
+	}
+}
+
 func TestAlternateInputWithDefaultEntrypoint(t *testing.T) {
 	src := "bbbcc"
 

@@ -3094,6 +3094,10 @@ var (
 	// errNoRule is returned when the grammar to parse has no rule.
 	errNoRule = errors.New("grammar has no rule")
 
+	// errInvalidEntrypoint is returned when the specified entrypoint rule
+	// does not exit.
+	errInvalidEntrypoint = errors.New("invalid entrypoint")
+
 	// errInvalidEncoding is returned when the source is not properly
 	// utf8-encoded.
 	errInvalidEncoding = errors.New("invalid encoding")
@@ -3751,6 +3755,10 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 	startRule := g.rules[0]
 	if p.entrypoint != "" {
 		startRule = p.rules[p.entrypoint]
+		if startRule == nil {
+			p.addErr(errInvalidEntrypoint)
+			return nil, p.errs.err()
+		}
 	}
 
 	p.read() // advance to first rune
