@@ -27,25 +27,29 @@ var g = &grammar{
 					pos: position{line: 5, col: 11, offset: 46},
 					exprs: []interface{}{
 						&oneOrMoreExpr{
-							pos: position{line: 13, col: 6, offset: 129},
+							pos: position{line: 17, col: 6, offset: 171},
 							expr: &litMatcher{
-								pos:        position{line: 13, col: 6, offset: 129},
+								pos:        position{line: 17, col: 6, offset: 171},
 								val:        "a",
 								ignoreCase: false,
 							},
 						},
-						&oneOrMoreExpr{
-							pos: position{line: 15, col: 6, offset: 149},
-							expr: &litMatcher{
-								pos:        position{line: 15, col: 6, offset: 149},
-								val:        "c",
-								ignoreCase: false,
+						&actionExpr{
+							pos: position{line: 19, col: 6, offset: 191},
+							run: (*parser).callonEntry15,
+							expr: &oneOrMoreExpr{
+								pos: position{line: 19, col: 6, offset: 191},
+								expr: &litMatcher{
+									pos:        position{line: 19, col: 6, offset: 191},
+									val:        "c",
+									ignoreCase: false,
+								},
 							},
 						},
 						&notExpr{
-							pos: position{line: 17, col: 7, offset: 163},
+							pos: position{line: 23, col: 7, offset: 230},
 							expr: &anyMatcher{
-								line: 17, col: 8, offset: 164,
+								line: 23, col: 8, offset: 231,
 							},
 						},
 					},
@@ -62,32 +66,93 @@ var g = &grammar{
 					pos: position{line: 9, col: 11, offset: 90},
 					exprs: []interface{}{
 						&oneOrMoreExpr{
-							pos: position{line: 14, col: 6, offset: 139},
+							pos: position{line: 18, col: 6, offset: 181},
 							expr: &litMatcher{
-								pos:        position{line: 14, col: 6, offset: 139},
+								pos:        position{line: 18, col: 6, offset: 181},
 								val:        "b",
 								ignoreCase: false,
 							},
 						},
-						&oneOrMoreExpr{
-							pos: position{line: 15, col: 6, offset: 149},
-							expr: &litMatcher{
-								pos:        position{line: 15, col: 6, offset: 149},
-								val:        "c",
-								ignoreCase: false,
+						&actionExpr{
+							pos: position{line: 19, col: 6, offset: 191},
+							run: (*parser).callonEntry25,
+							expr: &oneOrMoreExpr{
+								pos: position{line: 19, col: 6, offset: 191},
+								expr: &litMatcher{
+									pos:        position{line: 19, col: 6, offset: 191},
+									val:        "c",
+									ignoreCase: false,
+								},
 							},
 						},
 						&notExpr{
-							pos: position{line: 17, col: 7, offset: 163},
+							pos: position{line: 23, col: 7, offset: 230},
 							expr: &anyMatcher{
-								line: 17, col: 8, offset: 164,
+								line: 23, col: 8, offset: 231,
 							},
 						},
 					},
 				},
 			},
 		},
+		{
+			name: "Entry3",
+			pos:  position{line: 13, col: 1, offset: 124},
+			expr: &actionExpr{
+				pos: position{line: 13, col: 11, offset: 134},
+				run: (*parser).callonEntry31,
+				expr: &seqExpr{
+					pos: position{line: 13, col: 11, offset: 134},
+					exprs: []interface{}{
+						&actionExpr{
+							pos: position{line: 19, col: 6, offset: 191},
+							run: (*parser).callonEntry33,
+							expr: &oneOrMoreExpr{
+								pos: position{line: 19, col: 6, offset: 191},
+								expr: &litMatcher{
+									pos:        position{line: 19, col: 6, offset: 191},
+									val:        "c",
+									ignoreCase: false,
+								},
+							},
+						},
+						&notExpr{
+							pos: position{line: 23, col: 7, offset: 230},
+							expr: &anyMatcher{
+								line: 23, col: 8, offset: 231,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "C",
+			pos:  position{line: 19, col: 1, offset: 186},
+			expr: &actionExpr{
+				pos: position{line: 19, col: 6, offset: 191},
+				run: (*parser).callonC1,
+				expr: &oneOrMoreExpr{
+					pos: position{line: 19, col: 6, offset: 191},
+					expr: &litMatcher{
+						pos:        position{line: 19, col: 6, offset: 191},
+						val:        "c",
+						ignoreCase: false,
+					},
+				},
+			},
+		},
 	},
+}
+
+func (c *current) onEntry15() (interface{}, error) {
+	return c.text, nil
+}
+
+func (p *parser) callonEntry15() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onEntry15()
 }
 
 func (c *current) onEntry11() (interface{}, error) {
@@ -100,6 +165,16 @@ func (p *parser) callonEntry11() (interface{}, error) {
 	return p.cur.onEntry11()
 }
 
+func (c *current) onEntry25() (interface{}, error) {
+	return c.text, nil
+}
+
+func (p *parser) callonEntry25() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onEntry25()
+}
+
 func (c *current) onEntry21() (interface{}, error) {
 	return c.text, nil
 }
@@ -108,6 +183,36 @@ func (p *parser) callonEntry21() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onEntry21()
+}
+
+func (c *current) onEntry33() (interface{}, error) {
+	return c.text, nil
+}
+
+func (p *parser) callonEntry33() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onEntry33()
+}
+
+func (c *current) onEntry31() (interface{}, error) {
+	return c.text, nil
+}
+
+func (p *parser) callonEntry31() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onEntry31()
+}
+
+func (c *current) onC1() (interface{}, error) {
+	return c.text, nil
+}
+
+func (p *parser) callonC1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onC1()
 }
 
 var (

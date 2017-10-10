@@ -116,7 +116,7 @@ $(TEST_DIR)/thrownrecover/thrownrecover.go: $(TEST_DIR)/thrownrecover/thrownreco
 	$(BINDIR)/pigeon $< > $@
 
 $(TEST_DIR)/alternate_entrypoint/altentry.go: $(TEST_DIR)/alternate_entrypoint/altentry.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon -optimize-grammar -alternate-entrypoints Entry2 $< > $@
+	$(BINDIR)/pigeon -optimize-grammar -alternate-entrypoints Entry2,Entry3,C $< > $@
 
 lint:
 	golint ./...

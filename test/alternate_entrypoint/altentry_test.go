@@ -5,52 +5,52 @@ import (
 	"testing"
 )
 
-func TestAlternateEntrypoint(t *testing.T) {
-	src := "bbbcc"
-
-	v, err := Parse("", []byte(src), Entrypoint("Entry2"))
-	if err != nil {
-		t.Fatal(err)
+func TestValidEntrypoints(t *testing.T) {
+	cases := []struct {
+		in         string
+		entrypoint string
+	}{
+		{"aacc", ""},
+		{"bbbcc", "Entry2"},
+		{"cc", "Entry3"},
+		{"cc", "C"},
 	}
 
-	got := string(v.([]byte))
-	if got != src {
-		t.Fatalf("want %s, got %s", src, got)
-	}
-}
+	for _, c := range cases {
+		v, err := Parse("", []byte(c.in), Entrypoint(c.entrypoint))
+		if err != nil {
+			t.Errorf("%s:%s: got error %s", c.entrypoint, c.in, err)
+		}
 
-func TestInvalidAlternateEntrypoint(t *testing.T) {
-	src := "bbbcc"
-
-	_, err := Parse("", []byte(src), Entrypoint("Z"))
-	if err == nil {
-		t.Fatal("want error, got none")
-	}
-	if !strings.Contains(err.Error(), errInvalidEntrypoint.Error()) {
-		t.Fatalf("want %s, got %s", errInvalidEntrypoint, err)
+		got := string(v.([]byte))
+		if got != c.in {
+			t.Errorf("%s:%s: got %s", c.entrypoint, c.in, got)
+		}
 	}
 }
 
-func TestAlternateInputWithDefaultEntrypoint(t *testing.T) {
-	src := "bbbcc"
-
-	_, err := Parse("", []byte(src))
-	if err == nil {
-		t.Fatal("want error, got none")
+func TestInvalidEntrypoints(t *testing.T) {
+	cases := []struct {
+		in         string
+		entrypoint string
+		errMsg     string
+	}{
+		{"bbbcc", "Z", errInvalidEntrypoint.Error()},
+		{"bbbcc", "", "no match found"},
+		{"bbbcc", "C", "no match found"},
+		{"aacc", "Entry2", "no match found"},
+		{"aacc", "C", "no match found"},
+		{"cc", "", "no match found"},
+		{"cc", "Entry2", "no match found"},
 	}
-	if !strings.Contains(err.Error(), "no match found") {
-		t.Fatalf("want 'no match found', got %s", err)
-	}
-}
 
-func TestDefaultInputWithAlternateEntrypoint(t *testing.T) {
-	src := "aacc"
-
-	_, err := Parse("", []byte(src), Entrypoint("Entry2"))
-	if err == nil {
-		t.Fatal("want error, got none")
-	}
-	if !strings.Contains(err.Error(), "no match found") {
-		t.Fatalf("want 'no match found', got %s", err)
+	for _, c := range cases {
+		_, err := Parse("", []byte(c.in), Entrypoint(c.entrypoint))
+		if err == nil {
+			t.Errorf("%s:%s: want error, got none", c.entrypoint, c.in)
+		}
+		if !strings.Contains(err.Error(), c.errMsg) {
+			t.Errorf("%s:%s: want %s, got %s", c.entrypoint, c.in, c.errMsg, err)
+		}
 	}
 }
