@@ -426,6 +426,8 @@ func MaxExpressions(maxExprCnt uint64) Option {
 	}
 }
 
+// TODO(mna): add a func Entrypoint(rule string) Option
+
 // Statistics adds a user provided Stats struct to the parser to allow
 // the user to process the results after the parsing has finished.
 // Also the key for the "no match" counter is set.
@@ -812,6 +814,7 @@ type parser struct {
 
 	// max number of expressions to be parsed
 	maxExprCnt uint64
+	// TODO(mna): add entrypoint string field, use default if empty
 
 	*Stats
 
@@ -1037,6 +1040,7 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		}()
 	}
 
+	// TODO(mna): if p.entrypoint != "", start at rule p.rules[p.entrypoint]
 	// start rule is rule [0]
 	p.read() // advance to first rune
 	val, ok := p.parseRule(g.rules[0])

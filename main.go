@@ -35,7 +35,7 @@ func main() {
 		optimizeParserFlag     = fs.Bool("optimize-parser", false, "generate optimized parser without Debug and Memoize options")
 		recvrNmFlag            = fs.String("receiver-name", "c", "receiver name for the generated methods")
 		noBuildFlag            = fs.Bool("x", false, "do not build, only parse")
-		// TODO(mna): support --alternate-entrypoints flag, comma-separated list of rule names
+		altEntrypointsFlag     = fs.String("alternate-entrypoints", "", "comma-separated list of rule names that may be used as entrypoints")
 	)
 
 	fs.Usage = usage
@@ -80,11 +80,33 @@ func main() {
 		exit(3)
 	}
 
+	// validate alternate entrypoints
+	entrypoints := strings.Split(*altEntrypointsFlag, ",")
+	grammar := g.(*ast.Grammar)
+	for _, entrypoint := range entrypoints {
+		if entrypoint == "" {
+			continue
+		}
+
+		found := false
+		// TODO: build set of rule names
+		for _, rule := range grammar.Rules {
+			if rule.Name.Val == entrypoint {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			fmt.Fprintf(os.Stderr, "argument error:\nunknown rule name %s used as alternate entrypoint\n", entrypoint)
+			exit(9)
+		}
+	}
+
 	if !*noBuildFlag {
-		// TODO(mna): validate that all alternate entrypoints are valid rule names
 		if *optimizeGrammar {
 			// TODO(mna): pass the alternate entrypoints as rules to keep in the grammar
-			ast.Optimize(g.(*ast.Grammar))
+			ast.Optimize(grammar)
 		}
 
 		// generate parser
@@ -102,7 +124,7 @@ func main() {
 		curNmOpt := builder.ReceiverName(*recvrNmFlag)
 		optimizeParser := builder.Optimize(*optimizeParserFlag)
 		basicLatinOptimize := builder.BasicLatinLookupTable(*optimizeBasicLatinFlag)
-		if err := builder.BuildParser(outBuf, g.(*ast.Grammar), curNmOpt, optimizeParser, basicLatinOptimize); err != nil {
+		if err := builder.BuildParser(outBuf, grammar, curNmOpt, optimizeParser, basicLatinOptimize); err != nil {
 			fmt.Fprintln(os.Stderr, "build error: ", err)
 			exit(5)
 		}
@@ -165,6 +187,10 @@ the generated code is written to this file instead.
 		for the grammar's code blocks. Defaults to "c".
 	-x
 		do not generate the parser, only parse the grammar.
+  -alternate-entrypoints
+    comma-separated list of rule names that may be used as alternate
+    entrypoints for the parser, in addition to the first rule in the
+    grammar.
 
 See https://godoc.org/github.com/mna/pigeon for more information.
 `

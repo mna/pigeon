@@ -443,7 +443,7 @@ type parser struct {
 
 	// max number of expressions to be parsed
 	maxExprCnt uint64
-	// TODO(mna): add `entrypoint string` field, use default if empty
+	// TODO(mna): add entrypoint string field, use default if empty
 
 	*Stats
 
