@@ -186,10 +186,10 @@ the generated code is written to this file instead.
 		for the grammar's code blocks. Defaults to "c".
 	-x
 		do not generate the parser, only parse the grammar.
-  -alternate-entrypoints
-    comma-separated list of rule names that may be used as alternate
-    entrypoints for the parser, in addition to the first rule in the
-    grammar.
+ 	-alternate-entrypoints RULE[,RULE...]
+		comma-separated list of rule names that may be used as alternate
+		entrypoints for the parser, in addition to the first rule in the
+		grammar.
 
 See https://godoc.org/github.com/mna/pigeon for more information.
 `
