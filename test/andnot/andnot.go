@@ -208,7 +208,19 @@ func MaxExpressions(maxExprCnt uint64) Option {
 	}
 }
 
-// TODO(mna): add a func Entrypoint(rule string) Option
+// Entrypoint creates an Option to set the rule name to use as entrypoint.
+// The rule name must have been set with the -alternate-entrypoints flag
+// when generating the parser, otherwise it may have been optimized out
+// if the -optimize-grammar flag was set.
+//
+// The default is to start parsing at the first rule in the grammar.
+func Entrypoint(ruleName string) Option {
+	return func(p *parser) Option {
+		oldEntrypoint := p.entrypoint
+		p.entrypoint = ruleName
+		return Entrypoint(oldEntrypoint)
+	}
+}
 
 // Statistics adds a user provided Stats struct to the parser to allow
 // the user to process the results after the parsing has finished.
@@ -596,7 +608,8 @@ type parser struct {
 
 	// max number of expressions to be parsed
 	maxExprCnt uint64
-	// TODO(mna): add entrypoint string field, use default if empty
+	// entrypoint for the parser
+	entrypoint string
 
 	*Stats
 
@@ -822,10 +835,14 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		}()
 	}
 
-	// TODO(mna): if p.entrypoint != "", start at rule p.rules[p.entrypoint]
-	// start rule is rule [0]
+	// start rule is rule [0] unless an alternate entrypoint is specified
+	startRule := g.rules[0]
+	if p.entrypoint != "" {
+		startRule = p.rules[p.entrypoint]
+	}
+
 	p.read() // advance to first rune
-	val, ok := p.parseRule(g.rules[0])
+	val, ok := p.parseRule(startRule)
 	if !ok {
 		if len(*p.errs) == 0 {
 			// If parsing fails, but no errors have been recorded, the expected values
