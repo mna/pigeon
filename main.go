@@ -89,7 +89,7 @@ func main() {
 		}
 
 		found := false
-		// TODO: build set of rule names
+		// TODO(mna): build set of rule names
 		for _, rule := range grammar.Rules {
 			if rule.Name.Val == entrypoint {
 				found = true
@@ -105,8 +105,7 @@ func main() {
 
 	if !*noBuildFlag {
 		if *optimizeGrammar {
-			// TODO(mna): pass the alternate entrypoints as rules to keep in the grammar
-			ast.Optimize(grammar)
+			ast.Optimize(grammar, entrypoints...)
 		}
 
 		// generate parser
