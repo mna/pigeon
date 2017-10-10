@@ -75,6 +75,12 @@ The following options can be specified:
 	code blocks. Non-initializer code blocks in the grammar end up as methods on the
 	*current type, and this option sets the name of the receiver (default: c).
 
+	-alternate-entrypoints=RULE[,RULE...] : string, comma-separated list of rule names
+	that may be used as alternate entrypoints for the parser, in addition to the
+	default entrypoint (the first rule in the grammar) (default: none).
+	Such entrypoints can be specified in the call to Parse by passing an
+	Entrypoint option that specifies the alternate rule name to use.
+
 If the code blocks in the grammar (see below, section "Code block") are golint-
 and go vet-compliant, then the resulting generated code will also be golint-
 and go vet-compliant.
@@ -372,6 +378,7 @@ as a package with public functions to parse input text. The exported API is:
 	- ParseFile(string, ...Option) (interface{}, error)
 	- ParseReader(string, io.Reader, ...Option) (interface{}, error)
 	- Debug(bool) Option
+	- Entrypoint(string) Option
 	- GlobalStore(string, interface{}) Option
 	- MaxExpressions(uint64) Option
 	- Memoize(bool) Option
