@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"math"
 	"os"
 	"sort"
@@ -16,184 +17,258 @@ import (
 )
 
 func main() {
+	in := os.Stdin
+	if len(os.Args) > 1 {
+		f, err := os.Open(os.Args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		in = f
+	}
+	got, err := ParseReader("", in, Debug(true))
+	fmt.Println(got, err)
+}
+
+type values []int
+
+func (vals values) Clone() interface{} {
+	clone := make(values, 0, len(vals))
+	clone = append(clone, vals...)
+	return clone
 }
 
 var g = &grammar{
 	rules: []*rule{
 		{
-			name: "File",
-			pos:  position{line: 10, col: 1, offset: 102},
-			expr: &seqExpr{
-				pos: position{line: 10, col: 8, offset: 111},
-				exprs: []interface{}{
-					&choiceExpr{
-						pos: position{line: 10, col: 10, offset: 113},
-						alternatives: []interface{}{
-							&seqExpr{
-								pos: position{line: 10, col: 10, offset: 113},
+			name: "start",
+			pos:  position{line: 28, col: 1, offset: 392},
+			expr: &actionExpr{
+				pos: position{line: 28, col: 9, offset: 400},
+				run: (*parser).callonstart1,
+				expr: &seqExpr{
+					pos: position{line: 28, col: 9, offset: 400},
+					exprs: []interface{}{
+						&stateCodeExpr{
+							pos: position{line: 28, col: 9, offset: 400},
+							run: (*parser).callonstart3,
+						},
+						&zeroOrMoreExpr{
+							pos: position{line: 35, col: 3, offset: 525},
+							expr: &seqExpr{
+								pos: position{line: 35, col: 4, offset: 526},
 								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 10, offset: 113},
-										name: "L",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 12, offset: 115},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 12, offset: 115},
-											name: "S",
+									&choiceExpr{
+										pos: position{line: 35, col: 5, offset: 527},
+										alternatives: []interface{}{
+											&ruleRefExpr{
+												pos:  position{line: 35, col: 5, offset: 527},
+												name: "x",
+											},
+											&ruleRefExpr{
+												pos:  position{line: 35, col: 7, offset: 529},
+												name: "y",
+											},
+											&ruleRefExpr{
+												pos:  position{line: 35, col: 9, offset: 531},
+												name: "z",
+											},
 										},
 									},
-								},
-							},
-							&seqExpr{
-								pos: position{line: 10, col: 17, offset: 120},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 17, offset: 120},
-										name: "L",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 19, offset: 122},
+									&zeroOrMoreExpr{
+										pos: position{line: 35, col: 12, offset: 534},
 										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 19, offset: 122},
-											name: "N",
-										},
-									},
-								},
-							},
-							&seqExpr{
-								pos: position{line: 10, col: 24, offset: 127},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 24, offset: 127},
-										name: "N",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 26, offset: 129},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 26, offset: 129},
-											name: "L",
-										},
-									},
-								},
-							},
-							&seqExpr{
-								pos: position{line: 10, col: 31, offset: 134},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 31, offset: 134},
-										name: "N",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 33, offset: 136},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 33, offset: 136},
-											name: "S",
-										},
-									},
-								},
-							},
-							&seqExpr{
-								pos: position{line: 10, col: 38, offset: 141},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 38, offset: 141},
-										name: "S",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 40, offset: 143},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 40, offset: 143},
-											name: "L",
-										},
-									},
-								},
-							},
-							&seqExpr{
-								pos: position{line: 10, col: 45, offset: 148},
-								exprs: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 10, col: 45, offset: 148},
-										name: "S",
-									},
-									&zeroOrOneExpr{
-										pos: position{line: 10, col: 47, offset: 150},
-										expr: &ruleRefExpr{
-											pos:  position{line: 10, col: 47, offset: 150},
-											name: "N",
+											pos:  position{line: 35, col: 12, offset: 534},
+											name: "ws",
 										},
 									},
 								},
 							},
 						},
 					},
-					&zeroOrMoreExpr{
-						pos: position{line: 10, col: 52, offset: 155},
-						expr: &ruleRefExpr{
-							pos:  position{line: 10, col: 52, offset: 155},
-							name: "File",
-						},
+				},
+			},
+		},
+		{
+			name: "x",
+			pos:  position{line: 39, col: 1, offset: 576},
+			expr: &seqExpr{
+				pos: position{line: 39, col: 5, offset: 580},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 39, col: 5, offset: 580},
+						val:        "ab",
+						ignoreCase: false,
 					},
 					&ruleRefExpr{
-						pos:  position{line: 10, col: 58, offset: 161},
-						name: "EOF",
+						pos:  position{line: 39, col: 10, offset: 585},
+						name: "c",
+					},
+					&litMatcher{
+						pos:        position{line: 39, col: 12, offset: 587},
+						val:        "d",
+						ignoreCase: false,
 					},
 				},
 			},
 		},
 		{
-			name: "L",
-			pos:  position{line: 11, col: 1, offset: 165},
-			expr: &oneOrMoreExpr{
-				pos: position{line: 11, col: 5, offset: 171},
-				expr: &charClassMatcher{
-					pos:        position{line: 11, col: 5, offset: 171},
-					val:        "[a-z]i",
-					ranges:     []rune{'a', 'z'},
-					ignoreCase: true,
-					inverted:   false,
+			name: "y",
+			pos:  position{line: 40, col: 1, offset: 591},
+			expr: &seqExpr{
+				pos: position{line: 40, col: 5, offset: 595},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 40, col: 5, offset: 595},
+						val:        "a",
+						ignoreCase: false,
+					},
+					&ruleRefExpr{
+						pos:  position{line: 40, col: 9, offset: 599},
+						name: "bc",
+					},
+					&litMatcher{
+						pos:        position{line: 40, col: 12, offset: 602},
+						val:        "e",
+						ignoreCase: false,
+					},
 				},
 			},
 		},
 		{
-			name: "N",
-			pos:  position{line: 12, col: 1, offset: 179},
-			expr: &oneOrMoreExpr{
-				pos: position{line: 12, col: 5, offset: 185},
-				expr: &charClassMatcher{
-					pos:        position{line: 12, col: 5, offset: 185},
-					val:        "[0-9]",
-					ranges:     []rune{'0', '9'},
-					ignoreCase: false,
-					inverted:   false,
+			name: "z",
+			pos:  position{line: 41, col: 1, offset: 606},
+			expr: &seqExpr{
+				pos: position{line: 41, col: 5, offset: 610},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 41, col: 5, offset: 610},
+						val:        "abcf",
+						ignoreCase: false,
+					},
+					&stateCodeExpr{
+						pos: position{line: 41, col: 12, offset: 617},
+						run: (*parser).callonz3,
+					},
 				},
 			},
 		},
 		{
-			name: "S",
-			pos:  position{line: 13, col: 1, offset: 192},
-			expr: &oneOrMoreExpr{
-				pos: position{line: 13, col: 5, offset: 198},
-				expr: &charClassMatcher{
-					pos:        position{line: 13, col: 5, offset: 198},
-					val:        "[/+=]",
-					chars:      []rune{'/', '+', '='},
-					ignoreCase: false,
-					inverted:   false,
+			name: "c",
+			pos:  position{line: 43, col: 1, offset: 688},
+			expr: &seqExpr{
+				pos: position{line: 43, col: 5, offset: 692},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 43, col: 5, offset: 692},
+						val:        "c",
+						ignoreCase: false,
+					},
+					&stateCodeExpr{
+						pos: position{line: 43, col: 9, offset: 696},
+						run: (*parser).callonc3,
+					},
 				},
 			},
 		},
 		{
-			name: "EOF",
-			pos:  position{line: 14, col: 1, offset: 205},
-			expr: &notExpr{
-				pos: position{line: 14, col: 7, offset: 213},
-				expr: &anyMatcher{
-					line: 14, col: 8, offset: 214,
+			name: "bc",
+			pos:  position{line: 44, col: 1, offset: 767},
+			expr: &seqExpr{
+				pos: position{line: 44, col: 6, offset: 772},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 44, col: 6, offset: 772},
+						val:        "bc",
+						ignoreCase: false,
+					},
+					&stateCodeExpr{
+						pos: position{line: 44, col: 11, offset: 777},
+						run: (*parser).callonbc3,
+					},
+				},
+			},
+		},
+		{
+			name: "ws",
+			pos:  position{line: 46, col: 1, offset: 848},
+			expr: &choiceExpr{
+				pos: position{line: 46, col: 6, offset: 853},
+				alternatives: []interface{}{
+					&litMatcher{
+						pos:        position{line: 46, col: 6, offset: 853},
+						val:        " ",
+						ignoreCase: false,
+					},
+					&litMatcher{
+						pos:        position{line: 46, col: 12, offset: 859},
+						val:        "\n",
+						ignoreCase: false,
+					},
 				},
 			},
 		},
 	},
+}
+
+func (c *current) onstart3() error {
+
+	if _, ok := c.state["vals"]; !ok {
+		vals := make(values, 1)
+		vals[0] = 10
+		c.state["vals"] = vals
+	}
+	return nil
+}
+
+func (p *parser) callonstart3() error {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onstart3()
+}
+
+func (c *current) onstart1() (interface{}, error) {
+
+	return c.state["vals"], nil
+}
+
+func (p *parser) callonstart1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onstart1()
+}
+
+func (c *current) onz3() error {
+	c.state["vals"] = append(c.state["vals"].(values), 5)
+	return nil
+}
+
+func (p *parser) callonz3() error {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onz3()
+}
+
+func (c *current) onc3() error {
+	c.state["vals"] = append(c.state["vals"].(values), 3)
+	return nil
+}
+
+func (p *parser) callonc3() error {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onc3()
+}
+
+func (c *current) onbc3() error {
+	c.state["vals"] = append(c.state["vals"].(values), 1)
+	return nil
+}
+
+func (p *parser) callonbc3() error {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onbc3()
 }
 
 var (

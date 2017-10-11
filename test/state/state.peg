@@ -17,7 +17,14 @@ func main() {
 
 }
 
-start = #{ if _, ok := c.state["countCs"]; !ok { c.state["countCs"] = 0 }; return nil } ((x/y/z) ws*)* { return c.state["countCs"], nil }
+start = #{ 
+	if _, ok := c.state["countCs"]; !ok { 
+		c.state["countCs"] = 0 
+	}
+	return nil 
+} ((x/y/z) ws*)* { 
+	return c.state["countCs"], nil 
+}
 
 x = "ab" c "d"
 y = "a" bc "e"

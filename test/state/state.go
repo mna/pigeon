@@ -46,31 +46,31 @@ var g = &grammar{
 							run: (*parser).callonstart3,
 						},
 						&zeroOrMoreExpr{
-							pos: position{line: 20, col: 89, offset: 334},
+							pos: position{line: 25, col: 3, offset: 342},
 							expr: &seqExpr{
-								pos: position{line: 20, col: 90, offset: 335},
+								pos: position{line: 25, col: 4, offset: 343},
 								exprs: []interface{}{
 									&choiceExpr{
-										pos: position{line: 20, col: 91, offset: 336},
+										pos: position{line: 25, col: 5, offset: 344},
 										alternatives: []interface{}{
 											&ruleRefExpr{
-												pos:  position{line: 20, col: 91, offset: 336},
+												pos:  position{line: 25, col: 5, offset: 344},
 												name: "x",
 											},
 											&ruleRefExpr{
-												pos:  position{line: 20, col: 93, offset: 338},
+												pos:  position{line: 25, col: 7, offset: 346},
 												name: "y",
 											},
 											&ruleRefExpr{
-												pos:  position{line: 20, col: 95, offset: 340},
+												pos:  position{line: 25, col: 9, offset: 348},
 												name: "z",
 											},
 										},
 									},
 									&zeroOrMoreExpr{
-										pos: position{line: 20, col: 98, offset: 343},
+										pos: position{line: 25, col: 12, offset: 351},
 										expr: &ruleRefExpr{
-											pos:  position{line: 20, col: 98, offset: 343},
+											pos:  position{line: 25, col: 12, offset: 351},
 											name: "ws",
 										},
 									},
@@ -83,21 +83,21 @@ var g = &grammar{
 		},
 		{
 			name: "x",
-			pos:  position{line: 22, col: 1, offset: 385},
+			pos:  position{line: 29, col: 1, offset: 396},
 			expr: &seqExpr{
-				pos: position{line: 22, col: 5, offset: 389},
+				pos: position{line: 29, col: 5, offset: 400},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 22, col: 5, offset: 389},
+						pos:        position{line: 29, col: 5, offset: 400},
 						val:        "ab",
 						ignoreCase: false,
 					},
 					&ruleRefExpr{
-						pos:  position{line: 22, col: 10, offset: 394},
+						pos:  position{line: 29, col: 10, offset: 405},
 						name: "c",
 					},
 					&litMatcher{
-						pos:        position{line: 22, col: 12, offset: 396},
+						pos:        position{line: 29, col: 12, offset: 407},
 						val:        "d",
 						ignoreCase: false,
 					},
@@ -106,21 +106,21 @@ var g = &grammar{
 		},
 		{
 			name: "y",
-			pos:  position{line: 23, col: 1, offset: 400},
+			pos:  position{line: 30, col: 1, offset: 411},
 			expr: &seqExpr{
-				pos: position{line: 23, col: 5, offset: 404},
+				pos: position{line: 30, col: 5, offset: 415},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 23, col: 5, offset: 404},
+						pos:        position{line: 30, col: 5, offset: 415},
 						val:        "a",
 						ignoreCase: false,
 					},
 					&ruleRefExpr{
-						pos:  position{line: 23, col: 9, offset: 408},
+						pos:  position{line: 30, col: 9, offset: 419},
 						name: "bc",
 					},
 					&litMatcher{
-						pos:        position{line: 23, col: 12, offset: 411},
+						pos:        position{line: 30, col: 12, offset: 422},
 						val:        "e",
 						ignoreCase: false,
 					},
@@ -129,17 +129,17 @@ var g = &grammar{
 		},
 		{
 			name: "z",
-			pos:  position{line: 24, col: 1, offset: 415},
+			pos:  position{line: 31, col: 1, offset: 426},
 			expr: &seqExpr{
-				pos: position{line: 24, col: 5, offset: 419},
+				pos: position{line: 31, col: 5, offset: 430},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 24, col: 5, offset: 419},
+						pos:        position{line: 31, col: 5, offset: 430},
 						val:        "abcf",
 						ignoreCase: false,
 					},
 					&stateCodeExpr{
-						pos: position{line: 24, col: 12, offset: 426},
+						pos: position{line: 31, col: 12, offset: 437},
 						run: (*parser).callonz3,
 					},
 				},
@@ -147,17 +147,17 @@ var g = &grammar{
 		},
 		{
 			name: "c",
-			pos:  position{line: 26, col: 1, offset: 493},
+			pos:  position{line: 33, col: 1, offset: 504},
 			expr: &seqExpr{
-				pos: position{line: 26, col: 5, offset: 497},
+				pos: position{line: 33, col: 5, offset: 508},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 26, col: 5, offset: 497},
+						pos:        position{line: 33, col: 5, offset: 508},
 						val:        "c",
 						ignoreCase: false,
 					},
 					&stateCodeExpr{
-						pos: position{line: 26, col: 9, offset: 501},
+						pos: position{line: 33, col: 9, offset: 512},
 						run: (*parser).callonc3,
 					},
 				},
@@ -165,17 +165,17 @@ var g = &grammar{
 		},
 		{
 			name: "bc",
-			pos:  position{line: 27, col: 1, offset: 568},
+			pos:  position{line: 34, col: 1, offset: 579},
 			expr: &seqExpr{
-				pos: position{line: 27, col: 6, offset: 573},
+				pos: position{line: 34, col: 6, offset: 584},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 27, col: 6, offset: 573},
+						pos:        position{line: 34, col: 6, offset: 584},
 						val:        "bc",
 						ignoreCase: false,
 					},
 					&stateCodeExpr{
-						pos: position{line: 27, col: 11, offset: 578},
+						pos: position{line: 34, col: 11, offset: 589},
 						run: (*parser).callonbc3,
 					},
 				},
@@ -183,17 +183,17 @@ var g = &grammar{
 		},
 		{
 			name: "ws",
-			pos:  position{line: 29, col: 1, offset: 645},
+			pos:  position{line: 36, col: 1, offset: 656},
 			expr: &choiceExpr{
-				pos: position{line: 29, col: 6, offset: 650},
+				pos: position{line: 36, col: 6, offset: 661},
 				alternatives: []interface{}{
 					&litMatcher{
-						pos:        position{line: 29, col: 6, offset: 650},
+						pos:        position{line: 36, col: 6, offset: 661},
 						val:        " ",
 						ignoreCase: false,
 					},
 					&litMatcher{
-						pos:        position{line: 29, col: 12, offset: 656},
+						pos:        position{line: 36, col: 12, offset: 667},
 						val:        "\n",
 						ignoreCase: false,
 					},
@@ -204,6 +204,7 @@ var g = &grammar{
 }
 
 func (c *current) onstart3() error {
+
 	if _, ok := c.state["countCs"]; !ok {
 		c.state["countCs"] = 0
 	}
@@ -217,6 +218,7 @@ func (p *parser) callonstart3() error {
 }
 
 func (c *current) onstart1() (interface{}, error) {
+
 	return c.state["countCs"], nil
 }
 
@@ -398,7 +400,7 @@ func InitState(key string, value interface{}) Option {
 	return func(p *parser) Option {
 		old := p.cur.state[key]
 		p.cur.state[key] = value
-		return GlobalStore(key, old)
+		return InitState(key, old)
 	}
 }
 
@@ -454,9 +456,16 @@ type current struct {
 	pos  position // start position of the match
 	text []byte   // raw text of the match
 
-	// the state allows the parser to store arbitrary values and rollback them if needed
+	// state is a store for arbitrary key,value pairs that the user wants to be
+	// tied to the backtracking of the parser.
+	// This is always rolled back if a parsing rule fails.
 	state storeDict
-	// the globalStore allows the parser to store arbitrary values
+
+	// globalStore is a general store for the user to store arbitrary key-value
+	// pairs that they need to manage and that they do not want tied to the
+	// backtracking of the parser. This is only modified by the user and never
+	// rolled back by the parser. It is always up to the user to keep this in a
+	// consistent state.
 	globalStore storeDict
 }
 
@@ -885,6 +894,17 @@ func (p *parser) restore(pt savepoint) {
 	p.pt = pt
 }
 
+// Cloner is implemented by any value that has a Clone method, which returns a
+// copy of the value. This is mainly used for types which are not passed by
+// value (e.g map, slice, chan) or structs that contain such types.
+//
+// This is used in conjunction with the global state feature to create proper
+// copies of the state to allow the parser to properly restore the state in
+// the case of backtracking.
+type Cloner interface {
+	Clone() interface{}
+}
+
 // clone and return parser current state.
 func (p *parser) cloneState() storeDict {
 	if p.debug {
@@ -897,7 +917,11 @@ func (p *parser) cloneState() storeDict {
 
 	state := make(storeDict, len(p.cur.state))
 	for k, v := range p.cur.state {
-		state[k] = v
+		if c, ok := v.(Cloner); ok {
+			state[k] = c.Clone()
+		} else {
+			state[k] = v
+		}
 	}
 	return state
 }

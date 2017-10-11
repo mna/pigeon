@@ -309,22 +309,27 @@ parser will return. E.g.:
 		return true, nil
 	}
 
-State change code blocks are code blocks starting with "#". In distinction to
-the action and predicate code blocks, the state change code blocks are allowed to
-change the state of the parser, especially the global "state" store (see below).
-State change code blocks are also turned into a method on the "*current" type in the
-generated source code.
-The method receives any labeled expression's value as argument (as interface{})
-and must return a value of type error.
+State change code blocks are code blocks starting with "#". In contrast to
+action and predicate code blocks, state change code blocks are allowed to
+modify values in the global "state" store (see below).
+State change code blocks are turned into a method on the "*current" type
+in the generated source code.
+The method is passed any labeled expression's value as an argument (of type
+interface{}) and must return a value of type error.
 If a non-nil error is returned, it is added to the list of errors that the
-parser will return. E.g.:
-	Rule = [a] #{
-		c.state["a"] = 1
-		return nil
-	}
-
-The current type is a struct that provides four useful fields that can be
-accessed in action and predicate code blocks: "pos", "text", "state" and "globalStore".
+parser will return, note that the parser does NOT backtrack if a non-nil
+error is returned.
+E.g:
+    Rule = [a] #{
+        c.state["a"]++
+        if c.state["a"] > 5 {
+            return fmt.Errorf("we have seen more than 5 a's") // parser will not backtrack
+        }
+        return nil
+    }
+The "*current" type is a struct that provides four useful fields that can be
+accessed in action, state change, and predicate code blocks: "pos", "text",
+"state" and "globalStore".
 
 The "pos" field indicates the current position of the parser in the source
 input. It is itself a struct with three fields: "line", "col" and "offset".
@@ -334,13 +339,30 @@ runes from the start of the line, and offset is a 0-based byte offset.
 The "text" field is the slice of bytes of the current match. It is empty
 in a predicate code block.
 
-The "state" field is a global store with backtrack support of type "map[string]interface{}",
-which allows to store arbitrary values, which are available in action and
-predicate code blocks for read access.
-To change the "state", state change code blocks ("#{}") are used.
-It is important to notice, that the global "state" store is controlled by
-the backtrack mechanism of PEG and it is set back to its old state
-during backtracking.
+The "state" field is a global store, with backtrack support, of type
+"map[string]interface{}". The values in the store are tied to the parser's
+backtracking, in particular if a rule fails to match then all updates to the
+state that occurred in the process of matching the rule are rolled back. For a
+key-value store that is not tied to the parser's backtracking, see the
+"globalStore".
+The values in the "state" store are available for read access in action and
+predicate code blocks, any changes made to the "state" store will be reverted
+once the action or predicate code block is finished running. To update values
+in the "state" use state change code blocks ("#{}").
+
+IMPORTANT:
+	- In order to properly roll back the state if a rule fails to match the
+	  parser must clone the state before trying to match a rule.
+	- The default clone mechanism makes a "shallow" copy of each value in the
+	  "state", this implies that pointers, maps, slices, channels, and structs
+	  containing any of the previous types are not properly copied.
+	- To support theses cases pigeon offers the "Cloner" interface which
+	  consists of a single method "Clone". If a value stored in the "state"
+	  store implements this interface, the "Clone" method is used to obtain a
+	  proper copy.
+	- If a general solution is needed, external libraries which provide deep
+	  copy functionality may be used in the "Clone" method
+	  (e.g. https://github.com/mitchellh/copystructure).
 
 The "globalStore" field is a global store of type "map[string]interface{}",
 which allows to store arbitrary values, which are available in action and
