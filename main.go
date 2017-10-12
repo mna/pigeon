@@ -17,7 +17,22 @@ import (
 	"github.com/mna/pigeon/builder"
 )
 
+// exit function mockable for tests
 var exit = os.Exit
+
+// ruleNamesFlag is a custom flag that parses a comma-separated
+// list of rule names. It implements flag.Value.
+type ruleNamesFlag []string
+
+func (r *ruleNamesFlag) String() string {
+	return fmt.Sprint(*r)
+}
+
+func (r *ruleNamesFlag) Set(value string) error {
+	names := strings.Split(value, ",")
+	*r = append(*r, names...)
+	return nil
+}
 
 func main() {
 	fs := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
@@ -35,8 +50,10 @@ func main() {
 		optimizeParserFlag     = fs.Bool("optimize-parser", false, "generate optimized parser without Debug and Memoize options")
 		recvrNmFlag            = fs.String("receiver-name", "c", "receiver name for the generated methods")
 		noBuildFlag            = fs.Bool("x", false, "do not build, only parse")
-		altEntrypointsFlag     = fs.String("alternate-entrypoints", "", "comma-separated list of rule names that may be used as entrypoints")
+
+		altEntrypointsFlag ruleNamesFlag
 	)
+	fs.Var(&altEntrypointsFlag, "alternate-entrypoints", "comma-separated list of rule names that may be used as entrypoints")
 
 	fs.Usage = usage
 	err := fs.Parse(os.Args[1:])
@@ -81,16 +98,12 @@ func main() {
 	}
 
 	// validate alternate entrypoints
-	entrypoints := strings.Split(*altEntrypointsFlag, ",")
 	grammar := g.(*ast.Grammar)
-
-	// set of valid rule names
 	rules := make(map[string]struct{}, len(grammar.Rules))
 	for _, rule := range grammar.Rules {
 		rules[rule.Name.Val] = struct{}{}
 	}
-
-	for _, entrypoint := range entrypoints {
+	for _, entrypoint := range altEntrypointsFlag {
 		if entrypoint == "" {
 			continue
 		}
@@ -103,7 +116,7 @@ func main() {
 
 	if !*noBuildFlag {
 		if *optimizeGrammar {
-			ast.Optimize(grammar, entrypoints...)
+			ast.Optimize(grammar, altEntrypointsFlag...)
 		}
 
 		// generate parser

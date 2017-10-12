@@ -42,6 +42,9 @@ func TestInvalidEntrypoints(t *testing.T) {
 		{"aacc", "C", "no match found"},
 		{"cc", "", "no match found"},
 		{"cc", "Entry2", "no match found"},
+		// rules A and B are optimized away and not specified as alternate entrypoints
+		{"aa", "A", errInvalidEntrypoint.Error()},
+		{"bb", "B", errInvalidEntrypoint.Error()},
 	}
 
 	for _, c := range cases {
