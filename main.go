@@ -83,21 +83,19 @@ func main() {
 	// validate alternate entrypoints
 	entrypoints := strings.Split(*altEntrypointsFlag, ",")
 	grammar := g.(*ast.Grammar)
+
+	// set of valid rule names
+	rules := make(map[string]struct{}, len(grammar.Rules))
+	for _, rule := range grammar.Rules {
+		rules[rule.Name.Val] = struct{}{}
+	}
+
 	for _, entrypoint := range entrypoints {
 		if entrypoint == "" {
 			continue
 		}
 
-		found := false
-		// TODO(mna): build set of rule names
-		for _, rule := range grammar.Rules {
-			if rule.Name.Val == entrypoint {
-				found = true
-				break
-			}
-		}
-
-		if !found {
+		if _, ok := rules[entrypoint]; !ok {
 			fmt.Fprintf(os.Stderr, "argument error:\nunknown rule name %s used as alternate entrypoint\n", entrypoint)
 			exit(9)
 		}

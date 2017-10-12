@@ -213,15 +213,19 @@ func MaxExpressions(maxExprCnt uint64) Option {
 }
 
 // Entrypoint creates an Option to set the rule name to use as entrypoint.
-// The rule name must have been set with the -alternate-entrypoints flag
-// when generating the parser, otherwise it may have been optimized out
-// if the -optimize-grammar flag was set.
+// The rule name must have been specified in the -alternate-entrypoints
+// if generating the parser with the -optimize-grammar flag, otherwise
+// it may have been optimized out. Passing an empty string sets the
+// entrypoint to the first rule in the grammar.
 //
 // The default is to start parsing at the first rule in the grammar.
 func Entrypoint(ruleName string) Option {
 	return func(p *parser) Option {
 		oldEntrypoint := p.entrypoint
 		p.entrypoint = ruleName
+		if ruleName == "" {
+			p.entrypoint = g.rules[0].name
+		}
 		return Entrypoint(oldEntrypoint)
 	}
 }
@@ -534,6 +538,8 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		maxFailPos:      position{col: 1, line: 1},
 		maxFailExpected: make([]string, 0, 20),
 		Stats:           &stats,
+		// start rule is rule [0] unless an alternate entrypoint is specified
+		entrypoint: g.rules[0].name,
 	}
 	p.setOptions(opts)
 
@@ -839,18 +845,14 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		}()
 	}
 
-	// start rule is rule [0] unless an alternate entrypoint is specified
-	startRule := g.rules[0]
-	if p.entrypoint != "" {
-		startRule = p.rules[p.entrypoint]
-		if startRule == nil {
-			p.addErr(errInvalidEntrypoint)
-			return nil, p.errs.err()
-		}
+	startRule, ok := p.rules[p.entrypoint]
+	if !ok {
+		p.addErr(errInvalidEntrypoint)
+		return nil, p.errs.err()
 	}
 
 	p.read() // advance to first rune
-	val, ok := p.parseRule(startRule)
+	val, ok = p.parseRule(startRule)
 	if !ok {
 		if len(*p.errs) == 0 {
 			// If parsing fails, but no errors have been recorded, the expected values

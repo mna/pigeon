@@ -79,7 +79,9 @@ The following options can be specified:
 	that may be used as alternate entrypoints for the parser, in addition to the
 	default entrypoint (the first rule in the grammar) (default: none).
 	Such entrypoints can be specified in the call to Parse by passing an
-	Entrypoint option that specifies the alternate rule name to use.
+	Entrypoint option that specifies the alternate rule name to use. This is only
+	necessary if the -optimize-parser flag is set, as some rules may be optimized
+	out of the resulting parser.
 
 If the code blocks in the grammar (see below, section "Code block") are golint-
 and go vet-compliant, then the resulting generated code will also be golint-
