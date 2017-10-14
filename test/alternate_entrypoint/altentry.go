@@ -1,4 +1,4 @@
-package labeledfailures
+package alternate_entrypoint
 
 import (
 	"bytes"
@@ -15,222 +15,41 @@ import (
 	"unicode/utf8"
 )
 
-func ids(id, list interface{}) (interface{}, error) {
-	l := toStringSlice(list)
-	l = append([]string{id.(string)}, l...)
-	return l, nil
-}
-
-func toStringSlice(v interface{}) []string {
-	if v == nil {
-		return nil
-	}
-	return v.([]string)
-}
-
 var g = &grammar{
 	rules: []*rule{
 		{
-			name: "S",
-			pos:  position{line: 18, col: 1, offset: 268},
-			expr: &recoveryExpr{
-				pos: position{line: 18, col: 5, offset: 274},
-				expr: &recoveryExpr{
-					pos: position{line: 18, col: 5, offset: 274},
-					expr: &actionExpr{
-						pos: position{line: 18, col: 5, offset: 274},
-						run: (*parser).callonS3,
-						expr: &seqExpr{
-							pos: position{line: 18, col: 5, offset: 274},
-							exprs: []interface{}{
-								&labeledExpr{
-									pos:   position{line: 18, col: 5, offset: 274},
-									label: "id",
-									expr: &ruleRefExpr{
-										pos:  position{line: 18, col: 8, offset: 277},
-										name: "ID",
-									},
-								},
-								&labeledExpr{
-									pos:   position{line: 18, col: 11, offset: 280},
-									label: "list",
-									expr: &ruleRefExpr{
-										pos:  position{line: 18, col: 16, offset: 285},
-										name: "List",
-									},
-								},
-							},
-						},
-					},
-					recoverExpr: &ruleRefExpr{
-						pos:  position{line: 20, col: 16, offset: 332},
-						name: "ErrComma",
-					},
-					failureLabel: []string{
-						"errComma",
-					},
-				},
-				recoverExpr: &ruleRefExpr{
-					pos:  position{line: 20, col: 35, offset: 351},
-					name: "ErrID",
-				},
-				failureLabel: []string{
-					"errId",
-				},
-			},
-		},
-		{
-			name: "List",
-			pos:  position{line: 21, col: 1, offset: 357},
-			expr: &choiceExpr{
-				pos: position{line: 21, col: 8, offset: 366},
-				alternatives: []interface{}{
-					&notExpr{
-						pos: position{line: 21, col: 8, offset: 366},
-						expr: &anyMatcher{
-							line: 21, col: 9, offset: 367,
-						},
-					},
-					&actionExpr{
-						pos: position{line: 21, col: 13, offset: 371},
-						run: (*parser).callonList4,
-						expr: &seqExpr{
-							pos: position{line: 21, col: 13, offset: 371},
-							exprs: []interface{}{
-								&ruleRefExpr{
-									pos:  position{line: 21, col: 13, offset: 371},
-									name: "Comma",
-								},
-								&labeledExpr{
-									pos:   position{line: 21, col: 19, offset: 377},
-									label: "id",
-									expr: &ruleRefExpr{
-										pos:  position{line: 21, col: 22, offset: 380},
-										name: "ID",
-									},
-								},
-								&labeledExpr{
-									pos:   position{line: 21, col: 25, offset: 383},
-									label: "list",
-									expr: &ruleRefExpr{
-										pos:  position{line: 21, col: 30, offset: 388},
-										name: "List",
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "ID",
-			pos:  position{line: 24, col: 1, offset: 422},
-			expr: &choiceExpr{
-				pos: position{line: 24, col: 6, offset: 429},
-				alternatives: []interface{}{
-					&actionExpr{
-						pos: position{line: 24, col: 6, offset: 429},
-						run: (*parser).callonID2,
-						expr: &seqExpr{
-							pos: position{line: 24, col: 6, offset: 429},
-							exprs: []interface{}{
-								&ruleRefExpr{
-									pos:  position{line: 24, col: 6, offset: 429},
-									name: "Sp",
-								},
-								&oneOrMoreExpr{
-									pos: position{line: 24, col: 9, offset: 432},
-									expr: &charClassMatcher{
-										pos:        position{line: 24, col: 9, offset: 432},
-										val:        "[a-z]",
-										ranges:     []rune{'a', 'z'},
-										ignoreCase: false,
-										inverted:   false,
-									},
-								},
-							},
-						},
-					},
-					&throwExpr{
-						pos:   position{line: 26, col: 5, offset: 505},
-						label: "errId",
-					},
-				},
-			},
-		},
-		{
-			name: "Comma",
-			pos:  position{line: 27, col: 1, offset: 514},
-			expr: &choiceExpr{
-				pos: position{line: 27, col: 9, offset: 524},
-				alternatives: []interface{}{
-					&seqExpr{
-						pos: position{line: 27, col: 9, offset: 524},
-						exprs: []interface{}{
-							&ruleRefExpr{
-								pos:  position{line: 27, col: 9, offset: 524},
-								name: "Sp",
-							},
-							&litMatcher{
-								pos:        position{line: 27, col: 12, offset: 527},
-								val:        ",",
+			name: "Entry1",
+			pos:  position{line: 5, col: 1, offset: 36},
+			expr: &actionExpr{
+				pos: position{line: 5, col: 11, offset: 46},
+				run: (*parser).callonEntry11,
+				expr: &seqExpr{
+					pos: position{line: 5, col: 11, offset: 46},
+					exprs: []interface{}{
+						&oneOrMoreExpr{
+							pos: position{line: 17, col: 6, offset: 171},
+							expr: &litMatcher{
+								pos:        position{line: 17, col: 6, offset: 171},
+								val:        "a",
 								ignoreCase: false,
 							},
 						},
-					},
-					&throwExpr{
-						pos:   position{line: 27, col: 18, offset: 533},
-						label: "errComma",
-					},
-				},
-			},
-		},
-		{
-			name: "Sp",
-			pos:  position{line: 28, col: 1, offset: 545},
-			expr: &zeroOrMoreExpr{
-				pos: position{line: 28, col: 6, offset: 552},
-				expr: &charClassMatcher{
-					pos:        position{line: 28, col: 6, offset: 552},
-					val:        "[ \\t\\r\\n]",
-					chars:      []rune{' ', '\t', '\r', '\n'},
-					ignoreCase: false,
-					inverted:   false,
-				},
-			},
-		},
-		{
-			name: "ErrComma",
-			pos:  position{line: 30, col: 1, offset: 564},
-			expr: &seqExpr{
-				pos: position{line: 30, col: 12, offset: 577},
-				exprs: []interface{}{
-					&andCodeExpr{
-						pos: position{line: 30, col: 12, offset: 577},
-						run: (*parser).callonErrComma2,
-					},
-					&zeroOrMoreExpr{
-						pos: position{line: 32, col: 7, offset: 635},
-						expr: &seqExpr{
-							pos: position{line: 32, col: 9, offset: 637},
-							exprs: []interface{}{
-								&notExpr{
-									pos: position{line: 32, col: 9, offset: 637},
-									expr: &oneOrMoreExpr{
-										pos: position{line: 32, col: 11, offset: 639},
-										expr: &charClassMatcher{
-											pos:        position{line: 32, col: 11, offset: 639},
-											val:        "[a-z]",
-											ranges:     []rune{'a', 'z'},
-											ignoreCase: false,
-											inverted:   false,
-										},
-									},
+						&actionExpr{
+							pos: position{line: 19, col: 6, offset: 191},
+							run: (*parser).callonEntry15,
+							expr: &oneOrMoreExpr{
+								pos: position{line: 19, col: 6, offset: 191},
+								expr: &litMatcher{
+									pos:        position{line: 19, col: 6, offset: 191},
+									val:        "c",
+									ignoreCase: false,
 								},
-								&anyMatcher{
-									line: 32, col: 19, offset: 647,
-								},
+							},
+						},
+						&notExpr{
+							pos: position{line: 23, col: 7, offset: 230},
+							expr: &anyMatcher{
+								line: 23, col: 8, offset: 231,
 							},
 						},
 					},
@@ -238,37 +57,87 @@ var g = &grammar{
 			},
 		},
 		{
-			name: "ErrID",
-			pos:  position{line: 33, col: 1, offset: 651},
+			name: "Entry2",
+			pos:  position{line: 9, col: 1, offset: 80},
 			expr: &actionExpr{
-				pos: position{line: 33, col: 9, offset: 661},
-				run: (*parser).callonErrID1,
+				pos: position{line: 9, col: 11, offset: 90},
+				run: (*parser).callonEntry21,
 				expr: &seqExpr{
-					pos: position{line: 33, col: 9, offset: 661},
+					pos: position{line: 9, col: 11, offset: 90},
 					exprs: []interface{}{
-						&andCodeExpr{
-							pos: position{line: 33, col: 9, offset: 661},
-							run: (*parser).callonErrID3,
+						&oneOrMoreExpr{
+							pos: position{line: 18, col: 6, offset: 181},
+							expr: &litMatcher{
+								pos:        position{line: 18, col: 6, offset: 181},
+								val:        "b",
+								ignoreCase: false,
+							},
 						},
-						&zeroOrMoreExpr{
-							pos: position{line: 35, col: 7, offset: 729},
-							expr: &seqExpr{
-								pos: position{line: 35, col: 9, offset: 731},
-								exprs: []interface{}{
-									&notExpr{
-										pos: position{line: 35, col: 9, offset: 731},
-										expr: &litMatcher{
-											pos:        position{line: 35, col: 11, offset: 733},
-											val:        ",",
-											ignoreCase: false,
-										},
-									},
-									&anyMatcher{
-										line: 35, col: 16, offset: 738,
-									},
+						&actionExpr{
+							pos: position{line: 19, col: 6, offset: 191},
+							run: (*parser).callonEntry25,
+							expr: &oneOrMoreExpr{
+								pos: position{line: 19, col: 6, offset: 191},
+								expr: &litMatcher{
+									pos:        position{line: 19, col: 6, offset: 191},
+									val:        "c",
+									ignoreCase: false,
 								},
 							},
 						},
+						&notExpr{
+							pos: position{line: 23, col: 7, offset: 230},
+							expr: &anyMatcher{
+								line: 23, col: 8, offset: 231,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Entry3",
+			pos:  position{line: 13, col: 1, offset: 124},
+			expr: &actionExpr{
+				pos: position{line: 13, col: 11, offset: 134},
+				run: (*parser).callonEntry31,
+				expr: &seqExpr{
+					pos: position{line: 13, col: 11, offset: 134},
+					exprs: []interface{}{
+						&actionExpr{
+							pos: position{line: 19, col: 6, offset: 191},
+							run: (*parser).callonEntry33,
+							expr: &oneOrMoreExpr{
+								pos: position{line: 19, col: 6, offset: 191},
+								expr: &litMatcher{
+									pos:        position{line: 19, col: 6, offset: 191},
+									val:        "c",
+									ignoreCase: false,
+								},
+							},
+						},
+						&notExpr{
+							pos: position{line: 23, col: 7, offset: 230},
+							expr: &anyMatcher{
+								line: 23, col: 8, offset: 231,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "C",
+			pos:  position{line: 19, col: 1, offset: 186},
+			expr: &actionExpr{
+				pos: position{line: 19, col: 6, offset: 191},
+				run: (*parser).callonC1,
+				expr: &oneOrMoreExpr{
+					pos: position{line: 19, col: 6, offset: 191},
+					expr: &litMatcher{
+						pos:        position{line: 19, col: 6, offset: 191},
+						val:        "c",
+						ignoreCase: false,
 					},
 				},
 			},
@@ -276,66 +145,74 @@ var g = &grammar{
 	},
 }
 
-func (c *current) onS3(id, list interface{}) (interface{}, error) {
-	return ids(id, list)
+func (c *current) onEntry15() (interface{}, error) {
+	return c.text, nil
 }
 
-func (p *parser) callonS3() (interface{}, error) {
+func (p *parser) callonEntry15() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onS3(stack["id"], stack["list"])
+	return p.cur.onEntry15()
 }
 
-func (c *current) onList4(id, list interface{}) (interface{}, error) {
-	return ids(id, list)
+func (c *current) onEntry11() (interface{}, error) {
+	return c.text, nil
 }
 
-func (p *parser) callonList4() (interface{}, error) {
+func (p *parser) callonEntry11() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onList4(stack["id"], stack["list"])
+	return p.cur.onEntry11()
 }
 
-func (c *current) onID2() (interface{}, error) {
-	return strings.TrimLeft(string(c.text), " \t\r\n"), nil
+func (c *current) onEntry25() (interface{}, error) {
+	return c.text, nil
 }
 
-func (p *parser) callonID2() (interface{}, error) {
+func (p *parser) callonEntry25() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onID2()
+	return p.cur.onEntry25()
 }
 
-func (c *current) onErrComma2() (bool, error) {
-	return true, errors.New("expecting ','")
-
+func (c *current) onEntry21() (interface{}, error) {
+	return c.text, nil
 }
 
-func (p *parser) callonErrComma2() (bool, error) {
+func (p *parser) callonEntry21() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onErrComma2()
+	return p.cur.onEntry21()
 }
 
-func (c *current) onErrID3() (bool, error) {
-	return true, errors.New("expecting an identifier")
-
+func (c *current) onEntry33() (interface{}, error) {
+	return c.text, nil
 }
 
-func (p *parser) callonErrID3() (bool, error) {
+func (p *parser) callonEntry33() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onErrID3()
+	return p.cur.onEntry33()
 }
 
-func (c *current) onErrID1() (interface{}, error) {
-	return "NONE", nil
+func (c *current) onEntry31() (interface{}, error) {
+	return c.text, nil
 }
 
-func (p *parser) callonErrID1() (interface{}, error) {
+func (p *parser) callonEntry31() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onErrID1()
+	return p.cur.onEntry31()
+}
+
+func (c *current) onC1() (interface{}, error) {
+	return c.text, nil
+}
+
+func (p *parser) callonC1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onC1()
 }
 
 var (

@@ -122,6 +122,10 @@ var (
 	// errNoRule is returned when the grammar to parse has no rule.
 	errNoRule = errors.New("grammar has no rule")
 
+	// errInvalidEntrypoint is returned when the specified entrypoint rule
+	// does not exit.
+	errInvalidEntrypoint = errors.New("invalid entrypoint")
+
 	// errInvalidEncoding is returned when the source is not properly
 	// utf8-encoded.
 	errInvalidEncoding = errors.New("invalid encoding")
@@ -145,6 +149,24 @@ func MaxExpressions(maxExprCnt uint64) Option {
 		oldMaxExprCnt := p.maxExprCnt
 		p.maxExprCnt = maxExprCnt
 		return MaxExpressions(oldMaxExprCnt)
+	}
+}
+
+// Entrypoint creates an Option to set the rule name to use as entrypoint.
+// The rule name must have been specified in the -alternate-entrypoints
+// if generating the parser with the -optimize-grammar flag, otherwise
+// it may have been optimized out. Passing an empty string sets the
+// entrypoint to the first rule in the grammar.
+//
+// The default is to start parsing at the first rule in the grammar.
+func Entrypoint(ruleName string) Option {
+	return func(p *parser) Option {
+		oldEntrypoint := p.entrypoint
+		p.entrypoint = ruleName
+		if ruleName == "" {
+			p.entrypoint = g.rules[0].name
+		}
+		return Entrypoint(oldEntrypoint)
 	}
 }
 
@@ -456,6 +478,8 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		maxFailPos:      position{col: 1, line: 1},
 		maxFailExpected: make([]string, 0, 20),
 		Stats:           &stats,
+		// start rule is rule [0] unless an alternate entrypoint is specified
+		entrypoint: g.rules[0].name,
 	}
 	p.setOptions(opts)
 
@@ -534,6 +558,8 @@ type parser struct {
 
 	// max number of expressions to be parsed
 	maxExprCnt uint64
+	// entrypoint for the parser
+	entrypoint string
 
 	*Stats
 
@@ -759,9 +785,14 @@ func (p *parser) parse(g *grammar) (val interface{}, err error) {
 		}()
 	}
 
-	// start rule is rule [0]
+	startRule, ok := p.rules[p.entrypoint]
+	if !ok {
+		p.addErr(errInvalidEntrypoint)
+		return nil, p.errs.err()
+	}
+
 	p.read() // advance to first rune
-	val, ok := p.parseRule(g.rules[0])
+	val, ok = p.parseRule(startRule)
 	if !ok {
 		if len(*p.errs) == 0 {
 			// If parsing fails, but no errors have been recorded, the expected values
