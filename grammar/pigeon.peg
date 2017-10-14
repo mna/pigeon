@@ -165,17 +165,26 @@ RuleRefExpr ← name:IdentifierName !( __ ( StringLiteral __ )? RuleDefOp ) {
     return ref, nil
 }
 SemanticPredExpr ← op:SemanticPredOp __ code:CodeBlock {
-    opStr := op.(string)
-    if opStr == "&" {
+    switch op.(string) {
+    case "#":
+        state := ast.NewStateCodeExpr(c.astPos())
+        state.Code = code.(*ast.CodeBlock)
+        return state, nil
+
+    case "&":
         and := ast.NewAndCodeExpr(c.astPos())
         and.Code = code.(*ast.CodeBlock)
         return and, nil
+
+    // case "!":
+    default:
+        not := ast.NewNotCodeExpr(c.astPos())
+        not.Code = code.(*ast.CodeBlock)
+        return not, nil
+
     }
-    not := ast.NewNotCodeExpr(c.astPos())
-    not.Code = code.(*ast.CodeBlock)
-    return not, nil
 }
-SemanticPredOp ← ( '&' / '!' ) {
+SemanticPredOp ← ( '#' / '&' / '!' ) {
     return string(c.text), nil
 }
 

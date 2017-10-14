@@ -79,6 +79,9 @@ $(EXAMPLES_DIR)/json/optimized-grammar/json.go: $(EXAMPLES_DIR)/json/json.peg $(
 $(EXAMPLES_DIR)/calculator/calculator.go: $(EXAMPLES_DIR)/calculator/calculator.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
+$(EXAMPLES_DIR)/indentation/indentation.go: $(EXAMPLES_DIR)/indentation/indentation.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
 $(TEST_DIR)/andnot/andnot.go: $(TEST_DIR)/andnot/andnot.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
@@ -106,6 +109,9 @@ $(TEST_DIR)/global_store/global_store.go: $(TEST_DIR)/global_store/global_store.
 $(TEST_DIR)/goto/goto.go: $(TEST_DIR)/goto/goto.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
+$(TEST_DIR)/goto_state/goto_state.go: $(TEST_DIR)/goto_state/goto_state.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
 $(TEST_DIR)/max_expr_cnt/maxexpr.go: $(TEST_DIR)/max_expr_cnt/maxexpr.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
@@ -117,6 +123,15 @@ $(TEST_DIR)/thrownrecover/thrownrecover.go: $(TEST_DIR)/thrownrecover/thrownreco
 
 $(TEST_DIR)/alternate_entrypoint/altentry.go: $(TEST_DIR)/alternate_entrypoint/altentry.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -optimize-grammar -alternate-entrypoints Entry2,Entry3,C $< > $@
+
+$(TEST_DIR)/state/state.go: $(TEST_DIR)/state/state.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
+$(TEST_DIR)/stateclone/stateclone.go: $(TEST_DIR)/stateclone/stateclone.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
+$(TEST_DIR)/statereadonly/statereadonly.go: $(TEST_DIR)/statereadonly/statereadonly.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
 
 lint:
 	golint ./...

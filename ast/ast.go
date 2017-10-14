@@ -358,6 +358,27 @@ func (r *RuleRefExpr) String() string {
 	return fmt.Sprintf("%s: %T{Name: %v}", r.p, r, r.Name)
 }
 
+// StateCodeExpr is an expression which can modify the internal state of the parser.
+type StateCodeExpr struct {
+	p      Pos
+	Code   *CodeBlock
+	FuncIx int
+}
+
+// NewStateCodeExpr creates a new state (#) code expression at the specified
+// position.
+func NewStateCodeExpr(p Pos) *StateCodeExpr {
+	return &StateCodeExpr{p: p}
+}
+
+// Pos returns the starting position of the node.
+func (s *StateCodeExpr) Pos() Pos { return s.p }
+
+// String returns the textual representation of a node.
+func (s *StateCodeExpr) String() string {
+	return fmt.Sprintf("%s: %T{Code: %v}", s.p, s, s.Code)
+}
+
 // AndCodeExpr is a zero-length matcher that is considered a match if the
 // code block returns true.
 type AndCodeExpr struct {
