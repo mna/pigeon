@@ -1,5 +1,5 @@
 {
-  package alternate_entrypoint
+  package altentry
 }
 
 Entry1 <- A C EOF {

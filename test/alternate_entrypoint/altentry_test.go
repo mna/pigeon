@@ -1,4 +1,4 @@
-package alternate_entrypoint
+package altentry
 
 import (
 	"strings"
