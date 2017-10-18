@@ -15,47 +15,79 @@ import (
 	"unicode/utf8"
 )
 
+func joinBytes(a interface{}) []byte {
+	var A []byte
+	for _, x := range a.([]interface{}) {
+		A = append(A, x.([]uint8)...)
+	}
+	return A
+}
+
 var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Program",
-			pos:  position{line: 5, col: 1, offset: 22},
-			expr: &seqExpr{
-				pos: position{line: 5, col: 12, offset: 33},
-				exprs: []interface{}{
-					&litMatcher{
-						pos:        position{line: 5, col: 12, offset: 33},
-						val:        "\n",
-						ignoreCase: false,
-					},
-					&oneOrMoreExpr{
-						pos: position{line: 5, col: 17, offset: 38},
-						expr: &charClassMatcher{
-							pos:        position{line: 5, col: 17, offset: 38},
-							val:        "[^\\n]",
-							chars:      []rune{'\n'},
+			pos:  position{line: 13, col: 1, offset: 208},
+			expr: &actionExpr{
+				pos: position{line: 13, col: 12, offset: 219},
+				run: (*parser).callonProgram1,
+				expr: &seqExpr{
+					pos: position{line: 13, col: 12, offset: 219},
+					exprs: []interface{}{
+						&litMatcher{
+							pos:        position{line: 13, col: 12, offset: 219},
+							val:        "\n",
 							ignoreCase: false,
-							inverted:   true,
 						},
-					},
-					&litMatcher{
-						pos:        position{line: 5, col: 24, offset: 45},
-						val:        "\n",
-						ignoreCase: false,
-					},
-					&anyMatcher{
-						line: 5, col: 29, offset: 50,
-					},
-					&notExpr{
-						pos: position{line: 5, col: 31, offset: 52},
-						expr: &anyMatcher{
-							line: 5, col: 32, offset: 53,
+						&labeledExpr{
+							pos:   position{line: 13, col: 17, offset: 224},
+							label: "a",
+							expr: &oneOrMoreExpr{
+								pos: position{line: 13, col: 19, offset: 226},
+								expr: &charClassMatcher{
+									pos:        position{line: 13, col: 19, offset: 226},
+									val:        "[^\\n]",
+									chars:      []rune{'\n'},
+									ignoreCase: false,
+									inverted:   true,
+								},
+							},
+						},
+						&litMatcher{
+							pos:        position{line: 13, col: 26, offset: 233},
+							val:        "\n",
+							ignoreCase: false,
+						},
+						&labeledExpr{
+							pos:   position{line: 13, col: 31, offset: 238},
+							label: "b",
+							expr: &anyMatcher{
+								line: 13, col: 33, offset: 240,
+							},
+						},
+						&notExpr{
+							pos: position{line: 13, col: 35, offset: 242},
+							expr: &anyMatcher{
+								line: 13, col: 36, offset: 243,
+							},
 						},
 					},
 				},
 			},
 		},
 	},
+}
+
+func (c *current) onProgram1(a, b interface{}) (interface{}, error) {
+	return [][]byte{
+		c.text, joinBytes(a), b.([]uint8),
+	}, nil
+}
+
+func (p *parser) callonProgram1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onProgram1(stack["a"], stack["b"])
 }
 
 var (
@@ -164,6 +196,20 @@ func Memoize(b bool) Option {
 		old := p.memoize
 		p.memoize = b
 		return Memoize(old)
+	}
+}
+
+// AllowInvalidUTF8 creates an Option to allow invalid UTF-8 bytes.
+// Every invalid UTF-8 byte is treated as a utf8.RuneError (U+FFFD)
+// by character class matchers and is matched by the any matcher.
+// The returned matched value, c.text and c.offset are NOT affected.
+//
+// The default is false.
+func AllowInvalidUTF8(b bool) Option {
+	return func(p *parser) Option {
+		old := p.allowInvalidUTF8
+		p.allowInvalidUTF8 = b
+		return AllowInvalidUTF8(old)
 	}
 }
 
@@ -529,6 +575,8 @@ type parser struct {
 	// entrypoint for the parser
 	entrypoint string
 
+	allowInvalidUTF8 bool
+
 	*Stats
 
 	choiceNoMatch string
@@ -676,7 +724,9 @@ func (p *parser) read() {
 	}
 
 	if rn == utf8.RuneError && n == 1 { // see utf8.DecodeRune
-		p.addErr(errInvalidEncoding)
+		if !p.allowInvalidUTF8 {
+			p.addErr(errInvalidEncoding)
+		}
 	}
 }
 
@@ -998,14 +1048,15 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 		defer p.out(p.in("parseAnyMatcher"))
 	}
 
-	if p.pt.rn != utf8.RuneError || p.pt.w > 1 { // see utf8.DecodeRune
-		start := p.pt
-		p.read()
-		p.failAt(true, start.position, ".")
-		return p.sliceFrom(start), true
+	if p.pt.rn == utf8.RuneError && p.pt.w == 0 {
+		// EOF - see utf8.DecodeRune
+		p.failAt(false, p.pt.position, ".")
+		return nil, false
 	}
-	p.failAt(false, p.pt.position, ".")
-	return nil, false
+	start := p.pt
+	p.read()
+	p.failAt(true, start.position, ".")
+	return p.sliceFrom(start), true
 }
 
 func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool) {

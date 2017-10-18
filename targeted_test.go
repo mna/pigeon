@@ -44,7 +44,7 @@ func TestParseAnyMatcher(t *testing.T) {
 		{"ab", []byte("a")},
 		{"\u2190\U00001100", []byte("\u2190")},
 		{"\x0d", []byte("\x0d")},
-		{"\xfa", nil},
+		{"\xfa", []byte("\xfa")},
 		{"\nab", []byte("\n")},
 	}
 

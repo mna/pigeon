@@ -424,6 +424,7 @@ as a package with public functions to parse input text. The exported API is:
 	- Parse(string, []byte, ...Option) (interface{}, error)
 	- ParseFile(string, ...Option) (interface{}, error)
 	- ParseReader(string, io.Reader, ...Option) (interface{}, error)
+	- AllowInvalidUTF8(bool) Option
 	- Debug(bool) Option
 	- Entrypoint(string) Option
 	- GlobalStore(string, interface{}) Option
