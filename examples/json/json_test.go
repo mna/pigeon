@@ -84,13 +84,13 @@ func TestChoiceAltStatistics(t *testing.T) {
 		{
 			json: `{}`,
 			expectedStats: map[string]map[string]int{
-				"Bool 92:8": map[string]int{
+				"Bool 92:8": {
 					"no match": 1,
 				},
-				"Integer 68:11": map[string]int{
+				"Integer 68:11": {
 					"no match": 1,
 				},
-				"Value 29:15": map[string]int{
+				"Value 29:15": {
 					"1":        1,
 					"no match": 1,
 				},
@@ -99,18 +99,18 @@ func TestChoiceAltStatistics(t *testing.T) {
 		{
 			json: `{ "string": "string", "number": 123 }`,
 			expectedStats: map[string]map[string]int{
-				"Integer 68:11": map[string]int{
+				"Integer 68:11": {
 					"2":        1,
 					"no match": 2,
 				},
-				"Bool 92:8": map[string]int{
+				"Bool 92:8": {
 					"no match": 1,
 				},
-				"String 72:16": map[string]int{
+				"String 72:16": {
 					"1":        18,
 					"no match": 3,
 				},
-				"Value 29:15": map[string]int{
+				"Value 29:15": {
 					"1":        1,
 					"3":        1,
 					"4":        1,

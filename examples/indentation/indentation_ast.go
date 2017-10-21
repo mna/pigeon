@@ -31,7 +31,7 @@ func main() {
 
 var lvalues = make(map[string]int)
 
-// Statement is the smallest standalone element 
+// Statement is the smallest standalone element
 type Statement interface {
 	exec() error
 }
@@ -77,7 +77,7 @@ func (n StatementsNode) exec() error {
 	return nil
 }
 
-// ReturnNode return value to the caller. 
+// ReturnNode return value to the caller.
 type ReturnNode struct {
 	arg IdentifierNode
 }
@@ -90,7 +90,7 @@ func (n ReturnNode) exec() (int, error) {
 	return v, err
 }
 
-// IfNode controls conditional branching. 
+// IfNode controls conditional branching.
 type IfNode struct {
 	arg        LogicalExpressionNode
 	statements StatementsNode
