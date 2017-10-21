@@ -685,6 +685,20 @@ func Memoize(b bool) Option {
 	}
 }
 
+// AllowInvalidUTF8 creates an Option to allow invalid UTF-8 bytes.
+// Every invalid UTF-8 byte is treated as a utf8.RuneError (U+FFFD)
+// by character class matchers and is matched by the any matcher.
+// The returned matched value, c.text and c.offset are NOT affected.
+//
+// The default is false.
+func AllowInvalidUTF8(b bool) Option {
+	return func(p *parser) Option {
+		old := p.allowInvalidUTF8
+		p.allowInvalidUTF8 = b
+		return AllowInvalidUTF8(old)
+	}
+}
+
 // Recover creates an Option to set the recover flag to b. When set to
 // true, this causes the parser to recover from panics and convert it
 // to an error. Setting it to false can be useful while debugging to
@@ -1047,6 +1061,8 @@ type parser struct {
 	// entrypoint for the parser
 	entrypoint string
 
+	allowInvalidUTF8 bool
+
 	*Stats
 
 	choiceNoMatch string
@@ -1194,7 +1210,9 @@ func (p *parser) read() {
 	}
 
 	if rn == utf8.RuneError && n == 1 { // see utf8.DecodeRune
-		p.addErr(errInvalidEncoding)
+		if !p.allowInvalidUTF8 {
+			p.addErr(errInvalidEncoding)
+		}
 	}
 }
 
@@ -1516,14 +1534,15 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 		defer p.out(p.in("parseAnyMatcher"))
 	}
 
-	if p.pt.rn != utf8.RuneError || p.pt.w > 1 { // see utf8.DecodeRune
-		start := p.pt
-		p.read()
-		p.failAt(true, start.position, ".")
-		return p.sliceFrom(start), true
+	if p.pt.rn == utf8.RuneError && p.pt.w == 0 {
+		// EOF - see utf8.DecodeRune
+		p.failAt(false, p.pt.position, ".")
+		return nil, false
 	}
-	p.failAt(false, p.pt.position, ".")
-	return nil, false
+	start := p.pt
+	p.read()
+	p.failAt(true, start.position, ".")
+	return p.sliceFrom(start), true
 }
 
 func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool) {

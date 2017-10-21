@@ -1,6 +1,18 @@
 {
     package main
+
+    func joinBytes(a interface{}) []byte {
+        var A []byte
+        for _, x := range a.([]interface{}) {
+            A = append(A, x.([]uint8)...)
+        }
+        return A
+    }
 }
 
-Program <- '\n' [^\n]+ '\n' . !.
+Program <- '\n' a:[^\n]+ '\n' b:. !. {
+    return [][]byte{
+        c.text, joinBytes(a), b.([]uint8),
+    }, nil
+}
 
