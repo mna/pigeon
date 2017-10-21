@@ -34,7 +34,7 @@ func TestRuneError(t *testing.T) {
 		t.Error("Unexpected error:", err)
 	}
 	if !reflect.DeepEqual(v, [][]byte{
-		invalid, []byte{0xff, 0xfe, 0xfd}, []byte{0xfe},
+		invalid, {0xff, 0xfe, 0xfd}, {0xfe},
 	}) {
 		t.Error("Wrong result:", v)
 	}
