@@ -125,7 +125,7 @@ $(TEST_DIR)/alternate_entrypoint/altentry.go: $(TEST_DIR)/alternate_entrypoint/a
 	$(BINDIR)/pigeon -optimize-grammar -alternate-entrypoints Entry2,Entry3,C $< > $@
 
 $(TEST_DIR)/state/state.go: $(TEST_DIR)/state/state.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon $< > $@
+	$(BINDIR)/pigeon -optimize-grammar $< > $@
 
 $(TEST_DIR)/stateclone/stateclone.go: $(TEST_DIR)/stateclone/stateclone.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
