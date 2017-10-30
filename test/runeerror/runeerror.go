@@ -1,4 +1,4 @@
-package main
+package runeerror
 
 import (
 	"bytes"
@@ -27,25 +27,25 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Program",
-			pos:  position{line: 13, col: 1, offset: 208},
+			pos:  position{line: 13, col: 1, offset: 213},
 			expr: &actionExpr{
-				pos: position{line: 13, col: 12, offset: 219},
+				pos: position{line: 13, col: 12, offset: 224},
 				run: (*parser).callonProgram1,
 				expr: &seqExpr{
-					pos: position{line: 13, col: 12, offset: 219},
+					pos: position{line: 13, col: 12, offset: 224},
 					exprs: []interface{}{
 						&litMatcher{
-							pos:        position{line: 13, col: 12, offset: 219},
+							pos:        position{line: 13, col: 12, offset: 224},
 							val:        "\n",
 							ignoreCase: false,
 						},
 						&labeledExpr{
-							pos:   position{line: 13, col: 17, offset: 224},
+							pos:   position{line: 13, col: 17, offset: 229},
 							label: "a",
 							expr: &oneOrMoreExpr{
-								pos: position{line: 13, col: 19, offset: 226},
+								pos: position{line: 13, col: 19, offset: 231},
 								expr: &charClassMatcher{
-									pos:        position{line: 13, col: 19, offset: 226},
+									pos:        position{line: 13, col: 19, offset: 231},
 									val:        "[^\\n]",
 									chars:      []rune{'\n'},
 									ignoreCase: false,
@@ -54,21 +54,21 @@ var g = &grammar{
 							},
 						},
 						&litMatcher{
-							pos:        position{line: 13, col: 26, offset: 233},
+							pos:        position{line: 13, col: 26, offset: 238},
 							val:        "\n",
 							ignoreCase: false,
 						},
 						&labeledExpr{
-							pos:   position{line: 13, col: 31, offset: 238},
+							pos:   position{line: 13, col: 31, offset: 243},
 							label: "b",
 							expr: &anyMatcher{
-								line: 13, col: 33, offset: 240,
+								line: 13, col: 33, offset: 245,
 							},
 						},
 						&notExpr{
-							pos: position{line: 13, col: 35, offset: 242},
+							pos: position{line: 13, col: 35, offset: 247},
 							expr: &anyMatcher{
-								line: 13, col: 36, offset: 243,
+								line: 13, col: 36, offset: 248,
 							},
 						},
 					},

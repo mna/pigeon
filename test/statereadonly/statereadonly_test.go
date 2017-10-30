@@ -1,4 +1,4 @@
-package main
+package statereadonly
 
 import "testing"
 

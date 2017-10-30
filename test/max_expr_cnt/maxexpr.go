@@ -1,4 +1,4 @@
-package main
+package maxexprcnt
 
 import (
 	"bytes"
@@ -15,16 +15,13 @@ import (
 	"unicode/utf8"
 )
 
-func main() {
-}
-
 var g = &grammar{
 	rules: []*rule{
 		{
 			name: "infinite_rule",
-			pos:  position{line: 9, col: 1, offset: 76},
+			pos:  position{line: 6, col: 1, offset: 53},
 			expr: &ruleRefExpr{
-				pos:  position{line: 9, col: 17, offset: 92},
+				pos:  position{line: 6, col: 17, offset: 69},
 				name: "infinite_rule",
 			},
 		},
