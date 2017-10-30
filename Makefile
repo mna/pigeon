@@ -133,6 +133,9 @@ $(TEST_DIR)/stateclone/stateclone.go: $(TEST_DIR)/stateclone/stateclone.peg $(BI
 $(TEST_DIR)/statereadonly/statereadonly.go: $(TEST_DIR)/statereadonly/statereadonly.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
+$(TEST_DIR)/staterestore/staterestore.go: $(TEST_DIR)/staterestore/staterestore.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
 lint:
 	golint ./...
 	go vet ./...

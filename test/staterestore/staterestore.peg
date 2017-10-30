@@ -1,0 +1,37 @@
+{
+  package main
+
+  func main() {
+    in := os.Stdin
+    if len(os.Args) > 1 {
+      f, err := os.Open(os.Args[1])
+      if err != nil {
+        log.Fatal(err)
+      }
+      defer f.Close()
+      in = f
+    }
+    got, err := ParseReader("", in, Debug(false))
+    fmt.Println(got, err)
+  }
+}
+
+Grammar <- #{ c.state["cnt"] = 0; return nil } Expr _ EOF
+  {
+    return c.state["cnt"], nil
+  }
+
+Z_ <- _ 'Z'
+Expr <- 'f' Z_? Z_* Z_?
+EOL <- '\n'
+  #{
+    cnt := c.state["cnt"].(int)
+    cnt++
+    c.state["cnt"] = cnt
+    return nil
+  }
+
+Comment <- '#' ( !EOL . )*
+_ <- ( EOL / Comment )*
+EOF <- !.
+
