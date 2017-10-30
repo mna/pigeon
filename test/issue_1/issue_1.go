@@ -1,4 +1,4 @@
-package main
+package issue1
 
 import (
 	"bytes"
@@ -15,40 +15,31 @@ import (
 	"unicode/utf8"
 )
 
-func main() {
-	ast, err := Parse("STDIN", []byte("foo"))
-	if err != nil {
-		fmt.Printf("error: %s\n", err)
-		return
-	}
-	fmt.Printf("%+v\n", ast)
-}
-
 var g = &grammar{
 	rules: []*rule{
 		{
 			name: "TableRef",
-			pos:  position{line: 14, col: 1, offset: 174},
+			pos:  position{line: 5, col: 1, offset: 20},
 			expr: &actionExpr{
-				pos: position{line: 14, col: 13, offset: 186},
+				pos: position{line: 5, col: 13, offset: 32},
 				run: (*parser).callonTableRef1,
 				expr: &seqExpr{
-					pos: position{line: 14, col: 13, offset: 186},
+					pos: position{line: 5, col: 13, offset: 32},
 					exprs: []interface{}{
 						&labeledExpr{
-							pos:   position{line: 14, col: 13, offset: 186},
+							pos:   position{line: 5, col: 13, offset: 32},
 							label: "database",
 							expr: &zeroOrOneExpr{
-								pos: position{line: 14, col: 22, offset: 195},
+								pos: position{line: 5, col: 22, offset: 41},
 								expr: &seqExpr{
-									pos: position{line: 14, col: 23, offset: 196},
+									pos: position{line: 5, col: 23, offset: 42},
 									exprs: []interface{}{
 										&ruleRefExpr{
-											pos:  position{line: 14, col: 23, offset: 196},
+											pos:  position{line: 5, col: 23, offset: 42},
 											name: "ID",
 										},
 										&litMatcher{
-											pos:        position{line: 14, col: 26, offset: 199},
+											pos:        position{line: 5, col: 26, offset: 45},
 											val:        ".",
 											ignoreCase: false,
 										},
@@ -57,10 +48,10 @@ var g = &grammar{
 							},
 						},
 						&labeledExpr{
-							pos:   position{line: 14, col: 32, offset: 205},
+							pos:   position{line: 5, col: 32, offset: 51},
 							label: "table",
 							expr: &ruleRefExpr{
-								pos:  position{line: 14, col: 38, offset: 211},
+								pos:  position{line: 5, col: 38, offset: 57},
 								name: "ID",
 							},
 						},
@@ -70,14 +61,14 @@ var g = &grammar{
 		},
 		{
 			name: "ID",
-			pos:  position{line: 15, col: 1, offset: 271},
+			pos:  position{line: 6, col: 1, offset: 117},
 			expr: &actionExpr{
-				pos: position{line: 15, col: 7, offset: 277},
+				pos: position{line: 6, col: 7, offset: 123},
 				run: (*parser).callonID1,
 				expr: &oneOrMoreExpr{
-					pos: position{line: 15, col: 7, offset: 277},
+					pos: position{line: 6, col: 7, offset: 123},
 					expr: &charClassMatcher{
-						pos:        position{line: 15, col: 7, offset: 277},
+						pos:        position{line: 6, col: 7, offset: 123},
 						val:        "[a-z]",
 						ranges:     []rune{'a', 'z'},
 						ignoreCase: false,

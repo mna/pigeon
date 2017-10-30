@@ -1,4 +1,4 @@
-package main
+package globalstore
 
 import (
 	"bytes"
@@ -15,52 +15,43 @@ import (
 	"unicode/utf8"
 )
 
-func main() {
-	ast, err := Parse("STDIN", []byte("iiziid"))
-	if err != nil {
-		fmt.Printf("error: %s\n", err)
-		return
-	}
-	fmt.Printf("%+v\n", ast)
-}
-
 var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Input",
-			pos:  position{line: 14, col: 1, offset: 169},
+			pos:  position{line: 5, col: 1, offset: 25},
 			expr: &actionExpr{
-				pos: position{line: 14, col: 9, offset: 179},
+				pos: position{line: 5, col: 9, offset: 35},
 				run: (*parser).callonInput1,
 				expr: &seqExpr{
-					pos: position{line: 14, col: 9, offset: 179},
+					pos: position{line: 5, col: 9, offset: 35},
 					exprs: []interface{}{
 						&andCodeExpr{
-							pos: position{line: 14, col: 9, offset: 179},
+							pos: position{line: 5, col: 9, offset: 35},
 							run: (*parser).callonInput3,
 						},
 						&oneOrMoreExpr{
-							pos: position{line: 14, col: 89, offset: 259},
+							pos: position{line: 5, col: 89, offset: 115},
 							expr: &choiceExpr{
-								pos: position{line: 14, col: 90, offset: 260},
+								pos: position{line: 5, col: 90, offset: 116},
 								alternatives: []interface{}{
 									&ruleRefExpr{
-										pos:  position{line: 14, col: 90, offset: 260},
+										pos:  position{line: 5, col: 90, offset: 116},
 										name: "increment",
 									},
 									&ruleRefExpr{
-										pos:  position{line: 14, col: 102, offset: 272},
+										pos:  position{line: 5, col: 102, offset: 128},
 										name: "decrement",
 									},
 									&ruleRefExpr{
-										pos:  position{line: 14, col: 114, offset: 284},
+										pos:  position{line: 5, col: 114, offset: 140},
 										name: "zero",
 									},
 								},
 							},
 						},
 						&ruleRefExpr{
-							pos:  position{line: 14, col: 121, offset: 291},
+							pos:  position{line: 5, col: 121, offset: 147},
 							name: "EOF",
 						},
 					},
@@ -69,17 +60,17 @@ var g = &grammar{
 		},
 		{
 			name: "increment",
-			pos:  position{line: 16, col: 1, offset: 342},
+			pos:  position{line: 7, col: 1, offset: 198},
 			expr: &seqExpr{
-				pos: position{line: 16, col: 13, offset: 356},
+				pos: position{line: 7, col: 13, offset: 212},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 16, col: 13, offset: 356},
+						pos:        position{line: 7, col: 13, offset: 212},
 						val:        "i",
 						ignoreCase: false,
 					},
 					&andCodeExpr{
-						pos: position{line: 16, col: 17, offset: 360},
+						pos: position{line: 7, col: 17, offset: 216},
 						run: (*parser).callonincrement3,
 					},
 				},
@@ -87,17 +78,17 @@ var g = &grammar{
 		},
 		{
 			name: "decrement",
-			pos:  position{line: 17, col: 1, offset: 443},
+			pos:  position{line: 8, col: 1, offset: 299},
 			expr: &seqExpr{
-				pos: position{line: 17, col: 13, offset: 457},
+				pos: position{line: 8, col: 13, offset: 313},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 17, col: 13, offset: 457},
+						pos:        position{line: 8, col: 13, offset: 313},
 						val:        "d",
 						ignoreCase: false,
 					},
 					&andCodeExpr{
-						pos: position{line: 17, col: 17, offset: 461},
+						pos: position{line: 8, col: 17, offset: 317},
 						run: (*parser).callondecrement3,
 					},
 				},
@@ -105,17 +96,17 @@ var g = &grammar{
 		},
 		{
 			name: "zero",
-			pos:  position{line: 18, col: 1, offset: 544},
+			pos:  position{line: 9, col: 1, offset: 400},
 			expr: &seqExpr{
-				pos: position{line: 18, col: 8, offset: 553},
+				pos: position{line: 9, col: 8, offset: 409},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 18, col: 8, offset: 553},
+						pos:        position{line: 9, col: 8, offset: 409},
 						val:        "z",
 						ignoreCase: false,
 					},
 					&andCodeExpr{
-						pos: position{line: 18, col: 12, offset: 557},
+						pos: position{line: 9, col: 12, offset: 413},
 						run: (*parser).callonzero3,
 					},
 				},
@@ -123,11 +114,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 19, col: 1, offset: 608},
+			pos:  position{line: 10, col: 1, offset: 464},
 			expr: &notExpr{
-				pos: position{line: 19, col: 7, offset: 616},
+				pos: position{line: 10, col: 7, offset: 472},
 				expr: &anyMatcher{
-					line: 19, col: 8, offset: 617,
+					line: 10, col: 8, offset: 473,
 				},
 			},
 		},

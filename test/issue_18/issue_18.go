@@ -1,4 +1,4 @@
-package main
+package issue18
 
 import (
 	"bytes"
@@ -44,36 +44,36 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Program",
-			pos:  position{line: 32, col: 1, offset: 318},
+			pos:  position{line: 32, col: 1, offset: 321},
 			expr: &seqExpr{
-				pos: position{line: 32, col: 12, offset: 329},
+				pos: position{line: 32, col: 12, offset: 332},
 				exprs: []interface{}{
 					&ruleRefExpr{
-						pos:  position{line: 32, col: 12, offset: 329},
+						pos:  position{line: 32, col: 12, offset: 332},
 						name: "_",
 					},
 					&zeroOrMoreExpr{
-						pos: position{line: 32, col: 14, offset: 331},
+						pos: position{line: 32, col: 14, offset: 334},
 						expr: &seqExpr{
-							pos: position{line: 32, col: 15, offset: 332},
+							pos: position{line: 32, col: 15, offset: 335},
 							exprs: []interface{}{
 								&ruleRefExpr{
-									pos:  position{line: 32, col: 15, offset: 332},
+									pos:  position{line: 32, col: 15, offset: 335},
 									name: "X",
 								},
 								&ruleRefExpr{
-									pos:  position{line: 32, col: 17, offset: 334},
+									pos:  position{line: 32, col: 17, offset: 337},
 									name: "_",
 								},
 							},
 						},
 					},
 					&ruleRefExpr{
-						pos:  position{line: 32, col: 21, offset: 338},
+						pos:  position{line: 32, col: 21, offset: 341},
 						name: "_",
 					},
 					&ruleRefExpr{
-						pos:  position{line: 32, col: 24, offset: 341},
+						pos:  position{line: 32, col: 24, offset: 344},
 						name: "EOF",
 					},
 				},
@@ -81,9 +81,9 @@ var g = &grammar{
 		},
 		{
 			name: "X",
-			pos:  position{line: 34, col: 1, offset: 346},
+			pos:  position{line: 34, col: 1, offset: 349},
 			expr: &charClassMatcher{
-				pos:        position{line: 34, col: 6, offset: 351},
+				pos:        position{line: 34, col: 6, offset: 354},
 				val:        "[0-9]",
 				ranges:     []rune{'0', '9'},
 				ignoreCase: false,
@@ -93,11 +93,11 @@ var g = &grammar{
 		{
 			name:        "_",
 			displayName: "\"whitespace\"",
-			pos:         position{line: 36, col: 1, offset: 358},
+			pos:         position{line: 36, col: 1, offset: 361},
 			expr: &zeroOrMoreExpr{
-				pos: position{line: 36, col: 19, offset: 376},
+				pos: position{line: 36, col: 19, offset: 379},
 				expr: &charClassMatcher{
-					pos:        position{line: 36, col: 21, offset: 378},
+					pos:        position{line: 36, col: 21, offset: 381},
 					val:        "[ \\t\\r\\n]",
 					chars:      []rune{' ', '\t', '\r', '\n'},
 					ignoreCase: false,
@@ -107,11 +107,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 38, col: 1, offset: 392},
+			pos:  position{line: 38, col: 1, offset: 395},
 			expr: &notExpr{
-				pos: position{line: 38, col: 8, offset: 399},
+				pos: position{line: 38, col: 8, offset: 402},
 				expr: &anyMatcher{
-					line: 38, col: 9, offset: 400,
+					line: 38, col: 9, offset: 403,
 				},
 			},
 		},
