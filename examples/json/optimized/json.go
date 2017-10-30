@@ -1684,7 +1684,6 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 	var vals []interface{}
 
-	state := p.cloneState()
 	for {
 		p.pushV()
 		val, ok := p.parseExpr(expr.expr)
@@ -1692,7 +1691,6 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 		if !ok {
 			if len(vals) == 0 {
 				// did not match once, no match
-				p.restoreState(state)
 				return nil, false
 			}
 			return vals, true
