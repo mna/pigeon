@@ -992,10 +992,13 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 
 	// {{ end }} ==template==
 	pt := p.pt
+	state := p.cloneState()
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
 	p.popV()
+	p.restoreState(state)
 	p.restore(pt)
+
 	return nil, ok
 }
 
@@ -1219,12 +1222,15 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 
 	// {{ end }} ==template==
 	pt := p.pt
+	state := p.cloneState()
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	_, ok := p.parseExpr(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
 	p.restore(pt)
+	p.restoreState(state)
+
 	return nil, !ok
 }
 
@@ -1237,6 +1243,7 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 	// {{ end }} ==template==
 	var vals []interface{}
 
+	state := p.cloneState()
 	for {
 		p.pushV()
 		val, ok := p.parseExpr(expr.expr)
@@ -1244,6 +1251,7 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 		if !ok {
 			if len(vals) == 0 {
 				// did not match once, no match
+				p.restoreState(state)
 				return nil, false
 			}
 			return vals, true
@@ -1296,10 +1304,12 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
+	state := p.cloneState()
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
 			p.restore(pt)
+			p.restoreState(state)
 			return nil, false
 		}
 		vals = append(vals, val)
