@@ -65,9 +65,11 @@ The following options can be specified:
 	optimization potential of the grammar.
 
 	-optimize-parser : boolean, if set, the options Debug, Memoize and Statistics are
-	removed	from the resulting parser as well as the restoration of the global "state"
-	store after action and predicate code blocks. This saves a few cpu cycles, when
-	using the generated parser (default: false).
+	removed	from the resulting parser. The global "state" is optimized as well by
+	either removing all related code if no state change expression is present in the
+	grammar or by removing the restoration of the global "state" store after action
+	and predicate code blocks. This saves a few cpu cycles, when using the generated
+	parser (default: false).
 
 	-x : boolean, if set, do not build the parser, just parse the input grammar
 	(default: false).
@@ -302,7 +304,7 @@ Predicate code blocks are code blocks declared immediately after the and "&"
 or the not "!" operators. Like action code blocks, predicate code blocks
 are turned into a method on the "*current" type in the generated source code.
 The method receives any labeled expression's value as argument (as interface{})
-and must return two values, the first being a bool and the second an error.
+and must return two opt, the first being a bool and the second an error.
 If a non-nil error is returned, it is added to the list of errors that the
 parser will return. E.g.:
 	RuleAB = [ab]i+ &{

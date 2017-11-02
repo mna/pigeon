@@ -154,6 +154,8 @@ func GlobalStore(key string, value interface{}) Option {
 	}
 }
 
+// ==template== {{ if or .GlobalState (not .Optimize) }}
+
 // InitState creates an Option to set a key to a certain value in
 // the global "state" store.
 func InitState(key string, value interface{}) Option {
@@ -163,6 +165,8 @@ func InitState(key string, value interface{}) Option {
 		return InitState(key, old)
 	}
 }
+
+// {{ end }} ==template==
 
 // ParseFile parses the file identified by filename.
 func ParseFile(filename string, opts ...Option) (i interface{}, err error) {
@@ -216,10 +220,14 @@ type current struct {
 	pos  position // start position of the match
 	text []byte   // raw text of the match
 
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
+
 	// state is a store for arbitrary key,value pairs that the user wants to be
 	// tied to the backtracking of the parser.
 	// This is always rolled back if a parsing rule fails.
 	state storeDict
+
+	// {{ end }} ==template==
 
 	// globalStore is a general store for the user to store arbitrary key-value
 	// pairs that they need to manage and that they do not want tied to the
@@ -295,10 +303,14 @@ type ruleRefExpr struct {
 	name string
 }
 
+// ==template== {{ if or .GlobalState (not .Optimize) }}
+
 type stateCodeExpr struct {
 	pos position
 	run func(*parser) error
 }
+
+// {{ end }} ==template==
 
 type andCodeExpr struct {
 	pos position
@@ -402,7 +414,9 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		pt:       savepoint{position: position{line: 1}},
 		recover:  true,
 		cur: current{
-			state:       make(storeDict),
+			// ==template== {{ if or .GlobalState (not .Optimize) }}
+			state: make(storeDict),
+			// {{ end }} ==template==
 			globalStore: make(storeDict),
 		},
 		maxFailPos:      position{col: 1, line: 1},
@@ -410,7 +424,9 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		Stats:           &stats,
 		// start rule is rule [0] unless an alternate entrypoint is specified
 		entrypoint: g.rules[0].name,
+		// ==template== {{ if or .GlobalState (not .Optimize) }}
 		emptyState: make(storeDict),
+		// {{ end }} ==template==
 	}
 	p.setOptions(opts)
 
@@ -665,6 +681,8 @@ func (p *parser) restore(pt savepoint) {
 	p.pt = pt
 }
 
+// ==template== {{ if or .GlobalState (not .Optimize) }}
+
 // Cloner is implemented by any value that has a Clone method, which returns a
 // copy of the value. This is mainly used for types which are not passed by
 // value (e.g map, slice, chan) or structs that contain such types.
@@ -712,6 +730,8 @@ func (p *parser) restoreState(state storeDict) {
 	// {{ end }} ==template==
 	p.cur.state = state
 }
+
+// {{ end }} ==template==
 
 // get the slice of bytes from the savepoint start to the current position.
 func (p *parser) sliceFrom(start savepoint) []byte {
@@ -915,8 +935,10 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 		val, ok = p.parseRuleRefExpr(expr)
 	case *seqExpr:
 		val, ok = p.parseSeqExpr(expr)
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
 	case *stateCodeExpr:
 		val, ok = p.parseStateCodeExpr(expr)
+	// {{ end }} ==template==
 	case *throwExpr:
 		val, ok = p.parseThrowExpr(expr)
 	case *zeroOrMoreExpr:
@@ -946,14 +968,14 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 	if ok {
 		p.cur.pos = start.position
 		p.cur.text = p.sliceFrom(start)
-		// ==template== {{ if not .Optimize }}
+		// ==template== {{ if or .GlobalState (not .Optimize) }}
 		state := p.cloneState()
 		// {{ end }} ==template==
 		actVal, err := act.run(p)
 		if err != nil {
 			p.addErrAt(err, start.position, []string{})
 		}
-		// ==template== {{ if not .Optimize }}
+		// ==template== {{ if or .GlobalState (not .Optimize) }}
 		p.restoreState(state)
 		// {{ end }} ==template==
 
@@ -973,14 +995,16 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
 		defer p.out(p.in("parseAndCodeExpr"))
 	}
 
-	state := p.cloneState()
-
 	// {{ end }} ==template==
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
+	state := p.cloneState()
+	// {{ end }} ==template==
+
 	ok, err := and.run(p)
 	if err != nil {
 		p.addErr(err)
 	}
-	// ==template== {{ if not .Optimize }}
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
 	p.restoreState(state)
 	// {{ end }} ==template==
 
@@ -1130,7 +1154,10 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		// dummy assignment to prevent compile error if optimized
 		_ = altI
 
+		// ==template== {{ if or .GlobalState (not .Optimize) }}
 		state := p.cloneState()
+		// {{ end }} ==template==
+
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()
@@ -1140,7 +1167,9 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 			// {{ end }} ==template==
 			return val, ok
 		}
+		// ==template== {{ if or .GlobalState (not .Optimize) }}
 		p.restoreState(state)
+		// {{ end }} ==template==
 	}
 	// ==template== {{ if not .Optimize }}
 	p.incChoiceAltCnt(ch, choiceNoMatch)
@@ -1200,6 +1229,8 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 		defer p.out(p.in("parseNotCodeExpr"))
 	}
 
+	// {{ end }} ==template==
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
 	state := p.cloneState()
 
 	// {{ end }} ==template==
@@ -1207,7 +1238,7 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 	if err != nil {
 		p.addErr(err)
 	}
-	// ==template== {{ if not .Optimize }}
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
 	p.restoreState(state)
 	// {{ end }} ==template==
 
@@ -1310,19 +1341,21 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	return vals, true
 }
 
+// ==template== {{ if or .GlobalState (not .Optimize) }}
+
 func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (interface{}, bool) {
-	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseStateCodeExpr"))
 	}
 
-	// {{ end }} ==template==
 	err := state.run(p)
 	if err != nil {
 		p.addErr(err)
 	}
 	return nil, true
 }
+
+// {{ end }} ==template==
 
 func (p *parser) parseThrowExpr(expr *throwExpr) (interface{}, bool) {
 	// ==template== {{ if not .Optimize }}
