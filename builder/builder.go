@@ -104,6 +104,7 @@ type builder struct {
 	recvName              string
 	optimize              bool
 	basicLatinLookupTable bool
+	globalState           bool
 
 	ruleName  string
 	exprIndex int
@@ -498,16 +499,17 @@ func (b *builder) writeSeqExpr(seq *ast.SeqExpr) {
 	b.writelnf("},")
 }
 
-func (b *builder) writeStateCodeExpr(not *ast.StateCodeExpr) {
-	if not == nil {
+func (b *builder) writeStateCodeExpr(state *ast.StateCodeExpr) {
+	if state == nil {
 		b.writelnf("nil,")
 		return
 	}
+	b.globalState = true
 	b.writelnf("&stateCodeExpr{")
-	pos := not.Pos()
-	not.FuncIx = b.exprIndex
+	pos := state.Pos()
+	state.FuncIx = b.exprIndex
 	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
-	b.writelnf("\trun: (*parser).call%s,", b.funcName(not.FuncIx))
+	b.writelnf("\trun: (*parser).call%s,", b.funcName(state.FuncIx))
 	b.writelnf("},")
 }
 
@@ -717,9 +719,11 @@ func (b *builder) writeStaticCode() {
 	params := struct {
 		Optimize              bool
 		BasicLatinLookupTable bool
+		GlobalState           bool
 	}{
 		Optimize:              b.optimize,
 		BasicLatinLookupTable: b.basicLatinLookupTable,
+		GlobalState:           b.globalState,
 	}
 	t := template.Must(template.New("static_code").Parse(staticCode))
 
