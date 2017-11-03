@@ -33,28 +33,28 @@ func main() {
 var g = &grammar{
 	rules: []*rule{
 		{
-			name: "Grammar",
+			name: "TestExpr",
 			pos:  position{line: 19, col: 1, offset: 300},
 			expr: &actionExpr{
-				pos: position{line: 19, col: 12, offset: 311},
-				run: (*parser).callonGrammar1,
+				pos: position{line: 19, col: 13, offset: 312},
+				run: (*parser).callonTestExpr1,
 				expr: &seqExpr{
-					pos: position{line: 19, col: 12, offset: 311},
+					pos: position{line: 19, col: 13, offset: 312},
 					exprs: []interface{}{
 						&stateCodeExpr{
-							pos: position{line: 19, col: 12, offset: 311},
-							run: (*parser).callonGrammar3,
+							pos: position{line: 19, col: 13, offset: 312},
+							run: (*parser).callonTestExpr3,
 						},
 						&ruleRefExpr{
-							pos:  position{line: 19, col: 48, offset: 347},
+							pos:  position{line: 19, col: 49, offset: 348},
 							name: "Expr",
 						},
 						&ruleRefExpr{
-							pos:  position{line: 19, col: 53, offset: 352},
+							pos:  position{line: 19, col: 54, offset: 353},
 							name: "_",
 						},
 						&ruleRefExpr{
-							pos:  position{line: 19, col: 55, offset: 354},
+							pos:  position{line: 19, col: 56, offset: 355},
 							name: "EOF",
 						},
 					},
@@ -62,17 +62,81 @@ var g = &grammar{
 			},
 		},
 		{
+			name: "TestAnd",
+			pos:  position{line: 24, col: 1, offset: 399},
+			expr: &actionExpr{
+				pos: position{line: 24, col: 12, offset: 410},
+				run: (*parser).callonTestAnd1,
+				expr: &seqExpr{
+					pos: position{line: 24, col: 12, offset: 410},
+					exprs: []interface{}{
+						&stateCodeExpr{
+							pos: position{line: 24, col: 12, offset: 410},
+							run: (*parser).callonTestAnd3,
+						},
+						&andExpr{
+							pos: position{line: 24, col: 48, offset: 446},
+							expr: &ruleRefExpr{
+								pos:  position{line: 24, col: 49, offset: 447},
+								name: "EOL",
+							},
+						},
+						&anyMatcher{
+							line: 24, col: 53, offset: 451,
+						},
+						&ruleRefExpr{
+							pos:  position{line: 24, col: 55, offset: 453},
+							name: "EOF",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "TestNot",
+			pos:  position{line: 29, col: 1, offset: 497},
+			expr: &actionExpr{
+				pos: position{line: 29, col: 12, offset: 508},
+				run: (*parser).callonTestNot1,
+				expr: &seqExpr{
+					pos: position{line: 29, col: 12, offset: 508},
+					exprs: []interface{}{
+						&stateCodeExpr{
+							pos: position{line: 29, col: 12, offset: 508},
+							run: (*parser).callonTestNot3,
+						},
+						&choiceExpr{
+							pos: position{line: 29, col: 50, offset: 546},
+							alternatives: []interface{}{
+								&notExpr{
+									pos: position{line: 29, col: 50, offset: 546},
+									expr: &ruleRefExpr{
+										pos:  position{line: 29, col: 51, offset: 547},
+										name: "EOL",
+									},
+								},
+								&ruleRefExpr{
+									pos:  position{line: 29, col: 57, offset: 553},
+									name: "EOL",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
 			name: "Z_",
-			pos:  position{line: 24, col: 1, offset: 398},
+			pos:  position{line: 34, col: 1, offset: 599},
 			expr: &seqExpr{
-				pos: position{line: 24, col: 7, offset: 404},
+				pos: position{line: 34, col: 7, offset: 605},
 				exprs: []interface{}{
 					&ruleRefExpr{
-						pos:  position{line: 24, col: 7, offset: 404},
+						pos:  position{line: 34, col: 7, offset: 605},
 						name: "_",
 					},
 					&litMatcher{
-						pos:        position{line: 24, col: 9, offset: 406},
+						pos:        position{line: 34, col: 9, offset: 607},
 						val:        "Z",
 						ignoreCase: false,
 					},
@@ -81,33 +145,33 @@ var g = &grammar{
 		},
 		{
 			name: "Expr",
-			pos:  position{line: 25, col: 1, offset: 410},
+			pos:  position{line: 35, col: 1, offset: 611},
 			expr: &seqExpr{
-				pos: position{line: 25, col: 9, offset: 418},
+				pos: position{line: 35, col: 9, offset: 619},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 25, col: 9, offset: 418},
+						pos:        position{line: 35, col: 9, offset: 619},
 						val:        "f",
 						ignoreCase: false,
 					},
 					&zeroOrOneExpr{
-						pos: position{line: 25, col: 13, offset: 422},
+						pos: position{line: 35, col: 13, offset: 623},
 						expr: &ruleRefExpr{
-							pos:  position{line: 25, col: 13, offset: 422},
+							pos:  position{line: 35, col: 13, offset: 623},
 							name: "Z_",
 						},
 					},
 					&zeroOrMoreExpr{
-						pos: position{line: 25, col: 17, offset: 426},
+						pos: position{line: 35, col: 17, offset: 627},
 						expr: &ruleRefExpr{
-							pos:  position{line: 25, col: 17, offset: 426},
+							pos:  position{line: 35, col: 17, offset: 627},
 							name: "Z_",
 						},
 					},
 					&zeroOrOneExpr{
-						pos: position{line: 25, col: 21, offset: 430},
+						pos: position{line: 35, col: 21, offset: 631},
 						expr: &ruleRefExpr{
-							pos:  position{line: 25, col: 21, offset: 430},
+							pos:  position{line: 35, col: 21, offset: 631},
 							name: "Z_",
 						},
 					},
@@ -116,17 +180,17 @@ var g = &grammar{
 		},
 		{
 			name: "EOL",
-			pos:  position{line: 26, col: 1, offset: 434},
+			pos:  position{line: 36, col: 1, offset: 635},
 			expr: &seqExpr{
-				pos: position{line: 26, col: 8, offset: 441},
+				pos: position{line: 36, col: 8, offset: 642},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 26, col: 8, offset: 441},
+						pos:        position{line: 36, col: 8, offset: 642},
 						val:        "\n",
 						ignoreCase: false,
 					},
 					&stateCodeExpr{
-						pos: position{line: 27, col: 3, offset: 448},
+						pos: position{line: 37, col: 3, offset: 649},
 						run: (*parser).callonEOL3,
 					},
 				},
@@ -134,29 +198,29 @@ var g = &grammar{
 		},
 		{
 			name: "Comment",
-			pos:  position{line: 34, col: 1, offset: 538},
+			pos:  position{line: 44, col: 1, offset: 739},
 			expr: &seqExpr{
-				pos: position{line: 34, col: 12, offset: 549},
+				pos: position{line: 44, col: 12, offset: 750},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 34, col: 12, offset: 549},
+						pos:        position{line: 44, col: 12, offset: 750},
 						val:        "#",
 						ignoreCase: false,
 					},
 					&zeroOrMoreExpr{
-						pos: position{line: 34, col: 16, offset: 553},
+						pos: position{line: 44, col: 16, offset: 754},
 						expr: &seqExpr{
-							pos: position{line: 34, col: 18, offset: 555},
+							pos: position{line: 44, col: 18, offset: 756},
 							exprs: []interface{}{
 								&notExpr{
-									pos: position{line: 34, col: 18, offset: 555},
+									pos: position{line: 44, col: 18, offset: 756},
 									expr: &ruleRefExpr{
-										pos:  position{line: 34, col: 19, offset: 556},
+										pos:  position{line: 44, col: 19, offset: 757},
 										name: "EOL",
 									},
 								},
 								&anyMatcher{
-									line: 34, col: 23, offset: 560,
+									line: 44, col: 23, offset: 761,
 								},
 							},
 						},
@@ -166,18 +230,18 @@ var g = &grammar{
 		},
 		{
 			name: "_",
-			pos:  position{line: 35, col: 1, offset: 565},
+			pos:  position{line: 45, col: 1, offset: 766},
 			expr: &zeroOrMoreExpr{
-				pos: position{line: 35, col: 6, offset: 570},
+				pos: position{line: 45, col: 6, offset: 771},
 				expr: &choiceExpr{
-					pos: position{line: 35, col: 8, offset: 572},
+					pos: position{line: 45, col: 8, offset: 773},
 					alternatives: []interface{}{
 						&ruleRefExpr{
-							pos:  position{line: 35, col: 8, offset: 572},
+							pos:  position{line: 45, col: 8, offset: 773},
 							name: "EOL",
 						},
 						&ruleRefExpr{
-							pos:  position{line: 35, col: 14, offset: 578},
+							pos:  position{line: 45, col: 14, offset: 779},
 							name: "Comment",
 						},
 					},
@@ -186,37 +250,81 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 36, col: 1, offset: 589},
+			pos:  position{line: 46, col: 1, offset: 790},
 			expr: &notExpr{
-				pos: position{line: 36, col: 8, offset: 596},
+				pos: position{line: 46, col: 8, offset: 797},
 				expr: &anyMatcher{
-					line: 36, col: 9, offset: 597,
+					line: 46, col: 9, offset: 798,
 				},
 			},
 		},
 	},
 }
 
-func (c *current) onGrammar3() error {
+func (c *current) onTestExpr3() error {
 	c.state["cnt"] = 0
 	return nil
 }
 
-func (p *parser) callonGrammar3() error {
+func (p *parser) callonTestExpr3() error {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onGrammar3()
+	return p.cur.onTestExpr3()
 }
 
-func (c *current) onGrammar1() (interface{}, error) {
+func (c *current) onTestExpr1() (interface{}, error) {
 	return c.state["cnt"], nil
 
 }
 
-func (p *parser) callonGrammar1() (interface{}, error) {
+func (p *parser) callonTestExpr1() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onGrammar1()
+	return p.cur.onTestExpr1()
+}
+
+func (c *current) onTestAnd3() error {
+	c.state["cnt"] = 0
+	return nil
+}
+
+func (p *parser) callonTestAnd3() error {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onTestAnd3()
+}
+
+func (c *current) onTestAnd1() (interface{}, error) {
+	return c.state["cnt"], nil
+
+}
+
+func (p *parser) callonTestAnd1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onTestAnd1()
+}
+
+func (c *current) onTestNot3() error {
+	c.state["cnt"] = 0
+	return nil
+}
+
+func (p *parser) callonTestNot3() error {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onTestNot3()
+}
+
+func (c *current) onTestNot1() (interface{}, error) {
+	return c.state["cnt"], nil
+
+}
+
+func (p *parser) callonTestNot1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onTestNot1()
 }
 
 func (c *current) onEOL3() error {
@@ -1295,7 +1403,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		// dummy assignment to prevent compile error if optimized
 		_ = altI
 
-		state := p.cloneState()
+		//state := p.cloneState()
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()
@@ -1303,7 +1411,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 			p.incChoiceAltCnt(ch, altI)
 			return val, ok
 		}
-		p.restoreState(state)
+		//p.restoreState(state)
 	}
 	p.incChoiceAltCnt(ch, choiceNoMatch)
 	return nil, false

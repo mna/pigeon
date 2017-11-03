@@ -1,5 +1,5 @@
 {
-  package staterestore
+  package staterestoreopt
 
   func main() {
     in := os.Stdin
@@ -11,7 +11,7 @@
       defer f.Close()
       in = f
     }
-    got, err := ParseReader("", in, Debug(false))
+    got, err := ParseReader("", in)
     fmt.Println(got, err)
   }
 }

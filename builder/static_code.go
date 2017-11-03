@@ -1146,7 +1146,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		// dummy assignment to prevent compile error if optimized
 		_ = altI
 
-		state := p.cloneState()
+		//state := p.cloneState()
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()
@@ -1156,7 +1156,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 			// {{ end }} ==template==
 			return val, ok
 		}
-		p.restoreState(state)
+		//p.restoreState(state)
 	}
 	// ==template== {{ if not .Optimize }}
 	p.incChoiceAltCnt(ch, choiceNoMatch)
