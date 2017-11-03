@@ -1,5 +1,5 @@
 {
-  package main
+  package staterestore
 
   func main() {
     in := os.Stdin
