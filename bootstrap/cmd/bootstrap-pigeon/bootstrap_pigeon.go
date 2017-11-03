@@ -3314,8 +3314,8 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	_, ok := p.parseExpr(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
-	p.restore(pt)
 	p.restoreState(state)
+	p.restore(pt)
 
 	return nil, !ok
 }
@@ -3383,8 +3383,8 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
-			p.restore(pt)
 			p.restoreState(state)
+			p.restore(pt)
 			return nil, false
 		}
 		vals = append(vals, val)
