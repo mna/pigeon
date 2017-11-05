@@ -1,4 +1,4 @@
-package staterestoreopt
+package staterestore
 
 import "testing"
 
