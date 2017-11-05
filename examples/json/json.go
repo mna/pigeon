@@ -1143,6 +1143,7 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		Stats:           &stats,
 		// start rule is rule [0] unless an alternate entrypoint is specified
 		entrypoint: g.rules[0].name,
+		//emptyState: make(storeDict),
 	}
 	p.setOptions(opts)
 
@@ -1231,6 +1232,9 @@ type parser struct {
 	choiceNoMatch string
 	// recovery expression stack, keeps track of the currently available recovery expression, these are traversed in reverse
 	recoveryStack []map[string]interface{}
+
+	// emptyState contains an empty storeDict, which is used to optimize cloneState if global "state" store is not used.
+	//emptyState storeDict
 }
 
 // push a variable set on the vstack.
@@ -1403,6 +1407,12 @@ func (p *parser) cloneState() storeDict {
 	if p.debug {
 		defer p.out(p.in("cloneState"))
 	}
+
+	/*
+		if len(p.cur.state) == 0 {
+			return p.emptyState
+		}
+	*/
 
 	state := make(storeDict, len(p.cur.state))
 	for k, v := range p.cur.state {
