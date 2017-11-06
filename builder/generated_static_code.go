@@ -685,6 +685,9 @@ func (p *parser) cloneState() storeDict {
 	// {{ end }} ==template==
 
 	if len(p.cur.state) == 0 {
+		if len(p.emptyState) > 0 {
+			p.emptyState = make(storeDict)
+		}
 		return p.emptyState
 	}
 

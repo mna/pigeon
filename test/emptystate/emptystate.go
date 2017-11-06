@@ -1,4 +1,4 @@
-package stateclone
+package emptystate
 
 import (
 	"bytes"
@@ -15,181 +15,117 @@ import (
 	"unicode/utf8"
 )
 
-type values []int
-
-func (vals values) Clone() interface{} {
-	clone := make(values, 0, len(vals))
-	clone = append(clone, vals...)
-	return clone
-}
-
 var g = &grammar{
 	rules: []*rule{
 		{
 			name: "start",
-			pos:  position{line: 14, col: 1, offset: 171},
+			pos:  position{line: 5, col: 1, offset: 26},
 			expr: &actionExpr{
-				pos: position{line: 14, col: 9, offset: 179},
+				pos: position{line: 5, col: 10, offset: 35},
 				run: (*parser).callonstart1,
 				expr: &seqExpr{
-					pos: position{line: 14, col: 9, offset: 179},
+					pos: position{line: 5, col: 10, offset: 35},
 					exprs: []interface{}{
 						&stateCodeExpr{
-							pos: position{line: 14, col: 9, offset: 179},
+							pos: position{line: 5, col: 10, offset: 35},
 							run: (*parser).callonstart3,
 						},
-						&zeroOrMoreExpr{
-							pos: position{line: 21, col: 3, offset: 304},
-							expr: &seqExpr{
-								pos: position{line: 21, col: 4, offset: 305},
-								exprs: []interface{}{
-									&choiceExpr{
-										pos: position{line: 21, col: 5, offset: 306},
-										alternatives: []interface{}{
-											&ruleRefExpr{
-												pos:  position{line: 21, col: 5, offset: 306},
-												name: "x",
-											},
-											&ruleRefExpr{
-												pos:  position{line: 21, col: 7, offset: 308},
-												name: "y",
-											},
-											&ruleRefExpr{
-												pos:  position{line: 21, col: 9, offset: 310},
-												name: "z",
-											},
-										},
-									},
-									&zeroOrMoreExpr{
-										pos: position{line: 21, col: 12, offset: 313},
-										expr: &ruleRefExpr{
-											pos:  position{line: 21, col: 12, offset: 313},
-											name: "ws",
-										},
-									},
-								},
-							},
+						&ruleRefExpr{
+							pos:  position{line: 5, col: 26, offset: 51},
+							name: "a",
+						},
+						&ruleRefExpr{
+							pos:  position{line: 5, col: 28, offset: 53},
+							name: "b",
+						},
+						&ruleRefExpr{
+							pos:  position{line: 5, col: 30, offset: 55},
+							name: "c",
+						},
+						&ruleRefExpr{
+							pos:  position{line: 5, col: 32, offset: 57},
+							name: "d",
+						},
+						&ruleRefExpr{
+							pos:  position{line: 5, col: 34, offset: 59},
+							name: "e",
 						},
 					},
 				},
 			},
 		},
 		{
-			name: "x",
-			pos:  position{line: 25, col: 1, offset: 355},
-			expr: &seqExpr{
-				pos: position{line: 25, col: 5, offset: 359},
-				exprs: []interface{}{
-					&litMatcher{
-						pos:        position{line: 25, col: 5, offset: 359},
-						val:        "ab",
-						ignoreCase: false,
-					},
-					&ruleRefExpr{
-						pos:  position{line: 25, col: 10, offset: 364},
-						name: "c",
-					},
-					&litMatcher{
-						pos:        position{line: 25, col: 12, offset: 366},
-						val:        "d",
-						ignoreCase: false,
-					},
+			name: "a",
+			pos:  position{line: 10, col: 1, offset: 94},
+			expr: &actionExpr{
+				pos: position{line: 10, col: 6, offset: 99},
+				run: (*parser).callona1,
+				expr: &litMatcher{
+					pos:        position{line: 10, col: 6, offset: 99},
+					val:        "a",
+					ignoreCase: false,
 				},
 			},
 		},
 		{
-			name: "y",
-			pos:  position{line: 26, col: 1, offset: 370},
+			name: "b",
+			pos:  position{line: 16, col: 1, offset: 224},
 			expr: &seqExpr{
-				pos: position{line: 26, col: 5, offset: 374},
+				pos: position{line: 16, col: 6, offset: 229},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 26, col: 5, offset: 374},
-						val:        "a",
-						ignoreCase: false,
-					},
-					&ruleRefExpr{
-						pos:  position{line: 26, col: 9, offset: 378},
-						name: "bc",
-					},
-					&litMatcher{
-						pos:        position{line: 26, col: 12, offset: 381},
-						val:        "e",
-						ignoreCase: false,
-					},
-				},
-			},
-		},
-		{
-			name: "z",
-			pos:  position{line: 27, col: 1, offset: 385},
-			expr: &seqExpr{
-				pos: position{line: 27, col: 5, offset: 389},
-				exprs: []interface{}{
-					&litMatcher{
-						pos:        position{line: 27, col: 5, offset: 389},
-						val:        "abcf",
+						pos:        position{line: 16, col: 6, offset: 229},
+						val:        "b",
 						ignoreCase: false,
 					},
 					&stateCodeExpr{
-						pos: position{line: 27, col: 12, offset: 396},
-						run: (*parser).callonz3,
+						pos: position{line: 17, col: 3, offset: 235},
+						run: (*parser).callonb3,
 					},
 				},
 			},
 		},
 		{
 			name: "c",
-			pos:  position{line: 29, col: 1, offset: 467},
+			pos:  position{line: 23, col: 1, offset: 337},
+			expr: &actionExpr{
+				pos: position{line: 23, col: 6, offset: 342},
+				run: (*parser).callonc1,
+				expr: &litMatcher{
+					pos:        position{line: 23, col: 6, offset: 342},
+					val:        "c",
+					ignoreCase: false,
+				},
+			},
+		},
+		{
+			name: "d",
+			pos:  position{line: 29, col: 1, offset: 484},
 			expr: &seqExpr{
-				pos: position{line: 29, col: 5, offset: 471},
+				pos: position{line: 29, col: 6, offset: 489},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 29, col: 5, offset: 471},
-						val:        "c",
+						pos:        position{line: 29, col: 6, offset: 489},
+						val:        "d",
 						ignoreCase: false,
 					},
 					&stateCodeExpr{
-						pos: position{line: 29, col: 9, offset: 475},
-						run: (*parser).callonc3,
+						pos: position{line: 30, col: 3, offset: 495},
+						run: (*parser).callond3,
 					},
 				},
 			},
 		},
 		{
-			name: "bc",
-			pos:  position{line: 30, col: 1, offset: 546},
-			expr: &seqExpr{
-				pos: position{line: 30, col: 6, offset: 551},
-				exprs: []interface{}{
-					&litMatcher{
-						pos:        position{line: 30, col: 6, offset: 551},
-						val:        "bc",
-						ignoreCase: false,
-					},
-					&stateCodeExpr{
-						pos: position{line: 30, col: 11, offset: 556},
-						run: (*parser).callonbc3,
-					},
-				},
-			},
-		},
-		{
-			name: "ws",
-			pos:  position{line: 32, col: 1, offset: 627},
-			expr: &choiceExpr{
-				pos: position{line: 32, col: 6, offset: 632},
-				alternatives: []interface{}{
-					&litMatcher{
-						pos:        position{line: 32, col: 6, offset: 632},
-						val:        " ",
-						ignoreCase: false,
-					},
-					&litMatcher{
-						pos:        position{line: 32, col: 12, offset: 638},
-						val:        "\n",
-						ignoreCase: false,
-					},
+			name: "e",
+			pos:  position{line: 36, col: 1, offset: 647},
+			expr: &actionExpr{
+				pos: position{line: 36, col: 6, offset: 652},
+				run: (*parser).callone1,
+				expr: &litMatcher{
+					pos:        position{line: 36, col: 6, offset: 652},
+					val:        "e",
+					ignoreCase: false,
 				},
 			},
 		},
@@ -197,12 +133,6 @@ var g = &grammar{
 }
 
 func (c *current) onstart3() error {
-
-	if _, ok := c.state["vals"]; !ok {
-		vals := make(values, 1)
-		vals[0] = 10
-		c.state["vals"] = vals
-	}
 	return nil
 }
 
@@ -213,8 +143,8 @@ func (p *parser) callonstart3() error {
 }
 
 func (c *current) onstart1() (interface{}, error) {
+	return c.state, nil
 
-	return c.state["vals"], nil
 }
 
 func (p *parser) callonstart1() (interface{}, error) {
@@ -223,37 +153,67 @@ func (p *parser) callonstart1() (interface{}, error) {
 	return p.cur.onstart1()
 }
 
-func (c *current) onz3() error {
-	c.state["vals"] = append(c.state["vals"].(values), 5)
-	return nil
+func (c *current) ona1() (interface{}, error) {
+	// action code block forces the clone/restore of state, so p.cur.state === p.emptyState
+	return nil, nil
+
 }
 
-func (p *parser) callonz3() error {
+func (p *parser) callona1() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onz3()
+	return p.cur.ona1()
 }
 
-func (c *current) onc3() error {
-	c.state["vals"] = append(c.state["vals"].(values), 3)
+func (c *current) onb3() error {
+	// set thing in state, emptyState no longer empty
+	c.state["thing"] = 1
 	return nil
+
 }
 
-func (p *parser) callonc3() error {
+func (p *parser) callonb3() error {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onc3()
+	return p.cur.onb3()
 }
 
-func (c *current) onbc3() error {
-	c.state["vals"] = append(c.state["vals"].(values), 1)
-	return nil
+func (c *current) onc1() (interface{}, error) {
+	// code block forces clone/restore of state, so p.cur.state !== p.emptyState, but both are now non-empty
+	return nil, nil
+
 }
 
-func (p *parser) callonbc3() error {
+func (p *parser) callonc1() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onbc3()
+	return p.cur.onc1()
+}
+
+func (c *current) ond3() error {
+	// remove the thing from the state, so it is now empty in p.cur.state (but not in p.emptyState)
+	delete(c.state, "thing")
+	return nil
+
+}
+
+func (p *parser) callond3() error {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.ond3()
+}
+
+func (c *current) one1() (interface{}, error) {
+	// code block forces a clone, but c.state is empty so it returns p.emptyState, and then on restore
+	// c.state is set to that p.emptyState, which is not empty.
+	return nil, nil
+
+}
+
+func (p *parser) callone1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.one1()
 }
 
 var (
@@ -1205,13 +1165,10 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
-	state := p.cloneState()
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
 	p.popV()
-	p.restoreState(state)
 	p.restore(pt)
-
 	return nil, ok
 }
 
@@ -1399,15 +1356,12 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	}
 
 	pt := p.pt
-	state := p.cloneState()
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	_, ok := p.parseExpr(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
-	p.restoreState(state)
 	p.restore(pt)
-
 	return nil, !ok
 }
 
@@ -1470,11 +1424,9 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
-	state := p.cloneState()
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
-			p.restoreState(state)
 			p.restore(pt)
 			return nil, false
 		}

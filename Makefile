@@ -142,6 +142,9 @@ $(TEST_DIR)/staterestore/standard/staterestore.go: $(TEST_DIR)/staterestore/stat
 $(TEST_DIR)/staterestore/optimized/staterestore.go: $(TEST_DIR)/staterestore/staterestore.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -optimize-grammar -optimize-parser -alternate-entrypoints TestAnd,TestNot $< > $@
 
+$(TEST_DIR)/emptystate/emptystate.go: $(TEST_DIR)/emptystate/emptystate.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
 lint:
 	golint ./...
 	go vet ./...
