@@ -1237,6 +1237,9 @@ type Cloner interface {
 func (p *parser) cloneState() storeDict {
 
 	if len(p.cur.state) == 0 {
+		if len(p.emptyState) > 0 {
+			p.emptyState = make(storeDict)
+		}
 		return p.emptyState
 	}
 
@@ -1410,10 +1413,12 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 	if ok {
 		p.cur.pos = start.position
 		p.cur.text = p.sliceFrom(start)
+		state := p.cloneState()
 		actVal, err := act.run(p)
 		if err != nil {
 			p.addErrAt(err, start.position, []string{})
 		}
+		p.restoreState(state)
 
 		val = actVal
 	}
@@ -1421,10 +1426,13 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 }
 
 func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
+	state := p.cloneState()
+
 	ok, err := and.run(p)
 	if err != nil {
 		p.addErr(err)
 	}
+	p.restoreState(state)
 
 	return nil, ok
 }
@@ -1521,6 +1529,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		_ = altI
 
 		state := p.cloneState()
+
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()
@@ -1567,10 +1576,13 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 }
 
 func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
+	state := p.cloneState()
+
 	ok, err := not.run(p)
 	if err != nil {
 		p.addErr(err)
 	}
+	p.restoreState(state)
 
 	return nil, !ok
 }

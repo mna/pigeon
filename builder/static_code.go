@@ -1035,11 +1035,15 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 
 	// {{ end }} ==template==
 	pt := p.pt
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
 	state := p.cloneState()
+	// {{ end }} ==template==
 	p.pushV()
 	_, ok := p.parseExpr(and.expr)
 	p.popV()
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
 	p.restoreState(state)
+	// {{ end }} ==template==
 	p.restore(pt)
 
 	return nil, ok
@@ -1272,13 +1276,17 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 
 	// {{ end }} ==template==
 	pt := p.pt
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
 	state := p.cloneState()
+	// {{ end }} ==template==
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	_, ok := p.parseExpr(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
 	p.restoreState(state)
+	// {{ end }} ==template==
 	p.restore(pt)
 
 	return nil, !ok
@@ -1352,11 +1360,15 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	vals := make([]interface{}, 0, len(seq.exprs))
 
 	pt := p.pt
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
 	state := p.cloneState()
+	// {{ end }} ==template==
 	for _, expr := range seq.exprs {
 		val, ok := p.parseExpr(expr)
 		if !ok {
+			// ==template== {{ if or .GlobalState (not .Optimize) }}
 			p.restoreState(state)
+			// {{ end }} ==template==
 			p.restore(pt)
 			return nil, false
 		}
@@ -1368,10 +1380,12 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 // ==template== {{ if or .GlobalState (not .Optimize) }}
 
 func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (interface{}, bool) {
+	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseStateCodeExpr"))
 	}
 
+	// {{ end }} ==template==
 	err := state.run(p)
 	if err != nil {
 		p.addErr(err)

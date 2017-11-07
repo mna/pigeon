@@ -1010,6 +1010,9 @@ func (p *parser) cloneState() storeDict {
 	}
 
 	if len(p.cur.state) == 0 {
+		if len(p.emptyState) > 0 {
+			p.emptyState = make(storeDict)
+		}
 		return p.emptyState
 	}
 
@@ -1404,6 +1407,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		_ = altI
 
 		state := p.cloneState()
+
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()
