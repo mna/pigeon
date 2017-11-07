@@ -1,15 +1,4 @@
-// Package asmgotostate implements the asmgoto example with global state instead of GlobalStore.
-//
-// Very simplistic assembler language, only containing noop and jump instructions.
-// Jump instructions use labels as target, which may be defined optionally on ever code line.
-//
-// The global state is used to keep track of the labels as well as the unresolved targets for jump instructions.
-//
-// Example:
-//     label: noop
-//     jump label
-//
-package asmgotostate
+package staterestore
 
 import (
 	"bytes"
@@ -17,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"math"
 	"os"
 	"sort"
@@ -26,86 +16,108 @@ import (
 	"unicode/utf8"
 )
 
-func toIfaceSlice(v interface{}) []interface{} {
-	if v == nil {
-		return nil
+func main() {
+	in := os.Stdin
+	if len(os.Args) > 1 {
+		f, err := os.Open(os.Args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		in = f
 	}
-	return v.([]interface{})
+	got, err := ParseReader("", in)
+	fmt.Println(got, err)
 }
 
 var g = &grammar{
 	rules: []*rule{
 		{
-			name: "Program",
-			pos:  position{line: 23, col: 1, offset: 598},
+			name: "TestExpr",
+			pos:  position{line: 19, col: 1, offset: 286},
 			expr: &actionExpr{
-				pos: position{line: 23, col: 11, offset: 610},
-				run: (*parser).callonProgram1,
+				pos: position{line: 19, col: 13, offset: 298},
+				run: (*parser).callonTestExpr1,
 				expr: &seqExpr{
-					pos: position{line: 23, col: 11, offset: 610},
+					pos: position{line: 19, col: 13, offset: 298},
 					exprs: []interface{}{
 						&stateCodeExpr{
-							pos: position{line: 23, col: 11, offset: 610},
-							run: (*parser).callonProgram3,
-						},
-						&labeledExpr{
-							pos:   position{line: 23, col: 126, offset: 725},
-							label: "lines",
-							expr: &zeroOrMoreExpr{
-								pos: position{line: 23, col: 132, offset: 731},
-								expr: &ruleRefExpr{
-									pos:  position{line: 23, col: 132, offset: 731},
-									name: "Line",
-								},
-							},
+							pos: position{line: 19, col: 13, offset: 298},
+							run: (*parser).callonTestExpr3,
 						},
 						&ruleRefExpr{
-							pos:  position{line: 23, col: 138, offset: 737},
+							pos:  position{line: 19, col: 49, offset: 334},
+							name: "Expr",
+						},
+						&ruleRefExpr{
+							pos:  position{line: 19, col: 54, offset: 339},
+							name: "_",
+						},
+						&ruleRefExpr{
+							pos:  position{line: 19, col: 56, offset: 341},
 							name: "EOF",
 						},
-						&andCodeExpr{
-							pos: position{line: 23, col: 142, offset: 741},
-							run: (*parser).callonProgram8,
+					},
+				},
+			},
+		},
+		{
+			name: "TestAnd",
+			pos:  position{line: 24, col: 1, offset: 385},
+			expr: &actionExpr{
+				pos: position{line: 24, col: 12, offset: 396},
+				run: (*parser).callonTestAnd1,
+				expr: &seqExpr{
+					pos: position{line: 24, col: 12, offset: 396},
+					exprs: []interface{}{
+						&stateCodeExpr{
+							pos: position{line: 24, col: 12, offset: 396},
+							run: (*parser).callonTestAnd3,
+						},
+						&andExpr{
+							pos: position{line: 24, col: 48, offset: 432},
+							expr: &ruleRefExpr{
+								pos:  position{line: 24, col: 49, offset: 433},
+								name: "EOL",
+							},
+						},
+						&anyMatcher{
+							line: 24, col: 53, offset: 437,
+						},
+						&ruleRefExpr{
+							pos:  position{line: 24, col: 55, offset: 439},
+							name: "EOF",
 						},
 					},
 				},
 			},
 		},
 		{
-			name: "Line",
-			pos:  position{line: 32, col: 1, offset: 965},
+			name: "TestNot",
+			pos:  position{line: 29, col: 1, offset: 483},
 			expr: &actionExpr{
-				pos: position{line: 32, col: 8, offset: 974},
-				run: (*parser).callonLine1,
+				pos: position{line: 29, col: 12, offset: 494},
+				run: (*parser).callonTestNot1,
 				expr: &seqExpr{
-					pos: position{line: 32, col: 8, offset: 974},
+					pos: position{line: 29, col: 12, offset: 494},
 					exprs: []interface{}{
-						&ruleRefExpr{
-							pos:  position{line: 32, col: 8, offset: 974},
-							name: "_",
-						},
-						&labeledExpr{
-							pos:   position{line: 32, col: 10, offset: 976},
-							label: "inst",
-							expr: &ruleRefExpr{
-								pos:  position{line: 32, col: 15, offset: 981},
-								name: "Instruction",
-							},
-						},
-						&ruleRefExpr{
-							pos:  position{line: 32, col: 27, offset: 993},
-							name: "_",
+						&stateCodeExpr{
+							pos: position{line: 29, col: 12, offset: 494},
+							run: (*parser).callonTestNot3,
 						},
 						&choiceExpr{
-							pos: position{line: 32, col: 30, offset: 996},
+							pos: position{line: 29, col: 50, offset: 532},
 							alternatives: []interface{}{
-								&ruleRefExpr{
-									pos:  position{line: 32, col: 30, offset: 996},
-									name: "nl",
+								&notExpr{
+									pos: position{line: 29, col: 50, offset: 532},
+									expr: &ruleRefExpr{
+										pos:  position{line: 29, col: 51, offset: 533},
+										name: "EOL",
+									},
 								},
 								&ruleRefExpr{
-									pos:  position{line: 32, col: 35, offset: 1001},
-									name: "EOF",
+									pos:  position{line: 29, col: 57, offset: 539},
+									name: "EOL",
 								},
 							},
 						},
@@ -114,96 +126,102 @@ var g = &grammar{
 			},
 		},
 		{
-			name: "Instruction",
-			pos:  position{line: 36, col: 1, offset: 1030},
-			expr: &actionExpr{
-				pos: position{line: 36, col: 15, offset: 1046},
-				run: (*parser).callonInstruction1,
-				expr: &seqExpr{
-					pos: position{line: 36, col: 15, offset: 1046},
-					exprs: []interface{}{
-						&zeroOrOneExpr{
-							pos: position{line: 36, col: 15, offset: 1046},
-							expr: &ruleRefExpr{
-								pos:  position{line: 36, col: 15, offset: 1046},
-								name: "Label",
-							},
-						},
-						&ruleRefExpr{
-							pos:  position{line: 36, col: 22, offset: 1053},
-							name: "_",
-						},
-						&labeledExpr{
-							pos:   position{line: 36, col: 24, offset: 1055},
-							label: "op",
-							expr: &choiceExpr{
-								pos: position{line: 36, col: 29, offset: 1060},
-								alternatives: []interface{}{
-									&ruleRefExpr{
-										pos:  position{line: 36, col: 29, offset: 1060},
-										name: "Noop",
-									},
-									&ruleRefExpr{
-										pos:  position{line: 36, col: 36, offset: 1067},
-										name: "Jump",
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Label",
-			pos:  position{line: 40, col: 1, offset: 1096},
+			name: "Z_",
+			pos:  position{line: 34, col: 1, offset: 585},
 			expr: &seqExpr{
-				pos: position{line: 40, col: 9, offset: 1106},
+				pos: position{line: 34, col: 7, offset: 591},
 				exprs: []interface{}{
-					&labeledExpr{
-						pos:   position{line: 40, col: 9, offset: 1106},
-						label: "label",
-						expr: &ruleRefExpr{
-							pos:  position{line: 40, col: 15, offset: 1112},
-							name: "labelIdentifier",
-						},
-					},
-					&stateCodeExpr{
-						pos: position{line: 40, col: 31, offset: 1128},
-						run: (*parser).callonLabel4,
+					&ruleRefExpr{
+						pos:  position{line: 34, col: 7, offset: 591},
+						name: "_",
 					},
 					&litMatcher{
-						pos:        position{line: 40, col: 71, offset: 1168},
-						val:        ":",
+						pos:        position{line: 34, col: 9, offset: 593},
+						val:        "Z",
 						ignoreCase: false,
 					},
 				},
 			},
 		},
 		{
-			name: "labelIdentifier",
-			pos:  position{line: 42, col: 1, offset: 1173},
-			expr: &actionExpr{
-				pos: position{line: 42, col: 19, offset: 1193},
-				run: (*parser).callonlabelIdentifier1,
-				expr: &seqExpr{
-					pos: position{line: 42, col: 19, offset: 1193},
-					exprs: []interface{}{
-						&charClassMatcher{
-							pos:        position{line: 42, col: 19, offset: 1193},
-							val:        "[a-z]",
-							ranges:     []rune{'a', 'z'},
-							ignoreCase: false,
-							inverted:   false,
+			name: "Expr",
+			pos:  position{line: 35, col: 1, offset: 597},
+			expr: &seqExpr{
+				pos: position{line: 35, col: 9, offset: 605},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 35, col: 9, offset: 605},
+						val:        "f",
+						ignoreCase: false,
+					},
+					&zeroOrOneExpr{
+						pos: position{line: 35, col: 13, offset: 609},
+						expr: &ruleRefExpr{
+							pos:  position{line: 35, col: 13, offset: 609},
+							name: "Z_",
 						},
-						&zeroOrMoreExpr{
-							pos: position{line: 42, col: 24, offset: 1198},
-							expr: &charClassMatcher{
-								pos:        position{line: 42, col: 24, offset: 1198},
-								val:        "[a-z0-9]",
-								ranges:     []rune{'a', 'z', '0', '9'},
-								ignoreCase: false,
-								inverted:   false,
+					},
+					&zeroOrMoreExpr{
+						pos: position{line: 35, col: 17, offset: 613},
+						expr: &ruleRefExpr{
+							pos:  position{line: 35, col: 17, offset: 613},
+							name: "Z_",
+						},
+					},
+					&zeroOrOneExpr{
+						pos: position{line: 35, col: 21, offset: 617},
+						expr: &ruleRefExpr{
+							pos:  position{line: 35, col: 21, offset: 617},
+							name: "Z_",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "EOL",
+			pos:  position{line: 36, col: 1, offset: 621},
+			expr: &seqExpr{
+				pos: position{line: 36, col: 8, offset: 628},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 36, col: 8, offset: 628},
+						val:        "\n",
+						ignoreCase: false,
+					},
+					&stateCodeExpr{
+						pos: position{line: 37, col: 3, offset: 635},
+						run: (*parser).callonEOL3,
+					},
+				},
+			},
+		},
+		{
+			name: "Comment",
+			pos:  position{line: 44, col: 1, offset: 725},
+			expr: &seqExpr{
+				pos: position{line: 44, col: 12, offset: 736},
+				exprs: []interface{}{
+					&litMatcher{
+						pos:        position{line: 44, col: 12, offset: 736},
+						val:        "#",
+						ignoreCase: false,
+					},
+					&zeroOrMoreExpr{
+						pos: position{line: 44, col: 16, offset: 740},
+						expr: &seqExpr{
+							pos: position{line: 44, col: 18, offset: 742},
+							exprs: []interface{}{
+								&notExpr{
+									pos: position{line: 44, col: 18, offset: 742},
+									expr: &ruleRefExpr{
+										pos:  position{line: 44, col: 19, offset: 743},
+										name: "EOL",
+									},
+								},
+								&anyMatcher{
+									line: 44, col: 23, offset: 747,
+								},
 							},
 						},
 					},
@@ -211,217 +229,116 @@ var g = &grammar{
 			},
 		},
 		{
-			name: "Noop",
-			pos:  position{line: 46, col: 1, offset: 1242},
-			expr: &actionExpr{
-				pos: position{line: 46, col: 8, offset: 1251},
-				run: (*parser).callonNoop1,
-				expr: &litMatcher{
-					pos:        position{line: 46, col: 8, offset: 1251},
-					val:        "noop",
-					ignoreCase: false,
-				},
-			},
-		},
-		{
-			name: "Jump",
-			pos:  position{line: 50, col: 1, offset: 1284},
-			expr: &actionExpr{
-				pos: position{line: 50, col: 8, offset: 1293},
-				run: (*parser).callonJump1,
-				expr: &seqExpr{
-					pos: position{line: 50, col: 8, offset: 1293},
-					exprs: []interface{}{
-						&litMatcher{
-							pos:        position{line: 50, col: 8, offset: 1293},
-							val:        "jump",
-							ignoreCase: false,
+			name: "_",
+			pos:  position{line: 45, col: 1, offset: 752},
+			expr: &zeroOrMoreExpr{
+				pos: position{line: 45, col: 6, offset: 757},
+				expr: &choiceExpr{
+					pos: position{line: 45, col: 8, offset: 759},
+					alternatives: []interface{}{
+						&ruleRefExpr{
+							pos:  position{line: 45, col: 8, offset: 759},
+							name: "EOL",
 						},
 						&ruleRefExpr{
-							pos:  position{line: 50, col: 15, offset: 1300},
-							name: "__",
-						},
-						&labeledExpr{
-							pos:   position{line: 50, col: 18, offset: 1303},
-							label: "label",
-							expr: &ruleRefExpr{
-								pos:  position{line: 50, col: 24, offset: 1309},
-								name: "labelIdentifier",
-							},
-						},
-						&stateCodeExpr{
-							pos: position{line: 50, col: 40, offset: 1325},
-							run: (*parser).callonJump7,
+							pos:  position{line: 45, col: 14, offset: 765},
+							name: "Comment",
 						},
 					},
-				},
-			},
-		},
-		{
-			name:        "nl",
-			displayName: "\"newline\"",
-			pos:         position{line: 54, col: 1, offset: 1392},
-			expr: &oneOrMoreExpr{
-				pos: position{line: 54, col: 16, offset: 1409},
-				expr: &charClassMatcher{
-					pos:        position{line: 54, col: 16, offset: 1409},
-					val:        "[\\n\\r]",
-					chars:      []rune{'\n', '\r'},
-					ignoreCase: false,
-					inverted:   false,
-				},
-			},
-		},
-		{
-			name:        "__",
-			displayName: "\"whitespace\"",
-			pos:         position{line: 56, col: 1, offset: 1418},
-			expr: &oneOrMoreExpr{
-				pos: position{line: 56, col: 19, offset: 1438},
-				expr: &charClassMatcher{
-					pos:        position{line: 56, col: 19, offset: 1438},
-					val:        "[ \\t]",
-					chars:      []rune{' ', '\t'},
-					ignoreCase: false,
-					inverted:   false,
-				},
-			},
-		},
-		{
-			name:        "_",
-			displayName: "\"optional whitespace\"",
-			pos:         position{line: 58, col: 1, offset: 1446},
-			expr: &zeroOrMoreExpr{
-				pos: position{line: 58, col: 27, offset: 1474},
-				expr: &charClassMatcher{
-					pos:        position{line: 58, col: 27, offset: 1474},
-					val:        "[ \\t]",
-					chars:      []rune{' ', '\t'},
-					ignoreCase: false,
-					inverted:   false,
 				},
 			},
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 60, col: 1, offset: 1482},
+			pos:  position{line: 46, col: 1, offset: 776},
 			expr: &notExpr{
-				pos: position{line: 60, col: 7, offset: 1490},
+				pos: position{line: 46, col: 8, offset: 783},
 				expr: &anyMatcher{
-					line: 60, col: 8, offset: 1491,
+					line: 46, col: 9, offset: 784,
 				},
 			},
 		},
 	},
 }
 
-func (c *current) onProgram3() error {
-	if _, ok := c.state["labelLookup"]; !ok {
-		ll := make(labelLookup)
-		c.state["labelLookup"] = ll
-	}
+func (c *current) onTestExpr3() error {
+	c.state["cnt"] = 0
 	return nil
 }
 
-func (p *parser) callonProgram3() error {
+func (p *parser) callonTestExpr3() error {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onProgram3()
+	return p.cur.onTestExpr3()
 }
 
-func (c *current) onProgram8(lines interface{}) (bool, error) {
-	return labelCheck(c)
+func (c *current) onTestExpr1() (interface{}, error) {
+	return c.state["cnt"], nil
+
 }
 
-func (p *parser) callonProgram8() (bool, error) {
+func (p *parser) callonTestExpr1() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onProgram8(stack["lines"])
+	return p.cur.onTestExpr1()
 }
 
-func (c *current) onProgram1(lines interface{}) (interface{}, error) {
-	lines0 := toIfaceSlice(lines)
-	asmLines := make([]Instruction, 0, len(lines0))
-	for _, line := range lines0 {
-		asmLines = append(asmLines, line.(Instruction))
-	}
-	return asmLines, nil
+func (c *current) onTestAnd3() error {
+	c.state["cnt"] = 0
+	return nil
 }
 
-func (p *parser) callonProgram1() (interface{}, error) {
+func (p *parser) callonTestAnd3() error {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onProgram1(stack["lines"])
+	return p.cur.onTestAnd3()
 }
 
-func (c *current) onLine1(inst interface{}) (interface{}, error) {
-	return inst, nil
+func (c *current) onTestAnd1() (interface{}, error) {
+	return c.state["cnt"], nil
+
 }
 
-func (p *parser) callonLine1() (interface{}, error) {
+func (p *parser) callonTestAnd1() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onLine1(stack["inst"])
+	return p.cur.onTestAnd1()
 }
 
-func (c *current) onInstruction1(op interface{}) (interface{}, error) {
-	return op, nil
+func (c *current) onTestNot3() error {
+	c.state["cnt"] = 0
+	return nil
 }
 
-func (p *parser) callonInstruction1() (interface{}, error) {
+func (p *parser) callonTestNot3() error {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onInstruction1(stack["op"])
+	return p.cur.onTestNot3()
 }
 
-func (c *current) onLabel4(label interface{}) error {
-	return addLabel(c, label.(string))
+func (c *current) onTestNot1() (interface{}, error) {
+	return c.state["cnt"], nil
+
 }
 
-func (p *parser) callonLabel4() error {
+func (p *parser) callonTestNot1() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onLabel4(stack["label"])
+	return p.cur.onTestNot1()
 }
 
-func (c *current) onlabelIdentifier1() (interface{}, error) {
-	return string(c.text), nil
+func (c *current) onEOL3() error {
+	cnt := c.state["cnt"].(int)
+	cnt++
+	c.state["cnt"] = cnt
+	return nil
+
 }
 
-func (p *parser) callonlabelIdentifier1() (interface{}, error) {
+func (p *parser) callonEOL3() error {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onlabelIdentifier1()
-}
-
-func (c *current) onNoop1() (interface{}, error) {
-	return Noop{}, nil
-}
-
-func (p *parser) callonNoop1() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onNoop1()
-}
-
-func (c *current) onJump7(label interface{}) error {
-	return addJump(c, label.(string))
-}
-
-func (p *parser) callonJump7() error {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onJump7(stack["label"])
-}
-
-func (c *current) onJump1(label interface{}) (interface{}, error) {
-	return getCurJump(c)
-}
-
-func (p *parser) callonJump1() (interface{}, error) {
-	stack := p.vstack[len(p.vstack)-1]
-	_ = stack
-	return p.cur.onJump1(stack["label"])
+	return p.cur.onEOL3()
 }
 
 var (
@@ -1093,9 +1010,6 @@ func (p *parser) cloneState() storeDict {
 	}
 
 	if len(p.cur.state) == 0 {
-		if len(p.emptyState) > 0 {
-			p.emptyState = make(storeDict)
-		}
 		return p.emptyState
 	}
 
@@ -1490,7 +1404,6 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 		_ = altI
 
 		state := p.cloneState()
-
 		p.pushV()
 		val, ok := p.parseExpr(alt)
 		p.popV()
