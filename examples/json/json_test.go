@@ -14,49 +14,51 @@ import (
 func TestCmpStdlib(t *testing.T) {
 	files := testJSONFiles(t)
 	for _, file := range files {
-		pgot, err := ParseFile(file)
-		if err != nil {
-			t.Errorf("%s: pigeon.ParseFile: %v", file, err)
-			continue
-		}
+		t.Run(file, func(t *testing.T) {
+			pgot, err := ParseFile(file)
+			if err != nil {
+				t.Errorf("%s: pigeon.ParseFile: %v", file, err)
+				return
+			}
 
-		pogot, err := optimized.ParseFile(file)
-		if err != nil {
-			t.Errorf("%s: optimized.ParseFile: %v", file, err)
-			continue
-		}
+			pogot, err := optimized.ParseFile(file)
+			if err != nil {
+				t.Errorf("%s: optimized.ParseFile: %v", file, err)
+				return
+			}
 
-		poggot, err := optimizedgrammar.ParseFile(file)
-		if err != nil {
-			t.Errorf("%s: optimizedgrammar.ParseFile: %v", file, err)
-			continue
-		}
+			poggot, err := optimizedgrammar.ParseFile(file)
+			if err != nil {
+				t.Errorf("%s: optimizedgrammar.ParseFile: %v", file, err)
+				return
+			}
 
-		b, err := ioutil.ReadFile(file)
-		if err != nil {
-			t.Errorf("%s: ioutil.ReadAll: %v", file, err)
-			continue
-		}
-		var jgot interface{}
-		if err := json.Unmarshal(b, &jgot); err != nil {
-			t.Errorf("%s: json.Unmarshal: %v", file, err)
-			continue
-		}
+			b, err := ioutil.ReadFile(file)
+			if err != nil {
+				t.Errorf("%s: ioutil.ReadAll: %v", file, err)
+				return
+			}
+			var jgot interface{}
+			if err := json.Unmarshal(b, &jgot); err != nil {
+				t.Errorf("%s: json.Unmarshal: %v", file, err)
+				return
+			}
 
-		if !reflect.DeepEqual(pgot, jgot) {
-			t.Errorf("%s: not equal", file)
-			continue
-		}
+			if !reflect.DeepEqual(pgot, jgot) {
+				t.Errorf("%s: not equal", file)
+				return
+			}
 
-		if !reflect.DeepEqual(pogot, jgot) {
-			t.Errorf("%s: optimized not equal", file)
-			continue
-		}
+			if !reflect.DeepEqual(pogot, jgot) {
+				t.Errorf("%s: optimized not equal", file)
+				return
+			}
 
-		if !reflect.DeepEqual(poggot, jgot) {
-			t.Errorf("%s: optimized grammar not equal", file)
-			continue
-		}
+			if !reflect.DeepEqual(poggot, jgot) {
+				t.Errorf("%s: optimized grammar not equal", file)
+				return
+			}
+		})
 	}
 }
 
@@ -69,19 +71,23 @@ func testJSONFiles(t *testing.T) []string {
 	}
 	files := make([]string, 0, len(fis))
 	for _, fi := range fis {
-		if filepath.Ext(fi.Name()) == ".json" {
-			files = append(files, filepath.Join(rootDir, fi.Name()))
-		}
+		t.Run(fi.Name(), func(t *testing.T) {
+			if filepath.Ext(fi.Name()) == ".json" {
+				files = append(files, filepath.Join(rootDir, fi.Name()))
+			}
+		})
 	}
 	return files
 }
 
 func TestChoiceAltStatistics(t *testing.T) {
 	cases := []struct {
+		name          string
 		json          string
 		expectedStats map[string]map[string]int
 	}{
 		{
+			name: "empty json",
 			json: `{}`,
 			expectedStats: map[string]map[string]int{
 				"Bool 92:8": {
@@ -97,6 +103,7 @@ func TestChoiceAltStatistics(t *testing.T) {
 			},
 		},
 		{
+			name: "simple json",
 			json: `{ "string": "string", "number": 123 }`,
 			expectedStats: map[string]map[string]int{
 				"Integer 68:11": {
@@ -121,14 +128,16 @@ func TestChoiceAltStatistics(t *testing.T) {
 	}
 
 	for _, test := range cases {
-		stats := Stats{}
-		_, err := Parse("TestStatistics", []byte(test.json), Statistics(&stats, "no match"))
-		if err != nil {
-			t.Fatalf("Expected to parse %s without error, got: %v", test.json, err)
-		}
-		if !reflect.DeepEqual(test.expectedStats, stats.ChoiceAltCnt) {
-			t.Fatalf("Expected stats to equal %#v, got %#v", test.expectedStats, stats.ChoiceAltCnt)
-		}
+		t.Run(test.name, func(t *testing.T) {
+			stats := Stats{}
+			_, err := Parse("TestStatistics", []byte(test.json), Statistics(&stats, "no match"))
+			if err != nil {
+				t.Fatalf("Expected to parse %s without error, got: %v", test.json, err)
+			}
+			if !reflect.DeepEqual(test.expectedStats, stats.ChoiceAltCnt) {
+				t.Fatalf("Expected stats to equal %#v, got %#v", test.expectedStats, stats.ChoiceAltCnt)
+			}
+		})
 	}
 }
 

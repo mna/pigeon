@@ -24,13 +24,15 @@ var cases = map[string]string{
 
 func TestAndNot(t *testing.T) {
 	for tc, exp := range cases {
-		_, err := Parse("", []byte(tc))
-		var got string
-		if err != nil {
-			got = err.Error()
-		}
-		if got != exp {
-			t.Errorf("%q: want %v, got %v", tc, exp, got)
-		}
+		t.Run(tc, func(t *testing.T) {
+			_, err := Parse("", []byte(tc))
+			var got string
+			if err != nil {
+				got = err.Error()
+			}
+			if got != exp {
+				t.Errorf("%q: want %v, got %v", tc, exp, got)
+			}
+		})
 	}
 }

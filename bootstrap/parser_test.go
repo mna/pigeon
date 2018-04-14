@@ -53,17 +53,19 @@ var parseExpRes = []string{
 func TestParseValid(t *testing.T) {
 	p := NewParser()
 	for i, c := range parseValidCases {
-		g, err := p.Parse("", strings.NewReader(c))
-		if err != nil {
-			t.Errorf("%d: got error %v", i, err)
-			continue
-		}
+		t.Run(c, func(t *testing.T) {
+			g, err := p.Parse("", strings.NewReader(c))
+			if err != nil {
+				t.Errorf("%d: got error %v", i, err)
+				return
+			}
 
-		want := parseExpRes[i]
-		got := g.String()
-		if want != got {
-			t.Errorf("%d: want \n%s\n, got \n%s\n", i, want, got)
-		}
+			want := parseExpRes[i]
+			got := g.String()
+			if want != got {
+				t.Errorf("%d: want \n%s\n, got \n%s\n", i, want, got)
+			}
+		})
 	}
 }
 
@@ -80,18 +82,20 @@ var parseExpErrs = [][]string{
 func TestParseInvalid(t *testing.T) {
 	p := NewParser()
 	for i, c := range parseInvalidCases {
-		_, err := p.Parse("", strings.NewReader(c))
-		el := *(err.(*errList))
-		if len(el) != len(parseExpErrs[i]) {
-			t.Errorf("%d: want %d errors, got %d", i, len(parseExpErrs[i]), len(el))
-			continue
-		}
-		for j, err := range el {
-			want := parseExpErrs[i][j]
-			got := err.Error()
-			if want != got {
-				t.Errorf("%d: error %d: want %q, got %q", i, j, want, got)
+		t.Run(c, func(t *testing.T) {
+			_, err := p.Parse("", strings.NewReader(c))
+			el := *(err.(*errList))
+			if len(el) != len(parseExpErrs[i]) {
+				t.Errorf("%d: want %d errors, got %d", i, len(parseExpErrs[i]), len(el))
+				return
 			}
-		}
+			for j, err := range el {
+				want := parseExpErrs[i][j]
+				got := err.Error()
+				if want != got {
+					t.Errorf("%d: error %d: want %q, got %q", i, j, want, got)
+				}
+			}
+		})
 	}
 }

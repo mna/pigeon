@@ -48,19 +48,21 @@ var validCases = map[string]int{
 
 func TestValidCases(t *testing.T) {
 	for tc, exp := range validCases {
-		got, err := Parse("", []byte(tc))
-		if err != nil {
-			t.Errorf("%q: want no error, got %v", tc, err)
-			continue
-		}
-		goti, ok := got.(int)
-		if !ok {
-			t.Errorf("%q: want type %T, got %T", tc, exp, got)
-			continue
-		}
-		if exp != goti {
-			t.Errorf("%q: want %d, got %d", tc, exp, goti)
-		}
+		t.Run(tc, func(t *testing.T) {
+			got, err := Parse("", []byte(tc))
+			if err != nil {
+				t.Errorf("%q: want no error, got %v", tc, err)
+				return
+			}
+			goti, ok := got.(int)
+			if !ok {
+				t.Errorf("%q: want type %T, got %T", tc, exp, got)
+				return
+			}
+			if exp != goti {
+				t.Errorf("%q: want %d, got %d", tc, exp, goti)
+			}
+		})
 	}
 }
 
@@ -88,24 +90,26 @@ var invalidCases = map[string]string{
 
 func TestInvalidCases(t *testing.T) {
 	for tc, exp := range invalidCases {
-		got, err := Parse("", []byte(tc))
-		if err == nil {
-			t.Errorf("%q: want error, got none (%v)", tc, got)
-			continue
-		}
-		el, ok := err.(errList)
-		if !ok {
-			t.Errorf("%q: want error type %T, got %T", tc, &errList{}, err)
-			continue
-		}
-		for _, e := range el {
-			if _, ok := e.(*parserError); !ok {
-				t.Errorf("%q: want all individual errors to be %T, got %T (%[3]v)", tc, &parserError{}, e)
+		t.Run(tc, func(t *testing.T) {
+			got, err := Parse("", []byte(tc))
+			if err == nil {
+				t.Errorf("%q: want error, got none (%v)", tc, got)
+				return
 			}
-		}
-		if exp != err.Error() {
-			t.Errorf("%q: want \n%s\n, got \n%s\n", tc, exp, err)
-		}
+			el, ok := err.(errList)
+			if !ok {
+				t.Errorf("%q: want error type %T, got %T", tc, &errList{}, err)
+				return
+			}
+			for _, e := range el {
+				if _, ok := e.(*parserError); !ok {
+					t.Errorf("%q: want all individual errors to be %T, got %T (%[3]v)", tc, &parserError{}, e)
+				}
+			}
+			if exp != err.Error() {
+				t.Errorf("%q: want \n%s\n, got \n%s\n", tc, exp, err)
+			}
+		})
 	}
 }
 

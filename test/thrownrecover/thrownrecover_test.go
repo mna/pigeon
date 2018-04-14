@@ -95,36 +95,38 @@ func TestThrowAndRecover(t *testing.T) {
 		},
 	}
 	for _, test := range cases {
-		got, err := Parse("", []byte(test.input))
-		if test.errors == nil && err != nil {
-			t.Fatalf("for input %q got error: %s, but expect to parse without errors", test.input, err)
-		}
-		if test.errors != nil && err == nil {
-			t.Fatalf("for input %q got no error, but expect to parse with errors: %s", test.input, test.errors)
-		}
-		if !reflect.DeepEqual(got, test.captures) {
-			t.Errorf("for input %q want %s, got %s", test.input, test.captures, got)
-		}
-		if err != nil {
-			list := err.(errList)
-			if len(list) != len(test.errors) {
-				t.Errorf("for input %q want %d error(s), got %d", test.input, len(test.errors), len(list))
-				t.Logf("expected errors:\n")
-				for _, ee := range test.errors {
-					t.Logf("- %s\n", ee)
-				}
-				t.Logf("got errors:\n")
-				for _, ee := range list {
-					t.Logf("- %s\n", ee)
-				}
-				t.FailNow()
+		t.Run(test.input, func(t *testing.T) {
+			got, err := Parse("", []byte(test.input))
+			if test.errors == nil && err != nil {
+				t.Fatalf("for input %q got error: %s, but expect to parse without errors", test.input, err)
 			}
-			for i, err := range list {
-				pe := err.(*parserError)
-				if pe.Error() != test.errors[i] {
-					t.Errorf("for input %q want %dth error to be %s, got %s", test.input, i+1, test.errors[i], pe)
+			if test.errors != nil && err == nil {
+				t.Fatalf("for input %q got no error, but expect to parse with errors: %s", test.input, test.errors)
+			}
+			if !reflect.DeepEqual(got, test.captures) {
+				t.Errorf("for input %q want %s, got %s", test.input, test.captures, got)
+			}
+			if err != nil {
+				list := err.(errList)
+				if len(list) != len(test.errors) {
+					t.Errorf("for input %q want %d error(s), got %d", test.input, len(test.errors), len(list))
+					t.Logf("expected errors:\n")
+					for _, ee := range test.errors {
+						t.Logf("- %s\n", ee)
+					}
+					t.Logf("got errors:\n")
+					for _, ee := range list {
+						t.Logf("- %s\n", ee)
+					}
+					t.FailNow()
+				}
+				for i, err := range list {
+					pe := err.(*parserError)
+					if pe.Error() != test.errors[i] {
+						t.Errorf("for input %q want %dth error to be %s, got %s", test.input, i+1, test.errors[i], pe)
+					}
 				}
 			}
-		}
+		})
 	}
 }

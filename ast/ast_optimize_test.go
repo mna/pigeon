@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	// "github.com/pmezard/go-difflib/difflib"
@@ -340,25 +341,27 @@ var cases = []struct {
 
 func TestOptimize(t *testing.T) {
 	for i := range cases {
-		Optimize(cases[i].in)
-		if !reflect.DeepEqual(cases[i].in, cases[i].out) {
-			t.Errorf("%d: not equal", i)
-			// dumpin := goon.Sdump(cases[i].in)
-			// dumpout := goon.Sdump(cases[i].out)
-			// fmt.Println("=== want:")
-			// fmt.Println(dumpout)
-			// fmt.Println("=== got:")
-			// fmt.Println(dumpin)
-			// fmt.Println("=== diff:")
-			// diff := difflib.UnifiedDiff{
-			// 	A:        difflib.SplitLines(dumpout),
-			// 	B:        difflib.SplitLines(dumpin),
-			// 	FromFile: "want",
-			// 	ToFile:   "got",
-			// 	Context:  3,
-			// }
-			// text, _ := difflib.GetUnifiedDiffString(diff)
-			// fmt.Println(text)
-		}
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			Optimize(cases[i].in)
+			if !reflect.DeepEqual(cases[i].in, cases[i].out) {
+				t.Errorf("%d: not equal", i)
+				// dumpin := goon.Sdump(cases[i].in)
+				// dumpout := goon.Sdump(cases[i].out)
+				// fmt.Println("=== want:")
+				// fmt.Println(dumpout)
+				// fmt.Println("=== got:")
+				// fmt.Println(dumpin)
+				// fmt.Println("=== diff:")
+				// diff := difflib.UnifiedDiff{
+				// 	A:        difflib.SplitLines(dumpout),
+				// 	B:        difflib.SplitLines(dumpin),
+				// 	FromFile: "want",
+				// 	ToFile:   "got",
+				// 	Context:  3,
+				// }
+				// text, _ := difflib.GetUnifiedDiffString(diff)
+				// fmt.Println(text)
+			}
+		})
 	}
 }

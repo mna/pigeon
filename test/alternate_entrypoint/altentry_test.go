@@ -17,15 +17,17 @@ func TestValidEntrypoints(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		v, err := Parse("", []byte(c.in), Entrypoint(c.entrypoint))
-		if err != nil {
-			t.Errorf("%s:%s: got error %s", c.entrypoint, c.in, err)
-		}
+		t.Run(c.in, func(t *testing.T) {
+			v, err := Parse("", []byte(c.in), Entrypoint(c.entrypoint))
+			if err != nil {
+				t.Errorf("%s:%s: got error %s", c.entrypoint, c.in, err)
+			}
 
-		got := string(v.([]byte))
-		if got != c.in {
-			t.Errorf("%s:%s: got %s", c.entrypoint, c.in, got)
-		}
+			got := string(v.([]byte))
+			if got != c.in {
+				t.Errorf("%s:%s: got %s", c.entrypoint, c.in, got)
+			}
+		})
 	}
 }
 
@@ -48,12 +50,14 @@ func TestInvalidEntrypoints(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		_, err := Parse("", []byte(c.in), Entrypoint(c.entrypoint))
-		if err == nil {
-			t.Errorf("%s:%s: want error, got none", c.entrypoint, c.in)
-		}
-		if !strings.Contains(err.Error(), c.errMsg) {
-			t.Errorf("%s:%s: want %s, got %s", c.entrypoint, c.in, c.errMsg, err)
-		}
+		t.Run(c.in, func(t *testing.T) {
+			_, err := Parse("", []byte(c.in), Entrypoint(c.entrypoint))
+			if err == nil {
+				t.Errorf("%s:%s: want error, got none", c.entrypoint, c.in)
+			}
+			if !strings.Contains(err.Error(), c.errMsg) {
+				t.Errorf("%s:%s: want %s, got %s", c.entrypoint, c.in, c.errMsg, err)
+			}
+		})
 	}
 }

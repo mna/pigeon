@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"testing"
 	"time"
@@ -20,18 +21,20 @@ func TestLinearTime(t *testing.T) {
 		//1 << 20,
 	}
 	for _, sz := range sizes {
-		r := io.LimitReader(rand.Reader, sz)
-		enc := base64.NewEncoder(base64.StdEncoding, &buf)
-		_, err := io.Copy(enc, r)
-		if err != nil {
-			t.Fatal(err)
-		}
-		_ = enc.Close()
+		t.Run(fmt.Sprint(sz), func(t *testing.T) {
+			r := io.LimitReader(rand.Reader, sz)
+			enc := base64.NewEncoder(base64.StdEncoding, &buf)
+			_, err := io.Copy(enc, r)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = enc.Close()
 
-		start := time.Now()
-		if _, err := Parse("", buf.Bytes(), Memoize(true)); err != nil {
-			t.Fatal(err)
-		}
-		t.Log(time.Since(start))
+			start := time.Now()
+			if _, err := Parse("", buf.Bytes(), Memoize(true)); err != nil {
+				t.Fatal(err)
+			}
+			t.Log(time.Since(start))
+		})
 	}
 }

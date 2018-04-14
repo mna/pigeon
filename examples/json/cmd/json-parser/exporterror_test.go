@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -51,29 +52,31 @@ var invalidCases = []struct {
 }
 
 func TestInvalidCases(t *testing.T) {
-	for _, test := range invalidCases {
-		got, err := json.Parse("", []byte(test.input))
-		if err == nil {
-			t.Errorf("%q: want error, got none (%v)", test.input, got)
-			continue
-		}
-		el, ok := err.(json.ErrorLister)
-		if !ok {
-			t.Errorf("%q: want error to implement ErrorLister, got: %T", test.input, err)
-			continue
-		}
-		for _, e := range el.Errors() {
-			parserErr, ok := e.(json.ParserError)
+	for i, test := range invalidCases {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			got, err := json.Parse("", []byte(test.input))
+			if err == nil {
+				t.Errorf("%q: want error, got none (%v)", test.input, got)
+				return
+			}
+			el, ok := err.(json.ErrorLister)
 			if !ok {
-				t.Errorf("%q: want all individual errors to implement ParserError, got: %T", test.input, e)
+				t.Errorf("%q: want error to implement ErrorLister, got: %T", test.input, err)
+				return
 			}
-			if !reflect.DeepEqual(test.expected, parserErr.Expected()) {
-				t.Errorf("%q: want: %v, got: %v", test.input, test.expected, parserErr.Expected())
+			for _, e := range el.Errors() {
+				parserErr, ok := e.(json.ParserError)
+				if !ok {
+					t.Errorf("%q: want all individual errors to implement ParserError, got: %T", test.input, e)
+				}
+				if !reflect.DeepEqual(test.expected, parserErr.Expected()) {
+					t.Errorf("%q: want: %v, got: %v", test.input, test.expected, parserErr.Expected())
+				}
+				if !strings.Contains(parserErr.Error(), test.err) {
+					t.Errorf("%q: want prefix \n%s\n, got \n%s\n", test.input, test.err, parserErr.Error())
+				}
 			}
-			if !strings.Contains(parserErr.Error(), test.err) {
-				t.Errorf("%q: want prefix \n%s\n, got \n%s\n", test.input, test.err, parserErr.Error())
-			}
-		}
+		})
 	}
 }
 
@@ -129,15 +132,17 @@ var caretCases = []struct {
 }
 
 func TestCaretCases(t *testing.T) {
-	for _, test := range caretCases {
-		got, err := json.Parse("", []byte(test.input))
-		if err == nil {
-			t.Errorf("%q: want error, got none (%v)", test.input, got)
-			continue
-		}
-		caret := caretError(err, test.input)
-		if test.expected != caret {
-			t.Errorf("%q: want:\n%s\ngot:\n%s\n", test.input, test.expected, caret)
-		}
+	for i, test := range caretCases {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			got, err := json.Parse("", []byte(test.input))
+			if err == nil {
+				t.Errorf("%q: want error, got none (%v)", test.input, got)
+				return
+			}
+			caret := caretError(err, test.input)
+			if test.expected != caret {
+				t.Errorf("%q: want:\n%s\ngot:\n%s\n", test.input, test.expected, caret)
+			}
+		})
 	}
 }
