@@ -222,7 +222,9 @@ func (b *builder) writeActionExpr(act *ast.ActionExpr) {
 		b.writelnf("nil,")
 		return
 	}
-	act.FuncIx = b.exprIndex
+	if act.FuncIx == 0 {
+		act.FuncIx = b.exprIndex
+	}
 	b.writelnf("&actionExpr{")
 	pos := act.Pos()
 	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
@@ -239,7 +241,9 @@ func (b *builder) writeAndCodeExpr(and *ast.AndCodeExpr) {
 	}
 	b.writelnf("&andCodeExpr{")
 	pos := and.Pos()
-	and.FuncIx = b.exprIndex
+	if and.FuncIx == 0 {
+		and.FuncIx = b.exprIndex
+	}
 	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
 	b.writelnf("\trun: (*parser).call%s,", b.funcName(and.FuncIx))
 	b.writelnf("},")
@@ -414,7 +418,9 @@ func (b *builder) writeNotCodeExpr(not *ast.NotCodeExpr) {
 	}
 	b.writelnf("&notCodeExpr{")
 	pos := not.Pos()
-	not.FuncIx = b.exprIndex
+	if not.FuncIx == 0 {
+		not.FuncIx = b.exprIndex
+	}
 	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
 	b.writelnf("\trun: (*parser).call%s,", b.funcName(not.FuncIx))
 	b.writelnf("},")
@@ -507,7 +513,9 @@ func (b *builder) writeStateCodeExpr(state *ast.StateCodeExpr) {
 	b.globalState = true
 	b.writelnf("&stateCodeExpr{")
 	pos := state.Pos()
-	state.FuncIx = b.exprIndex
+	if state.FuncIx == 0 {
+		state.FuncIx = b.exprIndex
+	}
 	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
 	b.writelnf("\trun: (*parser).call%s,", b.funcName(state.FuncIx))
 	b.writelnf("},")
@@ -650,28 +658,40 @@ func (b *builder) writeActionExprCode(act *ast.ActionExpr) {
 	if act == nil {
 		return
 	}
-	b.writeFunc(act.FuncIx, act.Code, callFuncTemplate, onFuncTemplate)
+	if act.FuncIx > 0 {
+		b.writeFunc(act.FuncIx, act.Code, callFuncTemplate, onFuncTemplate)
+		act.FuncIx = 0 // already rendered, prevent duplicates
+	}
 }
 
 func (b *builder) writeAndCodeExprCode(and *ast.AndCodeExpr) {
 	if and == nil {
 		return
 	}
-	b.writeFunc(and.FuncIx, and.Code, callPredFuncTemplate, onPredFuncTemplate)
+	if and.FuncIx > 0 {
+		b.writeFunc(and.FuncIx, and.Code, callPredFuncTemplate, onPredFuncTemplate)
+		and.FuncIx = 0 // already rendered, prevent duplicates
+	}
 }
 
 func (b *builder) writeNotCodeExprCode(not *ast.NotCodeExpr) {
 	if not == nil {
 		return
 	}
-	b.writeFunc(not.FuncIx, not.Code, callPredFuncTemplate, onPredFuncTemplate)
+	if not.FuncIx > 0 {
+		b.writeFunc(not.FuncIx, not.Code, callPredFuncTemplate, onPredFuncTemplate)
+		not.FuncIx = 0 // already rendered, prevent duplicates
+	}
 }
 
 func (b *builder) writeStateCodeExprCode(state *ast.StateCodeExpr) {
 	if state == nil {
 		return
 	}
-	b.writeFunc(state.FuncIx, state.Code, callStateFuncTemplate, onStateFuncTemplate)
+	if state.FuncIx > 0 {
+		b.writeFunc(state.FuncIx, state.Code, callStateFuncTemplate, onStateFuncTemplate)
+		state.FuncIx = 0 // already rendered, prevent duplicates
+	}
 }
 
 func (b *builder) writeFunc(funcIx int, code *ast.CodeBlock, callTpl, funcTpl string) {
