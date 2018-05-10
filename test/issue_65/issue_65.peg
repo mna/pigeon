@@ -1,5 +1,5 @@
 {
-  package optimizegrammar
+  package issue65
 }
 
 Start <- List !.

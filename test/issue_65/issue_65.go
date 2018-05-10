@@ -1,4 +1,4 @@
-package optimizegrammar
+package issue65
 
 import (
 	"bytes"
@@ -19,44 +19,44 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Start",
-			pos:  position{line: 5, col: 1, offset: 31},
+			pos:  position{line: 5, col: 1, offset: 23},
 			expr: &seqExpr{
-				pos: position{line: 5, col: 10, offset: 40},
+				pos: position{line: 5, col: 10, offset: 32},
 				exprs: []interface{}{
 					&litMatcher{
-						pos:        position{line: 7, col: 6, offset: 74},
+						pos:        position{line: 7, col: 6, offset: 66},
 						val:        "X",
 						ignoreCase: false,
 					},
 					&zeroOrOneExpr{
-						pos: position{line: 7, col: 10, offset: 78},
+						pos: position{line: 7, col: 10, offset: 70},
 						expr: &actionExpr{
-							pos: position{line: 8, col: 6, offset: 86},
+							pos: position{line: 8, col: 6, offset: 78},
 							run: (*parser).callonStart4,
 							expr: &litMatcher{
-								pos:        position{line: 8, col: 6, offset: 86},
+								pos:        position{line: 8, col: 6, offset: 78},
 								val:        "Y",
 								ignoreCase: false,
 							},
 						},
 					},
 					&zeroOrMoreExpr{
-						pos: position{line: 6, col: 11, offset: 58},
+						pos: position{line: 6, col: 11, offset: 50},
 						expr: &seqExpr{
-							pos: position{line: 6, col: 13, offset: 60},
+							pos: position{line: 6, col: 13, offset: 52},
 							exprs: []interface{}{
 								&litMatcher{
-									pos:        position{line: 6, col: 13, offset: 60},
+									pos:        position{line: 6, col: 13, offset: 52},
 									val:        ",X",
 									ignoreCase: false,
 								},
 								&zeroOrOneExpr{
-									pos: position{line: 7, col: 10, offset: 78},
+									pos: position{line: 7, col: 10, offset: 70},
 									expr: &actionExpr{
-										pos: position{line: 8, col: 6, offset: 86},
+										pos: position{line: 8, col: 6, offset: 78},
 										run: (*parser).callonStart4,
 										expr: &litMatcher{
-											pos:        position{line: 8, col: 6, offset: 86},
+											pos:        position{line: 8, col: 6, offset: 78},
 											val:        "Y",
 											ignoreCase: false,
 										},
@@ -66,9 +66,9 @@ var g = &grammar{
 						},
 					},
 					&notExpr{
-						pos: position{line: 5, col: 15, offset: 45},
+						pos: position{line: 5, col: 15, offset: 37},
 						expr: &anyMatcher{
-							line: 5, col: 16, offset: 46,
+							line: 5, col: 16, offset: 38,
 						},
 					},
 				},

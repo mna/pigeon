@@ -1,4 +1,4 @@
-package optimizegrammar
+package issue65
 
 import (
 	"strings"
