@@ -23,9 +23,47 @@ var g = &grammar{
 			expr: &seqExpr{
 				pos: position{line: 5, col: 10, offset: 32},
 				exprs: []interface{}{
-					&ruleRefExpr{
-						pos:  position{line: 5, col: 10, offset: 32},
-						name: "List",
+					&litMatcher{
+						pos:        position{line: 7, col: 6, offset: 66},
+						val:        "X",
+						ignoreCase: false,
+					},
+					&zeroOrOneExpr{
+						pos: position{line: 7, col: 10, offset: 70},
+						expr: &actionExpr{
+							pos: position{line: 8, col: 6, offset: 78},
+							run: (*parser).callonStart4,
+							expr: &litMatcher{
+								pos:        position{line: 8, col: 6, offset: 78},
+								val:        "Y",
+								ignoreCase: false,
+							},
+						},
+					},
+					&zeroOrMoreExpr{
+						pos: position{line: 6, col: 11, offset: 50},
+						expr: &seqExpr{
+							pos: position{line: 6, col: 13, offset: 52},
+							exprs: []interface{}{
+								&litMatcher{
+									pos:        position{line: 6, col: 13, offset: 52},
+									val:        ",X",
+									ignoreCase: false,
+								},
+								&zeroOrOneExpr{
+									pos: position{line: 7, col: 10, offset: 70},
+									expr: &actionExpr{
+										pos: position{line: 8, col: 6, offset: 78},
+										run: (*parser).callonStart4,
+										expr: &litMatcher{
+											pos:        position{line: 8, col: 6, offset: 78},
+											val:        "Y",
+											ignoreCase: false,
+										},
+									},
+								},
+							},
+						},
 					},
 					&notExpr{
 						pos: position{line: 5, col: 15, offset: 37},
@@ -36,82 +74,18 @@ var g = &grammar{
 				},
 			},
 		},
-		{
-			name: "List",
-			pos:  position{line: 6, col: 1, offset: 40},
-			expr: &seqExpr{
-				pos: position{line: 6, col: 9, offset: 48},
-				exprs: []interface{}{
-					&ruleRefExpr{
-						pos:  position{line: 6, col: 9, offset: 48},
-						name: "X",
-					},
-					&zeroOrMoreExpr{
-						pos: position{line: 6, col: 11, offset: 50},
-						expr: &seqExpr{
-							pos: position{line: 6, col: 13, offset: 52},
-							exprs: []interface{}{
-								&litMatcher{
-									pos:        position{line: 6, col: 13, offset: 52},
-									val:        ",",
-									ignoreCase: false,
-								},
-								&ruleRefExpr{
-									pos:  position{line: 6, col: 17, offset: 56},
-									name: "X",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "X",
-			pos:  position{line: 7, col: 1, offset: 61},
-			expr: &seqExpr{
-				pos: position{line: 7, col: 6, offset: 66},
-				exprs: []interface{}{
-					&litMatcher{
-						pos:        position{line: 7, col: 6, offset: 66},
-						val:        "X",
-						ignoreCase: false,
-					},
-					&zeroOrOneExpr{
-						pos: position{line: 7, col: 10, offset: 70},
-						expr: &ruleRefExpr{
-							pos:  position{line: 7, col: 10, offset: 70},
-							name: "Y",
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "Y",
-			pos:  position{line: 8, col: 1, offset: 73},
-			expr: &actionExpr{
-				pos: position{line: 8, col: 6, offset: 78},
-				run: (*parser).callonY1,
-				expr: &litMatcher{
-					pos:        position{line: 8, col: 6, offset: 78},
-					val:        "Y",
-					ignoreCase: false,
-				},
-			},
-		},
 	},
 }
 
-func (c *current) onY1() (interface{}, error) {
+func (c *current) onStart4() (interface{}, error) {
 	return nil, errors.New("YY")
 
 }
 
-func (p *parser) callonY1() (interface{}, error) {
+func (p *parser) callonStart4() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
-	return p.cur.onY1()
+	return p.cur.onStart4()
 }
 
 var (

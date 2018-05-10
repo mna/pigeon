@@ -145,8 +145,14 @@ $(TEST_DIR)/staterestore/optimized/staterestore.go: $(TEST_DIR)/staterestore/sta
 $(TEST_DIR)/emptystate/emptystate.go: $(TEST_DIR)/emptystate/emptystate.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon $< > $@
 
-$(TEST_DIR)/issue_65/issue_65.go: $(TEST_DIR)/issue_65/issue_65.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon --optimize-grammar $< > $@
+$(TEST_DIR)/issue_65/issue_65.go: $(TEST_DIR)/issue_65/issue_65.peg $(TEST_DIR)/issue_65/optimized/issue_65.go $(TEST_DIR)/issue_65/optimized-grammar/issue_65.go $(BINDIR)/pigeon
+	$(BINDIR)/pigeon $< > $@
+
+$(TEST_DIR)/issue_65/optimized/issue_65.go: $(TEST_DIR)/issue_65/issue_65.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -optimize-parser -optimize-basic-latin $< > $@
+
+$(TEST_DIR)/issue_65/optimized-grammar/issue_65.go: $(TEST_DIR)/issue_65/issue_65.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -optimize-grammar $< > $@
 
 lint:
 	golint ./...
@@ -161,7 +167,7 @@ cmp:
 
 clean:
 	rm -f $(BUILDER_DIR)/generated_static_code.go $(BUILDER_DIR)/generated_static_code_range_table.go
-	rm -f $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC) $(EXAMPLES_DIR)/json/optimized/json.go $(EXAMPLES_DIR)/json/optimized-grammar/json.go $(TEST_DIR)/staterestore/optimized/staterestore.go $(TEST_DIR)/staterestore/standard/staterestore.go
+	rm -f $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC) $(EXAMPLES_DIR)/json/optimized/json.go $(EXAMPLES_DIR)/json/optimized-grammar/json.go $(TEST_DIR)/staterestore/optimized/staterestore.go $(TEST_DIR)/staterestore/standard/staterestore.go $(TEST_DIR)/issue_65/optimized/issue_65.go $(TEST_DIR)/issue_65/optimized-grammar/issue_65.go
 	rm -rf $(BINDIR)
 
 .PHONY: all clean lint cmp
