@@ -23,20 +23,24 @@ func TestOptimizeGrammar(t *testing.T) {
 	}
 
 	type parser func(string) (interface{}, error)
-	parsers := []parser{parseStd, parseOpt, parseOptGrammar}
-	for _, p := range parsers {
+	parsers := map[string]parser{
+		"standard":          parseStd,
+		"optimized":         parseOpt,
+		"optimized-grammar": parseOptGrammar,
+	}
+	for name, parser := range parsers {
 		for _, c := range cases {
-			_, err := p(c.input)
+			_, err := parser(c.input)
 			if c.errMsg == "" && err != nil {
-				t.Errorf("%q: want no error, got %v", c.input, err)
+				t.Errorf("%s: %q: want no error, got %v", name, c.input, err)
 				continue
 			}
 			if c.errMsg != "" && err == nil {
-				t.Errorf("%q: want error %q, got none", c.input, c.errMsg)
+				t.Errorf("%s: %q: want error %q, got none", name, c.input, c.errMsg)
 				continue
 			}
 			if c.errMsg != "" && !strings.Contains(err.Error(), c.errMsg) {
-				t.Errorf("%q: want error to contain %q, got %q", c.input, c.errMsg, err)
+				t.Errorf("%s: %q: want error to contain %q, got %q", name, c.input, c.errMsg, err)
 				continue
 			}
 		}
