@@ -78,6 +78,17 @@ func Optimize(optimize bool) Option {
 	}
 }
 
+// Nolint returns an option that specifies the nolint option
+// If nolint is true, special '// nolint: ...' comments are added
+// to the generated parser to suppress warnings by gometalinter.
+func Nolint(nolint bool) Option {
+	return func(b *builder) Option {
+		prev := b.nolint
+		b.nolint = nolint
+		return Optimize(prev)
+	}
+}
+
 // BasicLatinLookupTable returns an option that specifies the basicLatinLookup option
 // If basicLatinLookup is true, a lookup slice for the first 128 chars of
 // the Unicode table (Basic Latin) is generated for each CharClassMatcher
@@ -107,6 +118,7 @@ type builder struct {
 	optimize              bool
 	basicLatinLookupTable bool
 	globalState           bool
+	nolint                bool
 
 	ruleName  string
 	exprIndex int
@@ -742,10 +754,12 @@ func (b *builder) writeStaticCode() {
 		Optimize              bool
 		BasicLatinLookupTable bool
 		GlobalState           bool
+		Nolint                bool
 	}{
 		Optimize:              b.optimize,
 		BasicLatinLookupTable: b.basicLatinLookupTable,
 		GlobalState:           b.globalState,
+		Nolint:                b.nolint,
 	}
 	t := template.Must(template.New("static_code").Parse(staticCode))
 
@@ -759,8 +773,10 @@ func (b *builder) writeStaticCode() {
 	lines := strings.Split(buffer.String(), "\n")
 	buffer.Reset()
 	re := regexp.MustCompile(`^\s*//\s*(==template==\s*)+$`)
+	reLineEnd := regexp.MustCompile(`//\s*==template==\s*$`)
 	for _, line := range lines {
 		if !re.MatchString(line) {
+			line = reLineEnd.ReplaceAllString(line, "")
 			_, err := buffer.WriteString(line + "\n")
 			if err != nil {
 				// This is very unlikely to ever happen
