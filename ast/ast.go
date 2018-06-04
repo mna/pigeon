@@ -501,18 +501,18 @@ outer:
 		consumeN := 0
 		switch rn {
 		case '\\':
-			rn, _, _ := r.ReadRune()
+			rn, _, _ := r.ReadRune() // nolint: gas
 			switch rn {
 			case ']':
 				chars = append(chars, rn)
 				continue
 
 			case 'p':
-				rn, _, _ := r.ReadRune()
+				rn, _, _ := r.ReadRune() // nolint: gas
 				if rn == '{' {
 					buf.Reset()
 					for {
-						rn, _, _ := r.ReadRune()
+						rn, _, _ := r.ReadRune() // nolint: gas
 						if rn == '}' {
 							break
 						}
@@ -537,7 +537,7 @@ outer:
 			buf.Reset()
 			buf.WriteRune(rn)
 			for i := 0; i < consumeN; i++ {
-				rn, _, _ := r.ReadRune()
+				rn, _, _ := r.ReadRune() // nolint: gas
 				buf.WriteRune(rn)
 			}
 			rn, _, _, _ = strconv.UnquoteChar("\\"+buf.String(), 0)

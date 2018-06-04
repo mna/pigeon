@@ -317,11 +317,11 @@ type expr struct {
 	expr interface{}
 }
 
-type andExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type notExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type zeroOrOneExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type andExpr expr        //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type notExpr expr        //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type zeroOrOneExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type zeroOrMoreExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type oneOrMoreExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type oneOrMoreExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 
 //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type ruleRefExpr struct {
@@ -474,7 +474,6 @@ func (p *parser) setOptions(opts []Option) {
 		opt(p)
 	}
 }
-
 
 //{{ if .Nolint }} nolint: structcheck,deadcode {{else}} ==template== {{ end }}
 type resultTuple struct {

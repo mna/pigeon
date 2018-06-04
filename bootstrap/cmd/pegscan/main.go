@@ -13,7 +13,7 @@ import (
 
 func main() {
 	if len(os.Args) > 2 {
-		fmt.Fprintln(os.Stderr, "USAGE: pegscan FILE")
+		fmt.Fprintln(os.Stderr, "USAGE: pegscan FILE") // nolint: gas
 		os.Exit(1)
 	}
 

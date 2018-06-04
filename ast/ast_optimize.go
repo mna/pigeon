@@ -68,7 +68,7 @@ func set(m map[string]map[string]struct{}, src, dst string) {
 // optimize is a Visitor, which is used with the Walk function
 // The purpose of this function is to perform the actual optimizations.
 // See Optimize for a detailed list of the performed optimizations.
-func (r *grammarOptimizer) optimize(expr0 Expression) Visitor {
+func (r *grammarOptimizer) optimize(expr0 Expression) Visitor { // nolint: gocyclo
 	switch expr := expr0.(type) {
 	case *ActionExpr:
 		expr.Expr = r.optimizeRule(expr.Expr)
