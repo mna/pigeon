@@ -300,11 +300,11 @@ type expr struct {
 	expr interface{}
 }
 
-type andExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type notExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type zeroOrOneExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type andExpr expr        //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type notExpr expr        //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type zeroOrOneExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type zeroOrMoreExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type oneOrMoreExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type oneOrMoreExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 
 //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type ruleRefExpr struct {
@@ -438,9 +438,6 @@ func newParser(filename string, b []byte, opts ...Option) *parser {
 		Stats:           &stats,
 		// start rule is rule [0] unless an alternate entrypoint is specified
 		entrypoint: g.rules[0].name,
-		// ==template== {{ if or .GlobalState (not .Optimize) }}
-		emptyState: make(storeDict),
-		// {{ end }} ==template==
 	}
 	p.setOptions(opts)
 
@@ -457,7 +454,6 @@ func (p *parser) setOptions(opts []Option) {
 		opt(p)
 	}
 }
-
 
 //{{ if .Nolint }} nolint: structcheck,deadcode {{else}} ==template== {{ end }}
 type resultTuple struct {
@@ -535,9 +531,6 @@ type parser struct {
 	choiceNoMatch string
 	// recovery expression stack, keeps track of the currently available recovery expression, these are traversed in reverse
 	recoveryStack []map[string]interface{}
-
-	// emptyState contains an empty storeDict, which is used to optimize cloneState if global "state" store is not used.
-	emptyState storeDict
 }
 
 // push a variable set on the vstack.
@@ -719,13 +712,6 @@ func (p *parser) cloneState() storeDict {
 		defer p.out(p.in("cloneState"))
 	}
 	// {{ end }} ==template==
-
-	if len(p.cur.state) == 0 {
-		if len(p.emptyState) > 0 {
-			p.emptyState = make(storeDict)
-		}
-		return p.emptyState
-	}
 
 	state := make(storeDict, len(p.cur.state))
 	for k, v := range p.cur.state {

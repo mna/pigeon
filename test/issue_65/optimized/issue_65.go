@@ -539,9 +539,6 @@ type parser struct {
 	choiceNoMatch string
 	// recovery expression stack, keeps track of the currently available recovery expression, these are traversed in reverse
 	recoveryStack []map[string]interface{}
-
-	// emptyState contains an empty storeDict, which is used to optimize cloneState if global "state" store is not used.
-	emptyState storeDict
 }
 
 // push a variable set on the vstack.
