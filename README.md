@@ -18,7 +18,7 @@ Github user [@mna][6] created the package in April 2015, and [@breml][5] is the 
 
 ### Breaking Changes since v1.0.0
 
-* Removed support for Go < v1.7 due to the requirement of the package `context` in [golang.org/x/tools/imports](https://godoc.org/golang.org/x/tools/imports), which was added to the Go stdlib in Go v1.7. This is in compliance with the [Go Release Policy](https://golang.org/doc/devel/release.html#policy) respectively the [Go Release Maintenance](https://github.com/golang/go/wiki/Go-Release-Cycle#release-maintenance), which states support for each major release until there are two newer major releases.
+* Removed support for Go < v1.9 due to the requirement [golang.org/x/tools/imports](https://godoc.org/golang.org/x/tools/imports), which was updated to reflect changes in recent versions of Go. This is in compliance with the [Go Release Policy](https://golang.org/doc/devel/release.html#policy) respectively the [Go Release Maintenance](https://github.com/golang/go/wiki/Go-Release-Cycle#release-maintenance), which states support for each major release until there are two newer major releases.
 
 ## Installation
 
