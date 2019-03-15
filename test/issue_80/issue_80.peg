@@ -1,0 +1,17 @@
+{
+	package issue80
+}
+
+Value = [0-9]* EOF {
+	// } this comment line should safely be ignored {
+
+	return strconv.Atoi(string(c.text))
+	/* } this one too */
+} / [a-zA-Z]* EOF {
+// } and this one
+	return string(c.text), nil
+	/* } / "a fake rule" { return nil, nil }
+	*/
+}
+
+EOF = !.
