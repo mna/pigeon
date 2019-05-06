@@ -150,7 +150,7 @@ SuffixedExpr ← expr:PrimaryExpr __ op:SuffixedOp {
     default:
         return nil, errors.New("unknown operator: " + opStr)
     }
-} / PrimaryExpr 
+} / PrimaryExpr
 
 SuffixedOp ← ( '?' / '*' / '+' ) {
     return string(c.text), nil
@@ -252,14 +252,14 @@ HexEscape ← 'x' HexDigit HexDigit
     / 'x' ( SourceChar / EOL / EOF ) {
     return nil, errors.New("invalid hexadecimal escape")
 }
-LongUnicodeEscape ← 
+LongUnicodeEscape ←
     'U' HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit HexDigit {
         return validateUnicodeEscape(string(c.text), "invalid Unicode escape")
     }
     / 'U' ( SourceChar / EOL / EOF ) {
     return nil, errors.New("invalid Unicode escape")
 }
-ShortUnicodeEscape ← 
+ShortUnicodeEscape ←
     'u' HexDigit HexDigit HexDigit HexDigit {
         return validateUnicodeEscape(string(c.text), "invalid Unicode escape")
     }
@@ -286,7 +286,7 @@ CharClassEscape ← ( ']' / CommonEscapeSequence )
     return nil, errors.New("invalid escape character")
 }
 
-UnicodeClassEscape ← 'p' ( 
+UnicodeClassEscape ← 'p' (
       SingleCharUnicodeClass
     / !'{' ( SourceChar / EOL / EOF ) { return nil, errors.New("invalid Unicode class escape") }
     / '{' ident:IdentifierName '}' {
@@ -322,7 +322,7 @@ CodeBlock ← '{' Code '}' {
     return nil, errors.New("code block not terminated")
 }
 
-Code ← ( ( ![{}] SourceChar )+ / '{' Code '}' )*
+Code ← ( ( Comment / ![{}] SourceChar )+ / '{' Code '}' )*
 
 __ ← ( Whitespace / EOL / Comment )*
 _ ← ( Whitespace / MultiLineCommentNoLineTerminator )*
