@@ -1,0 +1,7 @@
+{
+package issue70
+}
+
+X ← a:Z !. { return a, nil }
+Y ← Z
+Z ← ('Z' { return "Z", nil })?
