@@ -56,7 +56,7 @@ var g = &grammar{
 									pos: position{line: 7, col: 10, offset: 70},
 									expr: &actionExpr{
 										pos: position{line: 8, col: 6, offset: 78},
-										run: (*parser).callonStart4,
+										run: (*parser).callonStart10,
 										expr: &litMatcher{
 											pos:        position{line: 8, col: 6, offset: 78},
 											val:        "Y",
@@ -88,6 +88,17 @@ func (p *parser) callonStart4() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onStart4()
+}
+
+func (c *current) onStart10() (interface{}, error) {
+	return nil, errors.New("YY")
+
+}
+
+func (p *parser) callonStart10() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onStart10()
 }
 
 var (

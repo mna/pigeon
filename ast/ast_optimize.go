@@ -348,7 +348,7 @@ func cloneExpr(expr Expression) Expression {
 		}
 	case *ZeroOrOneExpr:
 		return &ZeroOrOneExpr{
-			Expr: expr.Expr,
+			Expr: cloneExpr(expr.Expr),
 			p:    expr.p,
 		}
 	}

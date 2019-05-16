@@ -43,7 +43,7 @@ var g = &grammar{
 						pos: position{line: 6, col: 6, offset: 36},
 						expr: &actionExpr{
 							pos: position{line: 7, col: 6, offset: 44},
-							run: (*parser).callonD2,
+							run: (*parser).callonD3,
 							expr: &anyMatcher{
 								line: 7, col: 6, offset: 44,
 							},
@@ -67,6 +67,16 @@ func (p *parser) callonA2() (interface{}, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onA2()
+}
+
+func (c *current) onD3() (interface{}, error) {
+	return nil, nil
+}
+
+func (p *parser) callonD3() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onD3()
 }
 
 var (
