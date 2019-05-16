@@ -154,6 +154,12 @@ $(TEST_DIR)/issue_65/optimized/issue_65.go: $(TEST_DIR)/issue_65/issue_65.peg $(
 $(TEST_DIR)/issue_65/optimized-grammar/issue_65.go: $(TEST_DIR)/issue_65/issue_65.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint -optimize-grammar $< > $@
 
+$(TEST_DIR)/issue_70/issue_70.go: $(TEST_DIR)/issue_70/issue_70.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint $< > $@
+
+$(TEST_DIR)/issue_70b/issue_70b.go: $(TEST_DIR)/issue_70b/issue_70b.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint --optimize-grammar $< > $@
+
 $(TEST_DIR)/issue_80/issue_80.go: $(TEST_DIR)/issue_80/issue_80.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint $< > $@
 

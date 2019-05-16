@@ -1,0 +1,10 @@
+{
+  package issue70b
+}
+
+A <- B
+B <- C?
+C <- . { return nil, nil }
+
+D <- B / D
+
