@@ -166,7 +166,7 @@ func (a *ActionExpr) Pos() Pos { return a.p }
 
 // String returns the textual representation of a node.
 func (a *ActionExpr) String() string {
-	return fmt.Sprintf("%s: %T{Expr: %v, Code: %v, FuncIx: %d, ID: %p}", a.p, a, a.Expr, a.Code, a.FuncIx, a)
+	return fmt.Sprintf("%s: %T{Expr: %v, Code: %v}", a.p, a, a.Expr, a.Code)
 }
 
 // ThrowExpr is an expression that throws an FailureLabel to be catched by a
