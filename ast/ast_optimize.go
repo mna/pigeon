@@ -153,6 +153,20 @@ func (r *grammarOptimizer) optimize(expr0 Expression) Visitor {
 			_, protected := r.protectedRules[rule.Name.Val]
 			if !used && !protected {
 				expr.Rules = append(expr.Rules[:i], expr.Rules[i+1:]...)
+				// Compensate for the removed item
+				i--
+
+				for k, v := range r.ruleUsedByRules {
+					for kk := range v {
+						if kk == rule.Name.Val {
+							delete(r.ruleUsedByRules[k], kk)
+							if len(r.ruleUsedByRules[k]) == 0 {
+								delete(r.ruleUsedByRules, k)
+							}
+						}
+					}
+				}
+
 				r.optimized = true
 				continue
 			}
@@ -165,6 +179,7 @@ func (r *grammarOptimizer) optimize(expr0 Expression) Visitor {
 		expr.Expr = r.optimizeRule(expr.Expr)
 	case *Rule:
 		r.rule = expr.Name.Val
+		expr.Expr = r.optimizeRule(expr.Expr)
 	case *SeqExpr:
 		expr.Exprs = r.optimizeRules(expr.Exprs)
 
@@ -333,7 +348,7 @@ func cloneExpr(expr Expression) Expression {
 		}
 	case *ZeroOrOneExpr:
 		return &ZeroOrOneExpr{
-			Expr: expr.Expr,
+			Expr: cloneExpr(expr.Expr),
 			p:    expr.p,
 		}
 	}

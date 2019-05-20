@@ -1,0 +1,48 @@
+{
+  package issue70b
+}
+
+A <- B
+B <- C?
+C <- . { return nil, nil }
+
+D <- B / D
+
+
+// Before fix, this is what happened:
+// After 1st optimization:
+/*
+  A <- B
+  B <- .? { return nil, nil }
+  C <- . { return nil, nil }
+
+  D <- .? { return nil, nil } / D
+*/
+
+// After 2nd optimization:
+/*
+  A <- .? { return nil, nil }
+  B <- .? { return nil, nil }
+
+  D <- .? { return nil, nil } / D
+*/
+
+// After 3rd optimization:
+/*
+  A <- .? { return nil, nil }
+
+  D <- .? { return nil, nil } / D
+*/
+
+// After 4th optimization (nothing optimized, end of optimization)
+/*
+  A <- .? { return nil, nil }
+
+  D <- .? { return nil, nil } / D
+*/
+
+
+// The D code block does not get rendered because its FuncIx is 0 after
+// the A code block is rendered, so it looks like the ActionExpr is not
+// properly cloned (also, D could be dropped if the optimizer detected that
+// it is only referred to by itself).
