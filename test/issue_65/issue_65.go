@@ -310,7 +310,7 @@ type position struct {
 }
 
 func (p position) String() string {
-	return fmt.Sprintf("%d:%d [%d]", p.line, p.col, p.offset)
+	return strconv.Itoa(p.line) + ":" + strconv.Itoa(p.col) + " [" + strconv.Itoa(p.offset) + "]"
 }
 
 // savepoint stores all state required to go back to this point in the
@@ -928,7 +928,7 @@ func listJoin(list []string, sep string, lastSep string) string {
 	case 1:
 		return list[0]
 	default:
-		return fmt.Sprintf("%s %s %s", strings.Join(list[:len(list)-1], sep), lastSep, list[len(list)-1])
+		return strings.Join(list[:len(list)-1], sep) + " " + lastSep + " " + list[len(list)-1]
 	}
 }
 
@@ -1230,7 +1230,7 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 	if lit.ignoreCase {
 		ignoreCase = "i"
 	}
-	val := fmt.Sprintf("%q%s", lit.val, ignoreCase)
+	val := string(strconv.AppendQuote([]byte{}, lit.val)) + ignoreCase // wrap 'lit.val' with double quotes
 	start := p.pt
 	for _, want := range lit.val {
 		cur := p.pt.rn
