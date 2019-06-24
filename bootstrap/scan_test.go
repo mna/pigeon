@@ -218,33 +218,35 @@ func TestScanValid(t *testing.T) {
 	var s Scanner
 	var errh errsink
 	for i, c := range scanValidCases {
-		errh.reset()
-		s.Init("", strings.NewReader(c), errh.add)
+		t.Run(c, func(t *testing.T) {
+			errh.reset()
+			s.Init("", strings.NewReader(c), errh.add)
 
-		j := 0
-		for {
-			tok, ok := s.Scan()
-			if j < len(scanExpTokens[i]) {
-				got := tok.String()
-				want := scanExpTokens[i][j]
-				if got != want {
-					t.Errorf("%d: token %d: want %q, got %q", i, j, want, got)
+			j := 0
+			for {
+				tok, ok := s.Scan()
+				if j < len(scanExpTokens[i]) {
+					got := tok.String()
+					want := scanExpTokens[i][j]
+					if got != want {
+						t.Errorf("%d: token %d: want %q, got %q", i, j, want, got)
+					}
+				} else {
+					t.Errorf("%d: want %d tokens, got #%d", i, len(scanExpTokens[i]), j+1)
 				}
-			} else {
-				t.Errorf("%d: want %d tokens, got #%d", i, len(scanExpTokens[i]), j+1)
-			}
-			if !ok {
-				if j < len(scanExpTokens[i])-1 {
-					t.Errorf("%d: wand %d tokens, got only %d", i, len(scanExpTokens[i]), j+1)
+				if !ok {
+					if j < len(scanExpTokens[i])-1 {
+						t.Errorf("%d: wand %d tokens, got only %d", i, len(scanExpTokens[i]), j+1)
+					}
+					break
 				}
-				break
+				j++
 			}
-			j++
-		}
-		if len(errh.errs) != 0 {
-			t.Errorf("%d: want no error, got %d", i, len(errh.errs))
-			t.Log(errh.errs)
-		}
+			if len(errh.errs) != 0 {
+				t.Errorf("%d: want no error, got %d", i, len(errh.errs))
+				t.Log(errh.errs)
+			}
+		})
 	}
 }
 
@@ -336,23 +338,25 @@ func TestScanInvalid(t *testing.T) {
 	var s Scanner
 	var errh errsink
 	for i, c := range scanInvalidCases {
-		errh.reset()
-		s.Init("", strings.NewReader(c), errh.add)
-		for {
-			if _, ok := s.Scan(); !ok {
-				break
+		t.Run(c, func(t *testing.T) {
+			errh.reset()
+			s.Init("", strings.NewReader(c), errh.add)
+			for {
+				if _, ok := s.Scan(); !ok {
+					break
+				}
 			}
-		}
-		if len(errh.errs) != len(scanExpErrs[i]) {
-			t.Errorf("%d: want %d errors, got %d", i, len(scanExpErrs[i]), len(errh.errs))
-			continue
-		}
-		for j := range errh.errs {
-			want := scanExpErrs[i][j]
-			got := errh.StringAt(j)
-			if want != got {
-				t.Errorf("%d: error %d: want %q, got %q", i, j, want, got)
+			if len(errh.errs) != len(scanExpErrs[i]) {
+				t.Errorf("%d: want %d errors, got %d", i, len(scanExpErrs[i]), len(errh.errs))
+				return
 			}
-		}
+			for j := range errh.errs {
+				want := scanExpErrs[i][j]
+				got := errh.StringAt(j)
+				if want != got {
+					t.Errorf("%d: error %d: want %q, got %q", i, j, want, got)
+				}
+			}
+		})
 	}
 }

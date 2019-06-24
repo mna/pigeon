@@ -28,13 +28,15 @@ func TestGlobalStore(t *testing.T) {
 		},
 	}
 	for _, test := range cases {
-		got, err := Parse("", []byte(test.input), GlobalStore("initial", test.initial))
-		if err != nil {
-			t.Fatalf("for input %q got error: %s", test.input, err)
-		}
-		goti := got.(int)
-		if goti != test.expected {
-			t.Errorf("for input %q want %d, got %d", test.input, test.expected, goti)
-		}
+		t.Run(test.input, func(t *testing.T) {
+			got, err := Parse("", []byte(test.input), GlobalStore("initial", test.initial))
+			if err != nil {
+				t.Fatalf("for input %q got error: %s", test.input, err)
+			}
+			goti := got.(int)
+			if goti != test.expected {
+				t.Errorf("for input %q want %d, got %d", test.input, test.expected, goti)
+			}
+		})
 	}
 }

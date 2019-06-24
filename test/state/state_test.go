@@ -12,14 +12,16 @@ var cases = map[string]int{
 
 func TestState(t *testing.T) {
 	for tc, exp := range cases {
-		got, err := Parse("", []byte(tc), Memoize(false), InitState("countCs", 10))
+		t.Run(tc, func(t *testing.T) {
+			got, err := Parse("", []byte(tc), Memoize(false), InitState("countCs", 10))
 
-		if err != nil {
-			t.Errorf(err.Error())
-		}
-		if got != exp {
-			t.Errorf("%q: want %v, got %v", tc, exp, got)
-		}
+			if err != nil {
+				t.Errorf(err.Error())
+			}
+			if got != exp {
+				t.Errorf("%q: want %v, got %v", tc, exp, got)
+			}
+		})
 	}
 }
 

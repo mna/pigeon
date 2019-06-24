@@ -15,13 +15,15 @@ var cases = []struct {
 
 func TestStateRestore(t *testing.T) {
 	for _, c := range cases {
-		got, err := Parse("", []byte(c.input), Entrypoint(c.rule))
-		if err != nil {
-			t.Errorf("%s:%q: %v", c.rule, c.input, err)
-			continue
-		}
-		if got != c.want {
-			t.Errorf("%s:%q: want %v, got %v", c.rule, c.input, c.want, got)
-		}
+		t.Run(c.rule, func(t *testing.T) {
+			got, err := Parse("", []byte(c.input), Entrypoint(c.rule))
+			if err != nil {
+				t.Errorf("%s:%q: %v", c.rule, c.input, err)
+				return
+			}
+			if got != c.want {
+				t.Errorf("%s:%q: want %v, got %v", c.rule, c.input, c.want, got)
+			}
+		})
 	}
 }

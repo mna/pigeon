@@ -95,22 +95,24 @@ multidefined: noop`,
 	}
 
 	for _, test := range cases {
-		ll := make(labelLookup)
-		got, err := Parse("", []byte(test.input), InitState("labelLookup", ll))
-		if err != nil {
-			if !strings.Contains(err.Error(), test.err) {
-				t.Fatalf("Parse error did not match, expected: %s, got %s, input:\n%s\n", test.err, err, test.input)
+		t.Run(test.input, func(t *testing.T) {
+			ll := make(labelLookup)
+			got, err := Parse("", []byte(test.input), InitState("labelLookup", ll))
+			if err != nil {
+				if !strings.Contains(err.Error(), test.err) {
+					t.Fatalf("Parse error did not match, expected: %s, got %s, input:\n%s\n", test.err, err, test.input)
+				}
+			} else {
+				instr := got.([]Instruction)
+				result := ""
+				for _, inst := range instr {
+					result += inst.Assemble() + "\n"
+				}
+				result = strings.Trim(result, "\n")
+				if result != test.expected {
+					t.Fatalf("Parse did not provide expected result, expected:\n%s\n\nOutput:\n%s\n", test.expected, result)
+				}
 			}
-		} else {
-			instr := got.([]Instruction)
-			result := ""
-			for _, inst := range instr {
-				result += inst.Assemble() + "\n"
-			}
-			result = strings.Trim(result, "\n")
-			if result != test.expected {
-				t.Fatalf("Parse did not provide expected result, expected:\n%s\n\nOutput:\n%s\n", test.expected, result)
-			}
-		}
+		})
 	}
 }
