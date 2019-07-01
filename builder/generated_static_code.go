@@ -705,6 +705,17 @@ type Cloner interface {
 	Clone() interface{}
 }
 
+var statePool = &sync.Pool{
+	New: func() interface{} { return make(storeDict, 2) },
+}
+
+func (sd storeDict) Discard() {
+	for k := range sd {
+		delete(sd, k)
+	}
+	statePool.Put(sd)
+}
+
 // clone and return parser current state.
 func (p *parser) cloneState() storeDict {
 	// ==template== {{ if not .Optimize }}
@@ -713,7 +724,7 @@ func (p *parser) cloneState() storeDict {
 	}
 	// {{ end }} ==template==
 
-	state := make(storeDict, len(p.cur.state))
+	state := statePool.Get().(storeDict)
 	for k, v := range p.cur.state {
 		if c, ok := v.(Cloner); ok {
 			state[k] = c.Clone()
@@ -732,6 +743,7 @@ func (p *parser) restoreState(state storeDict) {
 		defer p.out(p.in("restoreState"))
 	}
 	// {{ end }} ==template==
+	p.cur.state.Discard()
 	p.cur.state = state
 }
 
