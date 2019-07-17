@@ -1433,7 +1433,7 @@ type Cloner interface {
 }
 
 var statePool = &sync.Pool{
-	New: func() interface{} { return make(storeDict, 2) },
+	New: func() interface{} { return make(storeDict) },
 }
 
 func (sd storeDict) Discard() {
