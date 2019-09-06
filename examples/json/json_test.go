@@ -84,37 +84,26 @@ func TestChoiceAltStatistics(t *testing.T) {
 		{
 			json: `{}`,
 			expectedStats: map[string]map[string]int{
-				"Bool 92:8": {
-					"no match": 1,
-				},
-				"Integer 68:11": {
-					"no match": 1,
-				},
-				"Value 29:15": {
-					"1":        1,
-					"no match": 1,
+				"Value 21:15": {
+					"1": 1,
 				},
 			},
 		},
 		{
 			json: `{ "string": "string", "number": 123 }`,
 			expectedStats: map[string]map[string]int{
-				"Integer 68:11": {
+				"Integer 60:11": {
 					"2":        1,
-					"no match": 2,
-				},
-				"Bool 92:8": {
 					"no match": 1,
 				},
-				"String 72:16": {
+				"String 64:16": {
 					"1":        18,
 					"no match": 3,
 				},
-				"Value 29:15": {
-					"1":        1,
-					"3":        1,
-					"4":        1,
-					"no match": 1,
+				"Value 21:15": {
+					"1": 1,
+					"3": 1,
+					"4": 1,
 				},
 			},
 		},
@@ -129,6 +118,13 @@ func TestChoiceAltStatistics(t *testing.T) {
 		if !reflect.DeepEqual(test.expectedStats, stats.ChoiceAltCnt) {
 			t.Fatalf("Expected stats to equal %#v, got %#v", test.expectedStats, stats.ChoiceAltCnt)
 		}
+	}
+}
+
+func TestZeroZero(t *testing.T) {
+	_, err := Parse(`fuzz`, []byte(`00`))
+	if err == nil {
+		t.Errorf("Error expected for invalid input: `00`")
 	}
 }
 

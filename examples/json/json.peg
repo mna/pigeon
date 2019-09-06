@@ -14,16 +14,8 @@ func toIfaceSlice(v interface{}) []interface{} {
 }
 }
 
-JSON ← _ vals:Value+ EOF {
-    valsSl := toIfaceSlice(vals)
-    switch len(valsSl) {
-    case 0:
-        return nil, nil
-    case 1:
-        return valsSl[0], nil
-    default:
-        return valsSl, nil
-    }
+JSON ← _ val:Value EOF {
+    return val, nil
 }
 
 Value ← val:( Object / Array / Number / String / Bool / Null ) _ {
