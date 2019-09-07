@@ -128,6 +128,15 @@ func TestZeroZero(t *testing.T) {
 	}
 }
 
+// The forward slash (solidus) is not a valid escape in Go, it will normally
+// fail if there's one in the string
+func TestForwardSlash(t *testing.T) {
+	_, err := Parse(`fuzz`, []byte(`"\/"`))
+	if err != nil {
+		t.Errorf("forward slash pigeon.Parse: %v", err)
+	}
+}
+
 func BenchmarkPigeonJSONNoMemo(b *testing.B) {
 	d, err := ioutil.ReadFile("testdata/github-octokit-repos.json")
 	if err != nil {
