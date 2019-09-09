@@ -62,8 +62,7 @@ Integer ← '0' / NonZeroDecimalDigit DecimalDigit*
 Exponent ← 'e'i [+-]? DecimalDigit+
 
 String ← '"' ( !EscapedChar . / '\\' EscapeSequence )* '"' {
-    // TODO : the forward slash (solidus) is not a valid escape in Go, it will
-    // fail if there's one in the string
+    c.text = bytes.Replace(c.text, []byte(`\/`), []byte(`/`), -1)
     return strconv.Unquote(string(c.text))
 }
 
