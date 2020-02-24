@@ -87,6 +87,7 @@ var g = &grammar{
 						pos:        position{line: 25, col: 5, offset: 359},
 						val:        "ab",
 						ignoreCase: false,
+						want:       "\"ab\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 25, col: 10, offset: 364},
@@ -96,6 +97,7 @@ var g = &grammar{
 						pos:        position{line: 25, col: 12, offset: 366},
 						val:        "d",
 						ignoreCase: false,
+						want:       "\"d\"",
 					},
 				},
 			},
@@ -110,6 +112,7 @@ var g = &grammar{
 						pos:        position{line: 26, col: 5, offset: 374},
 						val:        "a",
 						ignoreCase: false,
+						want:       "\"a\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 26, col: 9, offset: 378},
@@ -119,6 +122,7 @@ var g = &grammar{
 						pos:        position{line: 26, col: 12, offset: 381},
 						val:        "e",
 						ignoreCase: false,
+						want:       "\"e\"",
 					},
 				},
 			},
@@ -133,6 +137,7 @@ var g = &grammar{
 						pos:        position{line: 27, col: 5, offset: 389},
 						val:        "abcf",
 						ignoreCase: false,
+						want:       "\"abcf\"",
 					},
 					&stateCodeExpr{
 						pos: position{line: 27, col: 12, offset: 396},
@@ -151,6 +156,7 @@ var g = &grammar{
 						pos:        position{line: 29, col: 5, offset: 471},
 						val:        "c",
 						ignoreCase: false,
+						want:       "\"c\"",
 					},
 					&stateCodeExpr{
 						pos: position{line: 29, col: 9, offset: 475},
@@ -169,6 +175,7 @@ var g = &grammar{
 						pos:        position{line: 30, col: 6, offset: 551},
 						val:        "bc",
 						ignoreCase: false,
+						want:       "\"bc\"",
 					},
 					&stateCodeExpr{
 						pos: position{line: 30, col: 11, offset: 556},
@@ -187,11 +194,13 @@ var g = &grammar{
 						pos:        position{line: 32, col: 6, offset: 632},
 						val:        " ",
 						ignoreCase: false,
+						want:       "\" \"",
 					},
 					&litMatcher{
 						pos:        position{line: 32, col: 12, offset: 638},
 						val:        "\n",
 						ignoreCase: false,
+						want:       "\"\\n\"",
 					},
 				},
 			},
@@ -580,20 +589,7 @@ type litMatcher struct {
 	pos        position
 	val        string
 	ignoreCase bool
-	wantCache  string
-}
-
-func (lit *litMatcher) want() string {
-	if lit.wantCache != "" {
-		return lit.wantCache
-	}
-	ignoreCase := ""
-	if lit.ignoreCase {
-		ignoreCase = "i"
-	}
-	val := string(strconv.AppendQuote([]byte{}, lit.val)) + ignoreCase // wrap 'lit.val' with double quotes
-	lit.wantCache = val
-	return val
+	want       string
 }
 
 // nolint: structcheck
@@ -1402,13 +1398,13 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 			cur = unicode.ToLower(cur)
 		}
 		if cur != want {
-			p.failAt(false, start.position, lit.want())
+			p.failAt(false, start.position, lit.want)
 			p.restore(start)
 			return nil, false
 		}
 		p.read()
 	}
-	p.failAt(true, start.position, lit.want())
+	p.failAt(true, start.position, lit.want)
 	return p.sliceFrom(start), true
 }
 

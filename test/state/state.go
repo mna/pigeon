@@ -48,6 +48,7 @@ var g = &grammar{
 														pos:        position{line: 14, col: 5, offset: 173},
 														val:        "abc",
 														ignoreCase: false,
+														want:       "\"abc\"",
 													},
 													&stateCodeExpr{
 														pos: position{line: 18, col: 9, offset: 285},
@@ -57,6 +58,7 @@ var g = &grammar{
 														pos:        position{line: 14, col: 12, offset: 180},
 														val:        "d",
 														ignoreCase: false,
+														want:       "\"d\"",
 													},
 												},
 											},
@@ -67,6 +69,7 @@ var g = &grammar{
 														pos:        position{line: 15, col: 5, offset: 188},
 														val:        "abc",
 														ignoreCase: false,
+														want:       "\"abc\"",
 													},
 													&stateCodeExpr{
 														pos: position{line: 19, col: 11, offset: 362},
@@ -76,6 +79,7 @@ var g = &grammar{
 														pos:        position{line: 15, col: 12, offset: 195},
 														val:        "e",
 														ignoreCase: false,
+														want:       "\"e\"",
 													},
 												},
 											},
@@ -86,6 +90,7 @@ var g = &grammar{
 														pos:        position{line: 16, col: 5, offset: 203},
 														val:        "abcf",
 														ignoreCase: false,
+														want:       "\"abcf\"",
 													},
 													&stateCodeExpr{
 														pos: position{line: 16, col: 12, offset: 210},
@@ -494,20 +499,7 @@ type litMatcher struct {
 	pos        position
 	val        string
 	ignoreCase bool
-	wantCache  string
-}
-
-func (lit *litMatcher) want() string {
-	if lit.wantCache != "" {
-		return lit.wantCache
-	}
-	ignoreCase := ""
-	if lit.ignoreCase {
-		ignoreCase = "i"
-	}
-	val := string(strconv.AppendQuote([]byte{}, lit.val)) + ignoreCase // wrap 'lit.val' with double quotes
-	lit.wantCache = val
-	return val
+	want       string
 }
 
 // nolint: structcheck
@@ -1316,13 +1308,13 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 			cur = unicode.ToLower(cur)
 		}
 		if cur != want {
-			p.failAt(false, start.position, lit.want())
+			p.failAt(false, start.position, lit.want)
 			p.restore(start)
 			return nil, false
 		}
 		p.read()
 	}
-	p.failAt(true, start.position, lit.want())
+	p.failAt(true, start.position, lit.want)
 	return p.sliceFrom(start), true
 }
 

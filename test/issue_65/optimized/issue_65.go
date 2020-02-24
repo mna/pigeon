@@ -57,6 +57,7 @@ var g = &grammar{
 									pos:        position{line: 6, col: 13, offset: 52},
 									val:        ",",
 									ignoreCase: false,
+									want:       "\",\"",
 								},
 								&ruleRefExpr{
 									pos:  position{line: 6, col: 17, offset: 56},
@@ -78,6 +79,7 @@ var g = &grammar{
 						pos:        position{line: 7, col: 6, offset: 66},
 						val:        "X",
 						ignoreCase: false,
+						want:       "\"X\"",
 					},
 					&zeroOrOneExpr{
 						pos: position{line: 7, col: 10, offset: 70},
@@ -99,6 +101,7 @@ var g = &grammar{
 					pos:        position{line: 8, col: 6, offset: 78},
 					val:        "Y",
 					ignoreCase: false,
+					want:       "\"Y\"",
 				},
 			},
 		},
@@ -359,20 +362,7 @@ type litMatcher struct {
 	pos        position
 	val        string
 	ignoreCase bool
-	wantCache  string
-}
-
-func (lit *litMatcher) want() string {
-	if lit.wantCache != "" {
-		return lit.wantCache
-	}
-	ignoreCase := ""
-	if lit.ignoreCase {
-		ignoreCase = "i"
-	}
-	val := string(strconv.AppendQuote([]byte{}, lit.val)) + ignoreCase // wrap 'lit.val' with double quotes
-	lit.wantCache = val
-	return val
+	want       string
 }
 
 // nolint: structcheck
@@ -989,13 +979,13 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 			cur = unicode.ToLower(cur)
 		}
 		if cur != want {
-			p.failAt(false, start.position, lit.want())
+			p.failAt(false, start.position, lit.want)
 			p.restore(start)
 			return nil, false
 		}
 		p.read()
 	}
-	p.failAt(true, start.position, lit.want())
+	p.failAt(true, start.position, lit.want)
 	return p.sliceFrom(start), true
 }
 

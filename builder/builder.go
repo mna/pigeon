@@ -422,6 +422,11 @@ func (b *builder) writeLitMatcher(lit *ast.LitMatcher) {
 		b.writelnf("\tval: %q,", lit.Val)
 	}
 	b.writelnf("\tignoreCase: %t,", lit.IgnoreCase)
+	ignoreCaseFlag := ""
+	if lit.IgnoreCase {
+		ignoreCaseFlag = "i"
+	}
+	b.writelnf("\twant: %q,", strconv.Quote(lit.Val)+ignoreCaseFlag)
 	b.writelnf("},")
 }
 
