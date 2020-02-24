@@ -67,6 +67,7 @@ var g = &grammar{
 					pos:        position{line: 10, col: 6, offset: 99},
 					val:        "a",
 					ignoreCase: false,
+					want:       "\"a\"",
 				},
 			},
 		},
@@ -80,6 +81,7 @@ var g = &grammar{
 						pos:        position{line: 16, col: 6, offset: 229},
 						val:        "b",
 						ignoreCase: false,
+						want:       "\"b\"",
 					},
 					&stateCodeExpr{
 						pos: position{line: 17, col: 3, offset: 235},
@@ -98,6 +100,7 @@ var g = &grammar{
 					pos:        position{line: 23, col: 6, offset: 342},
 					val:        "c",
 					ignoreCase: false,
+					want:       "\"c\"",
 				},
 			},
 		},
@@ -111,6 +114,7 @@ var g = &grammar{
 						pos:        position{line: 29, col: 6, offset: 489},
 						val:        "d",
 						ignoreCase: false,
+						want:       "\"d\"",
 					},
 					&stateCodeExpr{
 						pos: position{line: 30, col: 3, offset: 495},
@@ -129,6 +133,7 @@ var g = &grammar{
 					pos:        position{line: 36, col: 6, offset: 652},
 					val:        "e",
 					ignoreCase: false,
+					want:       "\"e\"",
 				},
 			},
 		},
@@ -540,6 +545,7 @@ type litMatcher struct {
 	pos        position
 	val        string
 	ignoreCase bool
+	want       string
 }
 
 // nolint: structcheck
@@ -1341,11 +1347,6 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 		defer p.out(p.in("parseLitMatcher"))
 	}
 
-	ignoreCase := ""
-	if lit.ignoreCase {
-		ignoreCase = "i"
-	}
-	val := string(strconv.AppendQuote([]byte{}, lit.val)) + ignoreCase // wrap 'lit.val' with double quotes
 	start := p.pt
 	for _, want := range lit.val {
 		cur := p.pt.rn
@@ -1353,13 +1354,13 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 			cur = unicode.ToLower(cur)
 		}
 		if cur != want {
-			p.failAt(false, start.position, val)
+			p.failAt(false, start.position, lit.want)
 			p.restore(start)
 			return nil, false
 		}
 		p.read()
 	}
-	p.failAt(true, start.position, val)
+	p.failAt(true, start.position, lit.want)
 	return p.sliceFrom(start), true
 }
 

@@ -96,6 +96,7 @@ var g = &grammar{
 						pos:        position{line: 7, col: 10, offset: 149},
 						val:        "case01",
 						ignoreCase: false,
+						want:       "\"case01\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 7, col: 19, offset: 158},
@@ -143,6 +144,7 @@ var g = &grammar{
 						pos:        position{line: 8, col: 10, offset: 208},
 						val:        "case02",
 						ignoreCase: false,
+						want:       "\"case02\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 8, col: 19, offset: 217},
@@ -171,6 +173,7 @@ var g = &grammar{
 						pos:        position{line: 9, col: 10, offset: 239},
 						val:        "case03",
 						ignoreCase: false,
+						want:       "\"case03\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 9, col: 19, offset: 248},
@@ -182,6 +185,7 @@ var g = &grammar{
 							pos:        position{line: 9, col: 22, offset: 251},
 							val:        "x",
 							ignoreCase: false,
+							want:       "\"x\"",
 						},
 					},
 					&charClassMatcher{
@@ -204,6 +208,7 @@ var g = &grammar{
 						pos:        position{line: 10, col: 10, offset: 273},
 						val:        "case04",
 						ignoreCase: false,
+						want:       "\"case04\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 10, col: 19, offset: 282},
@@ -250,6 +255,7 @@ var g = &grammar{
 						pos:        position{line: 11, col: 10, offset: 334},
 						val:        "case05",
 						ignoreCase: false,
+						want:       "\"case05\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 11, col: 19, offset: 343},
@@ -261,12 +267,14 @@ var g = &grammar{
 							pos:        position{line: 11, col: 23, offset: 347},
 							val:        "not",
 							ignoreCase: false,
+							want:       "\"not\"",
 						},
 					},
 					&litMatcher{
 						pos:        position{line: 11, col: 29, offset: 353},
 						val:        "yes",
 						ignoreCase: false,
+						want:       "\"yes\"",
 					},
 				},
 			},
@@ -281,6 +289,7 @@ var g = &grammar{
 						pos:        position{line: 12, col: 10, offset: 370},
 						val:        "case06",
 						ignoreCase: false,
+						want:       "\"case06\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 12, col: 19, offset: 379},
@@ -300,6 +309,7 @@ var g = &grammar{
 						pos:        position{line: 12, col: 29, offset: 389},
 						val:        "x",
 						ignoreCase: false,
+						want:       "\"x\"",
 					},
 				},
 			},
@@ -314,6 +324,7 @@ var g = &grammar{
 						pos:        position{line: 13, col: 10, offset: 404},
 						val:        "case07",
 						ignoreCase: false,
+						want:       "\"case07\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 13, col: 19, offset: 413},
@@ -328,6 +339,7 @@ var g = &grammar{
 									pos:        position{line: 13, col: 24, offset: 418},
 									val:        "abc",
 									ignoreCase: true,
+									want:       "\"abc\"i",
 								},
 								&charClassMatcher{
 									pos:        position{line: 13, col: 33, offset: 427},
@@ -366,6 +378,7 @@ var g = &grammar{
 						pos:        position{line: 14, col: 10, offset: 460},
 						val:        "case08",
 						ignoreCase: false,
+						want:       "\"case08\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 14, col: 19, offset: 469},
@@ -377,6 +390,7 @@ var g = &grammar{
 							pos:        position{line: 14, col: 23, offset: 473},
 							val:        "a",
 							ignoreCase: true,
+							want:       "\"a\"i",
 						},
 					},
 					&anyMatcher{
@@ -395,6 +409,7 @@ var g = &grammar{
 						pos:        position{line: 15, col: 10, offset: 491},
 						val:        "case09",
 						ignoreCase: false,
+						want:       "\"case09\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 15, col: 19, offset: 500},
@@ -426,6 +441,7 @@ var g = &grammar{
 						pos:        position{line: 16, col: 10, offset: 523},
 						val:        "case10",
 						ignoreCase: false,
+						want:       "\"case10\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 16, col: 19, offset: 532},
@@ -440,6 +456,7 @@ var g = &grammar{
 									pos:        position{line: 16, col: 24, offset: 537},
 									val:        "0",
 									ignoreCase: false,
+									want:       "\"0\"",
 								},
 								&charClassMatcher{
 									pos:        position{line: 16, col: 30, offset: 543},
@@ -481,6 +498,7 @@ var g = &grammar{
 						pos:        position{line: 17, col: 10, offset: 579},
 						val:        "case11",
 						ignoreCase: false,
+						want:       "\"case11\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 17, col: 19, offset: 588},
@@ -494,6 +512,7 @@ var g = &grammar{
 								pos:        position{line: 17, col: 26, offset: 595},
 								val:        "a",
 								ignoreCase: false,
+								want:       "\"a\"",
 							},
 						},
 					},
@@ -501,6 +520,7 @@ var g = &grammar{
 						pos:        position{line: 17, col: 32, offset: 601},
 						val:        "a",
 						ignoreCase: false,
+						want:       "\"a\"",
 					},
 				},
 			},
@@ -512,6 +532,7 @@ var g = &grammar{
 				pos:        position{line: 19, col: 13, offset: 620},
 				val:        "inc",
 				ignoreCase: false,
+				want:       "\"inc\"",
 			},
 		},
 		{
@@ -521,6 +542,7 @@ var g = &grammar{
 				pos:        position{line: 20, col: 13, offset: 640},
 				val:        "dec",
 				ignoreCase: false,
+				want:       "\"dec\"",
 			},
 		},
 		{
@@ -530,6 +552,7 @@ var g = &grammar{
 				pos:        position{line: 21, col: 8, offset: 655},
 				val:        "zero",
 				ignoreCase: false,
+				want:       "\"zero\"",
 			},
 		},
 		{
@@ -539,6 +562,7 @@ var g = &grammar{
 				pos:        position{line: 22, col: 13, offset: 676},
 				val:        "oneOrMore",
 				ignoreCase: false,
+				want:       "\"oneOrMore\"",
 			},
 		},
 		{
@@ -900,6 +924,7 @@ type litMatcher struct {
 	pos        position
 	val        string
 	ignoreCase bool
+	want       string
 }
 
 // nolint: structcheck
@@ -1701,11 +1726,6 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 		defer p.out(p.in("parseLitMatcher"))
 	}
 
-	ignoreCase := ""
-	if lit.ignoreCase {
-		ignoreCase = "i"
-	}
-	val := string(strconv.AppendQuote([]byte{}, lit.val)) + ignoreCase // wrap 'lit.val' with double quotes
 	start := p.pt
 	for _, want := range lit.val {
 		cur := p.pt.rn
@@ -1713,13 +1733,13 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 			cur = unicode.ToLower(cur)
 		}
 		if cur != want {
-			p.failAt(false, start.position, val)
+			p.failAt(false, start.position, lit.want)
 			p.restore(start)
 			return nil, false
 		}
 		p.read()
 	}
-	p.failAt(true, start.position, val)
+	p.failAt(true, start.position, lit.want)
 	return p.sliceFrom(start), true
 }
 
