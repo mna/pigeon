@@ -1,8 +1,8 @@
 {
 package andnot
 
-func toString(v interface{}) string {
-    ifSl := v.([]interface{})
+func toString(v any) string {
+    ifSl := v.([]any)
     var res string
     for _, s := range ifSl {
         res += string(s.([]byte))

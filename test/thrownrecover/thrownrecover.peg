@@ -19,7 +19,7 @@ number = !. / d:digit n:number {
     return d.(string) + n.(string), nil
 }
 
-digit = [0-9] { return string(c.text), nil } / x:( &[a-z] %{errAlpha} ) { return x.([]interface{})[1], nil } / %{errOther}
+digit = [0-9] { return string(c.text), nil } / x:( &[a-z] %{errAlpha} ) { return x.([]any)[1], nil } / %{errOther}
 
 ErrNonNumber = &{
     return true, errors.New("expecting a number")
@@ -48,7 +48,7 @@ number03 = !. / d:digit03 n:number03 {
     return d.(string) + n.(string), nil
 }
 
-digit03 = [0-9] { return string(c.text), nil } / x:( &[a-z] %{errAlphaLower} ) { return x.([]interface{})[1], nil } / x:( &[A-Z] %{errAlphaUpper} ) { return x.([]interface{})[1], nil } / %{errOther}
+digit03 = [0-9] { return string(c.text), nil } / x:( &[a-z] %{errAlphaLower} ) { return x.([]any)[1], nil } / x:( &[A-Z] %{errAlphaUpper} ) { return x.([]any)[1], nil } / %{errOther}
 
 ErrAlphaInner03 = &{
     return true, errors.New("expecting a number, got lower case char")
@@ -78,7 +78,7 @@ number04 = !. / d:digit04 n:number04 {
     return d.(string) + n.(string), nil
 }
 
-digit04 = [0-9] { return string(c.text), nil } / x:( &[a-z] %{errAlphaLower} ) { return x.([]interface{})[1], nil } / x:( &[A-Z] %{errAlphaUpper} ) { return x.([]interface{})[1], nil } / %{errOther}
+digit04 = [0-9] { return string(c.text), nil } / x:( &[a-z] %{errAlphaLower} ) { return x.([]any)[1], nil } / x:( &[A-Z] %{errAlphaUpper} ) { return x.([]any)[1], nil } / %{errOther}
 
 ErrAlphaInner04 = &{
     return false, nil

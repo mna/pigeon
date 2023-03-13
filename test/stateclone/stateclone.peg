@@ -3,7 +3,7 @@ package stateclone
 
 type values []int
 
-func (vals values) Clone() interface{} {
+func (vals values) Clone() any {
 	clone := make(values, 0, len(vals))
 	clone = append(clone, vals...)
 	return clone

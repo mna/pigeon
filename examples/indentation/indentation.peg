@@ -1,11 +1,11 @@
 {
 package main
 
-func toIfaceSlice(v interface{}) []interface{} {
+func toIfaceSlice(v any) []any {
     if v == nil {
         return nil
     }
-    return v.([]interface{})
+    return v.([]any)
 }
 
 }
