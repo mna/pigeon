@@ -201,8 +201,8 @@ func BenchmarkStdlibJSON(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		var iface any
-		if err := json.Unmarshal(d, &iface); err != nil {
+		var anyVal any
+		if err := json.Unmarshal(d, &anyVal); err != nil {
 			b.Fatal(err)
 		}
 	}

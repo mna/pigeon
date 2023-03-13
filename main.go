@@ -271,9 +271,9 @@ func (c *current) astPos() ast.Pos {
 	return ast.Pos{Line: c.pos.line, Col: c.pos.col, Off: c.pos.offset}
 }
 
-// toIfaceSlice is a helper function for the PEG grammar parser. It converts
+// toAnySlice is a helper function for the PEG grammar parser. It converts
 // v to a slice of empty interfaces.
-func toIfaceSlice(v any) []any {
+func toAnySlice(v any) []any {
 	if v == nil {
 		return nil
 	}

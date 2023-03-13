@@ -12,7 +12,7 @@
 //
 package asmgoto
 
-func toIfaceSlice(v any) []any {
+func toAnySlice(v any) []any {
     if v == nil {
         return nil
     }
@@ -21,7 +21,7 @@ func toIfaceSlice(v any) []any {
 }
 
 Program ← lines:Line* EOF &{ return labelCheck(c) } {
-  lines0 := toIfaceSlice(lines)
+  lines0 := toAnySlice(lines)
   asmLines := make([]Instruction, 0, len(lines0))
   for _, line := range lines0 {
     asmLines = append(asmLines, line.(Instruction))

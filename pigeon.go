@@ -2653,12 +2653,12 @@ func (c *current) onGrammar1(initializer, rules any) (any, error) {
 
 	// create the grammar, assign its initializer
 	g := ast.NewGrammar(pos)
-	initSlice := toIfaceSlice(initializer)
+	initSlice := toAnySlice(initializer)
 	if len(initSlice) > 0 {
 		g.Init = initSlice[0].(*ast.CodeBlock)
 	}
 
-	rulesSlice := toIfaceSlice(rules)
+	rulesSlice := toAnySlice(rules)
 	g.Rules = make([]*ast.Rule, len(rulesSlice))
 	for i, duo := range rulesSlice {
 		g.Rules[i] = duo.([]any)[0].(*ast.Rule)
@@ -2687,7 +2687,7 @@ func (c *current) onRule1(name, display, expr any) (any, error) {
 	pos := c.astPos()
 
 	rule := ast.NewRule(pos, name.(*ast.Identifier))
-	displaySlice := toIfaceSlice(display)
+	displaySlice := toAnySlice(display)
 	if len(displaySlice) > 0 {
 		rule.DisplayName = displaySlice[0].(*ast.StringLit)
 	}
@@ -2703,7 +2703,7 @@ func (p *parser) callonRule1() (any, error) {
 }
 
 func (c *current) onRecoveryExpr1(expr, recoverExprs any) (any, error) {
-	recoverExprSlice := toIfaceSlice(recoverExprs)
+	recoverExprSlice := toAnySlice(recoverExprs)
 	recover := expr.(ast.Expression)
 	for _, sl := range recoverExprSlice {
 		pos := c.astPos()
@@ -2725,7 +2725,7 @@ func (p *parser) callonRecoveryExpr1() (any, error) {
 
 func (c *current) onLabels1(label, labels any) (any, error) {
 	failureLabels := []ast.FailureLabel{ast.FailureLabel(label.(*ast.Identifier).Val)}
-	labelSlice := toIfaceSlice(labels)
+	labelSlice := toAnySlice(labels)
 	for _, fl := range labelSlice {
 		failureLabels = append(failureLabels, ast.FailureLabel(fl.([]any)[3].(*ast.Identifier).Val))
 	}
@@ -2739,7 +2739,7 @@ func (p *parser) callonLabels1() (any, error) {
 }
 
 func (c *current) onChoiceExpr1(first, rest any) (any, error) {
-	restSlice := toIfaceSlice(rest)
+	restSlice := toAnySlice(rest)
 	if len(restSlice) == 0 {
 		return first, nil
 	}
@@ -2767,7 +2767,7 @@ func (c *current) onActionExpr1(expr, code any) (any, error) {
 	pos := c.astPos()
 	act := ast.NewActionExpr(pos)
 	act.Expr = expr.(ast.Expression)
-	codeSlice := toIfaceSlice(code)
+	codeSlice := toAnySlice(code)
 	act.Code = codeSlice[1].(*ast.CodeBlock)
 
 	return act, nil
@@ -2780,7 +2780,7 @@ func (p *parser) callonActionExpr1() (any, error) {
 }
 
 func (c *current) onSeqExpr1(first, rest any) (any, error) {
-	restSlice := toIfaceSlice(rest)
+	restSlice := toAnySlice(rest)
 	if len(restSlice) == 0 {
 		return first, nil
 	}

@@ -109,7 +109,7 @@ func (c *current) astPos() ast.Pos {
 	return ast.Pos{Line: c.pos.line, Col: c.pos.col, Off: c.pos.offset}
 }
 
-func toIfaceSlice(v any) []any {
+func toAnySlice(v any) []any {
 	if v == nil {
 		return nil
 	}
