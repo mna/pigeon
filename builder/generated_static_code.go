@@ -62,18 +62,17 @@ func Entrypoint(ruleName string) Option {
 //
 // Example usage:
 //
-//     input := "input"
-//     stats := Stats{}
-//     _, err := Parse("input-file", []byte(input), Statistics(&stats, "no match"))
-//     if err != nil {
-//         log.Panicln(err)
-//     }
-//     b, err := json.MarshalIndent(stats.ChoiceAltCnt, "", "  ")
-//     if err != nil {
-//         log.Panicln(err)
-//     }
-//     fmt.Println(string(b))
-//
+//	input := "input"
+//	stats := Stats{}
+//	_, err := Parse("input-file", []byte(input), Statistics(&stats, "no match"))
+//	if err != nil {
+//	    log.Panicln(err)
+//	}
+//	b, err := json.MarshalIndent(stats.ChoiceAltCnt, "", "  ")
+//	if err != nil {
+//	    log.Panicln(err)
+//	}
+//	fmt.Println(string(b))
 func Statistics(stats *Stats, choiceNoMatch string) Option {
 	return func(p *parser) Option {
 		oldStats := p.Stats
@@ -240,13 +239,13 @@ type storeDict map[string]any
 
 // the AST types...
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type grammar struct {
 	pos   position
 	rules []*rule
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type rule struct {
 	pos         position
 	name        string
@@ -254,20 +253,20 @@ type rule struct {
 	expr        any
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type choiceExpr struct {
 	pos          position
 	alternatives []any
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type actionExpr struct {
 	pos  position
 	expr any
 	run  func(*parser) (any, error)
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type recoveryExpr struct {
 	pos          position
 	expr         any
@@ -275,26 +274,26 @@ type recoveryExpr struct {
 	failureLabel []string
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type seqExpr struct {
 	pos   position
 	exprs []any
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type throwExpr struct {
 	pos   position
 	label string
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type labeledExpr struct {
 	pos   position
 	label string
 	expr  any
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type expr struct {
 	pos  position
 	expr any
@@ -306,7 +305,7 @@ type zeroOrOneExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==templ
 type zeroOrMoreExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type oneOrMoreExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type ruleRefExpr struct {
 	pos  position
 	name string
@@ -314,7 +313,7 @@ type ruleRefExpr struct {
 
 // ==template== {{ if or .GlobalState (not .Optimize) }}
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type stateCodeExpr struct {
 	pos position
 	run func(*parser) error
@@ -322,19 +321,19 @@ type stateCodeExpr struct {
 
 // {{ end }} ==template==
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type andCodeExpr struct {
 	pos position
 	run func(*parser) (bool, error)
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type notCodeExpr struct {
 	pos position
 	run func(*parser) (bool, error)
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type litMatcher struct {
 	pos        position
 	val        string
@@ -342,7 +341,7 @@ type litMatcher struct {
 	want       string
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type charClassMatcher struct {
 	pos             position
 	val             string
@@ -456,14 +455,14 @@ func (p *parser) setOptions(opts []Option) {
 	}
 }
 
-//{{ if .Nolint }} nolint: structcheck,deadcode {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck,deadcode {{else}} ==template== {{ end }}
 type resultTuple struct {
 	v   any
 	b   bool
 	end savepoint
 }
 
-//{{ if .Nolint }} nolint: varcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: varcheck {{else}} ==template== {{ end }}
 const choiceNoMatch = -1
 
 // Stats stores some statistics, gathered during parsing
@@ -488,7 +487,7 @@ type Stats struct {
 	ChoiceAltCnt map[string]map[string]int
 }
 
-//{{ if .Nolint }} nolint: structcheck,maligned {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck,maligned {{else}} ==template== {{ end }}
 type parser struct {
 	filename string
 	pt       savepoint
@@ -789,7 +788,7 @@ func (p *parser) buildRulesTable(g *grammar) {
 	}
 }
 
-//{{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
 func (p *parser) parse(g *grammar) (val any, err error) {
 	if len(g.rules) == 0 {
 		p.addErr(errNoRule)
@@ -902,7 +901,7 @@ func (p *parser) parseRule(rule *rule) (any, bool) {
 	return val, ok
 }
 
-//{{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
 func (p *parser) parseExpr(expr any) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	var pt savepoint
@@ -1070,7 +1069,7 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (any, bool) {
 	return p.sliceFrom(start), true
 }
 
-//{{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
 func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
