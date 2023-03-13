@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"os"
 	"sort"
@@ -202,7 +201,7 @@ func ParseFile(filename string, opts ...Option) (i interface{}, err error) { //{
 // ParseReader parses the data from r using filename as information in the
 // error messages.
 func ParseReader(filename string, r io.Reader, opts ...Option) (interface{}, error) { //{{ if .Nolint }} nolint: deadcode {{else}} ==template== {{ end }}
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

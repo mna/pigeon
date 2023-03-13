@@ -1,12 +1,12 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
 func BenchmarkParsePigeonNoMemo(b *testing.B) {
-	d, err := ioutil.ReadFile("../../../grammar/pigeon.peg")
+	d, err := os.ReadFile("../../../grammar/pigeon.peg")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -20,7 +20,7 @@ func BenchmarkParsePigeonNoMemo(b *testing.B) {
 }
 
 func BenchmarkParsePigeonMemo(b *testing.B) {
-	d, err := ioutil.ReadFile("../../../grammar/pigeon.peg")
+	d, err := os.ReadFile("../../../grammar/pigeon.peg")
 	if err != nil {
 		b.Fatal(err)
 	}

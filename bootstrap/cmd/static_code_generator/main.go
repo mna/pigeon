@@ -5,7 +5,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -25,7 +24,7 @@ var %s = ` + "`"
 )
 
 func generateFile(source, dest, varname string) {
-	staticCode, err := ioutil.ReadFile(source)
+	staticCode, err := os.ReadFile(source)
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +43,7 @@ func generateFile(source, dest, varname string) {
 	}
 	dstLines = append(dstLines, strings.Split(footer, eol)...)
 
-	err = ioutil.WriteFile(dest, []byte(strings.Join(dstLines, eol)+eol), 0644)
+	err = os.WriteFile(dest, []byte(strings.Join(dstLines, eol)+eol), 0644)
 	if err != nil {
 		panic(err)
 	}

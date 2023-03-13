@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -29,7 +29,7 @@ func main() {
 		nm = os.Args[1]
 	}
 
-	b, err := ioutil.ReadAll(in)
+	b, err := io.ReadAll(in)
 	if err != nil {
 		log.Fatal(err)
 	}
