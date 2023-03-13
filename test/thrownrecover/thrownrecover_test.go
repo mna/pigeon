@@ -8,7 +8,7 @@ import (
 func TestThrowAndRecover(t *testing.T) {
 	cases := []struct {
 		input    string
-		captures interface{}
+		captures any
 		errors   []string
 	}{
 		// Case 01: Recover multiple labels

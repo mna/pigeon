@@ -2,9 +2,9 @@ package issue80
 
 import "testing"
 
-var cases = map[string]interface{}{
+var cases = map[string]any{
 	"12345": 12345,
-	"asdf": "asdf",
+	"asdf":  "asdf",
 }
 
 func TestIgnoreComments(t *testing.T) {
@@ -20,24 +20,22 @@ func TestIgnoreComments(t *testing.T) {
 			got, ok := ret.(int)
 			if !ok {
 				t.Fatalf("incorrect output type %T for case %v, expected %T",
-				ret, tc, expt)
+					ret, tc, expt)
 			}
 
-			if (expt != got) {
+			if expt != got {
 				t.Fatalf("incorrect output got %v, expected %v", got, exp)
 			}
 		case string:
 			got, ok := ret.(string)
 			if !ok {
 				t.Fatalf("incorrect output type %T for case %v, expected %T",
-				ret, tc, expt)
+					ret, tc, expt)
 			}
 
-			if (expt != got) {
+			if expt != got {
 				t.Fatalf("incorrect output got %v, expected %v", got, exp)
 			}
 		}
 	}
 }
-
-

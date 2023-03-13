@@ -800,13 +800,13 @@ func (b *builder) funcName(ix int) string {
 	return "on" + b.ruleName + strconv.Itoa(ix)
 }
 
-func (b *builder) writef(f string, args ...interface{}) {
+func (b *builder) writef(f string, args ...any) {
 	if b.err == nil {
 		_, b.err = fmt.Fprintf(b.w, f, args...)
 	}
 }
 
-func (b *builder) writelnf(f string, args ...interface{}) {
+func (b *builder) writelnf(f string, args ...any) {
 	b.writef(f+"\n", args...)
 }
 

@@ -58,7 +58,7 @@ type StatementsNode struct {
 	statements []Statement
 }
 
-func newStatementsNode(stmts interface{}) (StatementsNode, error) {
+func newStatementsNode(stmts any) (StatementsNode, error) {
 
 	st := toIfaceSlice(stmts)
 	ex := make([]Statement, len(st))
@@ -145,14 +145,14 @@ func (n LogicalExpressionNode) exec() (bool, error) {
 
 // AdditiveExpressionNode is a additive expression
 type AdditiveExpressionNode struct {
-	arg1 interface{}
+	arg1 any
 	arg2 PrimaryExpressionNode
 	op   string
 }
 
-func newAdditiveExpressionNode(arg PrimaryExpressionNode, rest interface{}) (AdditiveExpressionNode, error) {
+func newAdditiveExpressionNode(arg PrimaryExpressionNode, rest any) (AdditiveExpressionNode, error) {
 	var a AdditiveExpressionNode
-	var arg1 interface{} = arg
+	var arg1 any = arg
 
 	restSl := toIfaceSlice(rest)
 	if len(restSl) == 0 {
@@ -197,10 +197,10 @@ func (n AdditiveExpressionNode) exec() (int, error) {
 
 // PrimaryExpressionNode is a basic element
 type PrimaryExpressionNode struct {
-	arg interface{}
+	arg any
 }
 
-func newPrimaryExpressionNode(arg interface{}) (PrimaryExpressionNode, error) {
+func newPrimaryExpressionNode(arg any) (PrimaryExpressionNode, error) {
 	return PrimaryExpressionNode{arg}, nil
 }
 func (n PrimaryExpressionNode) exec() (int, error) {

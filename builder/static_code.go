@@ -1,5 +1,6 @@
 //go:generate go run ../bootstrap/cmd/static_code_generator/main.go -- $GOFILE generated_$GOFILE staticCode
 
+//go:build static_code
 // +build static_code
 
 package builder
@@ -79,18 +80,17 @@ func Entrypoint(ruleName string) Option {
 //
 // Example usage:
 //
-//     input := "input"
-//     stats := Stats{}
-//     _, err := Parse("input-file", []byte(input), Statistics(&stats, "no match"))
-//     if err != nil {
-//         log.Panicln(err)
-//     }
-//     b, err := json.MarshalIndent(stats.ChoiceAltCnt, "", "  ")
-//     if err != nil {
-//         log.Panicln(err)
-//     }
-//     fmt.Println(string(b))
-//
+//	input := "input"
+//	stats := Stats{}
+//	_, err := Parse("input-file", []byte(input), Statistics(&stats, "no match"))
+//	if err != nil {
+//	    log.Panicln(err)
+//	}
+//	b, err := json.MarshalIndent(stats.ChoiceAltCnt, "", "  ")
+//	if err != nil {
+//	    log.Panicln(err)
+//	}
+//	fmt.Println(string(b))
 func Statistics(stats *Stats, choiceNoMatch string) Option {
 	return func(p *parser) Option {
 		oldStats := p.Stats
@@ -162,7 +162,7 @@ func Recover(b bool) Option {
 
 // GlobalStore creates an Option to set a key to a certain value in
 // the globalStore.
-func GlobalStore(key string, value interface{}) Option {
+func GlobalStore(key string, value any) Option {
 	return func(p *parser) Option {
 		old := p.cur.globalStore[key]
 		p.cur.globalStore[key] = value
@@ -174,7 +174,7 @@ func GlobalStore(key string, value interface{}) Option {
 
 // InitState creates an Option to set a key to a certain value in
 // the global "state" store.
-func InitState(key string, value interface{}) Option {
+func InitState(key string, value any) Option {
 	return func(p *parser) Option {
 		old := p.cur.state[key]
 		p.cur.state[key] = value
@@ -185,7 +185,7 @@ func InitState(key string, value interface{}) Option {
 // {{ end }} ==template==
 
 // ParseFile parses the file identified by filename.
-func ParseFile(filename string, opts ...Option) (i interface{}, err error) { //{{ if .Nolint }} nolint: deadcode {{else}} ==template== {{ end }}
+func ParseFile(filename string, opts ...Option) (i any, err error) { //{{ if .Nolint }} nolint: deadcode {{else}} ==template== {{ end }}
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -200,8 +200,13 @@ func ParseFile(filename string, opts ...Option) (i interface{}, err error) { //{
 
 // ParseReader parses the data from r using filename as information in the
 // error messages.
+<<<<<<< HEAD
 func ParseReader(filename string, r io.Reader, opts ...Option) (interface{}, error) { //{{ if .Nolint }} nolint: deadcode {{else}} ==template== {{ end }}
 	b, err := io.ReadAll(r)
+=======
+func ParseReader(filename string, r io.Reader, opts ...Option) (any, error) { //{{ if .Nolint }} nolint: deadcode {{else}} ==template== {{ end }}
+	b, err := ioutil.ReadAll(r)
+>>>>>>> gofmt -r 'interface{} -> any' -w *.go && go mod edit -go 1.18
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +216,7 @@ func ParseReader(filename string, r io.Reader, opts ...Option) (interface{}, err
 
 // Parse parses the data from b using filename as information in the
 // error messages.
-func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
+func Parse(filename string, b []byte, opts ...Option) (any, error) {
 	return newParser(filename, b, opts...).parse(g)
 }
 
@@ -253,68 +258,68 @@ type current struct {
 	globalStore storeDict
 }
 
-type storeDict map[string]interface{}
+type storeDict map[string]any
 
 // the AST types...
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type grammar struct {
 	pos   position
 	rules []*rule
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type rule struct {
 	pos         position
 	name        string
 	displayName string
-	expr        interface{}
+	expr        any
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type choiceExpr struct {
 	pos          position
-	alternatives []interface{}
+	alternatives []any
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type actionExpr struct {
 	pos  position
-	expr interface{}
-	run  func(*parser) (interface{}, error)
+	expr any
+	run  func(*parser) (any, error)
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type recoveryExpr struct {
 	pos          position
-	expr         interface{}
-	recoverExpr  interface{}
+	expr         any
+	recoverExpr  any
 	failureLabel []string
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type seqExpr struct {
 	pos   position
-	exprs []interface{}
+	exprs []any
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type throwExpr struct {
 	pos   position
 	label string
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type labeledExpr struct {
 	pos   position
 	label string
-	expr  interface{}
+	expr  any
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type expr struct {
 	pos  position
-	expr interface{}
+	expr any
 }
 
 type andExpr expr        //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
@@ -323,7 +328,7 @@ type zeroOrOneExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==templ
 type zeroOrMoreExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type oneOrMoreExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type ruleRefExpr struct {
 	pos  position
 	name string
@@ -331,7 +336,7 @@ type ruleRefExpr struct {
 
 // ==template== {{ if or .GlobalState (not .Optimize) }}
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type stateCodeExpr struct {
 	pos position
 	run func(*parser) error
@@ -339,19 +344,19 @@ type stateCodeExpr struct {
 
 // {{ end }} ==template==
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type andCodeExpr struct {
 	pos position
 	run func(*parser) (bool, error)
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type notCodeExpr struct {
 	pos position
 	run func(*parser) (bool, error)
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type litMatcher struct {
 	pos        position
 	val        string
@@ -359,7 +364,7 @@ type litMatcher struct {
 	want       string
 }
 
-//{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type charClassMatcher struct {
 	pos             position
 	val             string
@@ -473,14 +478,14 @@ func (p *parser) setOptions(opts []Option) {
 	}
 }
 
-//{{ if .Nolint }} nolint: structcheck,deadcode {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck,deadcode {{else}} ==template== {{ end }}
 type resultTuple struct {
-	v   interface{}
+	v   any
 	b   bool
 	end savepoint
 }
 
-//{{ if .Nolint }} nolint: varcheck {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: varcheck {{else}} ==template== {{ end }}
 const choiceNoMatch = -1
 
 // Stats stores some statistics, gathered during parsing
@@ -505,7 +510,7 @@ type Stats struct {
 	ChoiceAltCnt map[string]map[string]int
 }
 
-//{{ if .Nolint }} nolint: structcheck,maligned {{else}} ==template== {{ end }}
+// {{ if .Nolint }} nolint: structcheck,maligned {{else}} ==template== {{ end }}
 type parser struct {
 	filename string
 	pt       savepoint
@@ -522,13 +527,13 @@ type parser struct {
 	memoize bool
 	// memoization table for the packrat algorithm:
 	// map[offset in source] map[expression or rule] {value, match}
-	memo map[int]map[interface{}]resultTuple
+	memo map[int]map[any]resultTuple
 	// {{ end }} ==template==
 
 	// rules table, maps the rule identifier to the rule node
 	rules map[string]*rule
 	// variables stack, map of label to value
-	vstack []map[string]interface{}
+	vstack []map[string]any
 	// rule stack, allows identification of the current rule in errors
 	rstack []*rule
 
@@ -548,7 +553,7 @@ type parser struct {
 
 	choiceNoMatch string
 	// recovery expression stack, keeps track of the currently available recovery expression, these are traversed in reverse
-	recoveryStack []map[string]interface{}
+	recoveryStack []map[string]any
 }
 
 // push a variable set on the vstack.
@@ -568,7 +573,7 @@ func (p *parser) pushV() {
 		return
 	}
 
-	m = make(map[string]interface{})
+	m = make(map[string]any)
 	p.vstack[len(p.vstack)-1] = m
 }
 
@@ -584,7 +589,7 @@ func (p *parser) popV() {
 }
 
 // push a recovery expression with its labels to the recoveryStack
-func (p *parser) pushRecovery(labels []string, expr interface{}) {
+func (p *parser) pushRecovery(labels []string, expr any) {
 	if cap(p.recoveryStack) == len(p.recoveryStack) {
 		// create new empty slot in the stack
 		p.recoveryStack = append(p.recoveryStack, nil)
@@ -593,7 +598,7 @@ func (p *parser) pushRecovery(labels []string, expr interface{}) {
 		p.recoveryStack = p.recoveryStack[:len(p.recoveryStack)+1]
 	}
 
-	m := make(map[string]interface{}, len(labels))
+	m := make(map[string]any, len(labels))
 	for _, fl := range labels {
 		m[fl] = expr
 	}
@@ -720,11 +725,11 @@ func (p *parser) restore(pt savepoint) {
 // copies of the state to allow the parser to properly restore the state in
 // the case of backtracking.
 type Cloner interface {
-	Clone() interface{}
+	Clone() any
 }
 
 var statePool = &sync.Pool{
-	New: func() interface{} { return make(storeDict) },
+	New: func() any { return make(storeDict) },
 }
 
 func (sd storeDict) Discard() {
@@ -773,7 +778,7 @@ func (p *parser) sliceFrom(start savepoint) []byte {
 }
 
 // ==template== {{ if not .Optimize }}
-func (p *parser) getMemoized(node interface{}) (resultTuple, bool) {
+func (p *parser) getMemoized(node any) (resultTuple, bool) {
 	if len(p.memo) == 0 {
 		return resultTuple{}, false
 	}
@@ -785,13 +790,13 @@ func (p *parser) getMemoized(node interface{}) (resultTuple, bool) {
 	return res, ok
 }
 
-func (p *parser) setMemoized(pt savepoint, node interface{}, tuple resultTuple) {
+func (p *parser) setMemoized(pt savepoint, node any, tuple resultTuple) {
 	if p.memo == nil {
-		p.memo = make(map[int]map[interface{}]resultTuple)
+		p.memo = make(map[int]map[any]resultTuple)
 	}
 	m := p.memo[pt.offset]
 	if m == nil {
-		m = make(map[interface{}]resultTuple)
+		m = make(map[any]resultTuple)
 		p.memo[pt.offset] = m
 	}
 	m[node] = tuple
@@ -806,8 +811,8 @@ func (p *parser) buildRulesTable(g *grammar) {
 	}
 }
 
-//{{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
-func (p *parser) parse(g *grammar) (val interface{}, err error) {
+// {{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
+func (p *parser) parse(g *grammar) (val any, err error) {
 	if len(g.rules) == 0 {
 		p.addErr(errNoRule)
 		return nil, p.errs.err()
@@ -886,7 +891,7 @@ func listJoin(list []string, sep string, lastSep string) string {
 	}
 }
 
-func (p *parser) parseRule(rule *rule) (interface{}, bool) {
+func (p *parser) parseRule(rule *rule) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseRule " + rule.name))
@@ -919,8 +924,8 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	return val, ok
 }
 
-//{{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
-func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
+// {{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
+func (p *parser) parseExpr(expr any) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	var pt savepoint
 
@@ -940,7 +945,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 		panic(errMaxExprCnt)
 	}
 
-	var val interface{}
+	var val any
 	var ok bool
 	switch expr := expr.(type) {
 	case *actionExpr:
@@ -992,7 +997,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	return val, ok
 }
 
-func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
+func (p *parser) parseActionExpr(act *actionExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseActionExpr"))
@@ -1025,7 +1030,7 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 	return val, ok
 }
 
-func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
+func (p *parser) parseAndCodeExpr(and *andCodeExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseAndCodeExpr"))
@@ -1047,7 +1052,7 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
 	return nil, ok
 }
 
-func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
+func (p *parser) parseAndExpr(and *andExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseAndExpr"))
@@ -1069,7 +1074,7 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	return nil, ok
 }
 
-func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
+func (p *parser) parseAnyMatcher(any *anyMatcher) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseAnyMatcher"))
@@ -1087,8 +1092,8 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 	return p.sliceFrom(start), true
 }
 
-//{{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
-func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool) {
+// {{ if .Nolint }} nolint: gocyclo {{else}} ==template== {{ end }}
+func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseCharClassMatcher"))
@@ -1187,7 +1192,7 @@ func (p *parser) incChoiceAltCnt(ch *choiceExpr, altI int) {
 
 // {{ end }} ==template==
 
-func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
+func (p *parser) parseChoiceExpr(ch *choiceExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseChoiceExpr"))
@@ -1221,7 +1226,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 	return nil, false
 }
 
-func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
+func (p *parser) parseLabeledExpr(lab *labeledExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseLabeledExpr"))
@@ -1238,7 +1243,7 @@ func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
 	return val, ok
 }
 
-func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
+func (p *parser) parseLitMatcher(lit *litMatcher) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseLitMatcher"))
@@ -1262,7 +1267,7 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 	return p.sliceFrom(start), true
 }
 
-func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
+func (p *parser) parseNotCodeExpr(not *notCodeExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseNotCodeExpr"))
@@ -1284,7 +1289,7 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 	return nil, !ok
 }
 
-func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
+func (p *parser) parseNotExpr(not *notExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseNotExpr"))
@@ -1308,14 +1313,14 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	return nil, !ok
 }
 
-func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
+func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseOneOrMoreExpr"))
 	}
 
 	// {{ end }} ==template==
-	var vals []interface{}
+	var vals []any
 
 	for {
 		p.pushV()
@@ -1332,7 +1337,7 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 	}
 }
 
-func (p *parser) parseRecoveryExpr(recover *recoveryExpr) (interface{}, bool) {
+func (p *parser) parseRecoveryExpr(recover *recoveryExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseRecoveryExpr (" + strings.Join(recover.failureLabel, ",") + ")"))
@@ -1347,7 +1352,7 @@ func (p *parser) parseRecoveryExpr(recover *recoveryExpr) (interface{}, bool) {
 	return val, ok
 }
 
-func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
+func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseRuleRefExpr " + ref.name))
@@ -1366,14 +1371,14 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
 	return p.parseRule(rule)
 }
 
-func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
+func (p *parser) parseSeqExpr(seq *seqExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseSeqExpr"))
 	}
 
 	// {{ end }} ==template==
-	vals := make([]interface{}, 0, len(seq.exprs))
+	vals := make([]any, 0, len(seq.exprs))
 
 	pt := p.pt
 	// ==template== {{ if or .GlobalState (not .Optimize) }}
@@ -1395,7 +1400,7 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 
 // ==template== {{ if or .GlobalState (not .Optimize) }}
 
-func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (interface{}, bool) {
+func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseStateCodeExpr"))
@@ -1411,7 +1416,7 @@ func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (interface{}, bool) {
 
 // {{ end }} ==template==
 
-func (p *parser) parseThrowExpr(expr *throwExpr) (interface{}, bool) {
+func (p *parser) parseThrowExpr(expr *throwExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseThrowExpr"))
@@ -1430,14 +1435,14 @@ func (p *parser) parseThrowExpr(expr *throwExpr) (interface{}, bool) {
 	return nil, false
 }
 
-func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
+func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseZeroOrMoreExpr"))
 	}
 
 	// {{ end }} ==template==
-	var vals []interface{}
+	var vals []any
 
 	for {
 		p.pushV()
@@ -1450,7 +1455,7 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 	}
 }
 
-func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
+func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	if p.debug {
 		defer p.out(p.in("parseZeroOrOneExpr"))

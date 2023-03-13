@@ -218,7 +218,7 @@ func usage() {
 
 // argError prints an error message to stderr, prints the command usage
 // and exits with the specified exit code.
-func argError(exitCode int, msg string, args ...interface{}) {
+func argError(exitCode int, msg string, args ...any) {
 	fmt.Fprintf(os.Stderr, msg, args...)
 	fmt.Fprintln(os.Stderr)
 	usage()
@@ -273,16 +273,16 @@ func (c *current) astPos() ast.Pos {
 
 // toIfaceSlice is a helper function for the PEG grammar parser. It converts
 // v to a slice of empty interfaces.
-func toIfaceSlice(v interface{}) []interface{} {
+func toIfaceSlice(v any) []any {
 	if v == nil {
 		return nil
 	}
-	return v.([]interface{})
+	return v.([]any)
 }
 
 // validateUnicodeEscape checks that the provided escape sequence is a
 // valid Unicode escape sequence.
-func validateUnicodeEscape(escape, errMsg string) (interface{}, error) {
+func validateUnicodeEscape(escape, errMsg string) (any, error) {
 	r, _, _, err := strconv.UnquoteChar("\\"+escape, '"')
 	if err != nil {
 		return nil, errors.New(errMsg)

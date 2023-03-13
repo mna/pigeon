@@ -37,7 +37,7 @@ func TestCmpStdlib(t *testing.T) {
 			t.Errorf("%s: os.ReadFile: %v", file, err)
 			continue
 		}
-		var jgot interface{}
+		var jgot any
 		if err := json.Unmarshal(b, &jgot); err != nil {
 			t.Errorf("%s: json.Unmarshal: %v", file, err)
 			continue
@@ -201,7 +201,7 @@ func BenchmarkStdlibJSON(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		var iface interface{}
+		var iface any
 		if err := json.Unmarshal(d, &iface); err != nil {
 			b.Fatal(err)
 		}

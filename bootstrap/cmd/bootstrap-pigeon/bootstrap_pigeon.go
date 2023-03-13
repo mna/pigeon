@@ -29,7 +29,7 @@ var g = &grammar{
 				run: (*parser).callonGrammar1,
 				expr: &seqExpr{
 					pos: position{line: 5, col: 11, offset: 30},
-					exprs: []interface{}{
+					exprs: []any{
 						&ruleRefExpr{
 							pos:  position{line: 5, col: 11, offset: 30},
 							name: "__",
@@ -41,7 +41,7 @@ var g = &grammar{
 								pos: position{line: 5, col: 28, offset: 47},
 								expr: &seqExpr{
 									pos: position{line: 5, col: 28, offset: 47},
-									exprs: []interface{}{
+									exprs: []any{
 										&ruleRefExpr{
 											pos:  position{line: 5, col: 28, offset: 47},
 											name: "Initializer",
@@ -61,7 +61,7 @@ var g = &grammar{
 								pos: position{line: 5, col: 54, offset: 73},
 								expr: &seqExpr{
 									pos: position{line: 5, col: 54, offset: 73},
-									exprs: []interface{}{
+									exprs: []any{
 										&ruleRefExpr{
 											pos:  position{line: 5, col: 54, offset: 73},
 											name: "Rule",
@@ -86,7 +86,7 @@ var g = &grammar{
 				run: (*parser).callonInitializer1,
 				expr: &seqExpr{
 					pos: position{line: 24, col: 15, offset: 537},
-					exprs: []interface{}{
+					exprs: []any{
 						&labeledExpr{
 							pos:   position{line: 24, col: 15, offset: 537},
 							label: "code",
@@ -111,7 +111,7 @@ var g = &grammar{
 				run: (*parser).callonRule1,
 				expr: &seqExpr{
 					pos: position{line: 28, col: 8, offset: 591},
-					exprs: []interface{}{
+					exprs: []any{
 						&labeledExpr{
 							pos:   position{line: 28, col: 8, offset: 591},
 							label: "name",
@@ -131,7 +131,7 @@ var g = &grammar{
 								pos: position{line: 28, col: 41, offset: 624},
 								expr: &seqExpr{
 									pos: position{line: 28, col: 41, offset: 624},
-									exprs: []interface{}{
+									exprs: []any{
 										&ruleRefExpr{
 											pos:  position{line: 28, col: 41, offset: 624},
 											name: "StringLiteral",
@@ -184,7 +184,7 @@ var g = &grammar{
 				run: (*parser).callonChoiceExpr1,
 				expr: &seqExpr{
 					pos: position{line: 43, col: 14, offset: 999},
-					exprs: []interface{}{
+					exprs: []any{
 						&labeledExpr{
 							pos:   position{line: 43, col: 14, offset: 999},
 							label: "first",
@@ -200,7 +200,7 @@ var g = &grammar{
 								pos: position{line: 43, col: 38, offset: 1023},
 								expr: &seqExpr{
 									pos: position{line: 43, col: 38, offset: 1023},
-									exprs: []interface{}{
+									exprs: []any{
 										&ruleRefExpr{
 											pos:  position{line: 43, col: 38, offset: 1023},
 											name: "__",
@@ -235,7 +235,7 @@ var g = &grammar{
 				run: (*parser).callonActionExpr1,
 				expr: &seqExpr{
 					pos: position{line: 58, col: 14, offset: 1453},
-					exprs: []interface{}{
+					exprs: []any{
 						&labeledExpr{
 							pos:   position{line: 58, col: 14, offset: 1453},
 							label: "expr",
@@ -251,7 +251,7 @@ var g = &grammar{
 								pos: position{line: 58, col: 34, offset: 1473},
 								expr: &seqExpr{
 									pos: position{line: 58, col: 34, offset: 1473},
-									exprs: []interface{}{
+									exprs: []any{
 										&ruleRefExpr{
 											pos:  position{line: 58, col: 34, offset: 1473},
 											name: "__",
@@ -276,7 +276,7 @@ var g = &grammar{
 				run: (*parser).callonSeqExpr1,
 				expr: &seqExpr{
 					pos: position{line: 72, col: 11, offset: 1754},
-					exprs: []interface{}{
+					exprs: []any{
 						&labeledExpr{
 							pos:   position{line: 72, col: 11, offset: 1754},
 							label: "first",
@@ -292,7 +292,7 @@ var g = &grammar{
 								pos: position{line: 72, col: 36, offset: 1779},
 								expr: &seqExpr{
 									pos: position{line: 72, col: 36, offset: 1779},
-									exprs: []interface{}{
+									exprs: []any{
 										&ruleRefExpr{
 											pos:  position{line: 72, col: 36, offset: 1779},
 											name: "__",
@@ -314,13 +314,13 @@ var g = &grammar{
 			pos:  position{line: 85, col: 1, offset: 2133},
 			expr: &choiceExpr{
 				pos: position{line: 85, col: 15, offset: 2149},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&actionExpr{
 						pos: position{line: 85, col: 15, offset: 2149},
 						run: (*parser).callonLabeledExpr2,
 						expr: &seqExpr{
 							pos: position{line: 85, col: 15, offset: 2149},
-							exprs: []interface{}{
+							exprs: []any{
 								&labeledExpr{
 									pos:   position{line: 85, col: 15, offset: 2149},
 									label: "label",
@@ -366,13 +366,13 @@ var g = &grammar{
 			pos:  position{line: 93, col: 1, offset: 2368},
 			expr: &choiceExpr{
 				pos: position{line: 93, col: 16, offset: 2385},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&actionExpr{
 						pos: position{line: 93, col: 16, offset: 2385},
 						run: (*parser).callonPrefixedExpr2,
 						expr: &seqExpr{
 							pos: position{line: 93, col: 16, offset: 2385},
-							exprs: []interface{}{
+							exprs: []any{
 								&labeledExpr{
 									pos:   position{line: 93, col: 16, offset: 2385},
 									label: "op",
@@ -411,7 +411,7 @@ var g = &grammar{
 				run: (*parser).callonPrefixedOp1,
 				expr: &choiceExpr{
 					pos: position{line: 106, col: 16, offset: 2720},
-					alternatives: []interface{}{
+					alternatives: []any{
 						&litMatcher{
 							pos:        position{line: 106, col: 16, offset: 2720},
 							val:        "&",
@@ -433,13 +433,13 @@ var g = &grammar{
 			pos:  position{line: 110, col: 1, offset: 2768},
 			expr: &choiceExpr{
 				pos: position{line: 110, col: 16, offset: 2785},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&actionExpr{
 						pos: position{line: 110, col: 16, offset: 2785},
 						run: (*parser).callonSuffixedExpr2,
 						expr: &seqExpr{
 							pos: position{line: 110, col: 16, offset: 2785},
-							exprs: []interface{}{
+							exprs: []any{
 								&labeledExpr{
 									pos:   position{line: 110, col: 16, offset: 2785},
 									label: "expr",
@@ -478,7 +478,7 @@ var g = &grammar{
 				run: (*parser).callonSuffixedOp1,
 				expr: &choiceExpr{
 					pos: position{line: 131, col: 16, offset: 3369},
-					alternatives: []interface{}{
+					alternatives: []any{
 						&litMatcher{
 							pos:        position{line: 131, col: 16, offset: 3369},
 							val:        "?",
@@ -506,7 +506,7 @@ var g = &grammar{
 			pos:  position{line: 135, col: 1, offset: 3423},
 			expr: &choiceExpr{
 				pos: position{line: 135, col: 15, offset: 3439},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&ruleRefExpr{
 						pos:  position{line: 135, col: 15, offset: 3439},
 						name: "LitMatcher",
@@ -532,7 +532,7 @@ var g = &grammar{
 						run: (*parser).callonPrimaryExpr7,
 						expr: &seqExpr{
 							pos: position{line: 135, col: 93, offset: 3517},
-							exprs: []interface{}{
+							exprs: []any{
 								&litMatcher{
 									pos:        position{line: 135, col: 93, offset: 3517},
 									val:        "(",
@@ -575,7 +575,7 @@ var g = &grammar{
 				run: (*parser).callonRuleRefExpr1,
 				expr: &seqExpr{
 					pos: position{line: 138, col: 15, offset: 3588},
-					exprs: []interface{}{
+					exprs: []any{
 						&labeledExpr{
 							pos:   position{line: 138, col: 15, offset: 3588},
 							label: "name",
@@ -588,7 +588,7 @@ var g = &grammar{
 							pos: position{line: 138, col: 35, offset: 3608},
 							expr: &seqExpr{
 								pos: position{line: 138, col: 38, offset: 3611},
-								exprs: []interface{}{
+								exprs: []any{
 									&ruleRefExpr{
 										pos:  position{line: 138, col: 38, offset: 3611},
 										name: "__",
@@ -597,7 +597,7 @@ var g = &grammar{
 										pos: position{line: 138, col: 43, offset: 3616},
 										expr: &seqExpr{
 											pos: position{line: 138, col: 43, offset: 3616},
-											exprs: []interface{}{
+											exprs: []any{
 												&ruleRefExpr{
 													pos:  position{line: 138, col: 43, offset: 3616},
 													name: "StringLiteral",
@@ -628,7 +628,7 @@ var g = &grammar{
 				run: (*parser).callonSemanticPredExpr1,
 				expr: &seqExpr{
 					pos: position{line: 143, col: 20, offset: 3773},
-					exprs: []interface{}{
+					exprs: []any{
 						&labeledExpr{
 							pos:   position{line: 143, col: 20, offset: 3773},
 							label: "op",
@@ -661,7 +661,7 @@ var g = &grammar{
 				run: (*parser).callonSemanticPredOp1,
 				expr: &choiceExpr{
 					pos: position{line: 154, col: 20, offset: 4097},
-					alternatives: []interface{}{
+					alternatives: []any{
 						&litMatcher{
 							pos:        position{line: 154, col: 20, offset: 4097},
 							val:        "&",
@@ -683,7 +683,7 @@ var g = &grammar{
 			pos:  position{line: 158, col: 1, offset: 4145},
 			expr: &choiceExpr{
 				pos: position{line: 158, col: 13, offset: 4159},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&litMatcher{
 						pos:        position{line: 158, col: 13, offset: 4159},
 						val:        "=",
@@ -723,7 +723,7 @@ var g = &grammar{
 			pos:  position{line: 161, col: 1, offset: 4210},
 			expr: &choiceExpr{
 				pos: position{line: 161, col: 11, offset: 4222},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&ruleRefExpr{
 						pos:  position{line: 161, col: 11, offset: 4222},
 						name: "MultiLineComment",
@@ -740,7 +740,7 @@ var g = &grammar{
 			pos:  position{line: 162, col: 1, offset: 4259},
 			expr: &seqExpr{
 				pos: position{line: 162, col: 20, offset: 4280},
-				exprs: []interface{}{
+				exprs: []any{
 					&litMatcher{
 						pos:        position{line: 162, col: 20, offset: 4280},
 						val:        "/*",
@@ -751,7 +751,7 @@ var g = &grammar{
 						pos: position{line: 162, col: 27, offset: 4287},
 						expr: &seqExpr{
 							pos: position{line: 162, col: 27, offset: 4287},
-							exprs: []interface{}{
+							exprs: []any{
 								&notExpr{
 									pos: position{line: 162, col: 27, offset: 4287},
 									expr: &litMatcher{
@@ -782,7 +782,7 @@ var g = &grammar{
 			pos:  position{line: 163, col: 1, offset: 4312},
 			expr: &seqExpr{
 				pos: position{line: 163, col: 36, offset: 4349},
-				exprs: []interface{}{
+				exprs: []any{
 					&litMatcher{
 						pos:        position{line: 163, col: 36, offset: 4349},
 						val:        "/*",
@@ -793,12 +793,12 @@ var g = &grammar{
 						pos: position{line: 163, col: 43, offset: 4356},
 						expr: &seqExpr{
 							pos: position{line: 163, col: 43, offset: 4356},
-							exprs: []interface{}{
+							exprs: []any{
 								&notExpr{
 									pos: position{line: 163, col: 43, offset: 4356},
 									expr: &choiceExpr{
 										pos: position{line: 163, col: 46, offset: 4359},
-										alternatives: []interface{}{
+										alternatives: []any{
 											&litMatcher{
 												pos:        position{line: 163, col: 46, offset: 4359},
 												val:        "*/",
@@ -833,7 +833,7 @@ var g = &grammar{
 			pos:  position{line: 164, col: 1, offset: 4391},
 			expr: &seqExpr{
 				pos: position{line: 164, col: 21, offset: 4413},
-				exprs: []interface{}{
+				exprs: []any{
 					&litMatcher{
 						pos:        position{line: 164, col: 21, offset: 4413},
 						val:        "//",
@@ -844,7 +844,7 @@ var g = &grammar{
 						pos: position{line: 164, col: 28, offset: 4420},
 						expr: &seqExpr{
 							pos: position{line: 164, col: 28, offset: 4420},
-							exprs: []interface{}{
+							exprs: []any{
 								&notExpr{
 									pos: position{line: 164, col: 28, offset: 4420},
 									expr: &ruleRefExpr{
@@ -878,7 +878,7 @@ var g = &grammar{
 				run: (*parser).callonIdentifierName1,
 				expr: &seqExpr{
 					pos: position{line: 167, col: 18, offset: 4489},
-					exprs: []interface{}{
+					exprs: []any{
 						&ruleRefExpr{
 							pos:  position{line: 167, col: 18, offset: 4489},
 							name: "IdentifierStart",
@@ -911,7 +911,7 @@ var g = &grammar{
 			pos:  position{line: 171, col: 1, offset: 4615},
 			expr: &choiceExpr{
 				pos: position{line: 171, col: 18, offset: 4634},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&ruleRefExpr{
 						pos:  position{line: 171, col: 18, offset: 4634},
 						name: "IdentifierStart",
@@ -934,7 +934,7 @@ var g = &grammar{
 				run: (*parser).callonLitMatcher1,
 				expr: &seqExpr{
 					pos: position{line: 173, col: 14, offset: 4674},
-					exprs: []interface{}{
+					exprs: []any{
 						&labeledExpr{
 							pos:   position{line: 173, col: 14, offset: 4674},
 							label: "lit",
@@ -968,10 +968,10 @@ var g = &grammar{
 				run: (*parser).callonStringLiteral1,
 				expr: &choiceExpr{
 					pos: position{line: 183, col: 19, offset: 4945},
-					alternatives: []interface{}{
+					alternatives: []any{
 						&seqExpr{
 							pos: position{line: 183, col: 19, offset: 4945},
-							exprs: []interface{}{
+							exprs: []any{
 								&litMatcher{
 									pos:        position{line: 183, col: 19, offset: 4945},
 									val:        "\"",
@@ -995,7 +995,7 @@ var g = &grammar{
 						},
 						&seqExpr{
 							pos: position{line: 183, col: 47, offset: 4973},
-							exprs: []interface{}{
+							exprs: []any{
 								&litMatcher{
 									pos:        position{line: 183, col: 47, offset: 4973},
 									val:        "'",
@@ -1016,7 +1016,7 @@ var g = &grammar{
 						},
 						&seqExpr{
 							pos: position{line: 183, col: 74, offset: 5000},
-							exprs: []interface{}{
+							exprs: []any{
 								&litMatcher{
 									pos:        position{line: 183, col: 74, offset: 5000},
 									val:        "`",
@@ -1044,15 +1044,15 @@ var g = &grammar{
 			pos:  position{line: 186, col: 1, offset: 5089},
 			expr: &choiceExpr{
 				pos: position{line: 186, col: 20, offset: 5110},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&seqExpr{
 						pos: position{line: 186, col: 20, offset: 5110},
-						exprs: []interface{}{
+						exprs: []any{
 							&notExpr{
 								pos: position{line: 186, col: 20, offset: 5110},
 								expr: &choiceExpr{
 									pos: position{line: 186, col: 23, offset: 5113},
-									alternatives: []interface{}{
+									alternatives: []any{
 										&litMatcher{
 											pos:        position{line: 186, col: 23, offset: 5113},
 											val:        "\"",
@@ -1080,7 +1080,7 @@ var g = &grammar{
 					},
 					&seqExpr{
 						pos: position{line: 186, col: 55, offset: 5145},
-						exprs: []interface{}{
+						exprs: []any{
 							&litMatcher{
 								pos:        position{line: 186, col: 55, offset: 5145},
 								val:        "\\",
@@ -1101,15 +1101,15 @@ var g = &grammar{
 			pos:  position{line: 187, col: 1, offset: 5169},
 			expr: &choiceExpr{
 				pos: position{line: 187, col: 20, offset: 5190},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&seqExpr{
 						pos: position{line: 187, col: 20, offset: 5190},
-						exprs: []interface{}{
+						exprs: []any{
 							&notExpr{
 								pos: position{line: 187, col: 20, offset: 5190},
 								expr: &choiceExpr{
 									pos: position{line: 187, col: 23, offset: 5193},
-									alternatives: []interface{}{
+									alternatives: []any{
 										&litMatcher{
 											pos:        position{line: 187, col: 23, offset: 5193},
 											val:        "'",
@@ -1137,7 +1137,7 @@ var g = &grammar{
 					},
 					&seqExpr{
 						pos: position{line: 187, col: 55, offset: 5225},
-						exprs: []interface{}{
+						exprs: []any{
 							&litMatcher{
 								pos:        position{line: 187, col: 55, offset: 5225},
 								val:        "\\",
@@ -1158,7 +1158,7 @@ var g = &grammar{
 			pos:  position{line: 188, col: 1, offset: 5249},
 			expr: &seqExpr{
 				pos: position{line: 188, col: 17, offset: 5267},
-				exprs: []interface{}{
+				exprs: []any{
 					&notExpr{
 						pos: position{line: 188, col: 17, offset: 5267},
 						expr: &litMatcher{
@@ -1180,7 +1180,7 @@ var g = &grammar{
 			pos:  position{line: 190, col: 1, offset: 5284},
 			expr: &choiceExpr{
 				pos: position{line: 190, col: 22, offset: 5307},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&litMatcher{
 						pos:        position{line: 190, col: 22, offset: 5307},
 						val:        "'",
@@ -1199,7 +1199,7 @@ var g = &grammar{
 			pos:  position{line: 191, col: 1, offset: 5334},
 			expr: &choiceExpr{
 				pos: position{line: 191, col: 22, offset: 5357},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&litMatcher{
 						pos:        position{line: 191, col: 22, offset: 5357},
 						val:        "\"",
@@ -1218,7 +1218,7 @@ var g = &grammar{
 			pos:  position{line: 193, col: 1, offset: 5385},
 			expr: &choiceExpr{
 				pos: position{line: 193, col: 24, offset: 5410},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&ruleRefExpr{
 						pos:  position{line: 193, col: 24, offset: 5410},
 						name: "SingleCharEscape",
@@ -1247,7 +1247,7 @@ var g = &grammar{
 			pos:  position{line: 194, col: 1, offset: 5494},
 			expr: &choiceExpr{
 				pos: position{line: 194, col: 20, offset: 5515},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&litMatcher{
 						pos:        position{line: 194, col: 20, offset: 5515},
 						val:        "a",
@@ -1304,7 +1304,7 @@ var g = &grammar{
 			pos:  position{line: 195, col: 1, offset: 5562},
 			expr: &seqExpr{
 				pos: position{line: 195, col: 15, offset: 5578},
-				exprs: []interface{}{
+				exprs: []any{
 					&ruleRefExpr{
 						pos:  position{line: 195, col: 15, offset: 5578},
 						name: "OctalDigit",
@@ -1325,7 +1325,7 @@ var g = &grammar{
 			pos:  position{line: 196, col: 1, offset: 5611},
 			expr: &seqExpr{
 				pos: position{line: 196, col: 13, offset: 5625},
-				exprs: []interface{}{
+				exprs: []any{
 					&litMatcher{
 						pos:        position{line: 196, col: 13, offset: 5625},
 						val:        "x",
@@ -1348,7 +1348,7 @@ var g = &grammar{
 			pos:  position{line: 197, col: 1, offset: 5647},
 			expr: &seqExpr{
 				pos: position{line: 197, col: 21, offset: 5669},
-				exprs: []interface{}{
+				exprs: []any{
 					&litMatcher{
 						pos:        position{line: 197, col: 21, offset: 5669},
 						val:        "U",
@@ -1395,7 +1395,7 @@ var g = &grammar{
 			pos:  position{line: 198, col: 1, offset: 5745},
 			expr: &seqExpr{
 				pos: position{line: 198, col: 22, offset: 5768},
-				exprs: []interface{}{
+				exprs: []any{
 					&litMatcher{
 						pos:        position{line: 198, col: 22, offset: 5768},
 						val:        "u",
@@ -1462,7 +1462,7 @@ var g = &grammar{
 				run: (*parser).callonCharClassMatcher1,
 				expr: &seqExpr{
 					pos: position{line: 204, col: 20, offset: 5898},
-					exprs: []interface{}{
+					exprs: []any{
 						&litMatcher{
 							pos:        position{line: 204, col: 20, offset: 5898},
 							val:        "[",
@@ -1473,7 +1473,7 @@ var g = &grammar{
 							pos: position{line: 204, col: 26, offset: 5904},
 							expr: &choiceExpr{
 								pos: position{line: 204, col: 26, offset: 5904},
-								alternatives: []interface{}{
+								alternatives: []any{
 									&ruleRefExpr{
 										pos:  position{line: 204, col: 26, offset: 5904},
 										name: "ClassCharRange",
@@ -1484,7 +1484,7 @@ var g = &grammar{
 									},
 									&seqExpr{
 										pos: position{line: 204, col: 55, offset: 5933},
-										exprs: []interface{}{
+										exprs: []any{
 											&litMatcher{
 												pos:        position{line: 204, col: 55, offset: 5933},
 												val:        "\\",
@@ -1524,7 +1524,7 @@ var g = &grammar{
 			pos:  position{line: 209, col: 1, offset: 6069},
 			expr: &seqExpr{
 				pos: position{line: 209, col: 18, offset: 6088},
-				exprs: []interface{}{
+				exprs: []any{
 					&ruleRefExpr{
 						pos:  position{line: 209, col: 18, offset: 6088},
 						name: "ClassChar",
@@ -1547,15 +1547,15 @@ var g = &grammar{
 			pos:  position{line: 210, col: 1, offset: 6112},
 			expr: &choiceExpr{
 				pos: position{line: 210, col: 13, offset: 6126},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&seqExpr{
 						pos: position{line: 210, col: 13, offset: 6126},
-						exprs: []interface{}{
+						exprs: []any{
 							&notExpr{
 								pos: position{line: 210, col: 13, offset: 6126},
 								expr: &choiceExpr{
 									pos: position{line: 210, col: 16, offset: 6129},
-									alternatives: []interface{}{
+									alternatives: []any{
 										&litMatcher{
 											pos:        position{line: 210, col: 16, offset: 6129},
 											val:        "]",
@@ -1583,7 +1583,7 @@ var g = &grammar{
 					},
 					&seqExpr{
 						pos: position{line: 210, col: 48, offset: 6161},
-						exprs: []interface{}{
+						exprs: []any{
 							&litMatcher{
 								pos:        position{line: 210, col: 48, offset: 6161},
 								val:        "\\",
@@ -1604,7 +1604,7 @@ var g = &grammar{
 			pos:  position{line: 211, col: 1, offset: 6182},
 			expr: &choiceExpr{
 				pos: position{line: 211, col: 19, offset: 6202},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&litMatcher{
 						pos:        position{line: 211, col: 19, offset: 6202},
 						val:        "]",
@@ -1623,7 +1623,7 @@ var g = &grammar{
 			pos:  position{line: 213, col: 1, offset: 6230},
 			expr: &seqExpr{
 				pos: position{line: 213, col: 22, offset: 6253},
-				exprs: []interface{}{
+				exprs: []any{
 					&litMatcher{
 						pos:        position{line: 213, col: 22, offset: 6253},
 						val:        "p",
@@ -1632,14 +1632,14 @@ var g = &grammar{
 					},
 					&choiceExpr{
 						pos: position{line: 213, col: 28, offset: 6259},
-						alternatives: []interface{}{
+						alternatives: []any{
 							&ruleRefExpr{
 								pos:  position{line: 213, col: 28, offset: 6259},
 								name: "SingleCharUnicodeClass",
 							},
 							&seqExpr{
 								pos: position{line: 213, col: 53, offset: 6284},
-								exprs: []interface{}{
+								exprs: []any{
 									&litMatcher{
 										pos:        position{line: 213, col: 53, offset: 6284},
 										val:        "{",
@@ -1711,7 +1711,7 @@ var g = &grammar{
 				run: (*parser).callonCodeBlock1,
 				expr: &seqExpr{
 					pos: position{line: 222, col: 13, offset: 6475},
-					exprs: []interface{}{
+					exprs: []any{
 						&litMatcher{
 							pos:        position{line: 222, col: 13, offset: 6475},
 							val:        "{",
@@ -1739,12 +1739,12 @@ var g = &grammar{
 				pos: position{line: 228, col: 10, offset: 6593},
 				expr: &choiceExpr{
 					pos: position{line: 228, col: 10, offset: 6593},
-					alternatives: []interface{}{
+					alternatives: []any{
 						&oneOrMoreExpr{
 							pos: position{line: 228, col: 12, offset: 6595},
 							expr: &seqExpr{
 								pos: position{line: 228, col: 12, offset: 6595},
-								exprs: []interface{}{
+								exprs: []any{
 									&notExpr{
 										pos: position{line: 228, col: 12, offset: 6595},
 										expr: &charClassMatcher{
@@ -1764,7 +1764,7 @@ var g = &grammar{
 						},
 						&seqExpr{
 							pos: position{line: 228, col: 34, offset: 6617},
-							exprs: []interface{}{
+							exprs: []any{
 								&litMatcher{
 									pos:        position{line: 228, col: 34, offset: 6617},
 									val:        "{",
@@ -1794,7 +1794,7 @@ var g = &grammar{
 				pos: position{line: 230, col: 8, offset: 6643},
 				expr: &choiceExpr{
 					pos: position{line: 230, col: 8, offset: 6643},
-					alternatives: []interface{}{
+					alternatives: []any{
 						&ruleRefExpr{
 							pos:  position{line: 230, col: 8, offset: 6643},
 							name: "Whitespace",
@@ -1818,7 +1818,7 @@ var g = &grammar{
 				pos: position{line: 231, col: 7, offset: 6681},
 				expr: &choiceExpr{
 					pos: position{line: 231, col: 7, offset: 6681},
-					alternatives: []interface{}{
+					alternatives: []any{
 						&ruleRefExpr{
 							pos:  position{line: 231, col: 7, offset: 6681},
 							name: "Whitespace",
@@ -1857,10 +1857,10 @@ var g = &grammar{
 			pos:  position{line: 235, col: 1, offset: 6767},
 			expr: &choiceExpr{
 				pos: position{line: 235, col: 7, offset: 6775},
-				alternatives: []interface{}{
+				alternatives: []any{
 					&seqExpr{
 						pos: position{line: 235, col: 7, offset: 6775},
-						exprs: []interface{}{
+						exprs: []any{
 							&ruleRefExpr{
 								pos:  position{line: 235, col: 7, offset: 6775},
 								name: "__",
@@ -1875,7 +1875,7 @@ var g = &grammar{
 					},
 					&seqExpr{
 						pos: position{line: 235, col: 16, offset: 6784},
-						exprs: []interface{}{
+						exprs: []any{
 							&ruleRefExpr{
 								pos:  position{line: 235, col: 16, offset: 6784},
 								name: "_",
@@ -1895,7 +1895,7 @@ var g = &grammar{
 					},
 					&seqExpr{
 						pos: position{line: 235, col: 43, offset: 6811},
-						exprs: []interface{}{
+						exprs: []any{
 							&ruleRefExpr{
 								pos:  position{line: 235, col: 43, offset: 6811},
 								name: "__",
@@ -1922,7 +1922,7 @@ var g = &grammar{
 	},
 }
 
-func (c *current) onGrammar1(initializer, rules interface{}) (interface{}, error) {
+func (c *current) onGrammar1(initializer, rules any) (any, error) {
 	pos := c.astPos()
 
 	// create the grammar, assign its initializer
@@ -1935,29 +1935,29 @@ func (c *current) onGrammar1(initializer, rules interface{}) (interface{}, error
 	rulesSlice := toIfaceSlice(rules)
 	g.Rules = make([]*ast.Rule, len(rulesSlice))
 	for i, duo := range rulesSlice {
-		g.Rules[i] = duo.([]interface{})[0].(*ast.Rule)
+		g.Rules[i] = duo.([]any)[0].(*ast.Rule)
 	}
 
 	return g, nil
 }
 
-func (p *parser) callonGrammar1() (interface{}, error) {
+func (p *parser) callonGrammar1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onGrammar1(stack["initializer"], stack["rules"])
 }
 
-func (c *current) onInitializer1(code interface{}) (interface{}, error) {
+func (c *current) onInitializer1(code any) (any, error) {
 	return code, nil
 }
 
-func (p *parser) callonInitializer1() (interface{}, error) {
+func (p *parser) callonInitializer1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onInitializer1(stack["code"])
 }
 
-func (c *current) onRule1(name, display, expr interface{}) (interface{}, error) {
+func (c *current) onRule1(name, display, expr any) (any, error) {
 	pos := c.astPos()
 
 	rule := ast.NewRule(pos, name.(*ast.Identifier))
@@ -1970,13 +1970,13 @@ func (c *current) onRule1(name, display, expr interface{}) (interface{}, error) 
 	return rule, nil
 }
 
-func (p *parser) callonRule1() (interface{}, error) {
+func (p *parser) callonRule1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onRule1(stack["name"], stack["display"], stack["expr"])
 }
 
-func (c *current) onChoiceExpr1(first, rest interface{}) (interface{}, error) {
+func (c *current) onChoiceExpr1(first, rest any) (any, error) {
 	restSlice := toIfaceSlice(rest)
 	if len(restSlice) == 0 {
 		return first, nil
@@ -1986,18 +1986,18 @@ func (c *current) onChoiceExpr1(first, rest interface{}) (interface{}, error) {
 	choice := ast.NewChoiceExpr(pos)
 	choice.Alternatives = []ast.Expression{first.(ast.Expression)}
 	for _, sl := range restSlice {
-		choice.Alternatives = append(choice.Alternatives, sl.([]interface{})[3].(ast.Expression))
+		choice.Alternatives = append(choice.Alternatives, sl.([]any)[3].(ast.Expression))
 	}
 	return choice, nil
 }
 
-func (p *parser) callonChoiceExpr1() (interface{}, error) {
+func (p *parser) callonChoiceExpr1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onChoiceExpr1(stack["first"], stack["rest"])
 }
 
-func (c *current) onActionExpr1(expr, code interface{}) (interface{}, error) {
+func (c *current) onActionExpr1(expr, code any) (any, error) {
 	if code == nil {
 		return expr, nil
 	}
@@ -2011,13 +2011,13 @@ func (c *current) onActionExpr1(expr, code interface{}) (interface{}, error) {
 	return act, nil
 }
 
-func (p *parser) callonActionExpr1() (interface{}, error) {
+func (p *parser) callonActionExpr1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onActionExpr1(stack["expr"], stack["code"])
 }
 
-func (c *current) onSeqExpr1(first, rest interface{}) (interface{}, error) {
+func (c *current) onSeqExpr1(first, rest any) (any, error) {
 	restSlice := toIfaceSlice(rest)
 	if len(restSlice) == 0 {
 		return first, nil
@@ -2025,18 +2025,18 @@ func (c *current) onSeqExpr1(first, rest interface{}) (interface{}, error) {
 	seq := ast.NewSeqExpr(c.astPos())
 	seq.Exprs = []ast.Expression{first.(ast.Expression)}
 	for _, sl := range restSlice {
-		seq.Exprs = append(seq.Exprs, sl.([]interface{})[1].(ast.Expression))
+		seq.Exprs = append(seq.Exprs, sl.([]any)[1].(ast.Expression))
 	}
 	return seq, nil
 }
 
-func (p *parser) callonSeqExpr1() (interface{}, error) {
+func (p *parser) callonSeqExpr1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onSeqExpr1(stack["first"], stack["rest"])
 }
 
-func (c *current) onLabeledExpr2(label, expr interface{}) (interface{}, error) {
+func (c *current) onLabeledExpr2(label, expr any) (any, error) {
 	pos := c.astPos()
 	lab := ast.NewLabeledExpr(pos)
 	lab.Label = label.(*ast.Identifier)
@@ -2044,13 +2044,13 @@ func (c *current) onLabeledExpr2(label, expr interface{}) (interface{}, error) {
 	return lab, nil
 }
 
-func (p *parser) callonLabeledExpr2() (interface{}, error) {
+func (p *parser) callonLabeledExpr2() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onLabeledExpr2(stack["label"], stack["expr"])
 }
 
-func (c *current) onPrefixedExpr2(op, expr interface{}) (interface{}, error) {
+func (c *current) onPrefixedExpr2(op, expr any) (any, error) {
 	pos := c.astPos()
 	opStr := op.(string)
 	if opStr == "&" {
@@ -2063,23 +2063,23 @@ func (c *current) onPrefixedExpr2(op, expr interface{}) (interface{}, error) {
 	return not, nil
 }
 
-func (p *parser) callonPrefixedExpr2() (interface{}, error) {
+func (p *parser) callonPrefixedExpr2() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onPrefixedExpr2(stack["op"], stack["expr"])
 }
 
-func (c *current) onPrefixedOp1() (interface{}, error) {
+func (c *current) onPrefixedOp1() (any, error) {
 	return string(c.text), nil
 }
 
-func (p *parser) callonPrefixedOp1() (interface{}, error) {
+func (p *parser) callonPrefixedOp1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onPrefixedOp1()
 }
 
-func (c *current) onSuffixedExpr2(expr, op interface{}) (interface{}, error) {
+func (c *current) onSuffixedExpr2(expr, op any) (any, error) {
 	pos := c.astPos()
 	opStr := op.(string)
 	switch opStr {
@@ -2100,45 +2100,45 @@ func (c *current) onSuffixedExpr2(expr, op interface{}) (interface{}, error) {
 	}
 }
 
-func (p *parser) callonSuffixedExpr2() (interface{}, error) {
+func (p *parser) callonSuffixedExpr2() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onSuffixedExpr2(stack["expr"], stack["op"])
 }
 
-func (c *current) onSuffixedOp1() (interface{}, error) {
+func (c *current) onSuffixedOp1() (any, error) {
 	return string(c.text), nil
 }
 
-func (p *parser) callonSuffixedOp1() (interface{}, error) {
+func (p *parser) callonSuffixedOp1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onSuffixedOp1()
 }
 
-func (c *current) onPrimaryExpr7(expr interface{}) (interface{}, error) {
+func (c *current) onPrimaryExpr7(expr any) (any, error) {
 	return expr, nil
 }
 
-func (p *parser) callonPrimaryExpr7() (interface{}, error) {
+func (p *parser) callonPrimaryExpr7() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onPrimaryExpr7(stack["expr"])
 }
 
-func (c *current) onRuleRefExpr1(name interface{}) (interface{}, error) {
+func (c *current) onRuleRefExpr1(name any) (any, error) {
 	ref := ast.NewRuleRefExpr(c.astPos())
 	ref.Name = name.(*ast.Identifier)
 	return ref, nil
 }
 
-func (p *parser) callonRuleRefExpr1() (interface{}, error) {
+func (p *parser) callonRuleRefExpr1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onRuleRefExpr1(stack["name"])
 }
 
-func (c *current) onSemanticPredExpr1(op, code interface{}) (interface{}, error) {
+func (c *current) onSemanticPredExpr1(op, code any) (any, error) {
 	opStr := op.(string)
 	if opStr == "&" {
 		and := ast.NewAndCodeExpr(c.astPos())
@@ -2150,33 +2150,33 @@ func (c *current) onSemanticPredExpr1(op, code interface{}) (interface{}, error)
 	return not, nil
 }
 
-func (p *parser) callonSemanticPredExpr1() (interface{}, error) {
+func (p *parser) callonSemanticPredExpr1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onSemanticPredExpr1(stack["op"], stack["code"])
 }
 
-func (c *current) onSemanticPredOp1() (interface{}, error) {
+func (c *current) onSemanticPredOp1() (any, error) {
 	return string(c.text), nil
 }
 
-func (p *parser) callonSemanticPredOp1() (interface{}, error) {
+func (p *parser) callonSemanticPredOp1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onSemanticPredOp1()
 }
 
-func (c *current) onIdentifierName1() (interface{}, error) {
+func (c *current) onIdentifierName1() (any, error) {
 	return ast.NewIdentifier(c.astPos(), string(c.text)), nil
 }
 
-func (p *parser) callonIdentifierName1() (interface{}, error) {
+func (p *parser) callonIdentifierName1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onIdentifierName1()
 }
 
-func (c *current) onLitMatcher1(lit, ignore interface{}) (interface{}, error) {
+func (c *current) onLitMatcher1(lit, ignore any) (any, error) {
 	rawStr := lit.(*ast.StringLit).Val
 	s, err := strconv.Unquote(rawStr)
 	if err != nil {
@@ -2187,52 +2187,52 @@ func (c *current) onLitMatcher1(lit, ignore interface{}) (interface{}, error) {
 	return m, nil
 }
 
-func (p *parser) callonLitMatcher1() (interface{}, error) {
+func (p *parser) callonLitMatcher1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onLitMatcher1(stack["lit"], stack["ignore"])
 }
 
-func (c *current) onStringLiteral1() (interface{}, error) {
+func (c *current) onStringLiteral1() (any, error) {
 	return ast.NewStringLit(c.astPos(), string(c.text)), nil
 }
 
-func (p *parser) callonStringLiteral1() (interface{}, error) {
+func (p *parser) callonStringLiteral1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onStringLiteral1()
 }
 
-func (c *current) onCharClassMatcher1() (interface{}, error) {
+func (c *current) onCharClassMatcher1() (any, error) {
 	pos := c.astPos()
 	cc := ast.NewCharClassMatcher(pos, string(c.text))
 	return cc, nil
 }
 
-func (p *parser) callonCharClassMatcher1() (interface{}, error) {
+func (p *parser) callonCharClassMatcher1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onCharClassMatcher1()
 }
 
-func (c *current) onAnyMatcher1() (interface{}, error) {
+func (c *current) onAnyMatcher1() (any, error) {
 	any := ast.NewAnyMatcher(c.astPos(), ".")
 	return any, nil
 }
 
-func (p *parser) callonAnyMatcher1() (interface{}, error) {
+func (p *parser) callonAnyMatcher1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onAnyMatcher1()
 }
 
-func (c *current) onCodeBlock1() (interface{}, error) {
+func (c *current) onCodeBlock1() (any, error) {
 	pos := c.astPos()
 	cb := ast.NewCodeBlock(pos, string(c.text))
 	return cb, nil
 }
 
-func (p *parser) callonCodeBlock1() (interface{}, error) {
+func (p *parser) callonCodeBlock1() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
 	return p.cur.onCodeBlock1()
@@ -2376,7 +2376,7 @@ func Recover(b bool) Option {
 
 // GlobalStore creates an Option to set a key to a certain value in
 // the globalStore.
-func GlobalStore(key string, value interface{}) Option {
+func GlobalStore(key string, value any) Option {
 	return func(p *parser) Option {
 		old := p.cur.globalStore[key]
 		p.cur.globalStore[key] = value
@@ -2386,7 +2386,7 @@ func GlobalStore(key string, value interface{}) Option {
 
 // InitState creates an Option to set a key to a certain value in
 // the global "state" store.
-func InitState(key string, value interface{}) Option {
+func InitState(key string, value any) Option {
 	return func(p *parser) Option {
 		old := p.cur.state[key]
 		p.cur.state[key] = value
@@ -2395,7 +2395,7 @@ func InitState(key string, value interface{}) Option {
 }
 
 // ParseFile parses the file identified by filename.
-func ParseFile(filename string, opts ...Option) (i interface{}, err error) {
+func ParseFile(filename string, opts ...Option) (i any, err error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -2410,7 +2410,7 @@ func ParseFile(filename string, opts ...Option) (i interface{}, err error) {
 
 // ParseReader parses the data from r using filename as information in the
 // error messages.
-func ParseReader(filename string, r io.Reader, opts ...Option) (interface{}, error) {
+func ParseReader(filename string, r io.Reader, opts ...Option) (any, error) {
 	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -2421,7 +2421,7 @@ func ParseReader(filename string, r io.Reader, opts ...Option) (interface{}, err
 
 // Parse parses the data from b using filename as information in the
 // error messages.
-func Parse(filename string, b []byte, opts ...Option) (interface{}, error) {
+func Parse(filename string, b []byte, opts ...Option) (any, error) {
 	return newParser(filename, b, opts...).parse(g)
 }
 
@@ -2459,7 +2459,7 @@ type current struct {
 	globalStore storeDict
 }
 
-type storeDict map[string]interface{}
+type storeDict map[string]any
 
 // the AST types...
 
@@ -2472,30 +2472,30 @@ type rule struct {
 	pos         position
 	name        string
 	displayName string
-	expr        interface{}
+	expr        any
 }
 
 type choiceExpr struct {
 	pos          position
-	alternatives []interface{}
+	alternatives []any
 }
 
 type actionExpr struct {
 	pos  position
-	expr interface{}
-	run  func(*parser) (interface{}, error)
+	expr any
+	run  func(*parser) (any, error)
 }
 
 type recoveryExpr struct {
 	pos          position
-	expr         interface{}
-	recoverExpr  interface{}
+	expr         any
+	recoverExpr  any
 	failureLabel []string
 }
 
 type seqExpr struct {
 	pos   position
-	exprs []interface{}
+	exprs []any
 }
 
 type throwExpr struct {
@@ -2506,12 +2506,12 @@ type throwExpr struct {
 type labeledExpr struct {
 	pos   position
 	label string
-	expr  interface{}
+	expr  any
 }
 
 type expr struct {
 	pos  position
-	expr interface{}
+	expr any
 }
 
 type andExpr expr
@@ -2659,7 +2659,7 @@ func (p *parser) setOptions(opts []Option) {
 }
 
 type resultTuple struct {
-	v   interface{}
+	v   any
 	b   bool
 	end savepoint
 }
@@ -2703,12 +2703,12 @@ type parser struct {
 	memoize bool
 	// memoization table for the packrat algorithm:
 	// map[offset in source] map[expression or rule] {value, match}
-	memo map[int]map[interface{}]resultTuple
+	memo map[int]map[any]resultTuple
 
 	// rules table, maps the rule identifier to the rule node
 	rules map[string]*rule
 	// variables stack, map of label to value
-	vstack []map[string]interface{}
+	vstack []map[string]any
 	// rule stack, allows identification of the current rule in errors
 	rstack []*rule
 
@@ -2728,7 +2728,7 @@ type parser struct {
 
 	choiceNoMatch string
 	// recovery expression stack, keeps track of the currently available recovery expression, these are traversed in reverse
-	recoveryStack []map[string]interface{}
+	recoveryStack []map[string]any
 }
 
 // push a variable set on the vstack.
@@ -2748,7 +2748,7 @@ func (p *parser) pushV() {
 		return
 	}
 
-	m = make(map[string]interface{})
+	m = make(map[string]any)
 	p.vstack[len(p.vstack)-1] = m
 }
 
@@ -2764,7 +2764,7 @@ func (p *parser) popV() {
 }
 
 // push a recovery expression with its labels to the recoveryStack
-func (p *parser) pushRecovery(labels []string, expr interface{}) {
+func (p *parser) pushRecovery(labels []string, expr any) {
 	if cap(p.recoveryStack) == len(p.recoveryStack) {
 		// create new empty slot in the stack
 		p.recoveryStack = append(p.recoveryStack, nil)
@@ -2773,7 +2773,7 @@ func (p *parser) pushRecovery(labels []string, expr interface{}) {
 		p.recoveryStack = p.recoveryStack[:len(p.recoveryStack)+1]
 	}
 
-	m := make(map[string]interface{}, len(labels))
+	m := make(map[string]any, len(labels))
 	for _, fl := range labels {
 		m[fl] = expr
 	}
@@ -2893,11 +2893,11 @@ func (p *parser) restore(pt savepoint) {
 // copies of the state to allow the parser to properly restore the state in
 // the case of backtracking.
 type Cloner interface {
-	Clone() interface{}
+	Clone() any
 }
 
 var statePool = &sync.Pool{
-	New: func() interface{} { return make(storeDict) },
+	New: func() any { return make(storeDict) },
 }
 
 func (sd storeDict) Discard() {
@@ -2939,7 +2939,7 @@ func (p *parser) sliceFrom(start savepoint) []byte {
 	return p.data[start.position.offset:p.pt.position.offset]
 }
 
-func (p *parser) getMemoized(node interface{}) (resultTuple, bool) {
+func (p *parser) getMemoized(node any) (resultTuple, bool) {
 	if len(p.memo) == 0 {
 		return resultTuple{}, false
 	}
@@ -2951,13 +2951,13 @@ func (p *parser) getMemoized(node interface{}) (resultTuple, bool) {
 	return res, ok
 }
 
-func (p *parser) setMemoized(pt savepoint, node interface{}, tuple resultTuple) {
+func (p *parser) setMemoized(pt savepoint, node any, tuple resultTuple) {
 	if p.memo == nil {
-		p.memo = make(map[int]map[interface{}]resultTuple)
+		p.memo = make(map[int]map[any]resultTuple)
 	}
 	m := p.memo[pt.offset]
 	if m == nil {
-		m = make(map[interface{}]resultTuple)
+		m = make(map[any]resultTuple)
 		p.memo[pt.offset] = m
 	}
 	m[node] = tuple
@@ -2970,7 +2970,7 @@ func (p *parser) buildRulesTable(g *grammar) {
 	}
 }
 
-func (p *parser) parse(g *grammar) (val interface{}, err error) {
+func (p *parser) parse(g *grammar) (val any, err error) {
 	if len(g.rules) == 0 {
 		p.addErr(errNoRule)
 		return nil, p.errs.err()
@@ -3047,7 +3047,7 @@ func listJoin(list []string, sep string, lastSep string) string {
 	}
 }
 
-func (p *parser) parseRule(rule *rule) (interface{}, bool) {
+func (p *parser) parseRule(rule *rule) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseRule " + rule.name))
 	}
@@ -3076,7 +3076,7 @@ func (p *parser) parseRule(rule *rule) (interface{}, bool) {
 	return val, ok
 }
 
-func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
+func (p *parser) parseExpr(expr any) (any, bool) {
 	var pt savepoint
 
 	if p.memoize {
@@ -3093,7 +3093,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 		panic(errMaxExprCnt)
 	}
 
-	var val interface{}
+	var val any
 	var ok bool
 	switch expr := expr.(type) {
 	case *actionExpr:
@@ -3141,7 +3141,7 @@ func (p *parser) parseExpr(expr interface{}) (interface{}, bool) {
 	return val, ok
 }
 
-func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
+func (p *parser) parseActionExpr(act *actionExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseActionExpr"))
 	}
@@ -3166,7 +3166,7 @@ func (p *parser) parseActionExpr(act *actionExpr) (interface{}, bool) {
 	return val, ok
 }
 
-func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
+func (p *parser) parseAndCodeExpr(and *andCodeExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseAndCodeExpr"))
 	}
@@ -3182,7 +3182,7 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (interface{}, bool) {
 	return nil, ok
 }
 
-func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
+func (p *parser) parseAndExpr(and *andExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseAndExpr"))
 	}
@@ -3198,7 +3198,7 @@ func (p *parser) parseAndExpr(and *andExpr) (interface{}, bool) {
 	return nil, ok
 }
 
-func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
+func (p *parser) parseAnyMatcher(any *anyMatcher) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseAnyMatcher"))
 	}
@@ -3214,7 +3214,7 @@ func (p *parser) parseAnyMatcher(any *anyMatcher) (interface{}, bool) {
 	return p.sliceFrom(start), true
 }
 
-func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (interface{}, bool) {
+func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseCharClassMatcher"))
 	}
@@ -3295,7 +3295,7 @@ func (p *parser) incChoiceAltCnt(ch *choiceExpr, altI int) {
 	m[alt]++
 }
 
-func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
+func (p *parser) parseChoiceExpr(ch *choiceExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseChoiceExpr"))
 	}
@@ -3319,7 +3319,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (interface{}, bool) {
 	return nil, false
 }
 
-func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
+func (p *parser) parseLabeledExpr(lab *labeledExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseLabeledExpr"))
 	}
@@ -3334,7 +3334,7 @@ func (p *parser) parseLabeledExpr(lab *labeledExpr) (interface{}, bool) {
 	return val, ok
 }
 
-func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
+func (p *parser) parseLitMatcher(lit *litMatcher) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseLitMatcher"))
 	}
@@ -3356,7 +3356,7 @@ func (p *parser) parseLitMatcher(lit *litMatcher) (interface{}, bool) {
 	return p.sliceFrom(start), true
 }
 
-func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
+func (p *parser) parseNotCodeExpr(not *notCodeExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseNotCodeExpr"))
 	}
@@ -3372,7 +3372,7 @@ func (p *parser) parseNotCodeExpr(not *notCodeExpr) (interface{}, bool) {
 	return nil, !ok
 }
 
-func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
+func (p *parser) parseNotExpr(not *notExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseNotExpr"))
 	}
@@ -3390,12 +3390,12 @@ func (p *parser) parseNotExpr(not *notExpr) (interface{}, bool) {
 	return nil, !ok
 }
 
-func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
+func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseOneOrMoreExpr"))
 	}
 
-	var vals []interface{}
+	var vals []any
 
 	for {
 		p.pushV()
@@ -3412,7 +3412,7 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (interface{}, bool) {
 	}
 }
 
-func (p *parser) parseRecoveryExpr(recover *recoveryExpr) (interface{}, bool) {
+func (p *parser) parseRecoveryExpr(recover *recoveryExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseRecoveryExpr (" + strings.Join(recover.failureLabel, ",") + ")"))
 	}
@@ -3424,7 +3424,7 @@ func (p *parser) parseRecoveryExpr(recover *recoveryExpr) (interface{}, bool) {
 	return val, ok
 }
 
-func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
+func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseRuleRefExpr " + ref.name))
 	}
@@ -3441,12 +3441,12 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (interface{}, bool) {
 	return p.parseRule(rule)
 }
 
-func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
+func (p *parser) parseSeqExpr(seq *seqExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseSeqExpr"))
 	}
 
-	vals := make([]interface{}, 0, len(seq.exprs))
+	vals := make([]any, 0, len(seq.exprs))
 
 	pt := p.pt
 	state := p.cloneState()
@@ -3462,7 +3462,7 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (interface{}, bool) {
 	return vals, true
 }
 
-func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (interface{}, bool) {
+func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseStateCodeExpr"))
 	}
@@ -3474,7 +3474,7 @@ func (p *parser) parseStateCodeExpr(state *stateCodeExpr) (interface{}, bool) {
 	return nil, true
 }
 
-func (p *parser) parseThrowExpr(expr *throwExpr) (interface{}, bool) {
+func (p *parser) parseThrowExpr(expr *throwExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseThrowExpr"))
 	}
@@ -3490,12 +3490,12 @@ func (p *parser) parseThrowExpr(expr *throwExpr) (interface{}, bool) {
 	return nil, false
 }
 
-func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
+func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseZeroOrMoreExpr"))
 	}
 
-	var vals []interface{}
+	var vals []any
 
 	for {
 		p.pushV()
@@ -3508,7 +3508,7 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (interface{}, bool) {
 	}
 }
 
-func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (interface{}, bool) {
+func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseZeroOrOneExpr"))
 	}
