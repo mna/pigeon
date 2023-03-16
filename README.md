@@ -18,9 +18,11 @@ Github user [@mna][6] created the package in April 2015, and [@breml][5] is the 
 
 ### Breaking Changes since v1.0.0
 
+* Removed support for Go < v1.13 to support recent version of [golang.org/x/tools](https://pkg.go.dev/golang.org/x/tools).
+
 * Removed support for Go < v1.11 to support go modules for dependency tracking.
 
-* Removed support for Go < v1.9 due to the requirement [golang.org/x/tools/imports](https://godoc.org/golang.org/x/tools/imports), which was updated to reflect changes in recent versions of Go. This is in compliance with the [Go Release Policy](https://golang.org/doc/devel/release.html#policy) respectively the [Go Release Maintenance](https://github.com/golang/go/wiki/Go-Release-Cycle#release-maintenance), which states support for each major release until there are two newer major releases.
+* Removed support for Go < v1.9 due to the requirement [golang.org/x/tools/imports](https://pkg.go.dev/golang.org/x/tools/imports), which was updated to reflect changes in recent versions of Go. This is in compliance with the [Go Release Policy](https://golang.org/doc/devel/release.html#policy) respectively the [Go Release Maintenance](https://github.com/golang/go/wiki/Go-Release-Cycle#release-maintenance), which states support for each major release until there are two newer major releases.
 
 ## Installation
 
@@ -129,7 +131,7 @@ The generated parser can parse simple arithmetic operations, e.g.:
 
 More examples can be found in the `examples/` subdirectory.
 
-See the [godoc page][3] for detailed usage.
+See the [package documentation][3] for detailed usage.
 
 ## Contributing
 
@@ -142,7 +144,7 @@ The [BSD 3-Clause license][4]. See the LICENSE file.
 [0]: http://en.wikipedia.org/wiki/Parsing_expression_grammar
 [1]: http://pegjs.org/
 [2]: http://www.codeproject.com/Articles/29713/Parsing-Expression-Grammar-Support-for-C-Part
-[3]: https://godoc.org/github.com/mna/pigeon
+[3]: https://pkg.go.dev/github.com/mna/pigeon
 [4]: http://opensource.org/licenses/BSD-3-Clause
 [5]: https://github.com/breml
 [6]: https://github.com/mna
