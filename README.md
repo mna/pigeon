@@ -1,7 +1,7 @@
 # pigeon - a PEG parser generator for Go
 
-[![GoDoc](https://godoc.org/github.com/mna/pigeon?status.png)](https://godoc.org/github.com/mna/pigeon)
-[![build status](https://secure.travis-ci.org/mna/pigeon.png?branch=master)](http://travis-ci.org/mna/pigeon)
+[![Go Reference](https://pkg.go.dev/badge/github.com/mna/pigeon.svg)](https://pkg.go.dev/github.com/mna/pigeon)
+[![Test Status](https://github.com/mna/pigeon/workflows/Go%20Matrix/badge.svg)](https://github.com/mna/pigeon/actions?query=workflow%3AGo%20Matrix)
 [![GoReportCard](https://goreportcard.com/badge/github.com/mna/pigeon)](https://goreportcard.com/report/github.com/mna/pigeon)
 [![Software License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
