@@ -187,8 +187,8 @@ DoubleStringChar ← !( '"' / "\\" / EOL ) SourceChar / "\\" DoubleStringEscape
 SingleStringChar ← !( "'" / "\\" / EOL ) SourceChar / "\\" SingleStringEscape
 RawStringChar ← !'`' SourceChar
 
-DoubleStringEscape ← "'" / CommonEscapeSequence
-SingleStringEscape ← '"' / CommonEscapeSequence
+DoubleStringEscape ← '"' / CommonEscapeSequence
+SingleStringEscape ← "'" / CommonEscapeSequence
 
 CommonEscapeSequence ← SingleCharEscape / OctalEscape / HexEscape / LongUnicodeEscape / ShortUnicodeEscape
 SingleCharEscape ← 'a' / 'b' / 'n' / 'f' / 'r' / 't' / 'v' / '\\'

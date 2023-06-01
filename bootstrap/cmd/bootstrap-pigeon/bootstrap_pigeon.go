@@ -1183,9 +1183,9 @@ var g = &grammar{
 				alternatives: []any{
 					&litMatcher{
 						pos:        position{line: 190, col: 22, offset: 5271},
-						val:        "'",
+						val:        "\"",
 						ignoreCase: false,
-						want:       "\"'\"",
+						want:       "\"\\\"\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 190, col: 28, offset: 5277},
@@ -1202,9 +1202,9 @@ var g = &grammar{
 				alternatives: []any{
 					&litMatcher{
 						pos:        position{line: 191, col: 22, offset: 5321},
-						val:        "\"",
+						val:        "'",
 						ignoreCase: false,
-						want:       "\"\\\"\"",
+						want:       "\"'\"",
 					},
 					&ruleRefExpr{
 						pos:  position{line: 191, col: 28, offset: 5327},
