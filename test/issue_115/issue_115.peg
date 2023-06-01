@@ -1,0 +1,8 @@
+{
+	package issue115
+}
+
+// this shouldn't compile if #115 isn't fixed.
+Test <- . {
+    return "}" + `}` + string('}'), nil
+}

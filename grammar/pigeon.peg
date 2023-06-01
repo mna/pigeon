@@ -322,7 +322,11 @@ CodeBlock ← '{' Code '}' {
     return nil, errors.New("code block not terminated")
 }
 
-Code ← ( ( Comment / ![{}] SourceChar )+ / '{' Code '}' )*
+Code ← ( ( Comment / CodeStringLiteral / ![{}] SourceChar )+ / '{' Code '}' )*
+
+CodeStringLiteral ← '"' (`\"` / [^"\r\n])* '"' /
+                    '`' [^`]* '`' /
+                    '\'' (`\'` / [^']+) '\''
 
 __ ← ( Whitespace / EOL / Comment )*
 _ ← ( Whitespace / MultiLineCommentNoLineTerminator )*
