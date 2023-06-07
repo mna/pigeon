@@ -200,13 +200,8 @@ func ParseFile(filename string, opts ...Option) (i any, err error) { //{{ if .No
 
 // ParseReader parses the data from r using filename as information in the
 // error messages.
-<<<<<<< HEAD
-func ParseReader(filename string, r io.Reader, opts ...Option) (interface{}, error) { //{{ if .Nolint }} nolint: deadcode {{else}} ==template== {{ end }}
-	b, err := io.ReadAll(r)
-=======
 func ParseReader(filename string, r io.Reader, opts ...Option) (any, error) { //{{ if .Nolint }} nolint: deadcode {{else}} ==template== {{ end }}
-	b, err := ioutil.ReadAll(r)
->>>>>>> gofmt -r 'interface{} -> any' -w *.go && go mod edit -go 1.18
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
@@ -322,11 +317,13 @@ type expr struct {
 	expr any
 }
 
-type andExpr expr        //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type notExpr expr        //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type zeroOrOneExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type zeroOrMoreExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type oneOrMoreExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type (
+	andExpr        expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+	notExpr        expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+	zeroOrOneExpr  expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+	zeroOrMoreExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+	oneOrMoreExpr  expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+)
 
 // {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type ruleRefExpr struct {

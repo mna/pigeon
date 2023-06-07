@@ -364,11 +364,13 @@ type expr struct {
 	expr any
 }
 
-type andExpr expr        // nolint: structcheck
-type notExpr expr        // nolint: structcheck
-type zeroOrOneExpr expr  // nolint: structcheck
-type zeroOrMoreExpr expr // nolint: structcheck
-type oneOrMoreExpr expr  // nolint: structcheck
+type (
+	andExpr        expr // nolint: structcheck
+	notExpr        expr // nolint: structcheck
+	zeroOrOneExpr  expr // nolint: structcheck
+	zeroOrMoreExpr expr // nolint: structcheck
+	oneOrMoreExpr  expr // nolint: structcheck
+)
 
 // nolint: structcheck
 type ruleRefExpr struct {

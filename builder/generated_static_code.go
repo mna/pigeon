@@ -299,11 +299,13 @@ type expr struct {
 	expr any
 }
 
-type andExpr expr        //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type notExpr expr        //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type zeroOrOneExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type zeroOrMoreExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
-type oneOrMoreExpr expr  //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type (
+	andExpr        expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+	notExpr        expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+	zeroOrOneExpr  expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+	zeroOrMoreExpr expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+	oneOrMoreExpr  expr //{{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+)
 
 // {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type ruleRefExpr struct {
