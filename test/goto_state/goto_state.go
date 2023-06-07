@@ -8,9 +8,9 @@
 // The global state is used to keep track of the labels as well as the unresolved targets for jump instructions.
 //
 // Example:
-//     label: noop
-//     jump label
 //
+//	label: noop
+//	jump label
 package asmgotostate
 
 import (
@@ -488,18 +488,17 @@ func Entrypoint(ruleName string) Option {
 //
 // Example usage:
 //
-//     input := "input"
-//     stats := Stats{}
-//     _, err := Parse("input-file", []byte(input), Statistics(&stats, "no match"))
-//     if err != nil {
-//         log.Panicln(err)
-//     }
-//     b, err := json.MarshalIndent(stats.ChoiceAltCnt, "", "  ")
-//     if err != nil {
-//         log.Panicln(err)
-//     }
-//     fmt.Println(string(b))
-//
+//	input := "input"
+//	stats := Stats{}
+//	_, err := Parse("input-file", []byte(input), Statistics(&stats, "no match"))
+//	if err != nil {
+//	    log.Panicln(err)
+//	}
+//	b, err := json.MarshalIndent(stats.ChoiceAltCnt, "", "  ")
+//	if err != nil {
+//	    log.Panicln(err)
+//	}
+//	fmt.Println(string(b))
 func Statistics(stats *Stats, choiceNoMatch string) Option {
 	return func(p *parser) Option {
 		oldStats := p.Stats
