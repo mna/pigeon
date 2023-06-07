@@ -1,7 +1,7 @@
 package builder
 
 import (
-	"io/ioutil"
+	"io"
 	"strings"
 	"testing"
 
@@ -34,7 +34,7 @@ func TestBuildParser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := BuildParser(ioutil.Discard, g); err != nil {
+	if err := BuildParser(io.Discard, g); err != nil {
 		t.Fatal(err)
 	}
 }

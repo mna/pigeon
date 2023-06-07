@@ -2,7 +2,7 @@ package json
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -32,9 +32,9 @@ func TestCmpStdlib(t *testing.T) {
 			continue
 		}
 
-		b, err := ioutil.ReadFile(file)
+		b, err := os.ReadFile(file)
 		if err != nil {
-			t.Errorf("%s: ioutil.ReadAll: %v", file, err)
+			t.Errorf("%s: os.ReadFile: %v", file, err)
 			continue
 		}
 		var jgot interface{}
@@ -63,7 +63,7 @@ func TestCmpStdlib(t *testing.T) {
 func testJSONFiles(t *testing.T) []string {
 	const rootDir = "testdata"
 
-	fis, err := ioutil.ReadDir(rootDir)
+	fis, err := os.ReadDir(rootDir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func TestForwardSlash(t *testing.T) {
 }
 
 func BenchmarkPigeonJSONNoMemo(b *testing.B) {
-	d, err := ioutil.ReadFile("testdata/github-octokit-repos.json")
+	d, err := os.ReadFile("testdata/github-octokit-repos.json")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -152,7 +152,7 @@ func BenchmarkPigeonJSONNoMemo(b *testing.B) {
 }
 
 func BenchmarkPigeonJSONMemo(b *testing.B) {
-	d, err := ioutil.ReadFile("testdata/github-octokit-repos.json")
+	d, err := os.ReadFile("testdata/github-octokit-repos.json")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -166,7 +166,7 @@ func BenchmarkPigeonJSONMemo(b *testing.B) {
 }
 
 func BenchmarkPigeonJSONOptimized(b *testing.B) {
-	d, err := ioutil.ReadFile("testdata/github-octokit-repos.json")
+	d, err := os.ReadFile("testdata/github-octokit-repos.json")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -180,7 +180,7 @@ func BenchmarkPigeonJSONOptimized(b *testing.B) {
 }
 
 func BenchmarkPigeonJSONOptimizedGrammar(b *testing.B) {
-	d, err := ioutil.ReadFile("testdata/github-octokit-repos.json")
+	d, err := os.ReadFile("testdata/github-octokit-repos.json")
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -194,7 +194,7 @@ func BenchmarkPigeonJSONOptimizedGrammar(b *testing.B) {
 }
 
 func BenchmarkStdlibJSON(b *testing.B) {
-	d, err := ioutil.ReadFile("testdata/github-octokit-repos.json")
+	d, err := os.ReadFile("testdata/github-octokit-repos.json")
 	if err != nil {
 		b.Fatal(err)
 	}
