@@ -69,18 +69,18 @@ var ops = map[string]func(int, int) int {
     },
 }
 
-func toIfaceSlice(v interface{}) []interface{} {
+func toAnySlice(v any) []any {
     if v == nil {
         return nil
     }
-    return v.([]interface{})
+    return v.([]any)
 }
 
-func eval(first, rest interface{}) int {
+func eval(first, rest any) int {
     l := first.(int)
-    restSl := toIfaceSlice(rest)
+    restSl := toAnySlice(rest)
     for _, v := range restSl {
-        restExpr := toIfaceSlice(v)
+        restExpr := toAnySlice(v)
         r := restExpr[3].(int)
         op := restExpr[1].(string)
         l = ops[op](l, r)

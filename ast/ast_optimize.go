@@ -441,14 +441,14 @@ func escapeRune(r rune) string {
 
 // Optimize walks a given grammar and optimizes the grammar in regards
 // of parsing performance. This is done with several optimizations:
-// * removal of unreferenced rules
-// * replace rule references with a copy of the referenced Rule, if the
-// 	 referenced rule it self has no references.
-// * resolve nested choice expressions
-// * resolve choice expressions with only one alternative
-// * resolve nested sequences expression
-// * resolve sequence expressions with only one element
-// * combine character class matcher and literal matcher, where possible
+//   - removal of unreferenced rules
+//   - replace rule references with a copy of the referenced Rule, if the
+//     referenced rule it self has no references.
+//   - resolve nested choice expressions
+//   - resolve choice expressions with only one alternative
+//   - resolve nested sequences expression
+//   - resolve sequence expressions with only one element
+//   - combine character class matcher and literal matcher, where possible
 func Optimize(g *Grammar, alternateEntrypoints ...string) {
 	entrypoints := alternateEntrypoints
 	if len(g.Rules) > 0 {

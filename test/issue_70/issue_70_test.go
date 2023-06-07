@@ -19,7 +19,7 @@ func TestOptimizeGrammar(t *testing.T) {
 		{"Y", "Z", errors.New("no match found")},
 	}
 
-	type parser func(string) (interface{}, error)
+	type parser func(string) (any, error)
 	parsers := map[string]parser{
 		"standard":          parseStd,
 		"optimized":         parseOpt,
@@ -48,14 +48,14 @@ func TestOptimizeGrammar(t *testing.T) {
 	}
 }
 
-func parseStd(input string) (interface{}, error) {
+func parseStd(input string) (any, error) {
 	return Parse("", []byte(input))
 }
 
-func parseOpt(input string) (interface{}, error) {
+func parseOpt(input string) (any, error) {
 	return optimized.Parse("", []byte(input))
 }
 
-func parseOptGrammar(input string) (interface{}, error) {
+func parseOptGrammar(input string) (any, error) {
 	return optimizedgrammar.Parse("", []byte(input))
 }

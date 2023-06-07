@@ -12,16 +12,16 @@
 //
 package asmgotostate
 
-func toIfaceSlice(v interface{}) []interface{} {
+func toAnySlice(v any) []any {
     if v == nil {
         return nil
     }
-    return v.([]interface{})
+    return v.([]any)
 }
 }
 
 Program ← #{ if _, ok := c.state["labelLookup"]; !ok { ll := make(labelLookup); c.state["labelLookup"] = ll; }; return nil } lines:Line* EOF &{ return labelCheck(c) } {
-  lines0 := toIfaceSlice(lines)
+  lines0 := toAnySlice(lines)
   asmLines := make([]Instruction, 0, len(lines0))
   for _, line := range lines0 {
     asmLines = append(asmLines, line.(Instruction))

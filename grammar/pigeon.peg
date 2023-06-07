@@ -7,15 +7,15 @@ Grammar ← __ initializer:( Initializer __ )? rules:( Rule __ )+ EOF {
 
     // create the grammar, assign its initializer
     g := ast.NewGrammar(pos)
-    initSlice := toIfaceSlice(initializer)
+    initSlice := toAnySlice(initializer)
     if len(initSlice) > 0 {
         g.Init = initSlice[0].(*ast.CodeBlock)
     }
 
-    rulesSlice := toIfaceSlice(rules)
+    rulesSlice := toAnySlice(rules)
     g.Rules = make([]*ast.Rule, len(rulesSlice))
     for i, duo := range rulesSlice {
-        g.Rules[i] = duo.([]interface{})[0].(*ast.Rule)
+        g.Rules[i] = duo.([]any)[0].(*ast.Rule)
     }
 
     return g, nil
@@ -29,7 +29,7 @@ Rule ← name:IdentifierName __ display:( StringLiteral __ )? RuleDefOp __ expr:
     pos := c.astPos()
 
     rule := ast.NewRule(pos, name.(*ast.Identifier))
-    displaySlice := toIfaceSlice(display)
+    displaySlice := toAnySlice(display)
     if len(displaySlice) > 0 {
         rule.DisplayName = displaySlice[0].(*ast.StringLit)
     }
@@ -41,14 +41,14 @@ Rule ← name:IdentifierName __ display:( StringLiteral __ )? RuleDefOp __ expr:
 Expression ← RecoveryExpr
 
 RecoveryExpr ← expr:ChoiceExpr recoverExprs:( __ "//{" __ Labels __ "}" __ ChoiceExpr )* {
-    recoverExprSlice := toIfaceSlice(recoverExprs)
+    recoverExprSlice := toAnySlice(recoverExprs)
     recover := expr.(ast.Expression)
     for _, sl := range recoverExprSlice {
         pos := c.astPos()
         r := ast.NewRecoveryExpr(pos)
         r.Expr = recover
-        r.RecoverExpr = sl.([]interface{})[7].(ast.Expression)
-        r.Labels = sl.([]interface{})[3].([]ast.FailureLabel)
+        r.RecoverExpr = sl.([]any)[7].(ast.Expression)
+        r.Labels = sl.([]any)[3].([]ast.FailureLabel)
 
         recover = r
     }
@@ -57,15 +57,15 @@ RecoveryExpr ← expr:ChoiceExpr recoverExprs:( __ "//{" __ Labels __ "}" __ Cho
 
 Labels ← label:IdentifierName labels:( __ "," __ IdentifierName)* {
     failureLabels := []ast.FailureLabel{ast.FailureLabel(label.(*ast.Identifier).Val)}
-    labelSlice := toIfaceSlice(labels)
+    labelSlice := toAnySlice(labels)
     for _, fl := range labelSlice {
-        failureLabels = append(failureLabels, ast.FailureLabel(fl.([]interface{})[3].(*ast.Identifier).Val))
+        failureLabels = append(failureLabels, ast.FailureLabel(fl.([]any)[3].(*ast.Identifier).Val))
     }
     return failureLabels, nil
 }
 
 ChoiceExpr ← first:ActionExpr rest:( __ "/" __ ActionExpr )* {
-    restSlice := toIfaceSlice(rest)
+    restSlice := toAnySlice(rest)
     if len(restSlice) == 0 {
         return first, nil
     }
@@ -74,7 +74,7 @@ ChoiceExpr ← first:ActionExpr rest:( __ "/" __ ActionExpr )* {
     choice := ast.NewChoiceExpr(pos)
     choice.Alternatives = []ast.Expression{first.(ast.Expression)}
     for _, sl := range restSlice {
-        choice.Alternatives = append(choice.Alternatives, sl.([]interface{})[3].(ast.Expression))
+        choice.Alternatives = append(choice.Alternatives, sl.([]any)[3].(ast.Expression))
     }
     return choice, nil
 }
@@ -87,21 +87,21 @@ ActionExpr ← expr:SeqExpr code:( __ CodeBlock )? {
     pos := c.astPos()
     act := ast.NewActionExpr(pos)
     act.Expr = expr.(ast.Expression)
-    codeSlice := toIfaceSlice(code)
+    codeSlice := toAnySlice(code)
     act.Code = codeSlice[1].(*ast.CodeBlock)
 
     return act, nil
 }
 
 SeqExpr ← first:LabeledExpr rest:( __ LabeledExpr )* {
-    restSlice := toIfaceSlice(rest)
+    restSlice := toAnySlice(rest)
     if len(restSlice) == 0 {
         return first, nil
     }
     seq := ast.NewSeqExpr(c.astPos())
     seq.Exprs = []ast.Expression{first.(ast.Expression)}
     for _, sl := range restSlice {
-        seq.Exprs = append(seq.Exprs, sl.([]interface{})[1].(ast.Expression))
+        seq.Exprs = append(seq.Exprs, sl.([]any)[1].(ast.Expression))
     }
     return seq, nil
 }

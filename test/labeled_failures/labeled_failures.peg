@@ -1,13 +1,13 @@
 {
 package labeledfailures
 
-func ids(id, list interface{}) (interface{}, error) {
+func ids(id, list any) (any, error) {
 	l := toStringSlice(list)
 	l = append([]string{id.(string)}, l...)
 	return l, nil
 }
 
-func toStringSlice(v interface{}) []string {
+func toStringSlice(v any) []string {
 	if v == nil {
 		return nil
 	}

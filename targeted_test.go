@@ -54,7 +54,7 @@ func TestParseAnyMatcher(t *testing.T) {
 		// advance to the first rune
 		p.read()
 
-		var want interface{}
+		var want any
 		var match bool
 		if tc.out != nil {
 			want = tc.out
@@ -109,7 +109,7 @@ func TestParseLitMatcher(t *testing.T) {
 		// advance to the first rune
 		p.read()
 
-		var want interface{}
+		var want any
 		var match bool
 		if tc.out != nil {
 			match = true
@@ -239,7 +239,7 @@ func TestParseCharClassMatcher(t *testing.T) {
 		// advance to the first rune
 		p.read()
 
-		var want interface{}
+		var want any
 		var match bool
 		if tc.out != nil {
 			want = tc.out
@@ -293,7 +293,7 @@ func TestParseZeroOrOneExpr(t *testing.T) {
 		// advance to the first rune
 		p.read()
 
-		var want interface{}
+		var want any
 		if tc.out != nil {
 			want = tc.out
 		}
@@ -344,7 +344,7 @@ func TestParseZeroOrMoreExpr(t *testing.T) {
 		// advance to the first rune
 		p.read()
 
-		want := make([]interface{}, len(tc.out))
+		want := make([]any, len(tc.out))
 		for i, v := range tc.out {
 			want[i] = []byte(v)
 		}
@@ -402,10 +402,10 @@ func TestParseOneOrMoreExpr(t *testing.T) {
 		// advance to the first rune
 		p.read()
 
-		var want interface{}
+		var want any
 		var match bool
 		if tc.out != nil {
-			vals := make([]interface{}, len(tc.out))
+			vals := make([]any, len(tc.out))
 			for i, v := range tc.out {
 				vals[i] = []byte(v)
 			}
@@ -452,10 +452,10 @@ func TestParseSeqExpr(t *testing.T) {
 		// advance to the first rune
 		p.read()
 
-		var want interface{}
+		var want any
 		var match bool
 		if tc.out != nil {
-			var vals []interface{}
+			var vals []any
 			for _, v := range tc.out {
 				vals = append(vals, []byte(v))
 			}
@@ -463,11 +463,11 @@ func TestParseSeqExpr(t *testing.T) {
 			match = true
 		}
 		if tc.lits == nil {
-			want = make([]interface{}, 0) // empty seq (impossible case via the parser) always matches
+			want = make([]any, 0) // empty seq (impossible case via the parser) always matches
 		}
 		lbl := fmt.Sprintf("%v: %q", tc.lits, tc.in)
 
-		lits := make([]interface{}, len(tc.lits))
+		lits := make([]any, len(tc.lits))
 		for i, l := range tc.lits {
 			lits[i] = &litMatcher{val: l}
 		}
@@ -705,7 +705,7 @@ func TestParseLabeledExpr(t *testing.T) {
 		p.read()
 		p.pushV()
 
-		var want interface{}
+		var want any
 		var match bool
 		if tc.out != nil {
 			match = true
@@ -771,7 +771,7 @@ func TestParseChoiceExpr(t *testing.T) {
 		// advance to the first rune
 		p.read()
 
-		var want interface{}
+		var want any
 		var match bool
 		if tc.out != nil {
 			want = tc.out
@@ -779,7 +779,7 @@ func TestParseChoiceExpr(t *testing.T) {
 		}
 		lbl := fmt.Sprintf("%v: %q", tc.lits, tc.in)
 
-		lits := make([]interface{}, len(tc.lits))
+		lits := make([]any, len(tc.lits))
 		for i, l := range tc.lits {
 			lits[i] = &litMatcher{val: l}
 		}
@@ -801,7 +801,7 @@ func TestParseActionExpr(t *testing.T) {
 	cases := []struct {
 		in  string
 		lit string
-		v   interface{}
+		v   any
 		err error
 	}{
 		{"", "", 1, nil}, // empty string always matches
@@ -816,7 +816,7 @@ func TestParseActionExpr(t *testing.T) {
 
 	for _, tc := range cases {
 		called := false
-		fn := func(_ *parser) (interface{}, error) {
+		fn := func(_ *parser) (any, error) {
 			called = true
 			return tc.v, tc.err
 		}

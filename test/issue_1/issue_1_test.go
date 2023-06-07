@@ -16,10 +16,10 @@ func TestRunIssue1(t *testing.T) {
 
 // Since go1.7: The Method and NumMethod methods of Type and Value no longer return or count unexported methods.
 func TestIssue1(t *testing.T) {
-	var cur interface{} = &current{}
+	var cur any = &current{}
 	_, ok := cur.(interface {
-		onTableRef1(interface{}, interface{}) (interface{}, error)
-		onID1() (interface{}, error)
+		onTableRef1(any, any) (any, error)
+		onID1() (any, error)
 	})
 	if !ok {
 		t.Errorf("want *current to have expected methods")

@@ -1,11 +1,11 @@
 {
 package main
 
-func toIfaceSlice(v interface{}) []interface{} {
+func toAnySlice(v any) []any {
     if v == nil {
         return nil
     }
-    return v.([]interface{})
+    return v.([]any)
 }
 
 }
@@ -43,7 +43,7 @@ Comment ← "//" [^\r\n]*
 
 EOF ← !.
 
-INDENTATION ← spaces:" "* &{ return len(toIfaceSlice(spaces)) == c.state["Indentation"].(int), nil }
+INDENTATION ← spaces:" "* &{ return len(toAnySlice(spaces)) == c.state["Indentation"].(int), nil }
 
 INDENT ← #{ c.state["Indentation"] = c.state["Indentation"].(int) + 4; return nil }
 

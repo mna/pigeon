@@ -532,12 +532,12 @@ func (s *Scanner) error(p ast.Pos, err error) {
 }
 
 // helper to generate and notify of an error.
-func (s *Scanner) errorf(f string, args ...interface{}) {
+func (s *Scanner) errorf(f string, args ...any) {
 	s.errorpf(s.cpos, f, args...)
 }
 
 // helper to generate and notify of an error at a specific position.
-func (s *Scanner) errorpf(p ast.Pos, f string, args ...interface{}) {
+func (s *Scanner) errorpf(p ast.Pos, f string, args ...any) {
 	s.error(p, fmt.Errorf(f, args...))
 }
 

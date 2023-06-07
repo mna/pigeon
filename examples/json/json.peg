@@ -6,11 +6,11 @@
 // [1]: http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
 package json
 
-func toIfaceSlice(v interface{}) []interface{} {
+func toAnySlice(v any) []any {
     if v == nil {
         return nil
     }
-    return v.([]interface{})
+    return v.([]any)
 }
 }
 
@@ -23,29 +23,29 @@ Value ← val:( Object / Array / Number / String / Bool / Null ) _ {
 }
 
 Object ← '{' _ vals:( String _ ':' _ Value ( ',' _ String _ ':' _ Value )* )? '}' {
-    res := make(map[string]interface{})
-    valsSl := toIfaceSlice(vals)
+    res := make(map[string]any)
+    valsSl := toAnySlice(vals)
     if len(valsSl) == 0 {
         return res, nil
     }
     res[valsSl[0].(string)] = valsSl[4]
-    restSl := toIfaceSlice(valsSl[5])
+    restSl := toAnySlice(valsSl[5])
     for _, v := range restSl {
-        vSl := toIfaceSlice(v)
+        vSl := toAnySlice(v)
         res[vSl[2].(string)] = vSl[6]
     }
     return res, nil
 }
 
 Array ← '[' _ vals:( Value ( ',' _ Value )* )? ']' {
-    valsSl := toIfaceSlice(vals)
+    valsSl := toAnySlice(vals)
     if len(valsSl) == 0 {
-        return []interface{}{}, nil
+        return []any{}, nil
     }
-    res := []interface{}{valsSl[0]}
-    restSl := toIfaceSlice(valsSl[1])
+    res := []any{valsSl[0]}
+    restSl := toAnySlice(valsSl[1])
     for _, v := range restSl {
-        vSl := toIfaceSlice(v)
+        vSl := toAnySlice(v)
         res = append(res, vSl[2])
     }
     return res, nil
