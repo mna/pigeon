@@ -77,6 +77,17 @@ func Optimize(optimize bool) Option {
 	}
 }
 
+// IgnoreLeftRecursion returns an option that specifies the ignoreLeftRecursion option
+// If ignoreLeftRecursion is true, errors associated
+// with the use of left recursion rules are ignored.
+func IgnoreLeftRecursion(ignore bool) Option {
+	return func(b *builder) Option {
+		prev := b.optimize
+		b.ignoreLeftRecursion = ignore
+		return IgnoreLeftRecursion(prev)
+	}
+}
+
 // Nolint returns an option that specifies the nolint option
 // If nolint is true, special '// nolint: ...' comments are added
 // to the generated parser to suppress warnings by gometalinter.
@@ -118,6 +129,7 @@ type builder struct {
 	basicLatinLookupTable bool
 	globalState           bool
 	nolint                bool
+	ignoreLeftRecursion   bool
 
 	ruleName  string
 	exprIndex int
@@ -132,11 +144,15 @@ func (b *builder) setOptions(opts []Option) {
 	}
 }
 
-func (b *builder) buildParser(g *ast.Grammar) error {
-	b.writeInit(g.Init)
-	b.writeGrammar(g)
-
-	for _, rule := range g.Rules {
+func (b *builder) buildParser(grammar *ast.Grammar) error {
+	if err := PrepareGramma(grammar); err != nil {
+		if !b.ignoreLeftRecursion {
+			return fmt.Errorf("uncorrect gramma: %w", err)
+		}
+	}
+	b.writeInit(grammar.Init)
+	b.writeGrammar(grammar)
+	for _, rule := range grammar.Rules {
 		b.writeRuleCode(rule)
 	}
 	b.writeStaticCode()
