@@ -20,12 +20,86 @@ import (
 var g = &grammar{
 	rules: []*rule{
 		{
-			name: "infinite_rule",
+			name: "long_rule1",
 			pos:  position{line: 6, col: 1, offset: 53},
 			expr: &ruleRefExpr{
-				pos:  position{line: 6, col: 17, offset: 69},
-				name: "infinite_rule",
+				pos:  position{line: 6, col: 14, offset: 66},
+				name: "long_rule2",
 			},
+			leader:        false,
+			leftRecursive: false,
+		},
+		{
+			name: "long_rule2",
+			pos:  position{line: 7, col: 1, offset: 77},
+			expr: &ruleRefExpr{
+				pos:  position{line: 7, col: 14, offset: 90},
+				name: "long_rule3",
+			},
+			leader:        false,
+			leftRecursive: false,
+		},
+		{
+			name: "long_rule3",
+			pos:  position{line: 8, col: 1, offset: 101},
+			expr: &ruleRefExpr{
+				pos:  position{line: 8, col: 14, offset: 114},
+				name: "long_rule4",
+			},
+			leader:        false,
+			leftRecursive: false,
+		},
+		{
+			name: "long_rule4",
+			pos:  position{line: 9, col: 1, offset: 125},
+			expr: &ruleRefExpr{
+				pos:  position{line: 9, col: 14, offset: 138},
+				name: "long_rule5",
+			},
+			leader:        false,
+			leftRecursive: false,
+		},
+		{
+			name: "long_rule5",
+			pos:  position{line: 10, col: 1, offset: 149},
+			expr: &ruleRefExpr{
+				pos:  position{line: 10, col: 14, offset: 162},
+				name: "long_rule6",
+			},
+			leader:        false,
+			leftRecursive: false,
+		},
+		{
+			name: "long_rule6",
+			pos:  position{line: 11, col: 1, offset: 173},
+			expr: &ruleRefExpr{
+				pos:  position{line: 11, col: 14, offset: 186},
+				name: "long_rule7",
+			},
+			leader:        false,
+			leftRecursive: false,
+		},
+		{
+			name: "long_rule7",
+			pos:  position{line: 12, col: 1, offset: 197},
+			expr: &ruleRefExpr{
+				pos:  position{line: 12, col: 14, offset: 210},
+				name: "long_rule8",
+			},
+			leader:        false,
+			leftRecursive: false,
+		},
+		{
+			name: "long_rule8",
+			pos:  position{line: 13, col: 1, offset: 221},
+			expr: &litMatcher{
+				pos:        position{line: 13, col: 14, offset: 234},
+				val:        " ",
+				ignoreCase: false,
+				want:       "\" \"",
+			},
+			leader:        false,
+			leftRecursive: false,
 		},
 	},
 }
@@ -267,6 +341,9 @@ type rule struct {
 	name        string
 	displayName string
 	expr        any
+
+	leader        bool
+	leftRecursive bool
 }
 
 // nolint: structcheck
@@ -610,14 +687,19 @@ func (p *parser) print(prefix, s string) string {
 	return s
 }
 
+func (p *parser) printIndent(mark string, s string) string {
+	return p.print(strings.Repeat(" ", p.depth)+mark, s)
+}
+
 func (p *parser) in(s string) string {
+	res := p.printIndent(">", s)
 	p.depth++
-	return p.print(strings.Repeat(" ", p.depth)+">", s)
+	return res
 }
 
 func (p *parser) out(s string) string {
 	p.depth--
-	return p.print(strings.Repeat(" ", p.depth)+"<", s)
+	return p.printIndent("<", s)
 }
 
 func (p *parser) addErr(err error) {
@@ -819,7 +901,7 @@ func (p *parser) parse(g *grammar) (val any, err error) {
 	}
 
 	p.read() // advance to first rune
-	val, ok = p.parseRule(startRule)
+	val, ok = p.parseRuleWrap(startRule)
 	if !ok {
 		if len(*p.errs) == 0 {
 			// If parsing fails, but no errors have been recorded, the expected values
@@ -860,37 +942,52 @@ func listJoin(list []string, sep string, lastSep string) string {
 	}
 }
 
-func (p *parser) parseRule(rule *rule) (any, bool) {
+func (p *parser) parseRuleMemoize(rule *rule) (any, bool) {
+	res, ok := p.getMemoized(rule)
+	if ok {
+		p.restore(res.end)
+		return res.v, res.b
+	}
+
+	startMark := p.pt
+	val, ok := p.parseRule(rule)
+	p.setMemoized(startMark, rule, resultTuple{val, ok, p.pt})
+
+	return val, ok
+}
+
+func (p *parser) parseRuleWrap(rule *rule) (any, bool) {
 	if p.debug {
 		defer p.out(p.in("parseRule " + rule.name))
 	}
+	var (
+		val       any
+		ok        bool
+		startMark = p.pt
+	)
 
 	if p.memoize {
-		res, ok := p.getMemoized(rule)
-		if ok {
-			p.restore(res.end)
-			return res.v, res.b
-		}
+		val, ok = p.parseRuleMemoize(rule)
+	} else {
+		val, ok = p.parseRule(rule)
 	}
 
-	start := p.pt
-	p.rstack = append(p.rstack, rule)
-	p.pushV()
-	val, ok := p.parseExpr(rule.expr)
-	p.popV()
-	p.rstack = p.rstack[:len(p.rstack)-1]
 	if ok && p.debug {
-		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
-	}
-
-	if p.memoize {
-		p.setMemoized(start, rule, resultTuple{val, ok, p.pt})
+		p.printIndent("MATCH", string(p.sliceFrom(startMark)))
 	}
 	return val, ok
 }
 
-// nolint: gocyclo
-func (p *parser) parseExpr(expr any) (any, bool) {
+func (p *parser) parseRule(rule *rule) (any, bool) {
+	p.rstack = append(p.rstack, rule)
+	p.pushV()
+	val, ok := p.parseExprWrap(rule.expr)
+	p.popV()
+	p.rstack = p.rstack[:len(p.rstack)-1]
+	return val, ok
+}
+
+func (p *parser) parseExprWrap(expr any) (any, bool) {
 	var pt savepoint
 
 	if p.memoize {
@@ -902,6 +999,16 @@ func (p *parser) parseExpr(expr any) (any, bool) {
 		pt = p.pt
 	}
 
+	val, ok := p.parseExpr(expr)
+
+	if p.memoize {
+		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
+	}
+	return val, ok
+}
+
+// nolint: gocyclo
+func (p *parser) parseExpr(expr any) (any, bool) {
 	p.ExprCnt++
 	if p.ExprCnt > p.maxExprCnt {
 		panic(errMaxExprCnt)
@@ -949,9 +1056,6 @@ func (p *parser) parseExpr(expr any) (any, bool) {
 	default:
 		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
-	if p.memoize {
-		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
-	}
 	return val, ok
 }
 
@@ -961,7 +1065,7 @@ func (p *parser) parseActionExpr(act *actionExpr) (any, bool) {
 	}
 
 	start := p.pt
-	val, ok := p.parseExpr(act.expr)
+	val, ok := p.parseExprWrap(act.expr)
 	if ok {
 		p.cur.pos = start.position
 		p.cur.text = p.sliceFrom(start)
@@ -975,7 +1079,7 @@ func (p *parser) parseActionExpr(act *actionExpr) (any, bool) {
 		val = actVal
 	}
 	if ok && p.debug {
-		p.print(strings.Repeat(" ", p.depth)+"MATCH", string(p.sliceFrom(start)))
+		p.printIndent("MATCH", string(p.sliceFrom(start)))
 	}
 	return val, ok
 }
@@ -1004,7 +1108,7 @@ func (p *parser) parseAndExpr(and *andExpr) (any, bool) {
 	pt := p.pt
 	state := p.cloneState()
 	p.pushV()
-	_, ok := p.parseExpr(and.expr)
+	_, ok := p.parseExprWrap(and.expr)
 	p.popV()
 	p.restoreState(state)
 	p.restore(pt)
@@ -1122,7 +1226,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (any, bool) {
 		state := p.cloneState()
 
 		p.pushV()
-		val, ok := p.parseExpr(alt)
+		val, ok := p.parseExprWrap(alt)
 		p.popV()
 		if ok {
 			p.incChoiceAltCnt(ch, altI)
@@ -1140,7 +1244,7 @@ func (p *parser) parseLabeledExpr(lab *labeledExpr) (any, bool) {
 	}
 
 	p.pushV()
-	val, ok := p.parseExpr(lab.expr)
+	val, ok := p.parseExprWrap(lab.expr)
 	p.popV()
 	if ok && lab.label != "" {
 		m := p.vstack[len(p.vstack)-1]
@@ -1196,7 +1300,7 @@ func (p *parser) parseNotExpr(not *notExpr) (any, bool) {
 	state := p.cloneState()
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
-	_, ok := p.parseExpr(not.expr)
+	_, ok := p.parseExprWrap(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
 	p.restoreState(state)
@@ -1214,7 +1318,7 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (any, bool) {
 
 	for {
 		p.pushV()
-		val, ok := p.parseExpr(expr.expr)
+		val, ok := p.parseExprWrap(expr.expr)
 		p.popV()
 		if !ok {
 			if len(vals) == 0 {
@@ -1233,7 +1337,7 @@ func (p *parser) parseRecoveryExpr(recover *recoveryExpr) (any, bool) {
 	}
 
 	p.pushRecovery(recover.failureLabel, recover.recoverExpr)
-	val, ok := p.parseExpr(recover.expr)
+	val, ok := p.parseExprWrap(recover.expr)
 	p.popRecovery()
 
 	return val, ok
@@ -1253,7 +1357,7 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (any, bool) {
 		p.addErr(fmt.Errorf("undefined rule: %s", ref.name))
 		return nil, false
 	}
-	return p.parseRule(rule)
+	return p.parseRuleWrap(rule)
 }
 
 func (p *parser) parseSeqExpr(seq *seqExpr) (any, bool) {
@@ -1266,7 +1370,7 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (any, bool) {
 	pt := p.pt
 	state := p.cloneState()
 	for _, expr := range seq.exprs {
-		val, ok := p.parseExpr(expr)
+		val, ok := p.parseExprWrap(expr)
 		if !ok {
 			p.restoreState(state)
 			p.restore(pt)
@@ -1296,7 +1400,7 @@ func (p *parser) parseThrowExpr(expr *throwExpr) (any, bool) {
 
 	for i := len(p.recoveryStack) - 1; i >= 0; i-- {
 		if recoverExpr, ok := p.recoveryStack[i][expr.label]; ok {
-			if val, ok := p.parseExpr(recoverExpr); ok {
+			if val, ok := p.parseExprWrap(recoverExpr); ok {
 				return val, ok
 			}
 		}
@@ -1314,7 +1418,7 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (any, bool) {
 
 	for {
 		p.pushV()
-		val, ok := p.parseExpr(expr.expr)
+		val, ok := p.parseExprWrap(expr.expr)
 		p.popV()
 		if !ok {
 			return vals, true
@@ -1329,7 +1433,7 @@ func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (any, bool) {
 	}
 
 	p.pushV()
-	val, _ := p.parseExpr(expr.expr)
+	val, _ := p.parseExprWrap(expr.expr)
 	p.popV()
 	// whether it matched or not, consider it a match
 	return val, true

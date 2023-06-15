@@ -15,27 +15,18 @@ var (
 	ErrHaveLeftRecirsion = errors.New("have left recursion")
 )
 
-// PrepareGramma evaluates parameters associated with left recursion
-func PrepareGramma(grammar *ast.Grammar) error {
+// PrepareGrammar evaluates parameters associated with left recursion
+func PrepareGrammar(grammar *ast.Grammar) (bool, error) {
 	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
 	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
 	ComputeNullables(mapRules)
-	if err := ComputeLeftRecursives(mapRules); err != nil {
-		return fmt.Errorf("error compute left recursive: %w", err)
+	haveLeftRecursion, err := ComputeLeftRecursives(mapRules)
+	if err != nil {
+		return false, fmt.Errorf("error compute left recursive: %w", err)
 	}
-	rulesWithLeftRecursion := []string{}
-	for _, rule := range grammar.Rules {
-		if rule.LeftRecursive {
-			rulesWithLeftRecursion = append(rulesWithLeftRecursion, rule.Name.Val)
-		}
-	}
-	if len(rulesWithLeftRecursion) > 0 {
-		return fmt.Errorf("%w: %v", ErrHaveLeftRecirsion, rulesWithLeftRecursion)
-	}
-
-	return nil
+	return haveLeftRecursion, nil
 }
 
 // ComputeNullables evaluates nullable nodes
@@ -80,9 +71,10 @@ func findLeader(
 }
 
 // ComputeLeftRecursives evaluates left recursion
-func ComputeLeftRecursives(rules map[string]*ast.Rule) error {
+func ComputeLeftRecursives(rules map[string]*ast.Rule) (bool, error) {
 	graph := MakeFirstGraph(rules)
 	vertices := make([]string, 0, len(graph))
+	haveLeftRecursion := false
 	for k := range graph {
 		vertices = append(vertices, k)
 	}
@@ -91,10 +83,11 @@ func ComputeLeftRecursives(rules map[string]*ast.Rule) error {
 		if len(scc) > 1 {
 			for name := range scc {
 				rules[name].LeftRecursive = true
+				haveLeftRecursion = true
 			}
 			leader, err := findLeader(graph, scc)
 			if err != nil {
-				return fmt.Errorf("error find leader %v: %w", scc, err)
+				return false, fmt.Errorf("error find leader %v: %w", scc, err)
 			}
 			rules[leader].Leader = true
 		} else {
@@ -106,10 +99,11 @@ func ComputeLeftRecursives(rules map[string]*ast.Rule) error {
 			if _, ok := graph[name][name]; ok {
 				rules[name].LeftRecursive = true
 				rules[name].Leader = true
+				haveLeftRecursion = true
 			}
 		}
 	}
-	return nil
+	return haveLeftRecursion, nil
 }
 
 // MakeFirstGraph compute the graph of left-invocations.

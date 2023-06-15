@@ -58,6 +58,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "Value",
@@ -108,6 +110,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "Object",
@@ -211,6 +215,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "Array",
@@ -278,6 +284,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "Number",
@@ -332,6 +340,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "Integer",
@@ -363,6 +373,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "Exponent",
@@ -396,6 +408,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "String",
@@ -459,6 +473,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "EscapedChar",
@@ -472,6 +488,8 @@ var g = &grammar{
 				ignoreCase:      false,
 				inverted:        false,
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "EscapeSequence",
@@ -489,6 +507,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "SingleCharEscape",
@@ -501,6 +521,8 @@ var g = &grammar{
 				ignoreCase:      false,
 				inverted:        false,
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "UnicodeEscape",
@@ -532,6 +554,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "DecimalDigit",
@@ -544,6 +568,8 @@ var g = &grammar{
 				ignoreCase:      false,
 				inverted:        false,
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "NonZeroDecimalDigit",
@@ -556,6 +582,8 @@ var g = &grammar{
 				ignoreCase:      false,
 				inverted:        false,
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "HexDigit",
@@ -568,6 +596,8 @@ var g = &grammar{
 				ignoreCase:      true,
 				inverted:        false,
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "Bool",
@@ -597,6 +627,8 @@ var g = &grammar{
 					},
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "Null",
@@ -611,6 +643,8 @@ var g = &grammar{
 					want:       "\"null\"",
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name:        "_",
@@ -627,6 +661,8 @@ var g = &grammar{
 					inverted:        false,
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -637,6 +673,8 @@ var g = &grammar{
 					line: 89, col: 8, offset: 2077,
 				},
 			},
+			leader:        false,
+			leftRecursive: false,
 		},
 	},
 }
@@ -921,6 +959,9 @@ type rule struct {
 	name        string
 	displayName string
 	expr        any
+
+	leader        bool
+	leftRecursive bool
 }
 
 // nolint: structcheck
@@ -1361,7 +1402,7 @@ func (p *parser) parse(g *grammar) (val any, err error) {
 	}
 
 	p.read() // advance to first rune
-	val, ok = p.parseRule(startRule)
+	val, ok = p.parseRuleWrap(startRule)
 	if !ok {
 		if len(*p.errs) == 0 {
 			// If parsing fails, but no errors have been recorded, the expected values
@@ -1402,18 +1443,34 @@ func listJoin(list []string, sep string, lastSep string) string {
 	}
 }
 
+func (p *parser) parseRuleWrap(rule *rule) (any, bool) {
+	var (
+		val any
+		ok  bool
+	)
+
+	val, ok = p.parseRule(rule)
+
+	return val, ok
+}
+
 func (p *parser) parseRule(rule *rule) (any, bool) {
 	p.rstack = append(p.rstack, rule)
 	p.pushV()
-	val, ok := p.parseExpr(rule.expr)
+	val, ok := p.parseExprWrap(rule.expr)
 	p.popV()
 	p.rstack = p.rstack[:len(p.rstack)-1]
 	return val, ok
 }
 
+func (p *parser) parseExprWrap(expr any) (any, bool) {
+	val, ok := p.parseExpr(expr)
+
+	return val, ok
+}
+
 // nolint: gocyclo
 func (p *parser) parseExpr(expr any) (any, bool) {
-
 	p.ExprCnt++
 	if p.ExprCnt > p.maxExprCnt {
 		panic(errMaxExprCnt)
@@ -1464,7 +1521,7 @@ func (p *parser) parseExpr(expr any) (any, bool) {
 
 func (p *parser) parseActionExpr(act *actionExpr) (any, bool) {
 	start := p.pt
-	val, ok := p.parseExpr(act.expr)
+	val, ok := p.parseExprWrap(act.expr)
 	if ok {
 		p.cur.pos = start.position
 		p.cur.text = p.sliceFrom(start)
@@ -1491,7 +1548,7 @@ func (p *parser) parseAndCodeExpr(and *andCodeExpr) (any, bool) {
 func (p *parser) parseAndExpr(and *andExpr) (any, bool) {
 	pt := p.pt
 	p.pushV()
-	_, ok := p.parseExpr(and.expr)
+	_, ok := p.parseExprWrap(and.expr)
 	p.popV()
 	p.restore(pt)
 
@@ -1589,7 +1646,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (any, bool) {
 		_ = altI
 
 		p.pushV()
-		val, ok := p.parseExpr(alt)
+		val, ok := p.parseExprWrap(alt)
 		p.popV()
 		if ok {
 			return val, ok
@@ -1600,7 +1657,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (any, bool) {
 
 func (p *parser) parseLabeledExpr(lab *labeledExpr) (any, bool) {
 	p.pushV()
-	val, ok := p.parseExpr(lab.expr)
+	val, ok := p.parseExprWrap(lab.expr)
 	p.popV()
 	if ok && lab.label != "" {
 		m := p.vstack[len(p.vstack)-1]
@@ -1640,7 +1697,7 @@ func (p *parser) parseNotExpr(not *notExpr) (any, bool) {
 	pt := p.pt
 	p.pushV()
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
-	_, ok := p.parseExpr(not.expr)
+	_, ok := p.parseExprWrap(not.expr)
 	p.maxFailInvertExpected = !p.maxFailInvertExpected
 	p.popV()
 	p.restore(pt)
@@ -1653,7 +1710,7 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (any, bool) {
 
 	for {
 		p.pushV()
-		val, ok := p.parseExpr(expr.expr)
+		val, ok := p.parseExprWrap(expr.expr)
 		p.popV()
 		if !ok {
 			if len(vals) == 0 {
@@ -1669,7 +1726,7 @@ func (p *parser) parseOneOrMoreExpr(expr *oneOrMoreExpr) (any, bool) {
 func (p *parser) parseRecoveryExpr(recover *recoveryExpr) (any, bool) {
 
 	p.pushRecovery(recover.failureLabel, recover.recoverExpr)
-	val, ok := p.parseExpr(recover.expr)
+	val, ok := p.parseExprWrap(recover.expr)
 	p.popRecovery()
 
 	return val, ok
@@ -1685,7 +1742,7 @@ func (p *parser) parseRuleRefExpr(ref *ruleRefExpr) (any, bool) {
 		p.addErr(fmt.Errorf("undefined rule: %s", ref.name))
 		return nil, false
 	}
-	return p.parseRule(rule)
+	return p.parseRuleWrap(rule)
 }
 
 func (p *parser) parseSeqExpr(seq *seqExpr) (any, bool) {
@@ -1693,7 +1750,7 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (any, bool) {
 
 	pt := p.pt
 	for _, expr := range seq.exprs {
-		val, ok := p.parseExpr(expr)
+		val, ok := p.parseExprWrap(expr)
 		if !ok {
 			p.restore(pt)
 			return nil, false
@@ -1707,7 +1764,7 @@ func (p *parser) parseThrowExpr(expr *throwExpr) (any, bool) {
 
 	for i := len(p.recoveryStack) - 1; i >= 0; i-- {
 		if recoverExpr, ok := p.recoveryStack[i][expr.label]; ok {
-			if val, ok := p.parseExpr(recoverExpr); ok {
+			if val, ok := p.parseExprWrap(recoverExpr); ok {
 				return val, ok
 			}
 		}
@@ -1721,7 +1778,7 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (any, bool) {
 
 	for {
 		p.pushV()
-		val, ok := p.parseExpr(expr.expr)
+		val, ok := p.parseExprWrap(expr.expr)
 		p.popV()
 		if !ok {
 			return vals, true
@@ -1732,7 +1789,7 @@ func (p *parser) parseZeroOrMoreExpr(expr *zeroOrMoreExpr) (any, bool) {
 
 func (p *parser) parseZeroOrOneExpr(expr *zeroOrOneExpr) (any, bool) {
 	p.pushV()
-	val, _ := p.parseExpr(expr.expr)
+	val, _ := p.parseExprWrap(expr.expr)
 	p.popV()
 	// whether it matched or not, consider it a match
 	return val, true

@@ -48,7 +48,7 @@ func main() {
 		outputFlag             = fs.String("o", "", "output file, defaults to stdout")
 		optimizeBasicLatinFlag = fs.Bool("optimize-basic-latin", false, "generate optimized parser for Unicode Basic Latin character sets")
 		optimizeGrammar        = fs.Bool("optimize-grammar", false, "optimize the given grammar (EXPERIMENTAL FEATURE)")
-		ignoreLeftRecursion    = fs.Bool("ignore-left-recursion", false, "ignore errors related to left recursion")
+		supportLeftRecursion   = fs.Bool("support-left-recursion", false, "add support left recursion")
 		optimizeParserFlag     = fs.Bool("optimize-parser", false, "generate optimized parser without Debug and Memoize options")
 		recvrNmFlag            = fs.String("receiver-name", "c", "receiver name for the generated methods")
 		noBuildFlag            = fs.Bool("x", false, "do not build, only parse")
@@ -137,10 +137,10 @@ func main() {
 		optimizeParser := builder.Optimize(*optimizeParserFlag)
 		basicLatinOptimize := builder.BasicLatinLookupTable(*optimizeBasicLatinFlag)
 		nolintOpt := builder.Nolint(*nolint)
-		leftRecursionIgnorer := builder.IgnoreLeftRecursion(*ignoreLeftRecursion)
+		leftRecursionSupporter := builder.SupportLeftRecursion(*supportLeftRecursion)
 		if err := builder.BuildParser(
 			outBuf, grammar, curNmOpt, optimizeParser, basicLatinOptimize,
-			nolintOpt, leftRecursionIgnorer); err != nil {
+			nolintOpt, leftRecursionSupporter); err != nil {
 			fmt.Fprintln(os.Stderr, "build error: ", err)
 			exit(5)
 		}

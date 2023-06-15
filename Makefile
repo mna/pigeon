@@ -116,7 +116,7 @@ $(TEST_DIR)/goto_state/goto_state.go: $(TEST_DIR)/goto_state/goto_state.peg $(BI
 	$(BINDIR)/pigeon -nolint $< > $@
 
 $(TEST_DIR)/max_expr_cnt/maxexpr.go: $(TEST_DIR)/max_expr_cnt/maxexpr.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon -nolint -ignore-left-recursion $< > $@
+	$(BINDIR)/pigeon -nolint $< > $@
 
 $(TEST_DIR)/labeled_failures/labeled_failures.go: $(TEST_DIR)/labeled_failures/labeled_failures.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint $< > $@
@@ -167,10 +167,13 @@ $(TEST_DIR)/issue_70/optimized-grammar/issue_70.go: $(TEST_DIR)/issue_70/issue_7
 	$(BINDIR)/pigeon -nolint -optimize-grammar $< > $@
 
 $(TEST_DIR)/issue_70b/issue_70b.go: $(TEST_DIR)/issue_70b/issue_70b.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon -nolint --optimize-grammar -ignore-left-recursion $< > $@
+	$(BINDIR)/pigeon -nolint -optimize-grammar -support-left-recursion $< > $@
 
 $(TEST_DIR)/issue_80/issue_80.go: $(TEST_DIR)/issue_80/issue_80.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint $< > $@
+
+$(TEST_DIR)/left_recursion/left_recursion.go: $(TEST_DIR)/left_recursion/left_recursion.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint -support-left-recursion $< > $@
 
 lint:
 	golint ./...

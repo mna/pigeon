@@ -13,7 +13,7 @@ import (
 
 func TestLeftRrecursive(t *testing.T) {
 	t.Parallel()
-	grammar := `
+	text := `
 	start = expr NEWLINE
     expr = ('-' term / expr '+' term / term)
     term = NUMBER
@@ -22,12 +22,13 @@ func TestLeftRrecursive(t *testing.T) {
     baz = NAME?
 	`
 	p := bootstrap.NewParser()
-	g, err := p.Parse("", strings.NewReader(grammar))
+	grammar, err := p.Parse("", strings.NewReader(text))
 	require.NoError(t, err)
-	err = builder.PrepareGramma(g)
-	require.ErrorIs(t, err, builder.ErrHaveLeftRecirsion)
-	mapRules := make(map[string]*ast.Rule, len(g.Rules))
-	for _, rule := range g.Rules {
+	haveLeftRecursion, err := builder.PrepareGrammar(grammar)
+	require.NoError(t, err)
+	require.True(t, haveLeftRecursion)
+	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
+	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
 	assert.False(t, mapRules["start"].LeftRecursive)
@@ -40,17 +41,18 @@ func TestLeftRrecursive(t *testing.T) {
 
 func TestNullable(t *testing.T) {
 	t.Parallel()
-	grammar := `
+	text := `
 	start = sign NUMBER
     sign = ('-' / '+')?
 	`
 	p := bootstrap.NewParser()
-	g, err := p.Parse("", strings.NewReader(grammar))
+	grammar, err := p.Parse("", strings.NewReader(text))
 	require.NoError(t, err)
-	err = builder.PrepareGramma(g)
+	haveLeftRecursion, err := builder.PrepareGrammar(grammar)
 	require.NoError(t, err)
-	mapRules := make(map[string]*ast.Rule, len(g.Rules))
-	for _, rule := range g.Rules {
+	require.False(t, haveLeftRecursion)
+	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
+	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
 	assert.False(t, mapRules["start"].Nullable)
@@ -59,17 +61,18 @@ func TestNullable(t *testing.T) {
 
 func TestAdvancedLeftRrecursive(t *testing.T) {
 	t.Parallel()
-	grammar := `
+	text := `
 	start = NUMBER / sign start
     sign = '-'?
 	`
 	p := bootstrap.NewParser()
-	g, err := p.Parse("", strings.NewReader(grammar))
+	grammar, err := p.Parse("", strings.NewReader(text))
 	require.NoError(t, err)
-	err = builder.PrepareGramma(g)
-	require.ErrorIs(t, err, builder.ErrHaveLeftRecirsion)
-	mapRules := make(map[string]*ast.Rule, len(g.Rules))
-	for _, rule := range g.Rules {
+	haveLeftRecursion, err := builder.PrepareGrammar(grammar)
+	require.NoError(t, err)
+	require.True(t, haveLeftRecursion)
+	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
+	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
 	assert.False(t, mapRules["start"].Nullable)
@@ -80,18 +83,19 @@ func TestAdvancedLeftRrecursive(t *testing.T) {
 
 func TestMutuallyLeftRrecursive(t *testing.T) {
 	t.Parallel()
-	grammar := `
+	text := `
 	start = foo 'E'
     foo = bar 'A' / 'B'
     bar = foo 'C' / 'D'
 	`
 	p := bootstrap.NewParser()
-	g, err := p.Parse("", strings.NewReader(grammar))
+	grammar, err := p.Parse("", strings.NewReader(text))
 	require.NoError(t, err)
-	err = builder.PrepareGramma(g)
-	require.ErrorIs(t, err, builder.ErrHaveLeftRecirsion)
-	mapRules := make(map[string]*ast.Rule, len(g.Rules))
-	for _, rule := range g.Rules {
+	haveLeftRecursion, err := builder.PrepareGrammar(grammar)
+	require.NoError(t, err)
+	require.True(t, haveLeftRecursion)
+	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
+	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
 	assert.False(t, mapRules["start"].LeftRecursive)
@@ -101,18 +105,19 @@ func TestMutuallyLeftRrecursive(t *testing.T) {
 
 func TestNastyMutuallyLeftRrecursive(t *testing.T) {
 	t.Parallel()
-	grammar := `
+	text := `
 	start = target '='
     target = maybe '+' / NAME
     maybe = maybe '-' / target
 	`
 	p := bootstrap.NewParser()
-	g, err := p.Parse("", strings.NewReader(grammar))
+	grammar, err := p.Parse("", strings.NewReader(text))
 	require.NoError(t, err)
-	err = builder.PrepareGramma(g)
-	require.ErrorIs(t, err, builder.ErrHaveLeftRecirsion)
-	mapRules := make(map[string]*ast.Rule, len(g.Rules))
-	for _, rule := range g.Rules {
+	haveLeftRecursion, err := builder.PrepareGrammar(grammar)
+	require.NoError(t, err)
+	require.True(t, haveLeftRecursion)
+	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
+	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
 	assert.False(t, mapRules["start"].LeftRecursive)
@@ -122,15 +127,15 @@ func TestNastyMutuallyLeftRrecursive(t *testing.T) {
 
 func TestLeftRecursionTooComplex(t *testing.T) {
 	t.Parallel()
-	grammar := `
+	text := `
 	start = foo
     foo = bar '+' / baz '+' / '+'
     bar = baz '-' / foo '-' / '-'
     baz = foo '*' / bar '*' / '*'
 	`
 	p := bootstrap.NewParser()
-	g, err := p.Parse("", strings.NewReader(grammar))
+	grammar, err := p.Parse("", strings.NewReader(text))
 	require.NoError(t, err)
-	err = builder.PrepareGramma(g)
+	_, err = builder.PrepareGrammar(grammar)
 	require.ErrorIs(t, err, builder.ErrNoLeader)
 }
