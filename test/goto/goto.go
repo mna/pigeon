@@ -895,6 +895,11 @@ type Stats struct {
 	ChoiceAltCnt map[string]map[string]int
 }
 
+type ruleWithExpsStack struct {
+	rule   *rule
+	estack []any
+}
+
 // nolint: structcheck,maligned
 type parser struct {
 	filename string
@@ -918,7 +923,7 @@ type parser struct {
 	// variables stack, map of label to value
 	vstack []map[string]any
 	// rule stack, allows identification of the current rule in errors
-	rstack []*rule
+	rstack []ruleWithExpsStack
 
 	// parse fail
 	maxFailPos            position
@@ -969,6 +974,30 @@ func (p *parser) popV() {
 		p.vstack[len(p.vstack)-1] = nil
 	}
 	p.vstack = p.vstack[:len(p.vstack)-1]
+}
+
+func (p *parser) pushRule(rule *rule) {
+	p.rstack = append(p.rstack, ruleWithExpsStack{rule, []any{}})
+}
+
+func (p *parser) popRule() {
+	p.rstack = p.rstack[:len(p.rstack)-1]
+}
+
+func (p *parser) pushExpr(expr any) {
+	if len(p.rstack) == 0 {
+		return
+	}
+	p.rstack[len(p.rstack)-1].estack = append(
+		p.rstack[len(p.rstack)-1].estack, expr)
+}
+
+func (p *parser) popExpr() {
+	if len(p.rstack) == 0 {
+		return
+	}
+	p.rstack[len(p.rstack)-1].estack = p.rstack[len(p.rstack)-1].estack[:len(
+		p.rstack[len(p.rstack)-1].estack)-1]
 }
 
 // push a recovery expression with its labels to the recoveryStack
@@ -1038,7 +1067,7 @@ func (p *parser) addErrAt(err error, pos position, expected []string) {
 		if buf.Len() > 0 {
 			buf.WriteString(": ")
 		}
-		rule := p.rstack[len(p.rstack)-1]
+		rule := p.rstack[len(p.rstack)-1].rule
 		if rule.displayName != "" {
 			buf.WriteString("rule " + rule.displayName)
 		} else {
@@ -1298,11 +1327,11 @@ func (p *parser) parseRuleWrap(rule *rule) (any, bool) {
 }
 
 func (p *parser) parseRule(rule *rule) (any, bool) {
-	p.rstack = append(p.rstack, rule)
+	p.pushRule(rule)
 	p.pushV()
 	val, ok := p.parseExprWrap(rule.expr)
 	p.popV()
-	p.rstack = p.rstack[:len(p.rstack)-1]
+	p.popRule()
 	return val, ok
 }
 
@@ -1333,6 +1362,7 @@ func (p *parser) parseExpr(expr any) (any, bool) {
 		panic(errMaxExprCnt)
 	}
 
+	p.pushExpr(expr)
 	var val any
 	var ok bool
 	switch expr := expr.(type) {
@@ -1375,6 +1405,7 @@ func (p *parser) parseExpr(expr any) (any, bool) {
 	default:
 		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
+	p.popExpr()
 	return val, ok
 }
 
@@ -1519,7 +1550,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (any, bool) {
 }
 
 func (p *parser) incChoiceAltCnt(ch *choiceExpr, altI int) {
-	choiceIdent := fmt.Sprintf("%s %d:%d", p.rstack[len(p.rstack)-1].name, ch.pos.line, ch.pos.col)
+	choiceIdent := fmt.Sprintf("%s %d:%d", p.rstack[len(p.rstack)-1].rule.name, ch.pos.line, ch.pos.col)
 	m := p.ChoiceAltCnt[choiceIdent]
 	if m == nil {
 		m = make(map[string]int)

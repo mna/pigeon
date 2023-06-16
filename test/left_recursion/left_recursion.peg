@@ -1,32 +1,25 @@
 {
   package leftrecursion
 }
-start = a:sum !. {
-    return a, nil
+
+start = a:expr !. {
+	return a, nil
 }
-sum = a:sum op:('+'/'-') b:term {
+expr = '-' a:expr {
+    strA := a.(string)
+    return "(" + "-" + strA + ")", nil
+} / a:expr op:('*'/'/'/'%') b:expr {
+    strA := a.(string)
+    strB := b.(string)
+    strOp := string(op.([]byte))
+    return "(" + strA + strOp + strB + ")", nil 
+} / a:expr op:('+'/'-') b:expr {
     strA := a.(string)
     strB := b.(string)
     strOp := string(op.([]byte))
     return "(" + strA + strOp + strB + ")", nil
-} / a:term {
-    return a, nil
-}
-term = a:term op:('*'/'/'/'%') b:factor {
-    strA := a.(string)
-    strB := b.(string)
-    strOp := string(op.([]byte))
-    return "(" + strA + strOp + strB + ")", nil
-} / a:factor {
-    return a, nil
-}
-factor = op:('+'/'-') a:factor {
-    strA := a.(string)
-    strOp := string(op.([]byte))
-    return "(" + strOp + strA + ")", nil
-} / a:atom {
-    return a, nil
-}
-atom = [0-9]+ {
+} / term {
     return string(c.text), nil
 }
+
+term = [0-9]+
