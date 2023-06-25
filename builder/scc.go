@@ -10,7 +10,7 @@ func min(a1 int, a2 int) int {
 }
 
 // StronglyConnectedComponents compute strongly сonnected сomponents of a graph.
-// Tarjan's strongly connected components algorithm
+// Tarjan's strongly connected components algorithm.
 func StronglyConnectedComponents(
 	vertices []string, edges map[string]map[string]bool,
 ) []map[string]bool {

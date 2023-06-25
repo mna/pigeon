@@ -62,8 +62,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Statements",
@@ -83,8 +81,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Line",
@@ -110,8 +106,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ReturnOp",
@@ -147,8 +141,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Statement",
@@ -239,8 +231,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Assignment",
@@ -290,8 +280,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "LogicalExpression",
@@ -308,8 +296,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "AdditiveExpression",
@@ -359,8 +345,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "PrimaryExpression",
@@ -386,8 +370,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Integer",
@@ -406,8 +388,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Identifier",
@@ -438,8 +418,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "AddOp",
@@ -465,8 +443,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "_",
@@ -481,8 +457,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOL",
@@ -539,8 +513,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Comment",
@@ -566,8 +538,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -578,8 +548,6 @@ var g = &grammar{
 					line: 44, col: 8, offset: 1832,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "INDENTATION",
@@ -606,8 +574,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "INDENT",
@@ -616,8 +582,6 @@ var g = &grammar{
 				pos: position{line: 48, col: 10, offset: 1948},
 				run: (*parser).callonINDENT1,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "DEDENT",
@@ -626,8 +590,6 @@ var g = &grammar{
 				pos: position{line: 50, col: 10, offset: 2035},
 				run: (*parser).callonDEDENT1,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

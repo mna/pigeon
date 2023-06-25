@@ -58,17 +58,17 @@ func (g *Grammar) String() string {
 	return buf.String()
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (g *Grammar) NullableVisit(rules map[string]*Rule) bool {
 	panic("NullableVisit should not be called on the Grammar")
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (g *Grammar) IsNullable() bool {
 	panic("IsNullable should not be called on the Grammar")
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (g *Grammar) InitialNames() map[string]bool {
 	panic("InitialNames should not be called on the Grammar")
 }
@@ -81,7 +81,7 @@ type Rule struct {
 	DisplayName *StringLit
 	Expr        Expression
 
-	// for work with left recursion
+	// Fields below to work with left recursion.
 	Visited       bool
 	Nullable      bool
 	LeftRecursive bool
@@ -105,7 +105,7 @@ func (r *Rule) String() string {
 		r.p, r, r.Name, r.DisplayName, r.Expr)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (r *Rule) NullableVisit(rules map[string]*Rule) bool {
 	if r.Visited {
 		// A left-recursive rule is considered non-nullable.
@@ -116,12 +116,12 @@ func (r *Rule) NullableVisit(rules map[string]*Rule) bool {
 	return r.Nullable
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (r *Rule) IsNullable() bool {
 	return r.Nullable
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (r *Rule) InitialNames() map[string]bool {
 	return r.Expr.InitialNames()
 }
@@ -168,7 +168,7 @@ func (c *ChoiceExpr) String() string {
 	return buf.String()
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (c *ChoiceExpr) NullableVisit(rules map[string]*Rule) bool {
 	for _, alt := range c.Alternatives {
 		if alt.NullableVisit(rules) {
@@ -180,12 +180,12 @@ func (c *ChoiceExpr) NullableVisit(rules map[string]*Rule) bool {
 	return false
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (c *ChoiceExpr) IsNullable() bool {
 	return c.Nullable
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (c *ChoiceExpr) InitialNames() map[string]bool {
 	names := make(map[string]bool)
 	for _, alt := range c.Alternatives {
@@ -196,7 +196,7 @@ func (c *ChoiceExpr) InitialNames() map[string]bool {
 	return names
 }
 
-// FailureLabel is an identifier, which can by thrown and recovered in a grammar
+// FailureLabel is an identifier, which can by thrown and recovered in a grammar.
 type FailureLabel string
 
 // RecoveryExpr is an ordered sequence of expressions. The parser tries to
@@ -234,18 +234,18 @@ func (r *RecoveryExpr) String() string {
 	return buf.String()
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (r *RecoveryExpr) NullableVisit(rules map[string]*Rule) bool {
 	r.Nullable = r.Expr.NullableVisit(rules) || r.RecoverExpr.NullableVisit(rules)
 	return r.Nullable
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (r *RecoveryExpr) IsNullable() bool {
 	return r.Nullable
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (r *RecoveryExpr) InitialNames() map[string]bool {
 	names := make(map[string]bool)
 	for name := range r.Expr.InitialNames() {
@@ -283,18 +283,18 @@ func (a *ActionExpr) String() string {
 	return fmt.Sprintf("%s: %T{Expr: %v, Code: %v}", a.p, a, a.Expr, a.Code)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (a *ActionExpr) NullableVisit(rules map[string]*Rule) bool {
 	a.Nullable = a.Expr.NullableVisit(rules)
 	return a.Nullable
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (a *ActionExpr) IsNullable() bool {
 	return a.Nullable
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (a *ActionExpr) InitialNames() map[string]bool {
 	names := make(map[string]bool)
 	for name := range a.Expr.InitialNames() {
@@ -325,17 +325,17 @@ func (t *ThrowExpr) String() string {
 	return fmt.Sprintf("%s: %T{Label: %v}", t.p, t, t.Label)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (t *ThrowExpr) NullableVisit(rules map[string]*Rule) bool {
 	return true
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (t *ThrowExpr) IsNullable() bool {
 	return true
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (t *ThrowExpr) InitialNames() map[string]bool {
 	return make(map[string]bool)
 }
@@ -371,7 +371,7 @@ func (s *SeqExpr) String() string {
 	return buf.String()
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (s *SeqExpr) NullableVisit(rules map[string]*Rule) bool {
 	for _, item := range s.Exprs {
 		if !item.NullableVisit(rules) {
@@ -383,12 +383,12 @@ func (s *SeqExpr) NullableVisit(rules map[string]*Rule) bool {
 	return true
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (s *SeqExpr) IsNullable() bool {
 	return s.Nullable
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (s *SeqExpr) InitialNames() map[string]bool {
 	names := make(map[string]bool)
 	for _, item := range s.Exprs {
@@ -426,17 +426,17 @@ func (l *LabeledExpr) String() string {
 	return fmt.Sprintf("%s: %T{Label: %v, Expr: %v}", l.p, l, l.Label, l.Expr)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (l *LabeledExpr) NullableVisit(rules map[string]*Rule) bool {
 	return l.Expr.NullableVisit(rules)
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (l *LabeledExpr) IsNullable() bool {
 	return l.Expr.IsNullable()
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (l *LabeledExpr) InitialNames() map[string]bool {
 	return l.Expr.InitialNames()
 }
@@ -463,17 +463,17 @@ func (a *AndExpr) String() string {
 	return fmt.Sprintf("%s: %T{Expr: %v}", a.p, a, a.Expr)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (a *AndExpr) NullableVisit(rules map[string]*Rule) bool {
 	return true
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (a *AndExpr) IsNullable() bool {
 	return true
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (a *AndExpr) InitialNames() map[string]bool {
 	return make(map[string]bool)
 }
@@ -500,17 +500,17 @@ func (n *NotExpr) String() string {
 	return fmt.Sprintf("%s: %T{Expr: %v}", n.p, n, n.Expr)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (n *NotExpr) NullableVisit(rules map[string]*Rule) bool {
 	return true
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (n *NotExpr) IsNullable() bool {
 	return true
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (n *NotExpr) InitialNames() map[string]bool {
 	return make(map[string]bool)
 }
@@ -537,17 +537,17 @@ func (z *ZeroOrOneExpr) String() string {
 	return fmt.Sprintf("%s: %T{Expr: %v}", z.p, z, z.Expr)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (z *ZeroOrOneExpr) NullableVisit(rules map[string]*Rule) bool {
 	return true
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (z *ZeroOrOneExpr) IsNullable() bool {
 	return true
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (z *ZeroOrOneExpr) InitialNames() map[string]bool {
 	return z.Expr.InitialNames()
 }
@@ -574,17 +574,17 @@ func (z *ZeroOrMoreExpr) String() string {
 	return fmt.Sprintf("%s: %T{Expr: %v}", z.p, z, z.Expr)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (z *ZeroOrMoreExpr) NullableVisit(rules map[string]*Rule) bool {
 	return true
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (z *ZeroOrMoreExpr) IsNullable() bool {
 	return true
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (z *ZeroOrMoreExpr) InitialNames() map[string]bool {
 	return z.Expr.InitialNames()
 }
@@ -611,17 +611,17 @@ func (o *OneOrMoreExpr) String() string {
 	return fmt.Sprintf("%s: %T{Expr: %v}", o.p, o, o.Expr)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (o *OneOrMoreExpr) NullableVisit(rules map[string]*Rule) bool {
 	return false
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (o *OneOrMoreExpr) IsNullable() bool {
 	return false
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (o *OneOrMoreExpr) InitialNames() map[string]bool {
 	return o.Expr.InitialNames()
 }
@@ -650,7 +650,7 @@ func (r *RuleRefExpr) String() string {
 	return fmt.Sprintf("%s: %T{Name: %v}", r.p, r, r.Name)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (r *RuleRefExpr) NullableVisit(rules map[string]*Rule) bool {
 	item, ok := rules[r.Name.Val]
 	if !ok {
@@ -662,12 +662,12 @@ func (r *RuleRefExpr) NullableVisit(rules map[string]*Rule) bool {
 	return r.Nullable
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (r *RuleRefExpr) IsNullable() bool {
 	return r.Nullable
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (r *RuleRefExpr) InitialNames() map[string]bool {
 	return map[string]bool{r.Name.Val: true}
 }
@@ -695,17 +695,17 @@ func (s *StateCodeExpr) String() string {
 	return fmt.Sprintf("%s: %T{Code: %v}", s.p, s, s.Code)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (s *StateCodeExpr) NullableVisit(rules map[string]*Rule) bool {
 	return true
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (s *StateCodeExpr) IsNullable() bool {
 	return true
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (s *StateCodeExpr) InitialNames() map[string]bool {
 	return make(map[string]bool)
 }
@@ -734,17 +734,17 @@ func (a *AndCodeExpr) String() string {
 	return fmt.Sprintf("%s: %T{Code: %v}", a.p, a, a.Code)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (a *AndCodeExpr) NullableVisit(rules map[string]*Rule) bool {
 	return true
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (a *AndCodeExpr) IsNullable() bool {
 	return true
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (a *AndCodeExpr) InitialNames() map[string]bool {
 	return make(map[string]bool)
 }
@@ -773,17 +773,17 @@ func (n *NotCodeExpr) String() string {
 	return fmt.Sprintf("%s: %T{Code: %v}", n.p, n, n.Code)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (n *NotCodeExpr) NullableVisit(rules map[string]*Rule) bool {
 	return true
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (n *NotCodeExpr) IsNullable() bool {
 	return true
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (n *NotCodeExpr) InitialNames() map[string]bool {
 	return make(map[string]bool)
 }
@@ -812,18 +812,18 @@ func (l *LitMatcher) String() string {
 	return fmt.Sprintf("%s: %T{Val: %q, IgnoreCase: %t}", l.p, l, l.Val, l.IgnoreCase)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (l *LitMatcher) NullableVisit(rules map[string]*Rule) bool {
 	return l.IsNullable()
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (l *LitMatcher) IsNullable() bool {
 	// The string token '' is considered empty.
 	return len(l.Val) == 0
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (l *LitMatcher) InitialNames() map[string]bool {
 	return make(map[string]bool)
 }
@@ -965,17 +965,17 @@ func (c *CharClassMatcher) String() string {
 		c.p, c, c.Val, c.IgnoreCase, c.Inverted)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (c *CharClassMatcher) NullableVisit(rules map[string]*Rule) bool {
 	return c.IsNullable()
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (c *CharClassMatcher) IsNullable() bool {
 	return len(c.Chars) == 0 && len(c.Ranges) == 0 && len(c.UnicodeClasses) == 0
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (c *CharClassMatcher) InitialNames() map[string]bool {
 	return make(map[string]bool)
 }
@@ -1001,17 +1001,17 @@ func (a *AnyMatcher) String() string {
 	return fmt.Sprintf("%s: %T{Val: %q}", a.p, a, a.Val)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (a *AnyMatcher) NullableVisit(rules map[string]*Rule) bool {
 	return false
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (a *AnyMatcher) IsNullable() bool {
 	return false
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (a *AnyMatcher) InitialNames() map[string]bool {
 	return make(map[string]bool)
 }
@@ -1037,17 +1037,17 @@ func (c *CodeBlock) String() string {
 	return fmt.Sprintf("%s: %T{Val: %q}", c.p, c, c.Val)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (c *CodeBlock) NullableVisit(rules map[string]*Rule) bool {
 	panic("NullableVisit should not be called on the CodeBlock")
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (c *CodeBlock) IsNullable() bool {
 	panic("IsNullable should not be called on the CodeBlock")
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (c *CodeBlock) InitialNames() map[string]bool {
 	panic("InitialNames should not be called on the CodeBlock")
 }
@@ -1073,17 +1073,17 @@ func (i *Identifier) String() string {
 	return fmt.Sprintf("%s: %T{Val: %q}", i.p, i, i.Val)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (i *Identifier) NullableVisit(rules map[string]*Rule) bool {
 	panic("NullableVisit should not be called on the Identifier")
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (i *Identifier) IsNullable() bool {
 	panic("IsNullable should not be called on the Identifier")
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (i *Identifier) InitialNames() map[string]bool {
 	panic("InitialNames should not be called on the Identifier")
 }
@@ -1109,17 +1109,17 @@ func (s *StringLit) String() string {
 	return fmt.Sprintf("%s: %T{Val: %q}", s.p, s, s.Val)
 }
 
-// NullableVisit recursively determines whether an object is nullable
+// NullableVisit recursively determines whether an object is nullable.
 func (s *StringLit) NullableVisit(rules map[string]*Rule) bool {
 	panic("NullableVisit should not be called on the StringLit")
 }
 
-// IsNullable returns the nullable attribute of the node
+// IsNullable returns the nullable attribute of the node.
 func (s *StringLit) IsNullable() bool {
 	panic("IsNullable should not be called on the StringLit")
 }
 
-// InitialNames returns names of nodes with which an expression can begin
+// InitialNames returns names of nodes with which an expression can begin.
 func (s *StringLit) InitialNames() map[string]bool {
 	panic("InitialNames should not be called on the StringLit")
 }

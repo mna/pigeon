@@ -2,16 +2,25 @@ package leftrecursion
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestLeftRecursion(t *testing.T) {
 	t.Parallel()
+
 	data := "7+10/2*-4+5*3%6-8*6"
 	res, err := Parse("", []byte(data))
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf(
+			"for input %q got error: %s, but expect to parse without errors",
+			data, err)
+	}
 	str, ok := res.(string)
-	require.True(t, ok)
-	require.Equal(t, str, "(((7+((10/2)*(-4)))+((5*3)%6))-(8*6))")
+	if !ok {
+		t.FailNow()
+	}
+	want := "(((7+((10/2)*(-4)))+((5*3)%6))-(8*6))"
+	if str != want {
+		t.Fatalf(
+			"for input %q\ngot result: %q,\nbut expect: %q", data, str, want)
+	}
 }

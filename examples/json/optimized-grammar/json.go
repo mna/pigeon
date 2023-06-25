@@ -67,8 +67,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Value",
@@ -358,8 +356,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Object",
@@ -711,8 +707,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Array",
@@ -792,8 +786,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

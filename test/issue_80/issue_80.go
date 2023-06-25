@@ -73,8 +73,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -85,8 +83,6 @@ var g = &grammar{
 					line: 17, col: 8, offset: 276,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

@@ -55,8 +55,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "a",
@@ -71,8 +69,6 @@ var g = &grammar{
 					want:       "\"a\"",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "b",
@@ -92,8 +88,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "c",
@@ -108,8 +102,6 @@ var g = &grammar{
 					want:       "\"c\"",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "d",
@@ -129,8 +121,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "e",
@@ -145,8 +135,6 @@ var g = &grammar{
 					want:       "\"e\"",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

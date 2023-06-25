@@ -26,8 +26,6 @@ var g = &grammar{
 				pos:  position{line: 6, col: 14, offset: 66},
 				name: "long_rule2",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "long_rule2",
@@ -36,8 +34,6 @@ var g = &grammar{
 				pos:  position{line: 7, col: 14, offset: 90},
 				name: "long_rule3",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "long_rule3",
@@ -46,8 +42,6 @@ var g = &grammar{
 				pos:  position{line: 8, col: 14, offset: 114},
 				name: "long_rule4",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "long_rule4",
@@ -56,8 +50,6 @@ var g = &grammar{
 				pos:  position{line: 9, col: 14, offset: 138},
 				name: "long_rule5",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "long_rule5",
@@ -66,40 +58,16 @@ var g = &grammar{
 				pos:  position{line: 10, col: 14, offset: 162},
 				name: "long_rule6",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "long_rule6",
 			pos:  position{line: 11, col: 1, offset: 173},
-			expr: &ruleRefExpr{
-				pos:  position{line: 11, col: 14, offset: 186},
-				name: "long_rule7",
-			},
-			leader:        false,
-			leftRecursive: false,
-		},
-		{
-			name: "long_rule7",
-			pos:  position{line: 12, col: 1, offset: 197},
-			expr: &ruleRefExpr{
-				pos:  position{line: 12, col: 14, offset: 210},
-				name: "long_rule8",
-			},
-			leader:        false,
-			leftRecursive: false,
-		},
-		{
-			name: "long_rule8",
-			pos:  position{line: 13, col: 1, offset: 221},
 			expr: &litMatcher{
-				pos:        position{line: 13, col: 14, offset: 234},
+				pos:        position{line: 11, col: 14, offset: 186},
 				val:        " ",
 				ignoreCase: false,
 				want:       "\" \"",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

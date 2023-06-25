@@ -99,8 +99,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Expr",
@@ -158,8 +156,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Term",
@@ -209,8 +205,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Factor",
@@ -261,8 +255,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "AddOp",
@@ -288,8 +280,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "MulOp",
@@ -315,8 +305,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Integer",
@@ -349,8 +337,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name:        "_",
@@ -366,8 +352,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -378,8 +362,6 @@ var g = &grammar{
 					line: 101, col: 9, offset: 1916,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

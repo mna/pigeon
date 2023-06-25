@@ -58,8 +58,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Value",
@@ -110,8 +108,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Object",
@@ -215,8 +211,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Array",
@@ -284,8 +278,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Number",
@@ -340,8 +332,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Integer",
@@ -373,8 +363,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Exponent",
@@ -408,8 +396,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "String",
@@ -473,8 +459,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EscapedChar",
@@ -488,8 +472,6 @@ var g = &grammar{
 				ignoreCase:      false,
 				inverted:        false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EscapeSequence",
@@ -507,8 +489,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SingleCharEscape",
@@ -521,8 +501,6 @@ var g = &grammar{
 				ignoreCase:      false,
 				inverted:        false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "UnicodeEscape",
@@ -554,8 +532,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "DecimalDigit",
@@ -568,8 +544,6 @@ var g = &grammar{
 				ignoreCase:      false,
 				inverted:        false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "NonZeroDecimalDigit",
@@ -582,8 +556,6 @@ var g = &grammar{
 				ignoreCase:      false,
 				inverted:        false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "HexDigit",
@@ -596,8 +568,6 @@ var g = &grammar{
 				ignoreCase:      true,
 				inverted:        false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Bool",
@@ -627,8 +597,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Null",
@@ -643,8 +611,6 @@ var g = &grammar{
 					want:       "\"null\"",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name:        "_",
@@ -661,8 +627,6 @@ var g = &grammar{
 					inverted:        false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -673,8 +637,6 @@ var g = &grammar{
 					line: 89, col: 8, offset: 2077,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

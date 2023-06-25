@@ -80,8 +80,6 @@ var g = &grammar{
 					"errId",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "List",
@@ -126,8 +124,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ID",
@@ -164,8 +160,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Comma",
@@ -194,8 +188,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Sp",
@@ -210,8 +202,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ErrComma",
@@ -249,8 +239,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ErrID",
@@ -288,8 +276,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

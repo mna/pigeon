@@ -77,8 +77,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Initializer",
@@ -104,8 +102,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Rule",
@@ -171,8 +167,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Expression",
@@ -181,8 +175,6 @@ var g = &grammar{
 				pos:  position{line: 41, col: 14, offset: 958},
 				name: "ChoiceExpr",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ChoiceExpr",
@@ -234,8 +226,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ActionExpr",
@@ -277,8 +267,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SeqExpr",
@@ -320,8 +308,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "LabeledExpr",
@@ -374,8 +360,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "PrefixedExpr",
@@ -418,8 +402,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "PrefixedOp",
@@ -445,8 +427,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SuffixedExpr",
@@ -489,8 +469,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SuffixedOp",
@@ -522,8 +500,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "PrimaryExpr",
@@ -590,8 +566,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "RuleRefExpr",
@@ -645,8 +619,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SemanticPredExpr",
@@ -680,8 +652,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SemanticPredOp",
@@ -707,8 +677,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "RuleDefOp",
@@ -742,8 +710,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SourceChar",
@@ -751,8 +717,6 @@ var g = &grammar{
 			expr: &anyMatcher{
 				line: 160, col: 14, offset: 4172,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Comment",
@@ -770,8 +734,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "MultiLineComment",
@@ -814,8 +776,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "MultiLineCommentNoLineTerminator",
@@ -867,8 +827,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SingleLineComment",
@@ -903,8 +861,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Identifier",
@@ -913,8 +869,6 @@ var g = &grammar{
 				pos:  position{line: 166, col: 14, offset: 4419},
 				name: "IdentifierName",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "IdentifierName",
@@ -939,8 +893,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "IdentifierStart",
@@ -953,8 +905,6 @@ var g = &grammar{
 				ignoreCase: true,
 				inverted:   false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "IdentifierPart",
@@ -975,8 +925,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "LitMatcher",
@@ -1011,8 +959,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "StringLiteral",
@@ -1092,8 +1038,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "DoubleStringChar",
@@ -1151,8 +1095,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SingleStringChar",
@@ -1210,8 +1152,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "RawStringChar",
@@ -1234,8 +1174,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "DoubleStringEscape",
@@ -1255,8 +1193,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SingleStringEscape",
@@ -1276,8 +1212,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "CommonEscapeSequence",
@@ -1307,8 +1241,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SingleCharEscape",
@@ -1366,8 +1298,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "OctalEscape",
@@ -1389,8 +1319,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "HexEscape",
@@ -1414,8 +1342,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "LongUnicodeEscape",
@@ -1463,8 +1389,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ShortUnicodeEscape",
@@ -1496,8 +1420,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "OctalDigit",
@@ -1509,8 +1431,6 @@ var g = &grammar{
 				ignoreCase: false,
 				inverted:   false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "DecimalDigit",
@@ -1522,8 +1442,6 @@ var g = &grammar{
 				ignoreCase: false,
 				inverted:   false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "HexDigit",
@@ -1535,8 +1453,6 @@ var g = &grammar{
 				ignoreCase: true,
 				inverted:   false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "CharClassMatcher",
@@ -1602,8 +1518,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ClassCharRange",
@@ -1627,8 +1541,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ClassChar",
@@ -1686,8 +1598,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "CharClassEscape",
@@ -1707,8 +1617,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "UnicodeClassEscape",
@@ -1754,8 +1662,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "SingleCharUnicodeClass",
@@ -1767,8 +1673,6 @@ var g = &grammar{
 				ignoreCase: false,
 				inverted:   false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "UnicodeClass",
@@ -1784,8 +1688,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "AnyMatcher",
@@ -1800,8 +1702,6 @@ var g = &grammar{
 					want:       "\".\"",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "CodeBlock",
@@ -1831,8 +1731,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Code",
@@ -1888,8 +1786,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "__",
@@ -1914,8 +1810,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "_",
@@ -1936,8 +1830,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Whitespace",
@@ -1949,8 +1841,6 @@ var g = &grammar{
 				ignoreCase: false,
 				inverted:   false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOL",
@@ -1961,8 +1851,6 @@ var g = &grammar{
 				ignoreCase: false,
 				want:       "\"\\n\"",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOS",
@@ -2020,8 +1908,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -2032,8 +1918,6 @@ var g = &grammar{
 					line: 237, col: 8, offset: 6792,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

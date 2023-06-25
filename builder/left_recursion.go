@@ -15,7 +15,7 @@ var (
 	ErrHaveLeftRecirsion = errors.New("have left recursion")
 )
 
-// PrepareGrammar evaluates parameters associated with left recursion
+// PrepareGrammar evaluates parameters associated with left recursion.
 func PrepareGrammar(grammar *ast.Grammar) (bool, error) {
 	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
 	for _, rule := range grammar.Rules {
@@ -29,7 +29,7 @@ func PrepareGrammar(grammar *ast.Grammar) (bool, error) {
 	return haveLeftRecursion, nil
 }
 
-// ComputeNullables evaluates nullable nodes
+// ComputeNullables evaluates nullable nodes.
 func ComputeNullables(rules map[string]*ast.Rule) {
 	// Compute which rules in a grammar are nullable
 	for _, rule := range rules {
@@ -70,7 +70,7 @@ func findLeader(
 	return leader, nil
 }
 
-// ComputeLeftRecursives evaluates left recursion
+// ComputeLeftRecursives evaluates left recursion.
 func ComputeLeftRecursives(rules map[string]*ast.Rule) (bool, error) {
 	graph := MakeFirstGraph(rules)
 	vertices := make([]string, 0, len(graph))

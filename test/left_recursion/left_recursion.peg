@@ -8,12 +8,12 @@ start = a:expr !. {
 expr = '-' a:expr {
     strA := a.(string)
     return "(" + "-" + strA + ")", nil
-} / a:expr op:('*'/'/'/'%') b:expr {
+} / a:expr op:('*' / '/' / '%') b:expr {
     strA := a.(string)
     strB := b.(string)
     strOp := string(op.([]byte))
     return "(" + strA + strOp + strB + ")", nil 
-} / a:expr op:('+'/'-') b:expr {
+} / a:expr op:('+' / '-') b:expr {
     strA := a.(string)
     strB := b.(string)
     strOp := string(op.([]byte))

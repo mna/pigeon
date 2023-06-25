@@ -43,8 +43,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case01",
@@ -72,8 +70,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "MultiLabelRecover",
@@ -93,8 +89,6 @@ var g = &grammar{
 					"errOther",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "number",
@@ -135,8 +129,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "digit",
@@ -188,8 +180,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ErrNonNumber",
@@ -228,8 +218,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case02",
@@ -258,8 +246,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ThrowUndefLabel",
@@ -268,8 +254,6 @@ var g = &grammar{
 				pos:   position{line: 33, col: 19, offset: 744},
 				label: "undeflabel",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case03",
@@ -297,8 +281,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "OuterRecover03",
@@ -328,8 +310,6 @@ var g = &grammar{
 					"errOther",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "InnerRecover03",
@@ -348,8 +328,6 @@ var g = &grammar{
 					"errAlphaLower",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "number03",
@@ -390,8 +368,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "digit03",
@@ -470,8 +446,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ErrAlphaInner03",
@@ -510,8 +484,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ErrAlphaOuter03",
@@ -550,8 +522,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ErrOtherOuter03",
@@ -590,8 +560,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case04",
@@ -619,8 +587,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "OuterRecover04",
@@ -650,8 +616,6 @@ var g = &grammar{
 					"errOther",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "InnerRecover04",
@@ -670,8 +634,6 @@ var g = &grammar{
 					"errAlphaLower",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "number04",
@@ -712,8 +674,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "digit04",
@@ -792,8 +752,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ErrAlphaInner04",
@@ -802,8 +760,6 @@ var g = &grammar{
 				pos: position{line: 83, col: 19, offset: 2363},
 				run: (*parser).callonErrAlphaInner041,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ErrAlphaOuter04",
@@ -842,8 +798,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "ErrOtherOuter04",
@@ -882,8 +836,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

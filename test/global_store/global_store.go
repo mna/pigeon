@@ -59,8 +59,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "increment",
@@ -80,8 +78,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "decrement",
@@ -101,8 +97,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "zero",
@@ -122,8 +116,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -134,8 +126,6 @@ var g = &grammar{
 					line: 10, col: 8, offset: 473,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

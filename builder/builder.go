@@ -77,8 +77,8 @@ func Optimize(optimize bool) Option {
 	}
 }
 
-// SupportLeftRecursion returns an option that specifies the supportLeftRecursion option
-// If supportLeftRecursion is true, LeftRecursion code is added to the resulting parser
+// SupportLeftRecursion returns an option that specifies the supportLeftRecursion option.
+// If supportLeftRecursion is true, LeftRecursion code is added to the resulting parser.
 func SupportLeftRecursion(support bool) Option {
 	return func(b *builder) Option {
 		prev := b.optimize
@@ -203,8 +203,10 @@ func (b *builder) writeRule(r *ast.Rule) {
 	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
 	b.writef("\texpr: ")
 	b.writeExpr(r.Expr)
-	b.writelnf("\tleader: %t,", r.Leader)
-	b.writelnf("\tleftRecursive: %t,", r.LeftRecursive)
+	if b.supportLeftRecursion {
+		b.writelnf("\tleader: %t,", r.Leader)
+		b.writelnf("\tleftRecursive: %t,", r.LeftRecursive)
+	}
 	b.writelnf("},")
 }
 

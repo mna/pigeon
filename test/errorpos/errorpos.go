@@ -84,8 +84,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case01",
@@ -134,8 +132,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case02",
@@ -165,8 +161,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case03",
@@ -202,8 +196,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case04",
@@ -251,8 +243,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case05",
@@ -287,8 +277,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case06",
@@ -324,8 +312,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case07",
@@ -380,8 +366,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case08",
@@ -413,8 +397,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case09",
@@ -447,8 +429,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case10",
@@ -506,8 +486,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "case11",
@@ -545,8 +523,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "increment",
@@ -557,8 +533,6 @@ var g = &grammar{
 				ignoreCase: false,
 				want:       "\"inc\"",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "decrement",
@@ -569,8 +543,6 @@ var g = &grammar{
 				ignoreCase: false,
 				want:       "\"dec\"",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "zero",
@@ -581,8 +553,6 @@ var g = &grammar{
 				ignoreCase: false,
 				want:       "\"zero\"",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "oneOrMore",
@@ -593,8 +563,6 @@ var g = &grammar{
 				ignoreCase: false,
 				want:       "\"oneOrMore\"",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "_",
@@ -609,8 +577,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "__",
@@ -622,8 +588,6 @@ var g = &grammar{
 				ignoreCase: false,
 				inverted:   false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -634,8 +598,6 @@ var g = &grammar{
 					line: 25, col: 8, offset: 725,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

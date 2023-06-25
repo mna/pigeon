@@ -1,18 +1,18 @@
 package builder_test
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
 	"github.com/mna/pigeon/ast"
 	"github.com/mna/pigeon/bootstrap"
 	"github.com/mna/pigeon/builder"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-func TestLeftRrecursive(t *testing.T) {
+func TestLeftRecursive(t *testing.T) {
 	t.Parallel()
+
 	text := `
 	start = expr NEWLINE
     expr = ('-' term / expr '+' term / term)
@@ -23,66 +23,112 @@ func TestLeftRrecursive(t *testing.T) {
 	`
 	p := bootstrap.NewParser()
 	grammar, err := p.Parse("", strings.NewReader(text))
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	haveLeftRecursion, err := builder.PrepareGrammar(grammar)
-	require.NoError(t, err)
-	require.True(t, haveLeftRecursion)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !haveLeftRecursion {
+		t.Fatalf("Recursion not found")
+	}
+
 	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
 	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
-	assert.False(t, mapRules["start"].LeftRecursive)
-	assert.True(t, mapRules["expr"].LeftRecursive)
-	assert.False(t, mapRules["term"].LeftRecursive)
-	assert.False(t, mapRules["foo"].LeftRecursive)
-	assert.False(t, mapRules["bar"].LeftRecursive)
-	assert.False(t, mapRules["baz"].LeftRecursive)
+	if mapRules["start"].LeftRecursive {
+		t.Fail()
+	}
+	if !mapRules["expr"].LeftRecursive {
+		t.Fail()
+	}
+	if mapRules["term"].LeftRecursive {
+		t.Fail()
+	}
+	if mapRules["foo"].LeftRecursive {
+		t.Fail()
+	}
+	if mapRules["bar"].LeftRecursive {
+		t.Fail()
+	}
+	if mapRules["baz"].LeftRecursive {
+		t.Fail()
+	}
 }
 
 func TestNullable(t *testing.T) {
 	t.Parallel()
+
 	text := `
 	start = sign NUMBER
     sign = ('-' / '+')?
 	`
 	p := bootstrap.NewParser()
 	grammar, err := p.Parse("", strings.NewReader(text))
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	haveLeftRecursion, err := builder.PrepareGrammar(grammar)
-	require.NoError(t, err)
-	require.False(t, haveLeftRecursion)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if haveLeftRecursion {
+		t.Fatalf("Recursion found")
+	}
 	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
 	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
-	assert.False(t, mapRules["start"].Nullable)
-	assert.True(t, mapRules["sign"].Nullable)
+	if mapRules["start"].Nullable {
+		t.Fail()
+	}
+	if !mapRules["sign"].Nullable {
+		t.Fail()
+	}
 }
 
-func TestAdvancedLeftRrecursive(t *testing.T) {
+func TestAdvancedLeftRecursive(t *testing.T) {
 	t.Parallel()
+
 	text := `
 	start = NUMBER / sign start
     sign = '-'?
 	`
 	p := bootstrap.NewParser()
 	grammar, err := p.Parse("", strings.NewReader(text))
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	haveLeftRecursion, err := builder.PrepareGrammar(grammar)
-	require.NoError(t, err)
-	require.True(t, haveLeftRecursion)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !haveLeftRecursion {
+		t.Fatalf("Recursion not found")
+	}
 	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
 	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
-	assert.False(t, mapRules["start"].Nullable)
-	assert.True(t, mapRules["sign"].Nullable)
-	assert.True(t, mapRules["start"].LeftRecursive)
-	assert.False(t, mapRules["sign"].LeftRecursive)
+	if mapRules["start"].Nullable {
+		t.Fail()
+	}
+	if !mapRules["sign"].Nullable {
+		t.Fail()
+	}
+	if !mapRules["start"].LeftRecursive {
+		t.Fail()
+	}
+	if mapRules["sign"].LeftRecursive {
+		t.Fail()
+	}
 }
 
-func TestMutuallyLeftRrecursive(t *testing.T) {
+func TestMutuallyLeftRecursive(t *testing.T) {
 	t.Parallel()
+
 	text := `
 	start = foo 'E'
     foo = bar 'A' / 'B'
@@ -90,21 +136,34 @@ func TestMutuallyLeftRrecursive(t *testing.T) {
 	`
 	p := bootstrap.NewParser()
 	grammar, err := p.Parse("", strings.NewReader(text))
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	haveLeftRecursion, err := builder.PrepareGrammar(grammar)
-	require.NoError(t, err)
-	require.True(t, haveLeftRecursion)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !haveLeftRecursion {
+		t.Fatalf("Recursion not found")
+	}
 	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
 	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
-	assert.False(t, mapRules["start"].LeftRecursive)
-	assert.True(t, mapRules["foo"].LeftRecursive)
-	assert.True(t, mapRules["bar"].LeftRecursive)
+	if mapRules["start"].LeftRecursive {
+		t.Fail()
+	}
+	if !mapRules["foo"].LeftRecursive {
+		t.Fail()
+	}
+	if !mapRules["bar"].LeftRecursive {
+		t.Fail()
+	}
 }
 
-func TestNastyMutuallyLeftRrecursive(t *testing.T) {
+func TestNastyMutuallyLeftRecursive(t *testing.T) {
 	t.Parallel()
+
 	text := `
 	start = target '='
     target = maybe '+' / NAME
@@ -112,21 +171,34 @@ func TestNastyMutuallyLeftRrecursive(t *testing.T) {
 	`
 	p := bootstrap.NewParser()
 	grammar, err := p.Parse("", strings.NewReader(text))
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	haveLeftRecursion, err := builder.PrepareGrammar(grammar)
-	require.NoError(t, err)
-	require.True(t, haveLeftRecursion)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !haveLeftRecursion {
+		t.Fatalf("Recursion not found")
+	}
 	mapRules := make(map[string]*ast.Rule, len(grammar.Rules))
 	for _, rule := range grammar.Rules {
 		mapRules[rule.Name.Val] = rule
 	}
-	assert.False(t, mapRules["start"].LeftRecursive)
-	assert.True(t, mapRules["target"].LeftRecursive)
-	assert.True(t, mapRules["maybe"].LeftRecursive)
+	if mapRules["start"].LeftRecursive {
+		t.Fail()
+	}
+	if !mapRules["target"].LeftRecursive {
+		t.Fail()
+	}
+	if !mapRules["maybe"].LeftRecursive {
+		t.Fail()
+	}
 }
 
 func TestLeftRecursionTooComplex(t *testing.T) {
 	t.Parallel()
+
 	text := `
 	start = foo
     foo = bar '+' / baz '+' / '+'
@@ -135,7 +207,11 @@ func TestLeftRecursionTooComplex(t *testing.T) {
 	`
 	p := bootstrap.NewParser()
 	grammar, err := p.Parse("", strings.NewReader(text))
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	_, err = builder.PrepareGrammar(grammar)
-	require.ErrorIs(t, err, builder.ErrNoLeader)
+	if !errors.Is(err, builder.ErrNoLeader) {
+		t.Fatalf("Got %s, but expected %s", err, builder.ErrNoLeader)
+	}
 }

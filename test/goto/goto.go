@@ -68,8 +68,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Line",
@@ -112,8 +110,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Instruction",
@@ -155,8 +151,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Label",
@@ -184,8 +178,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "labelIdentifier",
@@ -216,8 +208,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Noop",
@@ -232,8 +222,6 @@ var g = &grammar{
 					want:       "\"noop\"",
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Jump",
@@ -265,8 +253,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name:        "nl",
@@ -282,8 +268,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name:        "__",
@@ -299,8 +283,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name:        "_",
@@ -316,8 +298,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -328,8 +308,6 @@ var g = &grammar{
 					line: 66, col: 8, offset: 1339,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

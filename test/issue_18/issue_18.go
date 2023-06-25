@@ -80,8 +80,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "X",
@@ -93,8 +91,6 @@ var g = &grammar{
 				ignoreCase: false,
 				inverted:   false,
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name:        "_",
@@ -110,8 +106,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -122,8 +116,6 @@ var g = &grammar{
 					line: 38, col: 9, offset: 403,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

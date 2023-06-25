@@ -139,8 +139,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "L",
@@ -155,8 +153,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "N",
@@ -171,8 +167,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "S",
@@ -187,8 +181,6 @@ var g = &grammar{
 					inverted:   false,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "EOF",
@@ -199,8 +191,6 @@ var g = &grammar{
 					line: 11, col: 8, offset: 187,
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }

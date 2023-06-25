@@ -44,8 +44,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Y",
@@ -54,8 +52,6 @@ var g = &grammar{
 				pos:  position{line: 6, col: 5, offset: 58},
 				name: "Z",
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 		{
 			name: "Z",
@@ -73,8 +69,6 @@ var g = &grammar{
 					},
 				},
 			},
-			leader:        false,
-			leftRecursive: false,
 		},
 	},
 }
