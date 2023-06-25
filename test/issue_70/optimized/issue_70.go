@@ -259,9 +259,6 @@ type rule struct {
 	name        string
 	displayName string
 	expr        any
-
-	leader        bool
-	leftRecursive bool
 }
 
 // nolint: structcheck
@@ -487,11 +484,6 @@ type Stats struct {
 	ChoiceAltCnt map[string]map[string]int
 }
 
-type ruleWithExpsStack struct {
-	rule   *rule
-	estack []any
-}
-
 // nolint: structcheck,maligned
 type parser struct {
 	filename string
@@ -509,7 +501,7 @@ type parser struct {
 	// variables stack, map of label to value
 	vstack []map[string]any
 	// rule stack, allows identification of the current rule in errors
-	rstack []ruleWithExpsStack
+	rstack []*rule
 
 	// parse fail
 	maxFailPos            position
@@ -563,27 +555,15 @@ func (p *parser) popV() {
 }
 
 func (p *parser) pushRule(rule *rule) {
-	p.rstack = append(p.rstack, ruleWithExpsStack{rule, []any{}})
+	p.rstack = append(p.rstack, rule)
 }
 
 func (p *parser) popRule() {
 	p.rstack = p.rstack[:len(p.rstack)-1]
 }
 
-func (p *parser) pushExpr(expr any) {
-	if len(p.rstack) == 0 {
-		return
-	}
-	p.rstack[len(p.rstack)-1].estack = append(
-		p.rstack[len(p.rstack)-1].estack, expr)
-}
-
-func (p *parser) popExpr() {
-	if len(p.rstack) == 0 {
-		return
-	}
-	p.rstack[len(p.rstack)-1].estack = p.rstack[len(p.rstack)-1].estack[:len(
-		p.rstack[len(p.rstack)-1].estack)-1]
+func (p *parser) getRule() *rule {
+	return p.rstack[len(p.rstack)-1]
 }
 
 // push a recovery expression with its labels to the recoveryStack
@@ -628,7 +608,7 @@ func (p *parser) addErrAt(err error, pos position, expected []string) {
 		if buf.Len() > 0 {
 			buf.WriteString(": ")
 		}
-		rule := p.rstack[len(p.rstack)-1].rule
+		rule := p.getRule()
 		if rule.displayName != "" {
 			buf.WriteString("rule " + rule.displayName)
 		} else {
@@ -805,7 +785,6 @@ func (p *parser) parseExpr(expr any) (any, bool) {
 		panic(errMaxExprCnt)
 	}
 
-	p.pushExpr(expr)
 	var val any
 	var ok bool
 	switch expr := expr.(type) {
@@ -846,7 +825,6 @@ func (p *parser) parseExpr(expr any) (any, bool) {
 	default:
 		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
-	p.popExpr()
 	return val, ok
 }
 

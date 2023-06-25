@@ -825,6 +825,10 @@ func (p *parser) popRule() {
 	p.rstack = p.rstack[:len(p.rstack)-1]
 }
 
+func (p *parser) getRule() *rule {
+	return p.rstack[len(p.rstack)-1].rule
+}
+
 func (p *parser) pushExpr(expr any) {
 	if len(p.rstack) == 0 {
 		return
@@ -908,7 +912,7 @@ func (p *parser) addErrAt(err error, pos position, expected []string) {
 		if buf.Len() > 0 {
 			buf.WriteString(": ")
 		}
-		rule := p.rstack[len(p.rstack)-1].rule
+		rule := p.getRule()
 		if rule.displayName != "" {
 			buf.WriteString("rule " + rule.displayName)
 		} else {
@@ -1506,7 +1510,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (any, bool) {
 }
 
 func (p *parser) incChoiceAltCnt(ch *choiceExpr, altI int) {
-	choiceIdent := fmt.Sprintf("%s %d:%d", p.rstack[len(p.rstack)-1].rule.name, ch.pos.line, ch.pos.col)
+	choiceIdent := fmt.Sprintf("%s %d:%d", p.getRule().name, ch.pos.line, ch.pos.col)
 	m := p.ChoiceAltCnt[choiceIdent]
 	if m == nil {
 		m = make(map[string]int)

@@ -270,8 +270,10 @@ type rule struct {
 	displayName string
 	expr        any
 
+	// ==template== {{ if .LeftRecursion }}
 	leader        bool
 	leftRecursive bool
+	// {{ end }} ==template==
 }
 
 // {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
@@ -510,10 +512,13 @@ type Stats struct {
 	ChoiceAltCnt map[string]map[string]int
 }
 
+// ==template== {{ if .LeftRecursion }}
 type ruleWithExpsStack struct {
 	rule   *rule
 	estack []any
 }
+
+// {{ end }} ==template==
 
 // {{ if .Nolint }} nolint: structcheck,maligned {{else}} ==template== {{ end }}
 type parser struct {
@@ -542,7 +547,11 @@ type parser struct {
 	// variables stack, map of label to value
 	vstack []map[string]any
 	// rule stack, allows identification of the current rule in errors
+	// ==template== {{ if .LeftRecursion }}
 	rstack []ruleWithExpsStack
+	// {{ else }}
+	rstack []*rule
+	// {{ end }} ==template==
 
 	// parse fail
 	maxFailPos            position
@@ -596,13 +605,26 @@ func (p *parser) popV() {
 }
 
 func (p *parser) pushRule(rule *rule) {
+	// ==template== {{ if .LeftRecursion }}
 	p.rstack = append(p.rstack, ruleWithExpsStack{rule, []any{}})
+	// {{ else }}
+	p.rstack = append(p.rstack, rule)
+	// {{ end }} ==template==
 }
 
 func (p *parser) popRule() {
 	p.rstack = p.rstack[:len(p.rstack)-1]
 }
 
+func (p *parser) getRule() *rule {
+	// ==template== {{ if .LeftRecursion }}
+	return p.rstack[len(p.rstack)-1].rule
+	// {{ else }}
+	return p.rstack[len(p.rstack)-1]
+	// {{ end }} ==template==
+}
+
+// ==template== {{ if .LeftRecursion }}
 func (p *parser) pushExpr(expr any) {
 	if len(p.rstack) == 0 {
 		return
@@ -618,6 +640,8 @@ func (p *parser) popExpr() {
 	p.rstack[len(p.rstack)-1].estack = p.rstack[len(p.rstack)-1].estack[:len(
 		p.rstack[len(p.rstack)-1].estack)-1]
 }
+
+// {{ end }} ==template==
 
 // push a recovery expression with its labels to the recoveryStack
 func (p *parser) pushRecovery(labels []string, expr any) {
@@ -689,7 +713,7 @@ func (p *parser) addErrAt(err error, pos position, expected []string) {
 		if buf.Len() > 0 {
 			buf.WriteString(": ")
 		}
-		rule := p.rstack[len(p.rstack)-1].rule
+		rule := p.getRule()
 		if rule.displayName != "" {
 			buf.WriteString("rule " + rule.displayName)
 		} else {
@@ -1159,7 +1183,9 @@ func (p *parser) parseExpr(expr any) (any, bool) {
 		panic(errMaxExprCnt)
 	}
 
+	// ==template== {{ if .LeftRecursion }}
 	p.pushExpr(expr)
+	// {{ end }} ==template==
 	var val any
 	var ok bool
 	switch expr := expr.(type) {
@@ -1204,7 +1230,9 @@ func (p *parser) parseExpr(expr any) (any, bool) {
 	default:
 		panic(fmt.Sprintf("unknown expression type %T", expr))
 	}
+	// ==template== {{ if .LeftRecursion }}
 	p.popExpr()
+	// {{ end }} ==template==
 	return val, ok
 }
 
@@ -1387,7 +1415,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (any, bool) {
 // ==template== {{ if not .Optimize }}
 
 func (p *parser) incChoiceAltCnt(ch *choiceExpr, altI int) {
-	choiceIdent := fmt.Sprintf("%s %d:%d", p.rstack[len(p.rstack)-1].rule.name, ch.pos.line, ch.pos.col)
+	choiceIdent := fmt.Sprintf("%s %d:%d", p.getRule().name, ch.pos.line, ch.pos.col)
 	m := p.ChoiceAltCnt[choiceIdent]
 	if m == nil {
 		m = make(map[string]int)
