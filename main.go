@@ -48,10 +48,10 @@ func main() {
 		outputFlag             = fs.String("o", "", "output file, defaults to stdout")
 		optimizeBasicLatinFlag = fs.Bool("optimize-basic-latin", false, "generate optimized parser for Unicode Basic Latin character sets")
 		optimizeGrammar        = fs.Bool("optimize-grammar", false, "optimize the given grammar (EXPERIMENTAL FEATURE)")
-		supportLeftRecursion   = fs.Bool("support-left-recursion", false, "add support left recursion")
 		optimizeParserFlag     = fs.Bool("optimize-parser", false, "generate optimized parser without Debug and Memoize options")
 		recvrNmFlag            = fs.String("receiver-name", "c", "receiver name for the generated methods")
 		noBuildFlag            = fs.Bool("x", false, "do not build, only parse")
+		supportLeftRecursion   = fs.Bool("support-left-recursion", false, "add support left recursion (EXPERIMENTAL FEATURE)")
 
 		altEntrypointsFlag ruleNamesFlag
 	)
@@ -211,6 +211,8 @@ the generated code is written to this file instead.
 		comma-separated list of rule names that may be used as alternate
 		entrypoints for the parser, in addition to the first rule in the
 		grammar.
+	-support-left-recursion
+		add support left recursion (EXPERIMENTAL FEATURE)
 
 See https://godoc.org/github.com/mna/pigeon for more information.
 `

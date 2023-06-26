@@ -89,6 +89,12 @@ The following options can be specified:
 	necessary if the -optimize-parser flag is set, as some rules may be optimized
 	out of the resulting parser.
 
+	-support-left-recursion : boolean, (EXPERIMENTAL FEATURE) if set, add support
+	for left recursion rules, including those with indirect recursion
+	(default: false).
+	E.g.:
+		expr = expr '*' term / expr '+' term
+
 If the code blocks in the grammar (see below, section "Code block") are golint-
 and go vet-compliant, then the resulting generated code will also be golint-
 and go vet-compliant.
@@ -381,6 +387,23 @@ Be aware, that all keys starting with "_pigeon" are reserved for internal use
 of pigeon and should not be used nor modified. Those keys are treated as
 internal implementation details and therefore there are no guarantees given in
 regards of API stability.
+
+Left recursion
+
+With options -support-left-recursion pigeon supports left recursion. E.g.:
+	expr = expr '*' term
+Supports indirect recursion:
+	A = B / D
+	B = A / C
+Supports priorities:
+	expr = expr '*' term / expr '+' term
+The implementation is based on the [Left-recursive PEG Grammars][9] article that
+links to [Left Recursion in Parsing Expression Grammars][10] and
+[Packrat Parsers Can Support Left Recursion][11] papers.
+References:
+    [9]: https://medium.com/@gvanrossum_83706/left-recursive-peg-grammars-65dab3c580e1
+	[10]: https://arxiv.org/pdf/1207.0443.pdf
+	[11]: http://web.cs.ucla.edu/~todd/research/pepm08.pdf
 
 Failure labels, throw and recover
 
