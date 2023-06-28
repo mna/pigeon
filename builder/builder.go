@@ -81,7 +81,7 @@ func Optimize(optimize bool) Option {
 // If supportLeftRecursion is true, LeftRecursion code is added to the resulting parser.
 func SupportLeftRecursion(support bool) Option {
 	return func(b *builder) Option {
-		prev := b.optimize
+		prev := b.supportLeftRecursion
 		b.supportLeftRecursion = support
 		return SupportLeftRecursion(prev)
 	}
@@ -147,10 +147,10 @@ func (b *builder) setOptions(opts []Option) {
 func (b *builder) buildParser(grammar *ast.Grammar) error {
 	haveLeftRecursion, err := PrepareGrammar(grammar)
 	if err != nil {
-		return fmt.Errorf("uncorrect gramma: %w", err)
+		return fmt.Errorf("incorrect grammar: %w", err)
 	}
 	if !b.supportLeftRecursion && haveLeftRecursion {
-		return fmt.Errorf("uncorrect gramma: %w", ErrHaveLeftRecirsion)
+		return fmt.Errorf("incorrect grammar: %w", ErrHaveLeftRecursion)
 	}
 	b.haveLeftRecursion = haveLeftRecursion
 

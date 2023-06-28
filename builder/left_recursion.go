@@ -11,8 +11,8 @@ var (
 	// ErrNoLeader is no leader error.
 	ErrNoLeader = errors.New(
 		"SCC has no leadership candidate (no element is included in all cycles)")
-	// ErrHaveLeftRecirsion is recursion error.
-	ErrHaveLeftRecirsion = errors.New("have left recursion")
+	// ErrHaveLeftRecursion is recursion error.
+	ErrHaveLeftRecursion = errors.New("grammar contains left recursion")
 )
 
 // PrepareGrammar evaluates parameters associated with left recursion.
@@ -38,18 +38,22 @@ func ComputeNullables(rules map[string]*ast.Rule) {
 }
 
 func findLeader(
-	graph map[string]map[string]bool, scc map[string]bool,
+	graph map[string]map[string]struct{}, scc map[string]struct{},
 ) (string, error) {
 	// Try to find a leader such that all cycles go through it.
-	leaders := make(map[string]bool, len(scc))
+	leaders := make(map[string]struct{}, len(scc))
 	for k := range scc {
-		leaders[k] = true
+		leaders[k] = struct{}{}
 	}
 	for start := range scc {
-		for _, cycle := range FindCyclesInSCC(graph, scc, start) {
-			mapCycle := map[string]bool{}
+		cycles, err := FindCyclesInSCC(graph, scc, start)
+		if err != nil {
+			return "", fmt.Errorf("error find cycles: %w", err)
+		}
+		for _, cycle := range cycles {
+			mapCycle := make(map[string]struct{}, len(cycle))
 			for _, k := range cycle {
-				mapCycle[k] = true
+				mapCycle[k] = struct{}{}
 			}
 			for k := range scc {
 				if _, okCycle := mapCycle[k]; !okCycle {
@@ -109,19 +113,19 @@ func ComputeLeftRecursives(rules map[string]*ast.Rule) (bool, error) {
 // MakeFirstGraph compute the graph of left-invocations.
 // There's an edge from A to B if A may invoke B at its initial position.
 // Note that this requires the nullable flags to have been computed.
-func MakeFirstGraph(rules map[string]*ast.Rule) map[string]map[string]bool {
-	graph := make(map[string]map[string]bool)
-	vertices := make(map[string]bool)
+func MakeFirstGraph(rules map[string]*ast.Rule) map[string]map[string]struct{} {
+	graph := make(map[string]map[string]struct{})
+	vertices := make(map[string]struct{})
 	for rulename, rule := range rules {
 		names := rule.InitialNames()
 		graph[rulename] = names
 		for name := range names {
-			vertices[name] = true
+			vertices[name] = struct{}{}
 		}
 	}
 	for vertex := range vertices {
 		if _, ok := graph[vertex]; !ok {
-			graph[vertex] = make(map[string]bool)
+			graph[vertex] = make(map[string]struct{})
 		}
 	}
 	return graph

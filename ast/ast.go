@@ -69,7 +69,7 @@ func (g *Grammar) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (g *Grammar) InitialNames() map[string]bool {
+func (g *Grammar) InitialNames() map[string]struct{} {
 	panic("InitialNames should not be called on the Grammar")
 }
 
@@ -113,6 +113,7 @@ func (r *Rule) NullableVisit(rules map[string]*Rule) bool {
 	}
 	r.Visited = true
 	r.Nullable = r.Expr.NullableVisit(rules)
+	r.Visited = false
 	return r.Nullable
 }
 
@@ -122,7 +123,7 @@ func (r *Rule) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (r *Rule) InitialNames() map[string]bool {
+func (r *Rule) InitialNames() map[string]struct{} {
 	return r.Expr.InitialNames()
 }
 
@@ -133,7 +134,7 @@ type Expression interface {
 	// for work with left recursion
 	NullableVisit(rules map[string]*Rule) bool
 	IsNullable() bool
-	InitialNames() map[string]bool
+	InitialNames() map[string]struct{}
 }
 
 // ChoiceExpr is an ordered sequence of expressions. The parser tries to
@@ -186,11 +187,11 @@ func (c *ChoiceExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (c *ChoiceExpr) InitialNames() map[string]bool {
-	names := make(map[string]bool)
+func (c *ChoiceExpr) InitialNames() map[string]struct{} {
+	names := make(map[string]struct{})
 	for _, alt := range c.Alternatives {
 		for name := range alt.InitialNames() {
-			names[name] = true
+			names[name] = struct{}{}
 		}
 	}
 	return names
@@ -246,13 +247,13 @@ func (r *RecoveryExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (r *RecoveryExpr) InitialNames() map[string]bool {
-	names := make(map[string]bool)
+func (r *RecoveryExpr) InitialNames() map[string]struct{} {
+	names := make(map[string]struct{})
 	for name := range r.Expr.InitialNames() {
-		names[name] = true
+		names[name] = struct{}{}
 	}
 	for name := range r.RecoverExpr.InitialNames() {
-		names[name] = true
+		names[name] = struct{}{}
 	}
 	return names
 }
@@ -295,10 +296,10 @@ func (a *ActionExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (a *ActionExpr) InitialNames() map[string]bool {
-	names := make(map[string]bool)
+func (a *ActionExpr) InitialNames() map[string]struct{} {
+	names := make(map[string]struct{})
 	for name := range a.Expr.InitialNames() {
-		names[name] = true
+		names[name] = struct{}{}
 	}
 	return names
 }
@@ -336,8 +337,8 @@ func (t *ThrowExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (t *ThrowExpr) InitialNames() map[string]bool {
-	return make(map[string]bool)
+func (t *ThrowExpr) InitialNames() map[string]struct{} {
+	return make(map[string]struct{})
 }
 
 // SeqExpr is an ordered sequence of expressions, all of which must match
@@ -389,11 +390,11 @@ func (s *SeqExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (s *SeqExpr) InitialNames() map[string]bool {
-	names := make(map[string]bool)
+func (s *SeqExpr) InitialNames() map[string]struct{} {
+	names := make(map[string]struct{})
 	for _, item := range s.Exprs {
 		for name := range item.InitialNames() {
-			names[name] = true
+			names[name] = struct{}{}
 		}
 		if !item.IsNullable() {
 			break
@@ -437,7 +438,7 @@ func (l *LabeledExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (l *LabeledExpr) InitialNames() map[string]bool {
+func (l *LabeledExpr) InitialNames() map[string]struct{} {
 	return l.Expr.InitialNames()
 }
 
@@ -474,8 +475,8 @@ func (a *AndExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (a *AndExpr) InitialNames() map[string]bool {
-	return make(map[string]bool)
+func (a *AndExpr) InitialNames() map[string]struct{} {
+	return make(map[string]struct{})
 }
 
 // NotExpr is a zero-length matcher that is considered a match if the
@@ -511,8 +512,8 @@ func (n *NotExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (n *NotExpr) InitialNames() map[string]bool {
-	return make(map[string]bool)
+func (n *NotExpr) InitialNames() map[string]struct{} {
+	return make(map[string]struct{})
 }
 
 // ZeroOrOneExpr is an expression that can be matched zero or one time.
@@ -548,7 +549,7 @@ func (z *ZeroOrOneExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (z *ZeroOrOneExpr) InitialNames() map[string]bool {
+func (z *ZeroOrOneExpr) InitialNames() map[string]struct{} {
 	return z.Expr.InitialNames()
 }
 
@@ -585,7 +586,7 @@ func (z *ZeroOrMoreExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (z *ZeroOrMoreExpr) InitialNames() map[string]bool {
+func (z *ZeroOrMoreExpr) InitialNames() map[string]struct{} {
 	return z.Expr.InitialNames()
 }
 
@@ -622,7 +623,7 @@ func (o *OneOrMoreExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (o *OneOrMoreExpr) InitialNames() map[string]bool {
+func (o *OneOrMoreExpr) InitialNames() map[string]struct{} {
 	return o.Expr.InitialNames()
 }
 
@@ -668,8 +669,8 @@ func (r *RuleRefExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (r *RuleRefExpr) InitialNames() map[string]bool {
-	return map[string]bool{r.Name.Val: true}
+func (r *RuleRefExpr) InitialNames() map[string]struct{} {
+	return map[string]struct{}{r.Name.Val: {}}
 }
 
 // StateCodeExpr is an expression which can modify the internal state of the parser.
@@ -706,8 +707,8 @@ func (s *StateCodeExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (s *StateCodeExpr) InitialNames() map[string]bool {
-	return make(map[string]bool)
+func (s *StateCodeExpr) InitialNames() map[string]struct{} {
+	return make(map[string]struct{})
 }
 
 // AndCodeExpr is a zero-length matcher that is considered a match if the
@@ -745,8 +746,8 @@ func (a *AndCodeExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (a *AndCodeExpr) InitialNames() map[string]bool {
-	return make(map[string]bool)
+func (a *AndCodeExpr) InitialNames() map[string]struct{} {
+	return make(map[string]struct{})
 }
 
 // NotCodeExpr is a zero-length matcher that is considered a match if the
@@ -784,8 +785,8 @@ func (n *NotCodeExpr) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (n *NotCodeExpr) InitialNames() map[string]bool {
-	return make(map[string]bool)
+func (n *NotCodeExpr) InitialNames() map[string]struct{} {
+	return make(map[string]struct{})
 }
 
 // LitMatcher is a string literal matcher. The value to match may be a
@@ -824,8 +825,8 @@ func (l *LitMatcher) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (l *LitMatcher) InitialNames() map[string]bool {
-	return make(map[string]bool)
+func (l *LitMatcher) InitialNames() map[string]struct{} {
+	return make(map[string]struct{})
 }
 
 // CharClassMatcher is a character class matcher. The value to match must
@@ -976,8 +977,8 @@ func (c *CharClassMatcher) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (c *CharClassMatcher) InitialNames() map[string]bool {
-	return make(map[string]bool)
+func (c *CharClassMatcher) InitialNames() map[string]struct{} {
+	return make(map[string]struct{})
 }
 
 // AnyMatcher is a matcher that matches any character except end-of-file.
@@ -1012,8 +1013,8 @@ func (a *AnyMatcher) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (a *AnyMatcher) InitialNames() map[string]bool {
-	return make(map[string]bool)
+func (a *AnyMatcher) InitialNames() map[string]struct{} {
+	return make(map[string]struct{})
 }
 
 // CodeBlock represents a code block.
@@ -1048,7 +1049,7 @@ func (c *CodeBlock) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (c *CodeBlock) InitialNames() map[string]bool {
+func (c *CodeBlock) InitialNames() map[string]struct{} {
 	panic("InitialNames should not be called on the CodeBlock")
 }
 
@@ -1084,7 +1085,7 @@ func (i *Identifier) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (i *Identifier) InitialNames() map[string]bool {
+func (i *Identifier) InitialNames() map[string]struct{} {
 	panic("InitialNames should not be called on the Identifier")
 }
 
@@ -1120,7 +1121,7 @@ func (s *StringLit) IsNullable() bool {
 }
 
 // InitialNames returns names of nodes with which an expression can begin.
-func (s *StringLit) InitialNames() map[string]bool {
+func (s *StringLit) InitialNames() map[string]struct{} {
 	panic("InitialNames should not be called on the StringLit")
 }
 

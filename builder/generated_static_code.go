@@ -588,7 +588,7 @@ func (p *parser) popV() {
 
 func (p *parser) pushRule(rule *rule) {
 	// ==template== {{ if .LeftRecursion }}
-	p.rstack = append(p.rstack, ruleWithExpsStack{rule, []any{}})
+	p.rstack = append(p.rstack, ruleWithExpsStack{rule: rule})
 	// {{ else }}
 	p.rstack = append(p.rstack, rule)
 	// {{ end }} ==template==
@@ -612,7 +612,8 @@ func (p *parser) pushExpr(expr any) {
 		return
 	}
 	p.rstack[len(p.rstack)-1].estack = append(
-		p.rstack[len(p.rstack)-1].estack, expr)
+		p.rstack[len(p.rstack)-1].estack, expr,
+	)
 }
 
 func (p *parser) popExpr() {
@@ -620,7 +621,8 @@ func (p *parser) popExpr() {
 		return
 	}
 	p.rstack[len(p.rstack)-1].estack = p.rstack[len(p.rstack)-1].estack[:len(
-		p.rstack[len(p.rstack)-1].estack)-1]
+		p.rstack[len(p.rstack)-1].estack,
+	)-1]
 }
 
 // {{ end }} ==template==
@@ -935,15 +937,12 @@ func listJoin(list []string, sep string, lastSep string) string {
 
 // ==template== {{ if .LeftRecursion }}
 
-func (p *parser) checkPrevChoice(rule *rule) (bool, bool) {
+func (p *parser) checkPrevChoice(rule *rule) (checkPriority, haveChoice bool) {
 	var currentEStack []any
 	var prevEStack []any
-	for i := 1; i <= len(p.rstack); i++ {
+	for i := 1; i <= len(p.rstack)/2; i++ {
 		indexCurrent := len(p.rstack) - i
 		indexPrev := len(p.rstack) - i*2
-		if indexPrev < 0 {
-			continue
-		}
 		if p.rstack[indexCurrent].rule == rule && p.rstack[indexPrev].rule == rule {
 			currentEStack = p.rstack[indexCurrent].estack
 			prevEStack = p.rstack[indexPrev].estack
@@ -998,8 +997,8 @@ func (p *parser) checkPrevChoice(rule *rule) (bool, bool) {
 func (p *parser) parseRuleRecursiveLeader(rule *rule) (any, bool) {
 	result, ok := p.getMemoized(rule)
 	if ok {
-		checkPriority, haveChoices := p.checkPrevChoice(rule)
-		if haveChoices && !checkPriority {
+		checkPriority, haveChoice := p.checkPrevChoice(rule)
+		if haveChoice && !checkPriority {
 			return nil, false
 		}
 		p.restore(result.end)

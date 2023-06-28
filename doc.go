@@ -395,12 +395,14 @@ With options -support-left-recursion pigeon supports left recursion. E.g.:
 Supports indirect recursion:
 	A = B / D
 	B = A / C
-Supports priorities:
+Preserve support for ordered choices:
 	expr = expr '*' term / expr '+' term
 The implementation is based on the [Left-recursive PEG Grammars][9] article that
 links to [Left Recursion in Parsing Expression Grammars][10] and
 [Packrat Parsers Can Support Left Recursion][11] papers.
+
 References:
+
     [9]: https://medium.com/@gvanrossum_83706/left-recursive-peg-grammars-65dab3c580e1
 	[10]: https://arxiv.org/pdf/1207.0443.pdf
 	[11]: http://web.cs.ucla.edu/~todd/research/pepm08.pdf

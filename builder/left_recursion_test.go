@@ -39,22 +39,22 @@ func TestLeftRecursive(t *testing.T) {
 		mapRules[rule.Name.Val] = rule
 	}
 	if mapRules["start"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'start' does not contain left recursion")
 	}
 	if !mapRules["expr"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'expr' contains left recursion")
 	}
 	if mapRules["term"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'term' does not contain left recursion")
 	}
 	if mapRules["foo"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'foo' does not contain left recursion")
 	}
 	if mapRules["bar"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'bar' does not contain left recursion")
 	}
 	if mapRules["baz"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'baz' does not contain left recursion")
 	}
 }
 
@@ -82,10 +82,10 @@ func TestNullable(t *testing.T) {
 		mapRules[rule.Name.Val] = rule
 	}
 	if mapRules["start"].Nullable {
-		t.Fail()
+		t.Error("Rule 'start' is not nullable")
 	}
 	if !mapRules["sign"].Nullable {
-		t.Fail()
+		t.Error("Rule 'sign' is nullable")
 	}
 }
 
@@ -113,16 +113,16 @@ func TestAdvancedLeftRecursive(t *testing.T) {
 		mapRules[rule.Name.Val] = rule
 	}
 	if mapRules["start"].Nullable {
-		t.Fail()
+		t.Error("Rule 'start' is not Nullable")
 	}
 	if !mapRules["sign"].Nullable {
-		t.Fail()
+		t.Error("Rule 'sign' is Nullable")
 	}
 	if !mapRules["start"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'start' does not contain left recursion")
 	}
 	if mapRules["sign"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'sign' contains left recursion")
 	}
 }
 
@@ -151,13 +151,13 @@ func TestMutuallyLeftRecursive(t *testing.T) {
 		mapRules[rule.Name.Val] = rule
 	}
 	if mapRules["start"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'start' does not contain left recursion")
 	}
 	if !mapRules["foo"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'foo' contains left recursion")
 	}
 	if !mapRules["bar"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'bar' contains left recursion")
 	}
 }
 
@@ -186,13 +186,13 @@ func TestNastyMutuallyLeftRecursive(t *testing.T) {
 		mapRules[rule.Name.Val] = rule
 	}
 	if mapRules["start"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'start' does not contain left recursion")
 	}
 	if !mapRules["target"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'target' contains left recursion")
 	}
 	if !mapRules["maybe"].LeftRecursive {
-		t.Fail()
+		t.Error("Rule 'maybe' contains left recursion")
 	}
 }
 
