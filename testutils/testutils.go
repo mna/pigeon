@@ -1,18 +1,19 @@
-package testutils
-
-import (
-	"bytes"
-	"reflect"
-)
-
 // Copied from https://github.com/stretchr/testify
 
 // Copyright (c) 2012-2020 Mat Ryer, Tyler Bunnell and contributors. All rights reserved.
 // Use of this source code is governed by an MIT-style license that can be found in
 // the THIRD-PARTY-NOTICES file.
 
-// isEmpty gets whether the specified object is considered empty or not.
-func isEmpty(object interface{}) bool {
+package testutils
+
+import (
+	"bytes"
+	"errors"
+	"reflect"
+)
+
+// IsEmpty gets whether the specified object is considered empty or not.
+func IsEmpty(object interface{}) bool {
 	// get nil case out of the way
 	if object == nil {
 		return true
@@ -30,7 +31,7 @@ func isEmpty(object interface{}) bool {
 			return true
 		}
 		deref := objValue.Elem().Interface()
-		return isEmpty(deref)
+		return IsEmpty(deref)
 	// for all other types, compare against the zero value
 	// array types are empty when they match their zero-initialized state
 	default:
@@ -39,16 +40,16 @@ func isEmpty(object interface{}) bool {
 	}
 }
 
-// isList checks that the provided value is array or slice.
-func isList(list interface{}) (ok bool) {
+// IsList checks that the provided value is array or slice.
+func IsList(list interface{}) (ok bool) {
 	kind := reflect.TypeOf(list).Kind()
 	return kind == reflect.Array || kind == reflect.Slice
 }
 
-// diffLists diffs two arrays/slices and returns slices of elements that are only in A and only in B.
+// DiffLists diffs two arrays/slices and returns slices of elements that are only in A and only in B.
 // If some element is present multiple times, each instance is counted separately (e.g. if something is 2x in A and
 // 5x in B, it will be 0x in extraA and 3x in extraB). The order of items in both lists is ignored.
-func diffLists(listA, listB interface{}) (extraA, extraB []interface{}) {
+func DiffLists(listA, listB interface{}) (extraA, extraB []interface{}) {
 	aValue := reflect.ValueOf(listA)
 	bValue := reflect.ValueOf(listB)
 
@@ -114,15 +115,50 @@ func ObjectsAreEqual(expected, actual interface{}) bool {
 //
 // ElementsMatch([1, 3, 2, 3], [1, 3, 3, 2]).
 func ElementsMatch(listA interface{}, listB interface{}) bool {
-	if isEmpty(listA) && isEmpty(listB) {
+	if IsEmpty(listA) && IsEmpty(listB) {
 		return true
 	}
 
-	if !isList(listA) || !isList(listB) {
+	if !IsList(listA) || !IsList(listB) {
 		return false
 	}
 
-	extraA, extraB := diffLists(listA, listB)
+	extraA, extraB := DiffLists(listA, listB)
 
 	return len(extraA) == 0 && len(extraB) == 0
+}
+
+func isFunction(arg interface{}) bool {
+	if arg == nil {
+		return false
+	}
+	return reflect.TypeOf(arg).Kind() == reflect.Func
+}
+
+// ValidateEqualArgs checks whether provided arguments can be safely used in the
+// Equal/NotEqual functions.
+func ValidateEqualArgs(expected, actual interface{}) error {
+	if expected == nil && actual == nil {
+		return nil
+	}
+
+	if isFunction(expected) || isFunction(actual) {
+		return errors.New("cannot take func type as argument")
+	}
+	return nil
+}
+
+// Equal asserts that two objects are equal.
+//
+//	Equal(123, 123)
+//
+// Pointer variable equality is determined based on the equality of the
+// referenced values (as opposed to the memory addresses). Function equality
+// cannot be determined and will always fail.
+func Equal(expected, actual interface{}, msgAndArgs ...interface{}) bool {
+	if err := ValidateEqualArgs(expected, actual); err != nil {
+		return false
+	}
+
+	return ObjectsAreEqual(expected, actual)
 }

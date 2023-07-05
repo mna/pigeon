@@ -203,7 +203,7 @@ func (b *builder) writeRule(r *ast.Rule) {
 	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
 	b.writef("\texpr: ")
 	b.writeExpr(r.Expr)
-	if b.supportLeftRecursion {
+	if b.haveLeftRecursion {
 		b.writelnf("\tleader: %t,", r.Leader)
 		b.writelnf("\tleftRecursive: %t,", r.LeftRecursive)
 	}

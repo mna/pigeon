@@ -623,18 +623,6 @@ func (p *parser) popV() {
 	p.vstack = p.vstack[:len(p.vstack)-1]
 }
 
-func (p *parser) pushRule(rule *rule) {
-	p.rstack = append(p.rstack, rule)
-}
-
-func (p *parser) popRule() {
-	p.rstack = p.rstack[:len(p.rstack)-1]
-}
-
-func (p *parser) getRule() *rule {
-	return p.rstack[len(p.rstack)-1]
-}
-
 // push a recovery expression with its labels to the recoveryStack
 func (p *parser) pushRecovery(labels []string, expr any) {
 	if cap(p.recoveryStack) == len(p.recoveryStack) {
@@ -702,7 +690,7 @@ func (p *parser) addErrAt(err error, pos position, expected []string) {
 		if buf.Len() > 0 {
 			buf.WriteString(": ")
 		}
-		rule := p.getRule()
+		rule := p.rstack[len(p.rstack)-1]
 		if rule.displayName != "" {
 			buf.WriteString("rule " + rule.displayName)
 		} else {
@@ -962,11 +950,11 @@ func (p *parser) parseRuleWrap(rule *rule) (any, bool) {
 }
 
 func (p *parser) parseRule(rule *rule) (any, bool) {
-	p.pushRule(rule)
+	p.rstack = append(p.rstack, rule)
 	p.pushV()
 	val, ok := p.parseExprWrap(rule.expr)
 	p.popV()
-	p.popRule()
+	p.rstack = p.rstack[:len(p.rstack)-1]
 	return val, ok
 }
 
@@ -1183,7 +1171,7 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (any, bool) {
 }
 
 func (p *parser) incChoiceAltCnt(ch *choiceExpr, altI int) {
-	choiceIdent := fmt.Sprintf("%s %d:%d", p.getRule().name, ch.pos.line, ch.pos.col)
+	choiceIdent := fmt.Sprintf("%s %d:%d", p.rstack[len(p.rstack)-1].name, ch.pos.line, ch.pos.col)
 	m := p.ChoiceAltCnt[choiceIdent]
 	if m == nil {
 		m = make(map[string]int)

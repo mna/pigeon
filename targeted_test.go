@@ -765,8 +765,7 @@ func TestParseChoiceExpr(t *testing.T) {
 		p := newParser("", []byte(tc.in))
 
 		// add dummy rule to rule stack of parser
-		r := rule{name: "dummy"}
-		p.pushRule(&r)
+		p.rstack = append(p.rstack, &rule{name: "dummy"})
 
 		// advance to the first rune
 		p.read()

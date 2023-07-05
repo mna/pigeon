@@ -5,21 +5,34 @@
 start = a:expr !. {
 	return a, nil
 }
-expr = '-' a:expr {
-    strA := a.(string)
-    return "(" + "-" + strA + ")", nil
-} / a:expr op:('*' / '/' / '%') b:expr {
-    strA := a.(string)
-    strB := b.(string)
-    strOp := string(op.([]byte))
-    return "(" + strA + strOp + strB + ")", nil 
-} / a:expr op:('+' / '-') b:expr {
+
+expr =  a:expr op:('+'/'-') b:term {
     strA := a.(string)
     strB := b.(string)
     strOp := string(op.([]byte))
     return "(" + strA + strOp + strB + ")", nil
-} / term {
+} / a:term {
+    strA := a.(string)
+    return strA, nil
+}
+
+term = a:term op:('*'/'/'/'%') b:factor {
+    strA := a.(string)
+    strB := b.(string)
+    strOp := string(op.([]byte))
+    return "(" + strA + strOp + strB + ")", nil 
+
+} / a:factor {
+    strA := a.(string)
+    return strA, nil
+}
+
+factor = op:('+' / '-') a:factor {
+    strA := a.(string)
+    strOp := string(op.([]byte))
+    return "(" + strOp + strA + ")", nil
+} / atom {
     return string(c.text), nil
 }
 
-term = [0-9]+
+atom = [0-9]+

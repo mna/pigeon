@@ -172,14 +172,33 @@ $(TEST_DIR)/issue_70b/issue_70b.go: $(TEST_DIR)/issue_70b/issue_70b.peg $(BINDIR
 $(TEST_DIR)/issue_80/issue_80.go: $(TEST_DIR)/issue_80/issue_80.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint $< > $@
 
-$(TEST_DIR)/left_recursion/left_recursion.go: $(TEST_DIR)/left_recursion/left_recursion.peg $(TEST_DIR)/left_recursion/standard/left_recursion.go $(TEST_DIR)/left_recursion/optimized/left_recursion.go $(BINDIR)/pigeon
+$(TEST_DIR)/left_recursion/left_recursion.go: \
+		$(TEST_DIR)/left_recursion/standart/leftrecursion/left_recursion.go \
+		$(TEST_DIR)/left_recursion/optimized/leftrecursion/left_recursion.go \
+		$(BINDIR)/pigeon
+
+$(TEST_DIR)/left_recursion/standart/leftrecursion/left_recursion.go: \
+		$(TEST_DIR)/left_recursion/left_recursion.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint -support-left-recursion $< > $@
 
-$(TEST_DIR)/left_recursion/standard/left_recursion.go: $(TEST_DIR)/left_recursion/left_recursion.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon -nolint -support-left-recursion $< > $@
-
-$(TEST_DIR)/left_recursion/optimized/left_recursion.go: $(TEST_DIR)/left_recursion/left_recursion.peg $(BINDIR)/pigeon
+$(TEST_DIR)/left_recursion/optimized/leftrecursion/left_recursion.go: \
+		$(TEST_DIR)/left_recursion/left_recursion.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint -optimize-parser -support-left-recursion $< > $@
+
+$(TEST_DIR)/left_recursion/without_left_recursion.go: \
+		$(TEST_DIR)/left_recursion/standart/withoutleftrecursion/without_left_recursion.go \
+		$(TEST_DIR)/left_recursion/optimized/withoutleftrecursion/without_left_recursion.go \
+		$(BINDIR)/pigeon
+
+$(TEST_DIR)/left_recursion/standart/withoutleftrecursion/without_left_recursion.go: \
+		$(TEST_DIR)/left_recursion/without_left_recursion.peg \
+		$(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint $< > $@
+
+$(TEST_DIR)/left_recursion/optimized/withoutleftrecursion/without_left_recursion.go: \
+		$(TEST_DIR)/left_recursion/without_left_recursion.peg \
+		$(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint -optimize-parser $< > $@
 
 
 lint:
