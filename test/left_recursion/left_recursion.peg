@@ -6,7 +6,7 @@ start = a:expr !. {
 	return a, nil
 }
 
-expr =  a:expr op:('+'/'-') b:term {
+expr =  a:expr op:('+' / '-') b:term {
     strA := a.(string)
     strB := b.(string)
     strOp := string(op.([]byte))
@@ -16,7 +16,7 @@ expr =  a:expr op:('+'/'-') b:term {
     return strA, nil
 }
 
-term = a:term op:('*'/'/'/'%') b:factor {
+term = a:term op:('*' / '/' / '%') b:factor {
     strA := a.(string)
     strB := b.(string)
     strOp := string(op.([]byte))

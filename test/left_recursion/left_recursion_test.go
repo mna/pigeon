@@ -91,7 +91,7 @@ func TestLeftRecursionParse(t *testing.T) {
 			}
 		})
 
-		t.Run(testCase.name+" optimezed", func(t *testing.T) {
+		t.Run(testCase.name+" optimized", func(t *testing.T) {
 			t.Parallel()
 
 			resLR, err := optimizedleftrecursion.Parse("", []byte(testCase.expr))
