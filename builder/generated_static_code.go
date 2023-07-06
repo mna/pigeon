@@ -909,6 +909,7 @@ func (p *parser) parseRuleRecursiveLeader(rule *rule) (any, bool) {
 		depth      = 0
 		startMark  = p.pt
 		lastResult = resultTuple{nil, false, startMark}
+		lastErrors = *p.errs
 	)
 
 	for {
@@ -925,13 +926,15 @@ func (p *parser) parseRuleRecursiveLeader(rule *rule) (any, bool) {
 				rule.name, depth, ok, string(p.sliceFrom(startMark))))
 		}
 		// {{ end }} ==template==
-		if (!ok) || (endMark.offset <= lastResult.end.offset) {
+		if (!ok) || (endMark.offset <= lastResult.end.offset && depth != 0) {
 			// ==template== {{ if or .GlobalState (not .Optimize) }}
 			p.restoreState(lastState)
 			// {{ end }} ==template==
+			*p.errs = lastErrors
 			break
 		}
 		lastResult = resultTuple{val, ok, endMark}
+		lastErrors = *p.errs
 		p.restore(startMark)
 		depth++
 	}
