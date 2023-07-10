@@ -1,6 +1,7 @@
 package leftrecursionlabeledfailures_test
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -118,8 +119,8 @@ func TestLeftRecursionWithLabeledFailures(t *testing.T) {
 					testCase.input, testCase.want.captures, got)
 			}
 			if err != nil {
-				errorLister, ok := err.(leftrecursionlabeledfailures.ErrorLister)
-				if !ok {
+				var errorLister leftrecursionlabeledfailures.ErrorLister
+				if !errors.As(err, &errorLister) {
 					t.FailNow()
 				}
 				list := errorLister.Errors()
@@ -138,14 +139,15 @@ func TestLeftRecursionWithLabeledFailures(t *testing.T) {
 					t.FailNow()
 				}
 				for index, err := range list {
-					pe, ok := err.(leftrecursionlabeledfailures.ParserError)
-					if !ok {
+					var parserError leftrecursionlabeledfailures.ParserError
+					if !errors.As(err, &parserError) {
 						t.FailNow()
 					}
-					if pe.Error() != testCase.want.errors[index] {
+					if parserError.Error() != testCase.want.errors[index] {
 						t.Errorf(
 							"for input %q want %dth error to be %s, got %s",
-							testCase.input, index+1, testCase.want.errors[index], pe)
+							testCase.input, index+1,
+							testCase.want.errors[index], parserError)
 					}
 				}
 			}

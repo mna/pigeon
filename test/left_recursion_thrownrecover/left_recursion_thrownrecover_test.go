@@ -1,6 +1,7 @@
 package leftrecursionthrownrecover_test
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -165,11 +166,12 @@ func TestLeftRecursionWithThrowAndRecover(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, testCase.want.captures) {
 				t.Errorf(
-					"for input %q want %s, got %s", testCase.input, testCase.want.captures, got)
+					"for input %q want %s, got %s",
+					testCase.input, testCase.want.captures, got)
 			}
 			if err != nil {
-				errorLister, ok := err.(leftrecursionthrownrecover.ErrorLister)
-				if !ok {
+				var errorLister leftrecursionthrownrecover.ErrorLister
+				if !errors.As(err, &errorLister) {
 					t.FailNow()
 				}
 				list := errorLister.Errors()
@@ -188,14 +190,15 @@ func TestLeftRecursionWithThrowAndRecover(t *testing.T) {
 					t.FailNow()
 				}
 				for index, err := range list {
-					pe, ok := err.(leftrecursionthrownrecover.ParserError)
-					if !ok {
+					var parserError leftrecursionthrownrecover.ParserError
+					if !errors.As(err, &parserError) {
 						t.FailNow()
 					}
-					if pe.Error() != testCase.want.errors[index] {
+					if parserError.Error() != testCase.want.errors[index] {
 						t.Errorf(
 							"for input %q want %dth error to be %s, got %s",
-							testCase.input, index+1, testCase.want.errors[index], pe)
+							testCase.input, index+1,
+							testCase.want.errors[index], parserError)
 					}
 				}
 			}
