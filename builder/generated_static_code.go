@@ -1034,7 +1034,12 @@ func (p *parser) parseExprWrap(expr any) (any, bool) {
 	// ==template== {{ if not .Optimize }}
 	var pt savepoint
 
+	// ==template== {{ if .LeftRecursion }}
+	isLeftRecusion := p.rstack[len(p.rstack)-1].leftRecursive
+	if p.memoize && !isLeftRecusion {
+	// {{ else }}
 	if p.memoize {
+	// {{ end }} ==template==
 		res, ok := p.getMemoized(expr)
 		if ok {
 			p.restore(res.end)
@@ -1047,7 +1052,11 @@ func (p *parser) parseExprWrap(expr any) (any, bool) {
 	val, ok := p.parseExpr(expr)
 
 	// ==template== {{ if not .Optimize }}
+	// ==template== {{ if .LeftRecursion }}
+	if p.memoize && !isLeftRecusion {
+	// {{ else }}
 	if p.memoize {
+	// {{ end }} ==template==
 		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
 	}
 	// {{ end }} ==template==

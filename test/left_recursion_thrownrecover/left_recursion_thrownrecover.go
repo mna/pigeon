@@ -2137,7 +2137,8 @@ func (p *parser) parseRule(rule *rule) (any, bool) {
 func (p *parser) parseExprWrap(expr any) (any, bool) {
 	var pt savepoint
 
-	if p.memoize {
+	isLeftRecusion := p.rstack[len(p.rstack)-1].leftRecursive
+	if p.memoize && !isLeftRecusion {
 		res, ok := p.getMemoized(expr)
 		if ok {
 			p.restore(res.end)
@@ -2148,7 +2149,7 @@ func (p *parser) parseExprWrap(expr any) (any, bool) {
 
 	val, ok := p.parseExpr(expr)
 
-	if p.memoize {
+	if p.memoize && !isLeftRecusion {
 		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
 	}
 	return val, ok

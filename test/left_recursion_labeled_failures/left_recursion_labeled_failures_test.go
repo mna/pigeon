@@ -103,54 +103,63 @@ func TestLeftRecursionWithLabeledFailures(t *testing.T) {
 	}
 	for _, testCase := range cases {
 		testCase := testCase
-		t.Run(testCase.name, func(t *testing.T) {
-			t.Parallel()
 
-			got, err := leftrecursionlabeledfailures.Parse(
-				"", []byte(testCase.input))
-			if testCase.want.errors == nil && err != nil {
-				t.Fatalf(
-					"for input %q got error: %s, but expect to parse without errors",
-					testCase.input, err)
-			}
-			if !reflect.DeepEqual(got, testCase.want.captures) {
-				t.Errorf(
-					"for input %q want %s, got %s",
-					testCase.input, testCase.want.captures, got)
-			}
-			if err != nil {
-				var errorLister leftrecursionlabeledfailures.ErrorLister
-				if !errors.As(err, &errorLister) {
-					t.FailNow()
+		setOptions := map[string][]leftrecursionlabeledfailures.Option{
+			"memoize": {leftrecursionlabeledfailures.Memoize(true)},
+			"-":       {},
+		}
+		for nameOptions, options := range setOptions {
+			options := options
+
+			t.Run(testCase.name+". Options: "+nameOptions, func(t *testing.T) {
+				t.Parallel()
+
+				got, err := leftrecursionlabeledfailures.Parse(
+					"", []byte(testCase.input), options...)
+				if testCase.want.errors == nil && err != nil {
+					t.Fatalf(
+						"for input %q got error: %s, but expect to parse without errors",
+						testCase.input, err)
 				}
-				list := errorLister.Errors()
-				if len(list) != len(testCase.want.errors) {
+				if !reflect.DeepEqual(got, testCase.want.captures) {
 					t.Errorf(
-						"for input %q want %d error(s), got %d",
-						testCase.input, len(testCase.want.errors), len(list))
-					t.Logf("expected errors:\n")
-					for _, ee := range testCase.want.errors {
-						t.Logf("- %s\n", ee)
-					}
-					t.Logf("got errors:\n")
-					for _, ee := range list {
-						t.Logf("- %s\n", ee)
-					}
-					t.FailNow()
+						"for input %q want %s, got %s",
+						testCase.input, testCase.want.captures, got)
 				}
-				for index, err := range list {
-					var parserError leftrecursionlabeledfailures.ParserError
-					if !errors.As(err, &parserError) {
+				if err != nil {
+					var errorLister leftrecursionlabeledfailures.ErrorLister
+					if !errors.As(err, &errorLister) {
 						t.FailNow()
 					}
-					if parserError.Error() != testCase.want.errors[index] {
+					list := errorLister.Errors()
+					if len(list) != len(testCase.want.errors) {
 						t.Errorf(
-							"for input %q want %dth error to be %s, got %s",
-							testCase.input, index+1,
-							testCase.want.errors[index], parserError)
+							"for input %q want %d error(s), got %d",
+							testCase.input, len(testCase.want.errors), len(list))
+						t.Logf("expected errors:\n")
+						for _, ee := range testCase.want.errors {
+							t.Logf("- %s\n", ee)
+						}
+						t.Logf("got errors:\n")
+						for _, ee := range list {
+							t.Logf("- %s\n", ee)
+						}
+						t.FailNow()
+					}
+					for index, err := range list {
+						var parserError leftrecursionlabeledfailures.ParserError
+						if !errors.As(err, &parserError) {
+							t.FailNow()
+						}
+						if parserError.Error() != testCase.want.errors[index] {
+							t.Errorf(
+								"for input %q want %dth error to be %s, got %s",
+								testCase.input, index+1,
+								testCase.want.errors[index], parserError)
+						}
 					}
 				}
-			}
-		})
+			})
+		}
 	}
 }

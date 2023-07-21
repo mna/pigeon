@@ -56,42 +56,67 @@ func TestLeftRecursionParse(t *testing.T) {
 
 	for _, testCase := range tests {
 		testCase := testCase
-		t.Run(testCase.name+" default", func(t *testing.T) {
-			t.Parallel()
 
-			resLR, err := leftrecursion.Parse("", []byte(testCase.expr))
-			if err != nil {
-				t.Fatalf(
-					"for input %q got error: %s, but expect to parse without errors",
-					testCase.expr, err)
-			}
-			exprLR, ok := resLR.(string)
-			if !ok {
-				t.FailNow()
-			}
-			if exprLR != testCase.want.expr {
-				t.Fatalf(
-					"for input %q\ngot result: %q,\nbut expect: %q",
-					testCase.expr, exprLR, testCase.want.expr)
-			}
-			res, err := withoutleftrecursion.Parse("", []byte(testCase.expr))
-			if err != nil {
-				t.Fatalf(
-					"for input %q got error: %s, but expect to parse without errors",
-					testCase.expr, err)
-			}
-			expr, ok := res.(string)
-			if !ok {
-				t.FailNow()
-			}
-			if expr != testCase.want.expr {
-				t.Fatalf(
-					"for input %q\ngot result: %q,\nbut expect: %q",
-					testCase.expr, expr, testCase.want.expr)
-			}
-		})
+		setOptionsLR := map[string][]leftrecursion.Option{
+			"memoize": {leftrecursion.Memoize(true)},
+			"-":       {},
+		}
+		for nameOptionsLR, optionsLR := range setOptionsLR {
+			optionsLR := optionsLR
 
-		t.Run(testCase.name+" optimized", func(t *testing.T) {
+			t.Run(
+				testCase.name+" default(recursion). Options: "+nameOptionsLR,
+				func(t *testing.T) {
+					t.Parallel()
+
+					resLR, err := leftrecursion.Parse(
+						"", []byte(testCase.expr), optionsLR...)
+					if err != nil {
+						t.Fatalf(
+							"for input %q got error: %s, but expect to parse without errors",
+							testCase.expr, err)
+					}
+					exprLR, ok := resLR.(string)
+					if !ok {
+						t.FailNow()
+					}
+					if exprLR != testCase.want.expr {
+						t.Fatalf(
+							"for input %q\ngot result: %q,\nbut expect: %q",
+							testCase.expr, exprLR, testCase.want.expr)
+					}
+				})
+		}
+
+		setOptions := map[string][]withoutleftrecursion.Option{
+			"memoize": {withoutleftrecursion.Memoize(true)},
+			"-":       {},
+		}
+		for nameOptions, options := range setOptions {
+			options := options
+
+			t.Run(testCase.name+" default(without recursion). Options: "+nameOptions, func(t *testing.T) {
+				t.Parallel()
+
+				res, err := withoutleftrecursion.Parse("", []byte(testCase.expr), options...)
+				if err != nil {
+					t.Fatalf(
+						"for input %q got error: %s, but expect to parse without errors",
+						testCase.expr, err)
+				}
+				expr, ok := res.(string)
+				if !ok {
+					t.FailNow()
+				}
+				if expr != testCase.want.expr {
+					t.Fatalf(
+						"for input %q\ngot result: %q,\nbut expect: %q",
+						testCase.expr, expr, testCase.want.expr)
+				}
+			})
+		}
+
+		t.Run(testCase.name+" optimized(recursion)", func(t *testing.T) {
 			t.Parallel()
 
 			resLR, err := optimizedleftrecursion.Parse("", []byte(testCase.expr))
@@ -109,6 +134,11 @@ func TestLeftRecursionParse(t *testing.T) {
 					"for input %q\ngot result: %q,\nbut expect: %q",
 					testCase.expr, exprLR, testCase.want.expr)
 			}
+		})
+
+		t.Run(testCase.name+" optimized(without recursion)", func(t *testing.T) {
+			t.Parallel()
+
 			res, err := optimizedwithoutleftrecursion.Parse("", []byte(testCase.expr))
 			if err != nil {
 				t.Fatalf(
@@ -138,6 +168,43 @@ func FuzzLeftRecursionParse(f *testing.F) {
 		}
 		resLR, errLR := leftrecursion.Parse("", data)
 		res, err := withoutleftrecursion.Parse("", data)
+		if err != nil || errLR != nil {
+			if err == nil || errLR == nil {
+				t.Fatalf(
+					"for input %q\ngot error: %q,\nbut expect: %q",
+					data, errLR, err)
+			}
+			return
+		}
+		exprLR, okLR := resLR.(string)
+		if !okLR {
+			t.FailNow()
+		}
+		expr, ok := res.(string)
+		if !ok {
+			t.FailNow()
+		}
+		if expr != exprLR {
+			t.Fatalf(
+				"for input %q\ngot result: %q,\nbut expect: %q",
+				data, exprLR, expr)
+		}
+	})
+}
+
+func FuzzLeftRecursionParseMemoize(f *testing.F) {
+	chars := []byte("0123456789+-/*%")
+
+	f.Fuzz(func(t *testing.T, bytes []byte) {
+		data := make([]byte, 0, len(bytes))
+		for _, b := range bytes {
+			data = append(data, chars[int(b)%len(chars)])
+		}
+
+		resLR, errLR := leftrecursion.Parse(
+			"", data, leftrecursion.Memoize(true))
+		res, err := withoutleftrecursion.Parse(
+			"", data, withoutleftrecursion.Memoize(true))
 		if err != nil || errLR != nil {
 			if err == nil || errLR == nil {
 				t.Fatalf(

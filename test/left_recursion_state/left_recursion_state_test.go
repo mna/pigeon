@@ -58,24 +58,36 @@ func TestLeftRecursionWithState(t *testing.T) {
 
 	for _, testCase := range tests {
 		testCase := testCase
-		t.Run(testCase.name+" default", func(t *testing.T) {
-			t.Parallel()
 
-			count, err := leftrecursionstate.Parse(
-				"", []byte(testCase.expr),
-				leftrecursionstate.Memoize(false),
-				leftrecursionstate.InitState("count", initCount))
-			if err != nil {
-				t.Fatalf(
-					"for input %q got error: %s, but expect to parse without errors",
-					testCase.expr, err)
-			}
-			if count != testCase.want.count {
-				t.Fatalf(
-					"for input %q\ngot result: %d,\nbut expect: %d",
-					testCase.expr, count, testCase.want.count)
-			}
-		})
+		setOptions := map[string][]leftrecursionstate.Option{
+			"memoize": {
+				leftrecursionstate.Memoize(true),
+				leftrecursionstate.InitState("count", initCount),
+			},
+			"-": {
+				leftrecursionstate.InitState("count", initCount),
+			},
+		}
+		for nameOptions, options := range setOptions {
+			options := options
+
+			t.Run(testCase.name+" default. Options: "+nameOptions, func(t *testing.T) {
+				t.Parallel()
+
+				count, err := leftrecursionstate.Parse(
+					"", []byte(testCase.expr), options...)
+				if err != nil {
+					t.Fatalf(
+						"for input %q got error: %s, but expect to parse without errors",
+						testCase.expr, err)
+				}
+				if count != testCase.want.count {
+					t.Fatalf(
+						"for input %q\ngot result: %d,\nbut expect: %d",
+						testCase.expr, count, testCase.want.count)
+				}
+			})
+		}
 
 		t.Run(testCase.name+" optimized", func(t *testing.T) {
 			t.Parallel()
