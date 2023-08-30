@@ -1,0 +1,21 @@
+{
+	package issue79
+}
+
+Input <- expr:Expr EOF {
+	return expr, nil
+}
+
+Expr <- _ Expr _ LogicOp _ Expr _/ _ Value _
+
+LogicOp <- ("and" / "or") {
+	return string(c.text), nil
+}
+
+Value <- [0-9]+ {
+	return string(c.text),nil
+}
+
+_ "whitespace" <- [ \n\t\r]*
+
+EOF <- !.

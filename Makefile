@@ -169,6 +169,10 @@ $(TEST_DIR)/issue_70/optimized-grammar/issue_70.go: $(TEST_DIR)/issue_70/issue_7
 $(TEST_DIR)/issue_70b/issue_70b.go: $(TEST_DIR)/issue_70b/issue_70b.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint -optimize-grammar -support-left-recursion $< > $@
 
+$(TEST_DIR)/issue_79/issue_79.go: $(TEST_DIR)/issue_79/issue_79.peg $(BINDIR)/pigeon
+	@! $(BINDIR)/pigeon $< > $@ 2>/dev/null && exit 0 || echo "failure, expect build to fail due to left recursion!" && exit 1
+	$(BINDIR)/pigeon -support-left-recursion $< > $@
+
 $(TEST_DIR)/issue_80/issue_80.go: $(TEST_DIR)/issue_80/issue_80.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint $< > $@
 
