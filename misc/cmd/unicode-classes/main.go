@@ -1,5 +1,7 @@
 // Command unicode-classes generates a set-like map of all valid
 // Unicode classes.
+//
+//nolint:unused
 package main
 
 import (
