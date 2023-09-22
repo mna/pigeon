@@ -7,8 +7,6 @@ import (
 	// goon "github.com/shurcooL/go-goon"
 )
 
-var p Pos
-
 var cases = []struct {
 	in  *Grammar
 	out *Grammar

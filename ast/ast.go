@@ -227,7 +227,7 @@ func (r *RecoveryExpr) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s: %T{Expr: %v, RecoverExpr: %v", r.p, r, r.Expr, r.RecoverExpr))
-	buf.WriteString(fmt.Sprintf(", Labels: [\n"))
+	buf.WriteString(", Labels: [\n")
 	for _, e := range r.Labels {
 		buf.WriteString(fmt.Sprintf("%s,\n", e))
 	}
