@@ -36,7 +36,8 @@ The following options can be specified:
 	-debug : boolean, print debugging info to stdout (default: false).
 
 	-nolint: add '// nolint: ...' comments for generated parser to suppress
-	warnings by gometalinter (https://github.com/alecthomas/gometalinter).
+	warnings by gometalinter (https://github.com/alecthomas/gometalinter) or
+	golangci-lint (https://golangci-lint.run/).
 
 	-no-recover : boolean, if set, do not recover from a panic. Useful
 	to access the panic stack when debugging, otherwise the panic

@@ -43,7 +43,7 @@ func main() {
 		dbgFlag                = fs.Bool("debug", false, "set debug mode")
 		shortHelpFlag          = fs.Bool("h", false, "show help page")
 		longHelpFlag           = fs.Bool("help", false, "show help page")
-		nolint                 = fs.Bool("nolint", false, "add '// nolint: ...' comments to suppress warnings by gometalinter")
+		nolint                 = fs.Bool("nolint", false, "add '// nolint: ...' comments to suppress warnings by gometalinter or golangci-lint")
 		noRecoverFlag          = fs.Bool("no-recover", false, "do not recover from panic")
 		outputFlag             = fs.String("o", "", "output file, defaults to stdout")
 		optimizeBasicLatinFlag = fs.Bool("optimize-basic-latin", false, "generate optimized parser for Unicode Basic Latin character sets")
@@ -189,7 +189,8 @@ the generated code is written to this file instead.
 		display this help message.
 	-nolint
 		add '// nolint: ...' comments for generated parser to suppress
-		warnings by gometalinter (https://github.com/alecthomas/gometalinter).
+		warnings by gometalinter (https://github.com/alecthomas/gometalinter) or
+		golangci-lint (https://golangci-lint.run/).
 	-no-recover
 		do not recover from a panic. Useful to access the panic stack
 		when debugging, otherwise the panic is converted to an error.

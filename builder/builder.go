@@ -89,7 +89,7 @@ func SupportLeftRecursion(support bool) Option {
 
 // Nolint returns an option that specifies the nolint option
 // If nolint is true, special '// nolint: ...' comments are added
-// to the generated parser to suppress warnings by gometalinter.
+// to the generated parser to suppress warnings by gometalinter or golangci-lint.
 func Nolint(nolint bool) Option {
 	return func(b *builder) Option {
 		prev := b.nolint

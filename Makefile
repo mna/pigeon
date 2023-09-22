@@ -231,11 +231,7 @@ $(TEST_DIR)/left_recursion_thrownrecover/left_recursion_thrownrecover.go: \
 	$(BINDIR)/pigeon -nolint -support-left-recursion $< > $@
 
 lint:
-	golint ./...
-	go vet ./...
-
-gometalinter:
-	gometalinter ./...
+	golangci-lint run ./...
 
 cmp:
 	@boot=$$(mktemp) && $(BINDIR)/bootstrap-pigeon $(PIGEON_GRAMMAR) > $$boot && \
@@ -252,5 +248,5 @@ clean:
 	rm -f $(BOOTSTRAPPIGEON_DIR)/bootstrap_pigeon.go $(ROOT)/pigeon.go $(TEST_GENERATED_SRC) $(EXAMPLES_DIR)/json/optimized/json.go $(EXAMPLES_DIR)/json/optimized-grammar/json.go $(TEST_DIR)/staterestore/optimized/staterestore.go $(TEST_DIR)/staterestore/standard/staterestore.go $(TEST_DIR)/issue_65/optimized/issue_65.go $(TEST_DIR)/issue_65/optimized-grammar/issue_65.go
 	rm -rf $(BINDIR)
 
-.PHONY: all clean lint gometalinter cmp test
+.PHONY: all clean lint cmp test
 
