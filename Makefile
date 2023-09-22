@@ -167,10 +167,65 @@ $(TEST_DIR)/issue_70/optimized-grammar/issue_70.go: $(TEST_DIR)/issue_70/issue_7
 	$(BINDIR)/pigeon -nolint -optimize-grammar $< > $@
 
 $(TEST_DIR)/issue_70b/issue_70b.go: $(TEST_DIR)/issue_70b/issue_70b.peg $(BINDIR)/pigeon
-	$(BINDIR)/pigeon -nolint --optimize-grammar $< > $@
+	$(BINDIR)/pigeon -nolint -optimize-grammar -support-left-recursion $< > $@
+
+$(TEST_DIR)/issue_79/issue_79.go: $(TEST_DIR)/issue_79/issue_79.peg $(BINDIR)/pigeon
+	@! $(BINDIR)/pigeon $< > $@ 2>/dev/null && exit 0 || echo "failure, expect build to fail due to left recursion!" && exit 1
+	$(BINDIR)/pigeon -support-left-recursion $< > $@
 
 $(TEST_DIR)/issue_80/issue_80.go: $(TEST_DIR)/issue_80/issue_80.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint $< > $@
+
+$(TEST_DIR)/left_recursion/left_recursion.go: \
+		$(TEST_DIR)/left_recursion/standart/leftrecursion/left_recursion.go \
+		$(TEST_DIR)/left_recursion/optimized/leftrecursion/left_recursion.go \
+		$(BINDIR)/pigeon
+
+$(TEST_DIR)/left_recursion/standart/leftrecursion/left_recursion.go: \
+		$(TEST_DIR)/left_recursion/left_recursion.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint -support-left-recursion $< > $@
+
+$(TEST_DIR)/left_recursion/optimized/leftrecursion/left_recursion.go: \
+		$(TEST_DIR)/left_recursion/left_recursion.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint -optimize-parser -support-left-recursion $< > $@
+
+$(TEST_DIR)/left_recursion/without_left_recursion.go: \
+		$(TEST_DIR)/left_recursion/standart/withoutleftrecursion/without_left_recursion.go \
+		$(TEST_DIR)/left_recursion/optimized/withoutleftrecursion/without_left_recursion.go \
+		$(BINDIR)/pigeon
+
+$(TEST_DIR)/left_recursion/standart/withoutleftrecursion/without_left_recursion.go: \
+		$(TEST_DIR)/left_recursion/without_left_recursion.peg \
+		$(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint $< > $@
+
+$(TEST_DIR)/left_recursion/optimized/withoutleftrecursion/without_left_recursion.go: \
+		$(TEST_DIR)/left_recursion/without_left_recursion.peg \
+		$(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint -optimize-parser $< > $@
+
+$(TEST_DIR)/left_recursion_state/left_recursion_state.go: \
+		$(TEST_DIR)/left_recursion_state/standart/left_recursion_state.go \
+		$(TEST_DIR)/left_recursion_state/optimized/left_recursion_state.go \
+		$(BINDIR)/pigeon
+
+$(TEST_DIR)/left_recursion_state/standart/left_recursion_state.go: \
+		$(TEST_DIR)/left_recursion_state/left_recursion_state.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint -support-left-recursion $< > $@
+
+$(TEST_DIR)/left_recursion_state/optimized/left_recursion_state.go: \
+		$(TEST_DIR)/left_recursion_state/left_recursion_state.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint -optimize-parser -support-left-recursion $< > $@
+
+$(TEST_DIR)/left_recursion_labeled_failures/left_recursion_labeled_failures.go: \
+		$(TEST_DIR)/left_recursion_labeled_failures/left_recursion_labeled_failures.peg \
+		$(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint -support-left-recursion $< > $@
+
+$(TEST_DIR)/left_recursion_thrownrecover/left_recursion_thrownrecover.go: \
+		$(TEST_DIR)/left_recursion_thrownrecover/left_recursion_thrownrecover.peg \
+		$(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint -support-left-recursion $< > $@
 
 lint:
 	golint ./...

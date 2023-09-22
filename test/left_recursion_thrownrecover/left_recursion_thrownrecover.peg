@@ -1,0 +1,106 @@
+{
+package leftrecursionthrownrecover
+
+}
+
+Start = &{return false, nil}
+
+
+// Case 01: Multiple Label Recover
+
+case01 = case01:MultiLabelRecover { return case01, nil } 
+
+MultiLabelRecover = number //{errAlpha, errOther} ErrNonNumber
+
+number = !. / (n:number d:digit) {
+    return n.(string) + d.(string), nil
+} / d:digit {
+    return d.(string), nil
+}
+
+digit = [0-9] {
+    return string(c.text), nil
+} / x:( &[a-z] %{errAlpha} ) {
+    return x.([]any)[1], nil
+} / %{errOther}
+
+ErrNonNumber = &{
+    return true, errors.New("expecting a number")
+} ( ![0-9] . )* { return "?", nil }
+
+
+// Case 02: Throw Undefined Label
+
+case02 = (ThrowUndefLabel / &{ return false, errors.New("Throwed undefined label") })
+
+ThrowUndefLabel = ThrowUndefLabel %{undeflabel}
+
+
+// Case 03: Nested Recover
+
+case03 = case03:OuterRecover03 { return case03, nil }
+
+OuterRecover03 = InnerRecover03 //{errAlphaLower, errAlphaUpper} ErrAlphaOuter03 //{errOther} ErrOtherOuter03
+
+InnerRecover03 = number03 //{errAlphaLower} ErrAlphaInner03
+
+number03 = !. / (n:number03 d:digit03) {
+    return n.(string) + d.(string), nil
+} / d:digit03 {
+    return d.(string), nil
+}
+
+digit03 = [0-9] {
+    return string(c.text), nil
+} / x:( &[a-z] %{errAlphaLower} ) {
+    return x.([]any)[1], nil
+} / x:( &[A-Z] %{errAlphaUpper} ) {
+    return x.([]any)[1], nil
+} / %{errOther}
+
+ErrAlphaInner03 = &{
+    return true, errors.New("expecting a number, got lower case char")
+} ( ![0-9] . )* { return "<", nil }
+
+ErrAlphaOuter03 = &{
+    return true, errors.New("expecting a number, got upper case char")
+} ( ![0-9] . )* { return ">", nil }
+
+ErrOtherOuter03 = &{
+    return true, errors.New("expecting a number, got a non-char")
+} ( ![0-9] . )* { return "?", nil }
+
+
+// Case 04: Nested Recover, which fails in inner recover
+
+case04 = case04:OuterRecover04 { return case04, nil }
+
+OuterRecover04 = InnerRecover04 //{errAlphaLower, errAlphaUpper} ErrAlphaOuter04 //{errOther} ErrOtherOuter04
+
+InnerRecover04 = number04 //{errAlphaLower} ErrAlphaInner04
+
+number04 = !. / (n:number04 d:digit04) {
+    return n.(string) + d.(string), nil
+} / d:digit04 {
+    return d.(string), nil
+}
+
+digit04 = [0-9] {
+    return string(c.text), nil
+} / x:( &[a-z] %{errAlphaLower} ) {
+    return x.([]any)[1], nil
+} / x:( &[A-Z] %{errAlphaUpper} ) {
+    return x.([]any)[1], nil
+} / %{errOther}
+
+ErrAlphaInner04 = &{
+    return false, nil
+}
+
+ErrAlphaOuter04 = &{
+    return true, errors.New("expecting a number, got a char")
+} ( ![0-9] . )* { return "x", nil }
+
+ErrOtherOuter04 = &{
+    return true, errors.New("expecting a number, got a non-char")
+} ( ![0-9] . )* { return "?", nil }

@@ -3,4 +3,9 @@ package maxexprcnt
 }
 
 // trigger an infinite parse
-infinite_rule = infinite_rule
+long_rule1 = long_rule2
+long_rule2 = long_rule3
+long_rule3 = long_rule4
+long_rule4 = long_rule5
+long_rule5 = long_rule6
+long_rule6 = " "

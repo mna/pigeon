@@ -77,6 +77,16 @@ func Optimize(optimize bool) Option {
 	}
 }
 
+// SupportLeftRecursion returns an option that specifies the supportLeftRecursion option.
+// If supportLeftRecursion is true, LeftRecursion code is added to the resulting parser.
+func SupportLeftRecursion(support bool) Option {
+	return func(b *builder) Option {
+		prev := b.supportLeftRecursion
+		b.supportLeftRecursion = support
+		return SupportLeftRecursion(prev)
+	}
+}
+
 // Nolint returns an option that specifies the nolint option
 // If nolint is true, special '// nolint: ...' comments are added
 // to the generated parser to suppress warnings by gometalinter.
@@ -118,6 +128,8 @@ type builder struct {
 	basicLatinLookupTable bool
 	globalState           bool
 	nolint                bool
+	supportLeftRecursion  bool
+	haveLeftRecursion     bool
 
 	ruleName  string
 	exprIndex int
@@ -132,11 +144,19 @@ func (b *builder) setOptions(opts []Option) {
 	}
 }
 
-func (b *builder) buildParser(g *ast.Grammar) error {
-	b.writeInit(g.Init)
-	b.writeGrammar(g)
+func (b *builder) buildParser(grammar *ast.Grammar) error {
+	haveLeftRecursion, err := PrepareGrammar(grammar)
+	if err != nil {
+		return fmt.Errorf("incorrect grammar: %w", err)
+	}
+	if !b.supportLeftRecursion && haveLeftRecursion {
+		return fmt.Errorf("incorrect grammar: %w", ErrHaveLeftRecursion)
+	}
+	b.haveLeftRecursion = haveLeftRecursion
 
-	for _, rule := range g.Rules {
+	b.writeInit(grammar.Init)
+	b.writeGrammar(grammar)
+	for _, rule := range grammar.Rules {
 		b.writeRuleCode(rule)
 	}
 	b.writeStaticCode()
@@ -183,6 +203,10 @@ func (b *builder) writeRule(r *ast.Rule) {
 	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
 	b.writef("\texpr: ")
 	b.writeExpr(r.Expr)
+	if b.haveLeftRecursion {
+		b.writelnf("\tleader: %t,", r.Leader)
+		b.writelnf("\tleftRecursive: %t,", r.LeftRecursive)
+	}
 	b.writelnf("},")
 }
 
@@ -758,11 +782,13 @@ func (b *builder) writeStaticCode() {
 		Optimize              bool
 		BasicLatinLookupTable bool
 		GlobalState           bool
+		LeftRecursion         bool
 		Nolint                bool
 	}{
 		Optimize:              b.optimize,
 		BasicLatinLookupTable: b.basicLatinLookupTable,
 		GlobalState:           b.globalState,
+		LeftRecursion:         b.haveLeftRecursion,
 		Nolint:                b.nolint,
 	}
 	t := template.Must(template.New("static_code").Parse(staticCode))

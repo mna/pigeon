@@ -1,0 +1,42 @@
+{
+    package withoutleftrecursion
+
+    func toAnySlice(v any) []any {
+        if v == nil {
+            return nil
+        }
+        return v.([]any)
+    }
+
+    func exprToString(first string, rest any) string {
+        restSl := toAnySlice(rest)
+        l := first
+        for _, v := range restSl {
+            restExpr := toAnySlice(v)
+            r := restExpr[1].(string)
+            op := string(restExpr[0].([]byte))
+            l = "(" + l + op + r + ")"
+        }
+        return l
+    }
+}
+
+start = a:expr !. {
+	return a, nil
+}
+expr = a:term b:(( '+' / '-' ) term )* {
+    strA := a.(string)
+    return exprToString(strA, b), nil
+}
+term = a:factor b:( ( '*' / '/' / '%') factor )* {
+    strA := a.(string)
+    return exprToString(strA, b), nil
+}
+factor = op:('+' / '-') a:factor {
+    strA := a.(string)
+    strOp := string(op.([]byte))
+    return "(" + strOp + strA + ")", nil
+} / atom {
+    return string(c.text), nil
+}
+atom = [0-9]+

@@ -1,0 +1,41 @@
+{
+  package leftrecursionstate
+}
+
+start = #{ 
+	if _, ok := c.state["count"]; !ok { 
+		c.state["count"] = 0 
+	}
+    return nil
+} (a:expr)? {
+	return c.state["count"], nil
+}
+
+expr =  (expr ('+' / '-') term) #{
+    c.state["count"] = c.state["count"].(int) + 1;
+    return nil
+} / term #{
+    c.state["count"] = c.state["count"].(int) + 3;
+    return nil
+}
+
+term = (term ('*' / '/' / '%') factor) #{
+    c.state["count"] = c.state["count"].(int) + 7;
+    return nil
+} / factor #{
+    c.state["count"] = c.state["count"].(int) + 15;
+    return nil
+}
+
+factor = (('+' / '-') factor) #{
+    c.state["count"] = c.state["count"].(int) + 31;
+    return nil
+} / atom #{
+    c.state["count"] = c.state["count"].(int) + 63;
+    return nil
+}
+
+atom = ([0-9]+) #{
+    c.state["count"] = c.state["count"].(int) + 127;
+    return nil
+}
