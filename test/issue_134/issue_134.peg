@@ -1,0 +1,9 @@
+{
+	package issue134
+}
+
+// this shouldn't compile if #133 isn't fixed.
+Test <- . {
+    return "\\"+"{", nil
+}
+
