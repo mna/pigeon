@@ -324,9 +324,9 @@ CodeBlock ← '{' Code '}' {
 
 Code ← ( ( Comment / CodeStringLiteral / ![{}] SourceChar )+ / '{' Code '}' )*
 
-CodeStringLiteral ← '"' (`\"` / [^"\r\n])* '"' /
+CodeStringLiteral ← '"' (`\"` / `\\` / [^"\r\n])* '"' /
                     '`' [^`]* '`' /
-                    '\'' (`\'` / [^']+) '\''
+                    '\'' (`\'` / `\\` / [^']+) '\''
 
 __ ← ( Whitespace / EOL / Comment )*
 _ ← ( Whitespace / MultiLineCommentNoLineTerminator )*

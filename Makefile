@@ -179,6 +179,9 @@ $(TEST_DIR)/issue_80/issue_80.go: $(TEST_DIR)/issue_80/issue_80.peg $(BINDIR)/pi
 $(TEST_DIR)/issue_115/issue_115.go: $(TEST_DIR)/issue_115/issue_115.peg $(BINDIR)/pigeon
 	$(BINDIR)/pigeon -nolint $< > $@
 
+$(TEST_DIR)/issue_134/issue_134.go: $(TEST_DIR)/issue_134/issue_134.peg $(BINDIR)/pigeon
+	$(BINDIR)/pigeon -nolint $< > $@
+
 $(TEST_DIR)/left_recursion/left_recursion.go: \
 		$(TEST_DIR)/left_recursion/standart/leftrecursion/left_recursion.go \
 		$(TEST_DIR)/left_recursion/optimized/leftrecursion/left_recursion.go \
