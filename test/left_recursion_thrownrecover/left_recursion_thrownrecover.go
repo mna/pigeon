@@ -953,7 +953,7 @@ func (p *parser) callonErrNonNumber1() (any, error) {
 }
 
 func (c *current) oncase023() (bool, error) {
-	return false, errors.New("Throwed undefined label")
+	return false, errors.New("Threw undefined label")
 }
 
 func (p *parser) calloncase023() (bool, error) {
@@ -1206,7 +1206,7 @@ var (
 
 	// errMaxExprCnt is used to signal that the maximum number of
 	// expressions have been parsed.
-	errMaxExprCnt = errors.New("max number of expresssions parsed")
+	errMaxExprCnt = errors.New("max number of expressions parsed")
 )
 
 // Option is a function that can set an option on the parser. It returns
@@ -2137,8 +2137,8 @@ func (p *parser) parseRule(rule *rule) (any, bool) {
 func (p *parser) parseExprWrap(expr any) (any, bool) {
 	var pt savepoint
 
-	isLeftRecusion := p.rstack[len(p.rstack)-1].leftRecursive
-	if p.memoize && !isLeftRecusion {
+	isLeftRecursion := p.rstack[len(p.rstack)-1].leftRecursive
+	if p.memoize && !isLeftRecursion {
 		res, ok := p.getMemoized(expr)
 		if ok {
 			p.restore(res.end)
@@ -2149,7 +2149,7 @@ func (p *parser) parseExprWrap(expr any) (any, bool) {
 
 	val, ok := p.parseExpr(expr)
 
-	if p.memoize && !isLeftRecusion {
+	if p.memoize && !isLeftRecursion {
 		p.setMemoized(pt, expr, resultTuple{val, ok, p.pt})
 	}
 	return val, ok

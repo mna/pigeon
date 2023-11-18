@@ -904,7 +904,7 @@ func (p *parser) callonErrNonNumber1() (any, error) {
 }
 
 func (c *current) oncase025() (bool, error) {
-	return false, errors.New("Throwed undefined label")
+	return false, errors.New("Threw undefined label")
 }
 
 func (p *parser) calloncase025() (bool, error) {
@@ -1143,7 +1143,7 @@ var (
 
 	// errMaxExprCnt is used to signal that the maximum number of
 	// expressions have been parsed.
-	errMaxExprCnt = errors.New("max number of expresssions parsed")
+	errMaxExprCnt = errors.New("max number of expressions parsed")
 )
 
 // Option is a function that can set an option on the parser. It returns
