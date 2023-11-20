@@ -36,7 +36,7 @@ func TestThrowAndRecover(t *testing.T) {
 			input:    "case02:",
 			captures: nil,
 			errors: []string{
-				"1:8 (7): rule case02: Throwed undefined label",
+				"1:8 (7): rule case02: Threw undefined label",
 			},
 		},
 

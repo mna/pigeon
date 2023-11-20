@@ -60,7 +60,7 @@ func TestLeftRecursionWithThrowAndRecover(t *testing.T) {
 			want: want{
 				captures: nil,
 				errors: []string{
-					"1:1 (0): rule case02: Throwed undefined label",
+					"1:1 (0): rule case02: Threw undefined label",
 				},
 			},
 		},

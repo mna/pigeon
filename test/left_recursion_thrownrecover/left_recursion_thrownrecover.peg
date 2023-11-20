@@ -8,7 +8,7 @@ Start = &{return false, nil}
 
 // Case 01: Multiple Label Recover
 
-case01 = case01:MultiLabelRecover { return case01, nil } 
+case01 = case01:MultiLabelRecover { return case01, nil }
 
 MultiLabelRecover = number //{errAlpha, errOther} ErrNonNumber
 
@@ -31,7 +31,7 @@ ErrNonNumber = &{
 
 // Case 02: Throw Undefined Label
 
-case02 = (ThrowUndefLabel / &{ return false, errors.New("Throwed undefined label") })
+case02 = (ThrowUndefLabel / &{ return false, errors.New("Threw undefined label") })
 
 ThrowUndefLabel = ThrowUndefLabel %{undeflabel}
 
