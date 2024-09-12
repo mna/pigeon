@@ -15,9 +15,8 @@ func TestState(t *testing.T) {
 		vals := make(values, 1)
 		vals[0] = 10
 		got, err := Parse("", []byte(tc), Memoize(false), InitState("vals", vals))
-
 		if err != nil {
-			t.Errorf(err.Error())
+			t.Errorf("%s", err.Error())
 		}
 		vals = got.(values)
 		res := 0
