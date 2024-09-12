@@ -221,9 +221,9 @@ func (s *Scanner) scanEscape(quote rune) bool {
 		msg := "unknown escape sequence"
 		if s.cur == -1 || s.cur == '\n' {
 			msg = "escape sequence not terminated"
-			s.errorf(msg)
+			s.errorf("%s", msg)
 		} else {
-			s.errorf(msg)
+			s.errorf("%s", msg)
 			s.read()
 		}
 		return false
@@ -268,10 +268,10 @@ func (s *Scanner) scanEscape(quote rune) bool {
 			msg := fmt.Sprintf("illegal character %#U in escape sequence", s.cur)
 			if s.cur == -1 || s.cur == '\n' {
 				msg = "escape sequence not terminated"
-				s.errorf(msg)
+				s.errorf("%s", msg)
 				return false
 			}
-			s.errorf(msg)
+			s.errorf("%s", msg)
 			s.read()
 			return false
 		}
