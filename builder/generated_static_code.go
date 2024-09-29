@@ -349,6 +349,12 @@ type litMatcher struct {
 }
 
 // {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
+type customParserCodeExpr struct {
+	pos position
+	run func(*parser) (any, bool, error)
+}
+
+// {{ if .Nolint }} nolint: structcheck {{else}} ==template== {{ end }}
 type charClassMatcher struct {
 	pos             position
 	val             string
@@ -1085,6 +1091,8 @@ func (p *parser) parseExpr(expr any) (any, bool) {
 		val, ok = p.parseCharClassMatcher(expr)
 	case *choiceExpr:
 		val, ok = p.parseChoiceExpr(expr)
+	case *customParserCodeExpr:
+		val, ok = p.parseCustomParserCodeExpr(expr)
 	case *labeledExpr:
 		val, ok = p.parseLabeledExpr(expr)
 	case *litMatcher:
@@ -1359,6 +1367,21 @@ func (p *parser) parseLabeledExpr(lab *labeledExpr) (any, bool) {
 	if ok && lab.label != "" {
 		m := p.vstack[len(p.vstack)-1]
 		m[lab.label] = val
+	}
+	return val, ok
+}
+
+func (p *parser) parseCustomParserCodeExpr(code *customParserCodeExpr) (any, bool) {
+	// ==template== {{ if not .Optimize }}
+	if p.debug {
+		defer p.out(p.in("parseCustomParserCodeExpr"))
+	}
+
+	// {{ end }} ==template==
+	val, ok, err := code.run(p)
+	if err != nil {
+		p.addErr(err)
+		return nil, true
 	}
 	return val, ok
 }
