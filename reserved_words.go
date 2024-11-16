@@ -29,8 +29,10 @@ var reservedWords = map[string]bool{
 	"var":         true,
 
 	// predeclared identifiers http://golang.org/ref/spec#Predeclared_identifiers
+	"any":        true,
 	"bool":       true,
 	"byte":       true,
+	"comparable": true,
 	"complex64":  true,
 	"complex128": true,
 	"error":      true,
@@ -55,6 +57,7 @@ var reservedWords = map[string]bool{
 	"nil":        true,
 	"append":     true,
 	"cap":        true,
+	"clear":      true,
 	"close":      true,
 	"complex":    true,
 	"copy":       true,
@@ -62,6 +65,8 @@ var reservedWords = map[string]bool{
 	"imag":       true,
 	"len":        true,
 	"make":       true,
+	"max":        true,
+	"min":        true,
 	"new":        true,
 	"panic":      true,
 	"println":    true,

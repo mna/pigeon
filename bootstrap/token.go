@@ -102,8 +102,10 @@ var blacklistedIdents = map[string]struct{}{
 	"var":         {},
 
 	// predeclared identifiers http://golang.org/ref/spec#Predeclared_identifiers
+	"any":        {},
 	"bool":       {},
 	"byte":       {},
+	"comparable": {},
 	"complex64":  {},
 	"complex128": {},
 	"error":      {},
@@ -128,6 +130,7 @@ var blacklistedIdents = map[string]struct{}{
 	"nil":        {},
 	"append":     {},
 	"cap":        {},
+	"clear":      {},
 	"close":      {},
 	"complex":    {},
 	"copy":       {},
@@ -135,6 +138,8 @@ var blacklistedIdents = map[string]struct{}{
 	"imag":       {},
 	"len":        {},
 	"make":       {},
+	"max":        {},
+	"min":        {},
 	"new":        {},
 	"panic":      {},
 	"print":      {},
