@@ -145,10 +145,10 @@ See the CONTRIBUTING.md file.
 
 The [BSD 3-Clause license][4]. See the LICENSE file.
 
-[0]: http://en.wikipedia.org/wiki/Parsing_expression_grammar
+[0]: https://en.wikipedia.org/wiki/Parsing_expression_grammar
 [1]: https://github.com/pegjs/pegjs
-[2]: http://www.codeproject.com/Articles/29713/Parsing-Expression-Grammar-Support-for-C-Part
+[2]: https://www.codeproject.com/Articles/29713/Parsing-Expression-Grammar-Support-for-C-Part
 [3]: https://pkg.go.dev/github.com/mna/pigeon
-[4]: http://opensource.org/licenses/BSD-3-Clause
+[4]: https://opensource.org/licenses/BSD-3-Clause
 [5]: https://github.com/breml
 [6]: https://github.com/mna
