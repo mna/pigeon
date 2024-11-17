@@ -133,7 +133,7 @@ The generated parser can parse simple arithmetic operations, e.g.:
 => -141
 ```
 
-More examples can be found in the `examples/` subdirectory.
+More examples can be found in the [examples](examples) subdirectory.
 
 See the [package documentation][3] for detailed usage.
 
