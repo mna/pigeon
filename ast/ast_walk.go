@@ -59,6 +59,8 @@ func Walk(v Visitor, expr Expression) {
 		}
 	case *StateCodeExpr:
 		// Nothing to do
+	case *CustomParserCodeExpr:
+		// Nothing to do
 	case *ZeroOrMoreExpr:
 		Walk(v, expr.Expr)
 	case *ZeroOrOneExpr:
