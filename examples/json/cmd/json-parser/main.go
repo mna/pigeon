@@ -65,7 +65,7 @@ func caretError(err error, input string) string {
 						pos += 7
 					}
 				}
-				buffer.WriteString(fmt.Sprintf("%s\n%s\n%s\n", line, strings.Repeat(" ", pos)+"^", err.Error()))
+				fmt.Fprintf(&buffer, "%s\n%s\n%s\n", line, strings.Repeat(" ", pos)+"^", err.Error())
 			} else {
 				return err.Error()
 			}

@@ -119,7 +119,7 @@ func TestPanicNoRecover(t *testing.T) {
 	}()
 
 	// should panic
-	Parse("", []byte("1 / 0"), Recover(false))
+	_, _ = Parse("", []byte("1 / 0"), Recover(false))
 }
 
 func TestMemoization(t *testing.T) {

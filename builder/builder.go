@@ -770,7 +770,7 @@ func (b *builder) writeFunc(funcIx int, code *ast.CodeBlock, callTpl, funcTpl st
 			if i > 0 {
 				args.WriteString(", ")
 			}
-			args.WriteString(fmt.Sprintf(`stack[%q]`, arg))
+			fmt.Fprintf(&args, `stack[%q]`, arg)
 		}
 	}
 	b.writelnf(callTpl, fnNm, args.String())
