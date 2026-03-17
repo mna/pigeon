@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GO_VERSION: "stable"
-      GOLANGCI_LINT_VERSION: v1.64.6
+      GOLANGCI_LINT_VERSION: v2.10.1
       CGO_ENABLED: 0
 
     steps:
@@ -33,7 +33,7 @@ jobs:
         run: go mod tidy -diff
 
       - name: golangci-lint action ${{ env.GOLANGCI_LINT_VERSION }}
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
 

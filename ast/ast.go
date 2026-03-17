@@ -49,10 +49,10 @@ func (g *Grammar) Pos() Pos { return g.p }
 func (g *Grammar) String() string {
 	var buf bytes.Buffer
 
-	buf.WriteString(fmt.Sprintf("%s: %T{Init: %v, Rules: [\n",
-		g.p, g, g.Init))
+	fmt.Fprintf(&buf, "%s: %T{Init: %v, Rules: [\n",
+		g.p, g, g.Init)
 	for _, r := range g.Rules {
-		buf.WriteString(fmt.Sprintf("%s,\n", r))
+		fmt.Fprintf(&buf, "%s,\n", r)
 	}
 	buf.WriteString("]}")
 	return buf.String()
@@ -161,9 +161,9 @@ func (c *ChoiceExpr) Pos() Pos { return c.p }
 func (c *ChoiceExpr) String() string {
 	var buf bytes.Buffer
 
-	buf.WriteString(fmt.Sprintf("%s: %T{Alternatives: [\n", c.p, c))
+	fmt.Fprintf(&buf, "%s: %T{Alternatives: [\n", c.p, c)
 	for _, e := range c.Alternatives {
-		buf.WriteString(fmt.Sprintf("%s,\n", e))
+		fmt.Fprintf(&buf, "%s,\n", e)
 	}
 	buf.WriteString("]}")
 	return buf.String()
@@ -226,10 +226,10 @@ func (r *RecoveryExpr) Pos() Pos { return r.p }
 func (r *RecoveryExpr) String() string {
 	var buf bytes.Buffer
 
-	buf.WriteString(fmt.Sprintf("%s: %T{Expr: %v, RecoverExpr: %v", r.p, r, r.Expr, r.RecoverExpr))
+	fmt.Fprintf(&buf, "%s: %T{Expr: %v, RecoverExpr: %v", r.p, r, r.Expr, r.RecoverExpr)
 	buf.WriteString(", Labels: [\n")
 	for _, e := range r.Labels {
-		buf.WriteString(fmt.Sprintf("%s,\n", e))
+		fmt.Fprintf(&buf, "%s,\n", e)
 	}
 	buf.WriteString("]}")
 	return buf.String()
@@ -364,9 +364,9 @@ func (s *SeqExpr) Pos() Pos { return s.p }
 func (s *SeqExpr) String() string {
 	var buf bytes.Buffer
 
-	buf.WriteString(fmt.Sprintf("%s: %T{Exprs: [\n", s.p, s))
+	fmt.Fprintf(&buf, "%s: %T{Exprs: [\n", s.p, s)
 	for _, e := range s.Exprs {
-		buf.WriteString(fmt.Sprintf("%s,\n", e))
+		fmt.Fprintf(&buf, "%s,\n", e)
 	}
 	buf.WriteString("]}")
 	return buf.String()
