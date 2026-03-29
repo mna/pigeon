@@ -31,6 +31,10 @@ var (
 %s
 }
 `
+	onStateFuncTemplate2 = `func (%s *current) %s(p *parser, %s) (any, bool, error) {
+%s
+}
+`
 	callFuncTemplate = `func (p *parser) call%s() (any, error) {
 	stack := p.vstack[len(p.vstack)-1]
 	_ = stack
@@ -47,6 +51,12 @@ var (
     stack := p.vstack[len(p.vstack)-1]
     _ = stack
     return p.cur.%[1]s(%s)
+}
+`
+	callStateFuncTemplate2 = `func (p *parser) call%s() (any, bool, error) {
+    stack := p.vstack[len(p.vstack)-1]
+    _ = stack
+    return p.cur.%[1]s(p, %s)
 }
 `
 )
@@ -243,6 +253,8 @@ func (b *builder) writeExpr(expr ast.Expression) {
 		b.writeSeqExpr(expr)
 	case *ast.StateCodeExpr:
 		b.writeStateCodeExpr(expr)
+	case *ast.CustomParserCodeExpr:
+		b.writeCustomParserCodeExpr(expr)
 	case *ast.ThrowExpr:
 		b.writeThrowExpr(expr)
 	case *ast.ZeroOrMoreExpr:
@@ -563,6 +575,22 @@ func (b *builder) writeStateCodeExpr(state *ast.StateCodeExpr) {
 	b.writelnf("},")
 }
 
+func (b *builder) writeCustomParserCodeExpr(state *ast.CustomParserCodeExpr) {
+	if state == nil {
+		b.writelnf("nil,")
+		return
+	}
+	b.globalState = true
+	b.writelnf("&customParserCodeExpr{")
+	pos := state.Pos()
+	if state.FuncIx == 0 {
+		state.FuncIx = b.exprIndex
+	}
+	b.writelnf("\tpos: position{line: %d, col: %d, offset: %d},", pos.Line, pos.Col, pos.Off)
+	b.writelnf("\trun: (*parser).call%s,", b.funcName(state.FuncIx))
+	b.writelnf("},")
+}
+
 func (b *builder) writeThrowExpr(throw *ast.ThrowExpr) {
 	if throw == nil {
 		b.writelnf("nil,")
@@ -684,6 +712,9 @@ func (b *builder) writeExprCode(expr ast.Expression) {
 	case *ast.StateCodeExpr:
 		b.writeStateCodeExprCode(expr)
 
+	case *ast.CustomParserCodeExpr:
+		b.writeCustomParserCodeExprCode(expr)
+
 	case *ast.ZeroOrMoreExpr:
 		b.pushArgsSet()
 		b.writeExprCode(expr.Expr)
@@ -732,6 +763,16 @@ func (b *builder) writeStateCodeExprCode(state *ast.StateCodeExpr) {
 	}
 	if state.FuncIx > 0 {
 		b.writeFunc(state.FuncIx, state.Code, callStateFuncTemplate, onStateFuncTemplate)
+		state.FuncIx = 0 // already rendered, prevent duplicates
+	}
+}
+
+func (b *builder) writeCustomParserCodeExprCode(state *ast.CustomParserCodeExpr) {
+	if state == nil {
+		return
+	}
+	if state.FuncIx > 0 {
+		b.writeFunc(state.FuncIx, state.Code, callStateFuncTemplate2, onStateFuncTemplate2)
 		state.FuncIx = 0 // already rendered, prevent duplicates
 	}
 }
