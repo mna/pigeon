@@ -159,6 +159,12 @@ func TestMutuallyLeftRecursive(t *testing.T) {
 	if !mapRules["bar"].LeftRecursive {
 		t.Error("Rule 'bar' contains left recursion")
 	}
+	if mapRules["foo"].Leader {
+		t.Error("Rule 'foo' should not be the stable left-recursion leader")
+	}
+	if !mapRules["bar"].Leader {
+		t.Error("Rule 'bar' should be the stable left-recursion leader")
+	}
 }
 
 func TestNastyMutuallyLeftRecursive(t *testing.T) {
