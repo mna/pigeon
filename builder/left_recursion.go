@@ -65,11 +65,12 @@ func findLeader(
 			}
 		}
 	}
-	// Pick an arbitrary leader from the candidates.
+	// Pick an arbitrary but stable leader from the candidates.
 	var leader string
 	for k := range leaders {
-		leader = k // The only element.
-		break
+		if leader == "" || k < leader {
+			leader = k
+		}
 	}
 	return leader, nil
 }
