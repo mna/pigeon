@@ -102,7 +102,7 @@ func TestLeftRecursionWithState(t *testing.T) {
 			}
 			if count != testCase.want.count {
 				t.Fatalf(
-					"for input %q\ngot result: %q,\nbut expect: %q",
+					"for input %q\ngot result: %v,\nbut expect: %d",
 					testCase.expr, count, testCase.want.count)
 			}
 			if count != testCase.want.count {
