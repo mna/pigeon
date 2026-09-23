@@ -176,6 +176,11 @@ SemanticPredExpr ← op:SemanticPredOp __ code:CodeBlock {
         and.Code = code.(*ast.CodeBlock)
         return and, nil
 
+    case "*":
+        state := ast.NewCustomParserCodeExpr(c.astPos())
+        state.Code = code.(*ast.CodeBlock)
+        return state, nil
+
     // case "!":
     default:
         not := ast.NewNotCodeExpr(c.astPos())
@@ -184,7 +189,7 @@ SemanticPredExpr ← op:SemanticPredOp __ code:CodeBlock {
 
     }
 }
-SemanticPredOp ← ( '#' / '&' / '!' ) {
+SemanticPredOp ← ( '#' / '&' / '!' / '*' ) {
     return string(c.text), nil
 }
 
