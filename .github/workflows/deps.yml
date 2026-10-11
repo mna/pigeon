@@ -3,6 +3,7 @@ name: dependency-submission
 on:
   push:
     branches:
+      - main
       - master
 
 permissions:
