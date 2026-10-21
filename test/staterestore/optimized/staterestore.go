@@ -1024,9 +1024,7 @@ func (p *parserError) Error() string {
 
 // newParser creates a parser with the specified input source and options.
 func newParser(filename string, b []byte, opts ...Option) *parser {
-	stats := Stats{
-		ChoiceAltCnt: make(map[string]map[string]int),
-	}
+	stats := Stats{}
 
 	p := &parser{
 		filename: filename,
