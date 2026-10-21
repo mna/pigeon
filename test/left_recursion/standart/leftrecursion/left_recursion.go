@@ -1225,6 +1225,7 @@ func (p *parser) parseRuleRecursiveLeader(rule *rule) (any, bool) {
 			*p.errs = lastErrors
 			break
 		}
+		lastState.Discard()
 		lastResult = resultTuple{val, ok, endMark}
 		lastErrors = *p.errs
 		p.restore(startMark)
@@ -1534,6 +1535,7 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (any, bool) {
 		val, ok := p.parseExprWrap(alt)
 		p.popV()
 		if ok {
+			state.Discard()
 			p.incChoiceAltCnt(ch, altI)
 			return val, ok
 		}
@@ -1683,6 +1685,7 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (any, bool) {
 		}
 		vals = append(vals, val)
 	}
+	state.Discard()
 	return vals, true
 }
 
