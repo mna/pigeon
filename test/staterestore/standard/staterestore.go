@@ -748,9 +748,7 @@ func (p *parserError) Error() string {
 
 // newParser creates a parser with the specified input source and options.
 func newParser(filename string, b []byte, opts ...Option) *parser {
-	stats := Stats{
-		ChoiceAltCnt: make(map[string]map[string]int),
-	}
+	stats := Stats{}
 
 	p := &parser{
 		filename: filename,
@@ -1440,6 +1438,9 @@ func (p *parser) parseCharClassMatcher(chr *charClassMatcher) (any, bool) {
 }
 
 func (p *parser) incChoiceAltCnt(ch *choiceExpr, altI int) {
+	if p.ChoiceAltCnt == nil {
+		return
+	}
 	choiceIdent := fmt.Sprintf("%s %d:%d", p.rstack[len(p.rstack)-1].name, ch.pos.line, ch.pos.col)
 	m := p.ChoiceAltCnt[choiceIdent]
 	if m == nil {
