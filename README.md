@@ -1,13 +1,13 @@
 # pigeon - a PEG parser generator for Go
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/mna/pigeon.svg)](https://pkg.go.dev/github.com/mna/pigeon)
-[![Test Status](https://github.com/mna/pigeon/workflows/Go%20Matrix/badge.svg)](https://github.com/mna/pigeon/actions?query=workflow%3AGo%20Matrix)
+[![Test Status](https://github.com/mna/pigeon/actions/workflows/go-cross.yml/badge.svg)](https://github.com/mna/pigeon/actions/workflows/go-cross.yml)
 [![GoReportCard](https://goreportcard.com/badge/github.com/mna/pigeon)](https://goreportcard.com/report/github.com/mna/pigeon)
 [![Software License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
 
 The pigeon command generates parsers based on a [parsing expression grammar (PEG)][0]. Its grammar and syntax is inspired by the [PEG.js project][1], while the implementation is loosely based on the [parsing expression grammar for C# 3.0][2] article. It parses Unicode text encoded in UTF-8.
 
-See the [godoc page][3] for detailed usage. Also have a look at the [Pigeon Wiki](https://github.com/mna/pigeon/wiki) for additional information about Pigeon and PEG in general.
+See the [package documentation][3] for detailed usage. Also have a look at the [Pigeon Wiki](https://github.com/mna/pigeon/wiki) for additional information about Pigeon and PEG in general.
 
 ## Releases
 
@@ -18,7 +18,7 @@ GitHub user [@mna][6] created the package in April 2015, and [@breml][5] is the 
 
 ### Release policy
 
-Starting of June 2023, the backwards compatibility support for `pigeon` is changed to follow the official [Go Security Policy](https://github.com/golang/go/security/policy).
+Starting of June 2023, the backwards compatibility support for `pigeon` is changed to follow the official [Go Security Policy](https://go.dev/security/policy).
 
 Over time, the Go ecosystem is evolving.
 
