@@ -30,4 +30,4 @@ All pull requests that get merged will be made available under the BSD 3-Clause 
 
 [0]: https://github.com/mna/pigeon/issues/new
 [1]: https://github.com/mna/pigeon/pulls
-[2]: https://github.com/golang/go/wiki/CodeReviewComments
+[2]: https://go.dev/wiki/CodeReviewComments

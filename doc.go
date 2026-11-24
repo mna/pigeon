@@ -383,7 +383,7 @@ It is important to notice, that the global store is completely independent from
 the backtrack mechanism of PEG and is therefore not set back to its old state
 during backtrack.
 The initialization of the global store may be achieved by using the GlobalStore
-function (http://godoc.org/github.com/mna/pigeon/test/predicates#GlobalStore).
+function (https://pkg.go.dev/github.com/mna/pigeon/test/predicates#GlobalStore).
 Be aware, that all keys starting with "_pigeon" are reserved for internal use
 of pigeon and should not be used nor modified. Those keys are treated as
 internal implementation details and therefore there are no guarantees given in
@@ -466,9 +466,9 @@ as a package with public functions to parse input text. The exported API is:
 	- Recover(bool) Option
 	- Statistics(*Stats) Option
 
-See the godoc page of the generated parser for the test/predicates grammar
+See the documentation of the generated parser for the test/predicates grammar
 for an example documentation page of the exported API:
-http://godoc.org/github.com/mna/pigeon/test/predicates.
+https://pkg.go.dev/github.com/mna/pigeon/test/predicates.
 
 Like the grammar used to generate the parser, the input text must be
 UTF-8-encoded Unicode.
@@ -553,7 +553,7 @@ command line tools).
 One possible implementation for exported errors (based on interfaces) and
 customized error reporting (caret style formatting of the position, where
 the parsing failed) is available in the json example and its command line tool:
-http://godoc.org/github.com/mna/pigeon/examples/json
+https://pkg.go.dev/github.com/mna/pigeon/examples/json
 
 API stability
 
@@ -602,7 +602,7 @@ the future):
 
 The above guarantee is given to the version 1.0 (https://github.com/mna/pigeon/releases/tag/v1.0.0)
 of pigeon, which has entered maintenance mode (bug fixes only). The current
-master branch includes the development toward a future version 2.0, which
+main branch includes the development toward a future version 2.0, which
 intends to further improve pigeon.
 While the given API stability should be maintained as far as it makes sense,
 breaking changes may be necessary to be able to improve pigeon.
@@ -611,8 +611,8 @@ may occur at any time.
 
 References:
 
-	[5]: https://golang.org/doc/go1compat
-	[6]: http://godoc.org/github.com/mna/pigeon/test/predicates
+	[5]: https://go.dev/doc/go1compat
+	[6]: https://pkg.go.dev/github.com/mna/pigeon/test/predicates
 
 */
 package main
