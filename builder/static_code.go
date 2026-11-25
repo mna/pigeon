@@ -949,6 +949,9 @@ func (p *parser) parseRuleRecursiveLeader(rule *rule) (any, bool) {
 			*p.errs = lastErrors
 			break
 		}
+		// ==template== {{ if or .GlobalState (not .Optimize) }}
+		lastState.Discard()
+		// {{ end }} ==template==
 		lastResult = resultTuple{val, ok, endMark}
 		lastErrors = *p.errs
 		p.restore(startMark)
@@ -1350,6 +1353,9 @@ func (p *parser) parseChoiceExpr(ch *choiceExpr) (any, bool) {
 		val, ok := p.parseExprWrap(alt)
 		p.popV()
 		if ok {
+			// ==template== {{ if or .GlobalState (not .Optimize) }}
+			state.Discard()
+			// {{ end }} ==template==
 			// ==template== {{ if not .Optimize }}
 			p.incChoiceAltCnt(ch, altI)
 			// {{ end }} ==template==
@@ -1534,6 +1540,9 @@ func (p *parser) parseSeqExpr(seq *seqExpr) (any, bool) {
 		}
 		vals = append(vals, val)
 	}
+	// ==template== {{ if or .GlobalState (not .Optimize) }}
+	state.Discard()
+	// {{ end }} ==template==
 	return vals, true
 }
 
